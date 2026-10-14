@@ -4,7 +4,6 @@ import os
 import secrets
 from functools import lru_cache
 from pathlib import Path
-from threading import RLock
 
 from fastapi import FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,11 +11,12 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from .analytics import metrics_at, state_at
+from .analytics import metrics_at, state_at, tactics_at
 from .agents import TRACES, configured, run_specialists
 from .evidence import insights_for, overlays_for, recap_for
-from .models import EventType, Match, MatchEvent
+from .models import Match, MatchEvent
 from .simulator import FIXTURES, generate
+from .storage import StorageConflict, imported_match, imported_matches, ingest
 
 app = FastAPI(title="PULSE XI API", version="0.1.0")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
@@ -31,19 +31,15 @@ def index():
     if (DIST / "index.html").is_file():
         return FileResponse(DIST / "index.html")
     return {"message": "Frontend not built; run scripts/build-local.ps1"}
-ingested: dict[str, tuple[Match, list[MatchEvent]]] = {}
-ingest_lock = RLock()
-
-
 @lru_cache(maxsize=24)
 def stored(fixture: str, seed: int | None = None) -> tuple[Match, list[MatchEvent]]:
     return generate(fixture, seed)
 
 
 def get_match(match_id: str) -> tuple[Match, list[MatchEvent]]:
-    with ingest_lock:
-        if match_id in ingested:
-            return ingested[match_id]
+    imported = imported_match(match_id)
+    if imported:
+        return imported
     for fixture, (seed, _, _) in FIXTURES.items():
         if match_id == f"{fixture}-{seed}":
             return stored(fixture)
@@ -72,8 +68,7 @@ def health():
 
 @app.get("/api/matches")
 def list_matches():
-    with ingest_lock:
-        return [stored(name)[0] for name in FIXTURES] + [match for match, _ in ingested.values()]
+    return [stored(name)[0] for name in FIXTURES] + imported_matches()
 
 
 @app.post("/api/matches/generate", response_model=Match)
@@ -98,28 +93,12 @@ def ingest_match(request: IngestRequest):
             raise HTTPException(422, f"unknown player in {event.event_id}")
         if event.team_id is None and (event.actor_id is not None or event.recipient_id is not None):
             raise HTTPException(422, f"teamless event has player in {event.event_id}")
-    with ingest_lock:
-        previous = ingested.get(match.match_id)
-        if previous and previous[0] != match:
-            raise HTTPException(409, "match metadata conflict")
-        by_id = {event.event_id: event for event in previous[1]} if previous else {}
-        inserted = 0
-        for event in request.events:
-            existing = by_id.get(event.event_id)
-            if existing:
-                if existing.model_copy(update={"sequence": event.sequence}) != event:
-                    raise HTTPException(409, f"event ID conflict: {event.event_id}")
-            else:
-                by_id[event.event_id] = event
-                inserted += 1
-        ordered = sorted(by_id.values(), key=lambda event: (event.match_second, event.event_id))
-        fulltime = [index for index, event in enumerate(ordered) if event.event_type == EventType.fulltime]
-        if fulltime and (len(fulltime) != 1 or fulltime[0] != len(ordered) - 1):
-            raise HTTPException(422, "events occur after fulltime")
-        normalized = [event.model_copy(update={"sequence": index + 1}) for index, event in enumerate(ordered)]
-        ingested[match.match_id] = (match, normalized)
-    return {"match_id": match.match_id, "inserted": inserted, "total": len(normalized),
-            "last_sequence": len(normalized)}
+    try:
+        return ingest(match, request.events)
+    except StorageConflict as error:
+        raise HTTPException(409, str(error)) from error
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
 
 
 @app.get("/api/matches/{match_id}", response_model=Match)
@@ -145,6 +124,12 @@ def match_metrics(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
     return metrics_at(match, events, at_second)
 
 
+@app.get("/api/matches/{match_id}/tactics")
+def match_tactics(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
+    match, events = get_match(match_id)
+    return tactics_at(match, events, at_second)
+
+
 @app.get("/api/matches/{match_id}/insights")
 def match_insights(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
     match, events = get_match(match_id)
@@ -158,17 +143,19 @@ def match_overlays(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
 
 
 @app.post("/api/matches/{match_id}/recap")
-def match_recap(match_id: str, locale: str = Query("en"), persona: str = Query("casual")):
+def match_recap(match_id: str, locale: str = Query("en"), persona: str = Query("casual"),
+                at_second: int = Query(5400, ge=0, le=5400),
+                favorite_team_id: str | None = Query(None), favorite_player_id: str | None = Query(None)):
     match, events = get_match(match_id)
     try:
-        return recap_for(match, events, locale, persona)
+        return recap_for(match, events, locale, persona, at_second, favorite_team_id, favorite_player_id)
     except ValueError as error:
         raise HTTPException(422, str(error)) from error
 
 
 @app.post("/api/insights/{insight_id}/explain")
 def explain_insight(insight_id: str):
-    for match, events in [stored(name) for name in FIXTURES] + list(ingested.values()):
+    for match, events in [stored(name) for name in FIXTURES] + [imported_match(item.match_id) for item in imported_matches()]:
         insight = next((item for item in insights_for(match, events) if item.insight_id == insight_id), None)
         if insight:
             source_ids = set(insight.supporting_event_ids)
@@ -192,7 +179,7 @@ async def agent_run(insight_id: str, x_admin_token: str | None = Header(default=
     expected = os.getenv("PULSE_FOUNDRY_ADMIN_TOKEN", "")
     if not expected or not x_admin_token or not secrets.compare_digest(expected, x_admin_token):
         raise HTTPException(403, "admin token required")
-    for match, events in [stored(name) for name in FIXTURES] + list(ingested.values()):
+    for match, events in [stored(name) for name in FIXTURES] + [imported_match(item.match_id) for item in imported_matches()]:
         insight = next((item for item in insights_for(match, events) if item.insight_id == insight_id), None)
         if insight:
             try:

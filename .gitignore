@@ -6,7 +6,9 @@ node_modules/
 dist/
 .env
 *.db
+*.sqlite*
 coverage/
 .npm-cache/
 *.tsbuildinfo
+test-results/
 pytest-cache-files-*/

@@ -124,23 +124,27 @@ class MatchMetrics(BaseModel):
 
 
 class FactualClaim(BaseModel):
-    metric: Literal["score_home", "score_away", "pressure_events", "recoveries"]
+    metric: Literal["score_home", "score_away", "pressure_events", "recoveries", "completed_passes", "final_third_entries", "momentum_points"]
     value: int
     team_id: str | None = None
     at_second: int
+    window_start: int = 0
 
 
 class Insight(BaseModel):
     insight_id: str
     match_id: str
-    category: Literal["goal", "pressure_pattern"]
+    category: Literal["goal", "pressure_pattern", "momentum_shift", "territorial_progression"]
     match_second: int
+    team_id: str | None = None
     title: str
     explanation: str
     factual_claims: list[FactualClaim]
     supporting_event_ids: list[str] = Field(min_length=1)
     derived_metric_ids: list[str]
     evidence_window: tuple[int, int]
+    comparison_window: tuple[int, int] | None = None
+    data_quality: str = "Event-derived; no tracking or calibrated probability model."
     uncertainty: str
     priority: int = Field(ge=0, le=100)
     verification_status: Literal["verified_rule_based", "rejected"]
@@ -152,9 +156,12 @@ class OverlayCue(BaseModel):
     cue_id: str
     match_id: str
     trigger_match_second: int
+    start_match_second: int
+    end_match_second: int
     show_duration_seconds: int = Field(gt=0, le=60)
     priority: int = Field(ge=0, le=100)
     overlay_type: Literal["goal", "insight"]
+    visual_template: Literal["score_lower_third", "tactical_lower_third"]
     text: str
     metrics: dict[str, int]
     supporting_event_ids: list[str]

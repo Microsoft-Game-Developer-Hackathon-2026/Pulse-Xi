@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from app.analytics import metrics_at, state_at
+from app.analytics import metrics_at, state_at, tactics_at
 from app.agents import audit_model_packet
 from app.evidence import insights_for, overlays_for, verify
 from app.main import app
@@ -39,6 +39,8 @@ def test_golden_scores_and_metrics():
     match, events = generate("comeback")
     assert state_at(match, events, 3500).score.away == 2
     assert state_at(match, events, 3500).score.home == 0
+    pressure = next(event for event in events if event.event_type == EventType.pressure)
+    assert state_at(match, events, pressure.match_second).possession_team_id != pressure.team_id
 
 
 def test_api_and_websocket():
@@ -60,7 +62,8 @@ def test_api_and_websocket():
         assert event["kind"] == "event" and event["sequence"] == 2
 
 
-def test_idempotent_out_of_order_ingest():
+def test_idempotent_out_of_order_ingest(tmp_path, monkeypatch):
+    monkeypatch.setenv("PULSE_DB_PATH", str(tmp_path / "matches.sqlite"))
     match, events = generate("custom", 809)
     match = match.model_copy(update={"match_id": "imported-fixture"})
     sample = [e.model_copy(update={"match_id": match.match_id, "event_id": f"import-{i}"})
@@ -77,22 +80,31 @@ def test_idempotent_out_of_order_ingest():
     assert [e["sequence"] for e in stored_events] == list(range(1, 9))
     payload["events"][0]["outcome"] = "corrupted"
     assert client.post("/api/matches/ingest", json=payload).status_code == 409
+    from app.storage import imported_match
+    recovered = imported_match(match.match_id)
+    assert recovered is not None
+    assert len(recovered[1]) == 8
+    assert recovered[1][0].sequence == 1
+    assert client.get("/api/matches").json()[-1]["match_id"] == match.match_id
 
 
 def test_prooftrail_overlay_and_localized_recap():
     match, events = generate("comeback")
     insights = insights_for(match, events)
     overlays = overlays_for(match, events)
-    assert len(insights) == len(overlays) == 5
+    assert len(insights) == len(overlays) >= 5
+    assert sum(item.category == "goal" for item in insights) == 5
+    assert any(item.category == "momentum_shift" for item in insights)
     assert all(verify(insight, match, events) for insight in insights)
     assert all(cue.trigger_match_second == insight.match_second and
                cue.supporting_event_ids == insight.supporting_event_ids
                for cue, insight in zip(overlays, insights))
+    assert all(cue.end_match_second <= next_cue.start_match_second for cue, next_cue in zip(overlays, overlays[1:]))
     bad = insights[0].model_copy(update={"supporting_event_ids": ["missing"]})
     assert not verify(bad, match, events)
     client = TestClient(app)
     match_id = match.match_id
-    assert len(client.get(f"/api/matches/{match_id}/insights?at_second=3500").json()) == 2
+    assert sum(item["category"] == "goal" for item in client.get(f"/api/matches/{match_id}/insights?at_second=3500").json()) == 2
     packet = client.post(f"/api/insights/{insights[0].insight_id}/explain").json()
     assert len(packet["source_events"]) == 2
     assert client.get(f"/api/matches/{match_id}/overlays").json()[0]["trigger_match_second"] == 1000
@@ -101,6 +113,45 @@ def test_prooftrail_overlay_and_localized_recap():
     assert casual["provider"] == "verified_rule_based_templates"
     assert casual["moments"][0]["text"] != analyst["moments"][0]["text"]
     assert casual["moments"][0]["supporting_event_ids"] == insights[0].supporting_event_ids
+
+
+def test_tactics_and_evidence_rejects_future_or_wrong_team():
+    match, events = generate("comeback")
+    at_zero = tactics_at(match, events, 0)
+    assert at_zero["computed_from_event_count"] == 1
+    assert at_zero["teams"][match.home.team_id]["shots"] == []
+    full = tactics_at(match, events, 5400)
+    assert full["teams"][match.home.team_id]["passes_completed"] <= full["teams"][match.home.team_id]["passes_attempted"]
+    assert full["momentum_windows"]
+    client = TestClient(app)
+    assert client.get(f"/api/matches/{match.match_id}/tactics?at_second=0").json() == at_zero
+    assert client.get(f"/api/matches/{match.match_id}/tactics?at_second=6000").status_code == 422
+    insights = insights_for(match, events)
+    assert all(verify(item, match, events) for item in insights)
+    tactical = next(item for item in insights if item.category == "momentum_shift")
+    other_team = match.away.team_id if tactical.team_id == match.home.team_id else match.home.team_id
+    assert not verify(tactical.model_copy(update={"team_id": other_team}), match, events)
+    assert not verify(tactical.model_copy(update={"supporting_event_ids": tactical.supporting_event_ids[:-1]}), match, events)
+    assert not verify(tactical.model_copy(update={"match_second": tactical.match_second - 1}), match, events)
+    assert not verify(tactical.model_copy(update={"explanation": tactical.explanation + " The team had 99 shots."}), match, events)
+    assert not verify(tactical.model_copy(update={"factual_claims": [tactical.factual_claims[0].model_copy(update={"value": 999}), tactical.factual_claims[1]]}), match, events)
+    assert all(item.match_second <= 3500 for item in insights_for(match, events, 3500))
+
+
+def test_personalized_recap_at_replay_clock():
+    match, events = generate("comeback")
+    client = TestClient(app)
+    base = f"/api/matches/{match.match_id}/recap"
+    early = client.post(f"{base}?at_second=500&locale=es").json()
+    assert early["moments"] == []
+    assert "0–0" in early["lead"]
+    team = client.post(f"{base}?persona=favorite_team&favorite_team_id={match.away.team_id}&at_second=3500").json()
+    assert len(team["moments"]) == 2
+    assert all(moment["match_second"] <= 3500 for moment in team["moments"])
+    player = client.post(f"{base}?persona=favorite_player&favorite_player_id={match.home.players[0].player_id}&at_second=3500").json()
+    assert "completed passes" in player["lead"]
+    assert player["moments"] == []
+    assert client.post(f"{base}?persona=favorite_team&favorite_team_id=fictional").status_code == 422
 
 
 def test_agent_auditor_and_unconfigured_guard():
