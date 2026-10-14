@@ -10,7 +10,7 @@
 ## Phase 2 verified slice — 2026-10-14
 
 - Backend: `python -m pytest -q` — **8 passed**. Added tactical API and verifier checks for team attribution, supporting-event completeness, fabricated values and future timestamps. SQLite ingest test uses a temporary database and confirms recovery through a fresh connection. A replay-clock personalization test covers team/player focus and rejects unknown teams.
-- Frontend: `npm run test:e2e` — production TypeScript/Vite build succeeded, **3 Playwright Chromium tests passed**. Tests load the real FastAPI-served app, seek through score and insight changes, open evidence, change matches, play/pause, check 390 px layout overflow and verify recap focus changes.
+- Frontend: `npm run test:e2e` — production TypeScript/Vite build succeeded, **3 Playwright Chromium tests passed**. Tests load the real FastAPI-served app, seek through score and insight changes, open evidence, change matches, play/pause, check 390 px layout overflow, verify recap focus and toggle broadcast overlays.
 - Optional Microsoft SDK: `agent-framework-foundry==1.13.0`, `agent-framework-orchestrations==1.3.1`, and `azure-identity==1.26.0` installed. Imports and offline two-agent workflow construction passed. No authenticated request or paid inference was made.
 - [GitHub Actions run 38581351513](https://github.com/satvikp-coder/pulse-xi/actions/runs/38581351513) completed successfully: backend, frontend build and Chromium browser jobs all passed on `main`.
 - Remaining: full interface localization, richer producer controls, an accessibility audit, live Foundry invocation with authorized credentials and Azure deployment.

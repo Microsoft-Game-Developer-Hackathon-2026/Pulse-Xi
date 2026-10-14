@@ -108,6 +108,10 @@ def test_prooftrail_overlay_and_localized_recap():
     packet = client.post(f"/api/insights/{insights[0].insight_id}/explain").json()
     assert len(packet["source_events"]) == 2
     assert client.get(f"/api/matches/{match_id}/overlays").json()[0]["trigger_match_second"] == 1000
+    cue = client.get(f"/api/matches/{match_id}/overlays/{overlays[0].cue_id}").json()
+    assert cue["schema_version"] == "1.0"
+    assert cue["start_match_second"] == 1000 and cue["end_match_second"] == 1012
+    assert client.get(f"/api/matches/{match_id}/overlays/not-a-cue").status_code == 404
     casual = client.post(f"/api/matches/{match_id}/recap?locale=es&persona=casual").json()
     analyst = client.post(f"/api/matches/{match_id}/recap?locale=es&persona=analyst").json()
     assert casual["provider"] == "verified_rule_based_templates"

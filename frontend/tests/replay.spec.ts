@@ -17,6 +17,12 @@ test('loads, seeks without future spoilers, and inspects tactical evidence', asy
   await page.locator('.insight-card').first().getByRole('button').click()
   await expect(page.getByRole('dialog', { name: 'Insight evidence' })).toBeVisible()
   await expect(page.locator('.proof-event').first()).toBeVisible()
+  await page.getByRole('button', { name: 'Close proof' }).click()
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('1000')
+  await expect(page.locator('.studio-lower')).toBeVisible()
+  await page.getByLabel('SHOW OVERLAYS').uncheck()
+  await expect(page.locator('.studio-lower')).toHaveCount(0)
+  await expect(page.getByRole('link', { name: /Export .* cue JSON/ }).first()).toHaveAttribute('href', /\/overlays\/cue-/)
 })
 
 test('match selection and mobile replay controls', async ({ page }) => {

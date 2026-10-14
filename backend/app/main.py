@@ -142,6 +142,15 @@ def match_overlays(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
     return overlays_for(match, events, at_second)
 
 
+@app.get("/api/matches/{match_id}/overlays/{cue_id}")
+def match_overlay(match_id: str, cue_id: str):
+    match, events = get_match(match_id)
+    cue = next((item for item in overlays_for(match, events) if item.cue_id == cue_id), None)
+    if cue is None:
+        raise HTTPException(404, "cue not found")
+    return cue
+
+
 @app.post("/api/matches/{match_id}/recap")
 def match_recap(match_id: str, locale: str = Query("en"), persona: str = Query("casual"),
                 at_second: int = Query(5400, ge=0, le=5400),
