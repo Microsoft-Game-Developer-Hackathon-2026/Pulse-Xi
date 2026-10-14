@@ -2,7 +2,7 @@
 
 **Synthetic simulation · Football intelligence operating system**
 
-An original local football match replay and analytics application. Three seeded fictional fixtures drive the match command center, deterministic statistics, ProofTrail goal evidence, synchronized cue JSON and preview, and limited rule-based English, Spanish and Hindi goal recaps. All clubs, players, match events and goals are fictional. No Premier League feed, footage or logos are used.
+An original local football match replay and analytics application. Three seeded fictional fixtures drive the match command center, deterministic statistics, verified goal and tactical insights, synchronized cue JSON and preview, and five replay-clock recap modes with limited rule-based English, Spanish and Hindi text. Imported synthetic matches persist in SQLite. All clubs, players, match events and goals are fictional. No Premier League feed, footage or logos are used.
 
 ## Run locally
 
@@ -24,7 +24,7 @@ npm install
 npm run dev
 ```
 
-API docs: http://localhost:8000/docs. Tests: `cd backend; python -m pytest tests -q -p no:cacheprovider` and `cd frontend; npm run build`.
+API docs: http://localhost:8000/docs. Tests: `cd backend; python -m pytest tests -q -p no:cacheprovider` and `cd frontend; npm run build`. Browser tests: `cd frontend; npx playwright install chromium; npm run test:e2e`.
 
 ```mermaid
 flowchart LR
@@ -38,4 +38,4 @@ flowchart LR
   R --> U[React match command center]
 ```
 
-The current milestone delivers a functioning local replay and initial evidence, broadcast and persona experiences. Tactical pattern insights, full FanDNA, Foundry agents, durable persistence, and Azure deployment are later phases; see [project status](docs/PROJECT_STATUS.md). The API `/health` reports the narrative provider as unconfigured: no LLM inference is claimed.
+The current milestone delivers a functioning local replay, event-derived tactical views, verified tactical changes, durable ingest, and five focused recap modes. Full interface localization, richer producer controls, authenticated Foundry invocation, and Azure deployment remain; see [project status](docs/PROJECT_STATUS.md). The API `/health` reports the narrative provider as unconfigured: no LLM inference is claimed.
