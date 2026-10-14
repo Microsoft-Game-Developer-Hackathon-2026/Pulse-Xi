@@ -1,0 +1,9 @@
+# Optional Microsoft Foundry workflow
+
+The normal local application uses verified rule-based narratives and makes **zero hosted model calls**. `/health` reports `not_configured`. The optional code path in `backend/app/agents.py` uses Microsoft Agent Framework's `FoundryChatClient` and `SequentialBuilder` per [Microsoft Foundry provider guidance](https://learn.microsoft.com/en-us/agent-framework/agents/providers/microsoft-foundry) and [sequential workflow documentation](https://learn.microsoft.com/en-us/agent-framework/workflows/orchestrations/sequential).
+
+When explicitly enabled, Tactical Analyst and Story Editor run as separate Foundry-backed agents. Their output passes a deterministic Evidence Auditor that checks cited IDs and rejects prose containing invented numeric claims. A rule-based Broadcast Director links the approved packet to a timed cue, and the Fan Personalizer returns verified templates. The trace records these stages and whether they succeeded. The model-generated text is labeled **opinion with verified references**, while score facts remain authoritative deterministic output.
+
+Install optional dependencies with `python -m pip install -r backend/requirements-foundry.txt`. Supply server-side `FOUNDRY_PROJECT_ENDPOINT`, `FOUNDRY_MODEL`, `PULSE_FOUNDRY_ADMIN_TOKEN`, and `PULSE_ENABLE_FOUNDRY=true`, then authenticate to Azure with `az login` for local development. Only an explicit `POST /api/insights/{id}/agent-run` with the `X-Admin-Token` header starts a hosted workflow. Inference can incur Azure charges. Never set these secrets in frontend files or commit them.
+
+This hosted path has **not** been installed or invoked in this workspace because no Foundry project, deployment, or credentials were supplied. Its SDK compatibility, trace, latency, costs and output quality still require a real configured invocation before submission. The application does not claim that the model has run.

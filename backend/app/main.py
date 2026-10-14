@@ -1,16 +1,20 @@
 """PULSE XI local API. A match stream is a deterministic replay of synthetic events."""
 import asyncio
+import os
+import secrets
 from functools import lru_cache
 from pathlib import Path
 from threading import RLock
 
-from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .analytics import metrics_at, state_at
+from .agents import TRACES, configured, run_specialists
+from .evidence import insights_for, overlays_for, recap_for
 from .models import EventType, Match, MatchEvent
 from .simulator import FIXTURES, generate
 
@@ -62,7 +66,8 @@ class IngestRequest(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "simulation": "synthetic", "narrative_provider": "not_configured"}
+    return {"status": "ok", "simulation": "synthetic",
+            "narrative_provider": "configured_not_verified" if configured() else "not_configured"}
 
 
 @app.get("/api/matches")
@@ -138,6 +143,65 @@ def match_state(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
 def match_metrics(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
     match, events = get_match(match_id)
     return metrics_at(match, events, at_second)
+
+
+@app.get("/api/matches/{match_id}/insights")
+def match_insights(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
+    match, events = get_match(match_id)
+    return insights_for(match, events, at_second)
+
+
+@app.get("/api/matches/{match_id}/overlays")
+def match_overlays(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
+    match, events = get_match(match_id)
+    return overlays_for(match, events, at_second)
+
+
+@app.post("/api/matches/{match_id}/recap")
+def match_recap(match_id: str, locale: str = Query("en"), persona: str = Query("casual")):
+    match, events = get_match(match_id)
+    try:
+        return recap_for(match, events, locale, persona)
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
+
+
+@app.post("/api/insights/{insight_id}/explain")
+def explain_insight(insight_id: str):
+    for match, events in [stored(name) for name in FIXTURES] + list(ingested.values()):
+        insight = next((item for item in insights_for(match, events) if item.insight_id == insight_id), None)
+        if insight:
+            source_ids = set(insight.supporting_event_ids)
+            return {"insight": insight, "source_events": [e for e in events if e.event_id in source_ids],
+                    "verification": "deterministic claim check passed"}
+    raise HTTPException(404, "insight not found")
+
+
+@app.get("/api/agent-traces")
+def agent_traces(x_admin_token: str | None = Header(default=None)):
+    expected = os.getenv("PULSE_FOUNDRY_ADMIN_TOKEN", "")
+    if expected and (not x_admin_token or not secrets.compare_digest(expected, x_admin_token)):
+        raise HTTPException(403, "admin token required")
+    return TRACES
+
+
+@app.post("/api/insights/{insight_id}/agent-run")
+async def agent_run(insight_id: str, x_admin_token: str | None = Header(default=None)):
+    if not configured():
+        raise HTTPException(503, "Foundry workflow is not configured; verified rule-based narratives remain available")
+    expected = os.getenv("PULSE_FOUNDRY_ADMIN_TOKEN", "")
+    if not expected or not x_admin_token or not secrets.compare_digest(expected, x_admin_token):
+        raise HTTPException(403, "admin token required")
+    for match, events in [stored(name) for name in FIXTURES] + list(ingested.values()):
+        insight = next((item for item in insights_for(match, events) if item.insight_id == insight_id), None)
+        if insight:
+            try:
+                return await run_specialists(match, events, insight)
+            except (ImportError, ModuleNotFoundError) as error:
+                raise HTTPException(503, "optional Agent Framework dependency is not installed") from error
+            except Exception as error:
+                raise HTTPException(502, f"Foundry workflow failed: {type(error).__name__}") from error
+    raise HTTPException(404, "insight not found")
 
 
 @app.websocket("/ws/matches/{match_id}")

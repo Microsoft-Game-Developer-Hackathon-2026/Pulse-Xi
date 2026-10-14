@@ -2,7 +2,7 @@
 
 **Synthetic simulation · Football intelligence operating system**
 
-An original local football match replay and analytics application. All clubs, players, match events and goals are fictional. No Premier League feed, footage or logos are used.
+An original local football match replay and analytics application. Three seeded fictional fixtures drive the match command center, deterministic statistics, ProofTrail goal evidence, synchronized cue JSON and preview, and limited rule-based English, Spanish and Hindi goal recaps. All clubs, players, match events and goals are fictional. No Premier League feed, footage or logos are used.
 
 ## Run locally
 
@@ -31,8 +31,11 @@ flowchart LR
   S[Seeded synthetic simulator] --> E[Versioned events]
   E --> A[Deterministic analytics]
   E --> R[Replay API and WebSocket]
+  A --> P[ProofTrail auditor]
+  P --> O[Timed overlay cues and localized recap]
   A --> R
+  O --> R
   R --> U[React match command center]
 ```
 
-The current milestone delivers a functioning local replay. Evidence narratives, synchronized graphics, FanDNA, Foundry agents, persistence, and Azure deployment are later phases; see [project status](docs/PROJECT_STATUS.md).
+The current milestone delivers a functioning local replay and initial evidence, broadcast and persona experiences. Tactical pattern insights, full FanDNA, Foundry agents, durable persistence, and Azure deployment are later phases; see [project status](docs/PROJECT_STATUS.md). The API `/health` reports the narrative provider as unconfigured: no LLM inference is claimed.

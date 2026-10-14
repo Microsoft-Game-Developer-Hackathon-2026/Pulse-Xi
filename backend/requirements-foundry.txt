@@ -1,0 +1,4 @@
+# Optional; install only after you have a Foundry project and model deployment.
+-r requirements.txt
+agent-framework-foundry==1.13.0
+azure-identity==1.26.0

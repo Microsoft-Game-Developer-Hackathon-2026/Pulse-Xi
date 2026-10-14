@@ -20,6 +20,11 @@ def make_team(team_id: str, name: str, color: str) -> Team:
                                 role=role, shirt_number=i + 1) for i, role in enumerate(roles)])
 
 
+def shot_quality_proxy(position: Point) -> float:
+    """Uncalibrated position-only score: clamp((x-60)/100-|y-50|/180, .02, .8)."""
+    return round(min(0.8, max(0.02, (position.x - 60) / 100 - abs(position.y - 50) / 180)), 2)
+
+
 def generate(fixture: str = "comeback", seed: int | None = None) -> tuple[Match, list[MatchEvent]]:
     if fixture not in FIXTURES and fixture != "custom":
         raise ValueError("unknown fixture")
@@ -69,7 +74,7 @@ def generate(fixture: str = "comeback", seed: int | None = None) -> tuple[Match,
             shooter = rng.choice([7, 8, 9, 10])
             target = Point(x=100, y=50)
             emit(goal_second, EventType.shot, possession, shooter, position, target, "goal",
-                 qualifiers={"shot_quality_proxy": round(max(0.05, 0.45 - abs(position.y - 50) / 100), 2)})
+                 qualifiers={"shot_quality_proxy": shot_quality_proxy(position)})
             emit(goal_second, EventType.goal, possession, shooter, position, target, "scored",
                  qualifiers={"assisted_shot_event_id": events[-1].event_id})
             possession = "away" if possession == "home" else "home"
@@ -85,7 +90,7 @@ def generate(fixture: str = "comeback", seed: int | None = None) -> tuple[Match,
             target = Point(x=100, y=rng.uniform(35, 65))
             emit(second, EventType.shot, possession, actor, position, target,
                  "saved" if rng.random() < 0.42 else "off_target",
-                 qualifiers={"shot_quality_proxy": round(max(0.02, (position.x - 65) / 100 - abs(position.y - 50) / 180), 2)})
+                 qualifiers={"shot_quality_proxy": shot_quality_proxy(position)})
             possession = "away" if possession == "home" else "home"
             possession_number += 1
             position = Point(x=rng.uniform(18, 35), y=rng.uniform(25, 75))

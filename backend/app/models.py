@@ -121,3 +121,47 @@ class MatchMetrics(BaseModel):
     home: TeamMetrics
     away: TeamMetrics
     computed_from_event_count: int
+
+
+class FactualClaim(BaseModel):
+    metric: Literal["score_home", "score_away", "pressure_events", "recoveries"]
+    value: int
+    team_id: str | None = None
+    at_second: int
+
+
+class Insight(BaseModel):
+    insight_id: str
+    match_id: str
+    category: Literal["goal", "pressure_pattern"]
+    match_second: int
+    title: str
+    explanation: str
+    factual_claims: list[FactualClaim]
+    supporting_event_ids: list[str] = Field(min_length=1)
+    derived_metric_ids: list[str]
+    evidence_window: tuple[int, int]
+    uncertainty: str
+    priority: int = Field(ge=0, le=100)
+    verification_status: Literal["verified_rule_based", "rejected"]
+    hypothesis: Literal[False] = False
+    provenance: Literal["deterministic-analytics"] = "deterministic-analytics"
+
+
+class OverlayCue(BaseModel):
+    cue_id: str
+    match_id: str
+    trigger_match_second: int
+    show_duration_seconds: int = Field(gt=0, le=60)
+    priority: int = Field(ge=0, le=100)
+    overlay_type: Literal["goal", "insight"]
+    text: str
+    metrics: dict[str, int]
+    supporting_event_ids: list[str]
+    insight_id: str
+    locale: Literal["en", "es", "hi"] = "en"
+    persona: Literal["casual", "analyst", "broadcaster"] = "broadcaster"
+    safe_area: Literal["lower_third"] = "lower_third"
+    animation_in: Literal["fade"] = "fade"
+    animation_out: Literal["fade"] = "fade"
+    schema_version: Literal["1.0"] = "1.0"

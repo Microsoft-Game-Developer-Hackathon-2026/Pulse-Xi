@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
 
 from app.analytics import metrics_at, state_at
+from app.agents import audit_model_packet
+from app.evidence import insights_for, overlays_for, verify
 from app.main import app
 from app.models import EventType, MatchEvent
 from app.simulator import FIXTURES, generate
@@ -75,3 +77,41 @@ def test_idempotent_out_of_order_ingest():
     assert [e["sequence"] for e in stored_events] == list(range(1, 9))
     payload["events"][0]["outcome"] = "corrupted"
     assert client.post("/api/matches/ingest", json=payload).status_code == 409
+
+
+def test_prooftrail_overlay_and_localized_recap():
+    match, events = generate("comeback")
+    insights = insights_for(match, events)
+    overlays = overlays_for(match, events)
+    assert len(insights) == len(overlays) == 5
+    assert all(verify(insight, match, events) for insight in insights)
+    assert all(cue.trigger_match_second == insight.match_second and
+               cue.supporting_event_ids == insight.supporting_event_ids
+               for cue, insight in zip(overlays, insights))
+    bad = insights[0].model_copy(update={"supporting_event_ids": ["missing"]})
+    assert not verify(bad, match, events)
+    client = TestClient(app)
+    match_id = match.match_id
+    assert len(client.get(f"/api/matches/{match_id}/insights?at_second=3500").json()) == 2
+    packet = client.post(f"/api/insights/{insights[0].insight_id}/explain").json()
+    assert len(packet["source_events"]) == 2
+    assert client.get(f"/api/matches/{match_id}/overlays").json()[0]["trigger_match_second"] == 1000
+    casual = client.post(f"/api/matches/{match_id}/recap?locale=es&persona=casual").json()
+    analyst = client.post(f"/api/matches/{match_id}/recap?locale=es&persona=analyst").json()
+    assert casual["provider"] == "verified_rule_based_templates"
+    assert casual["moments"][0]["text"] != analyst["moments"][0]["text"]
+    assert casual["moments"][0]["supporting_event_ids"] == insights[0].supporting_event_ids
+
+
+def test_agent_auditor_and_unconfigured_guard():
+    match, events = generate("late-winner")
+    insight = insights_for(match, events)[0]
+    valid = {"headline": "A goal changes the match", "commentary": "A clear finish reshapes the scoreline.",
+             "event_ids": insight.supporting_event_ids}
+    assert audit_model_packet(valid, insight, match, events)
+    assert not audit_model_packet({**valid, "commentary": "The striker ran 35 km/h."}, insight, match, events)
+    assert not audit_model_packet({**valid, "event_ids": ["invented-event"]}, insight, match, events)
+    client = TestClient(app)
+    response = client.post(f"/api/insights/{insight.insight_id}/agent-run")
+    assert response.status_code == 503
+    assert client.get("/api/agent-traces").json() == []
