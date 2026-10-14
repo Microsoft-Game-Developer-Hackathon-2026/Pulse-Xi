@@ -1,0 +1,12 @@
+__pycache__/
+.pytest_cache/
+.venv/
+*.pyc
+node_modules/
+dist/
+.env
+*.db
+coverage/
+.npm-cache/
+*.tsbuildinfo
+pytest-cache-files-*/
