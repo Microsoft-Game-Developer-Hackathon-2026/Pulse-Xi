@@ -24,7 +24,7 @@ npm install
 npm run dev
 ```
 
-API docs: http://localhost:8000/docs. Tests: `cd backend; python -m pytest -q` and `cd frontend; npm run build`. The Windows launcher uses a direct local bundle path because the coding sandbox blocks child processes spawned by Vite.
+API docs: http://localhost:8000/docs. Tests: `cd backend; python -m pytest tests -q -p no:cacheprovider` and `cd frontend; npm run build`.
 
 ```mermaid
 flowchart LR
