@@ -75,6 +75,10 @@ test('generates a seeded replay through the real API, explores events, and survi
   await page.getByRole('button', { name: 'Generate replay' }).click()
   await expect(page.getByLabel('SELECT MATCH')).toHaveValue('custom-0')
   expect(await (await request.get('/api/matches/custom-0/events?limit=1000')).json()).toEqual(first)
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('5400')
+  await page.locator('.insight-card').first().getByRole('button').click()
+  await expect(page.getByRole('dialog', { name: 'Insight evidence' })).toBeVisible()
+  await expect(page.locator('.proof-event').first()).toContainText('custom-0')
 })
 
 test('validates seeds, recovers from generation failure, and fits mobile', async ({ page }) => {
