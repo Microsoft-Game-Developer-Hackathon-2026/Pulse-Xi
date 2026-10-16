@@ -17,9 +17,26 @@ def read_glb(path: Path) -> dict:
     if magic != b"glTF" or version != 2 or size != len(data):
         raise ValueError("invalid GLB header")
     length, kind = struct.unpack_from("<II", data, 12)
-    if kind != 0x4E4F534A or 20 + length > len(data):
+    if kind != 0x4E4F534A or length % 4 or 20 + length > len(data):
         raise ValueError("invalid JSON chunk")
     doc = json.loads(data[20:20 + length])
+    # This original untextured kit requires one self-contained binary chunk.
+    binary_offset = 20 + length
+    if binary_offset + 8 > len(data):
+        raise ValueError("missing BIN chunk")
+    binary_length, binary_kind = struct.unpack_from("<II", data, binary_offset)
+    if (binary_kind != 0x004E4942 or binary_length % 4 or
+            binary_offset + 8 + binary_length != len(data)):
+        raise ValueError("invalid BIN chunk length/type")
+    buffers = doc.get("buffers", [])
+    if (len(buffers) != 1 or not isinstance(buffers[0].get("byteLength"), int) or
+            not 0 <= binary_length - buffers[0]["byteLength"] <= 3):
+        raise ValueError("BIN chunk disagrees with buffer length")
+    for view in doc.get("bufferViews", []):
+        offset, size = view.get("byteOffset", 0), view.get("byteLength")
+        if (view.get("buffer") != 0 or type(offset) is not int or type(size) is not int or
+                offset < 0 or size < 0 or offset + size > buffers[0]["byteLength"]):
+            raise ValueError("buffer view exceeds BIN chunk")
     for collection in ("buffers", "images"):
         if any("uri" in item for item in doc.get(collection, [])):
             raise ValueError("external/data URI resources are not permitted")
@@ -54,7 +71,8 @@ def validate_manifest(root: Path) -> list[dict]:
         info = read_glb(output)
         if info["bytes"] > asset["budget_bytes"] or info["triangles"] > asset["budget_triangles"]:
             raise ValueError(f"asset budget exceeded: {asset['name']}")
-        if info["triangles"] != asset["triangles"] or info["bytes"] != asset["bytes"] or info["textures"]:
+        if (info["triangles"] != asset["triangles"] or info["bytes"] != asset["bytes"] or info["textures"] or
+                info["primitives"] != asset["draw_primitives"] or source.stat().st_size != asset["source_bytes"]):
             raise ValueError(f"asset metadata mismatch: {asset['name']}")
         if asset["license"] != "CC0-1.0" or not asset["author"]:
             raise ValueError("asset provenance is incomplete")
