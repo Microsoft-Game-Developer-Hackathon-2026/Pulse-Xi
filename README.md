@@ -26,6 +26,8 @@ npm run dev
 
 API docs: http://localhost:8000/docs. Tests: `cd backend; python -m pytest tests -q -p no:cacheprovider` and `cd frontend; npm run build`. Browser tests: `cd frontend; npx playwright install chromium; npm run test:e2e`.
 
+The **Sandbox Lab** navigation opens a working fixture workspace at `/#/sandbox`: generate a fictional replay from a seed, select recorded events and inspect pass difficulty and evidence. This currently uses the existing precomputed fixture API. Live tactical interventions, engine checkpoints and ForkCast await the authoritative simulator contracts. See the [implementation and team handoff](docs/SATVIK_IMPLEMENTATION.md) and [pass formula](docs/PASS_DIFFICULTY.md).
+
 ```mermaid
 flowchart LR
   S[Seeded synthetic simulator] --> E[Versioned events]

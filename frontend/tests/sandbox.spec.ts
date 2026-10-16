@@ -1,0 +1,87 @@
+import { expect, test } from '@playwright/test'
+
+test('generates a seeded replay through the real API, explores events, and survives reload', async ({ page, request }, testInfo) => {
+  await page.goto('/#/sandbox')
+  await expect(page.getByRole('region', { name: 'Sandbox fixture setup' })).toBeVisible()
+  await page.getByLabel('REPRODUCIBLE MATCH SEED').fill('0')
+  await page.getByRole('button', { name: 'Generate replay' }).click()
+  await expect(page.getByLabel('SELECT MATCH')).toHaveValue('custom-0')
+  await expect(page.getByRole('status').filter({ hasText: 'Replay custom-0 is ready' })).toBeVisible()
+  const first = await (await request.get('/api/matches/custom-0/events?limit=1000')).json()
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('3000')
+  await page.getByRole('combobox', { name: /^EVENT TYPE/ }).selectOption('pass')
+  const pass = first.filter((event: { type: string; match_second: number }) => event.type === 'pass' && event.match_second <= 3000).at(-1)
+  const row = page.getByRole('list', { name: 'Recorded replay events' }).getByRole('button').first()
+  await row.click()
+  await expect(page.getByRole('slider', { name: 'Seek match time' })).toHaveValue(String(pass.match_second))
+  await expect(row).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('region', { name: 'Sandbox fixture setup' }).screenshot({ path: testInfo.outputPath('sandbox-setup.png') })
+  await page.reload()
+  await expect(page.getByLabel('SELECT MATCH')).toHaveValue('custom-0')
+  await expect(page.getByRole('slider', { name: 'Seek match time' })).toHaveValue('0')
+  await page.getByRole('button', { name: 'Generate replay' }).click()
+  await expect(page.getByLabel('SELECT MATCH')).toHaveValue('custom-4411')
+  await page.getByLabel('REPRODUCIBLE MATCH SEED').fill('0')
+  await page.getByRole('button', { name: 'Generate replay' }).click()
+  await expect(page.getByLabel('SELECT MATCH')).toHaveValue('custom-0')
+  expect(await (await request.get('/api/matches/custom-0/events?limit=1000')).json()).toEqual(first)
+})
+
+test('validates seeds, recovers from generation failure, and fits mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/#/sandbox')
+  await page.getByLabel('REPRODUCIBLE MATCH SEED').fill('-1')
+  await page.getByRole('button', { name: 'Generate replay' }).click()
+  await expect(page.getByText('Use a whole-number seed from 0 to 2,147,483,647.')).toBeVisible()
+  await page.route('**/api/matches/generate', route => route.fulfill({ status: 503, body: '{}' }))
+  await page.getByLabel('REPRODUCIBLE MATCH SEED').fill('123')
+  await page.getByRole('button', { name: 'Generate replay' }).click()
+  await expect(page.getByText(/Fixture generation failed \(503\)/)).toBeVisible()
+  await expect(page.getByLabel('SELECT MATCH')).toHaveValue('comeback-1107')
+  await page.unroute('**/api/matches/generate')
+  await page.getByRole('button', { name: 'Generate replay' }).click()
+  await expect(page.getByLabel('SELECT MATCH')).toHaveValue('custom-123')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2)).toBe(true)
+  await page.getByRole('link', { name: 'MATCH INTELLIGENCE', exact: true }).click()
+  await expect(page.getByRole('region', { name: 'Sandbox fixture setup' })).toHaveCount(0)
+})
+
+test('past replay timeline contains no future events and can be used with a keyboard', async ({ page }) => {
+  await page.goto('/#/sandbox')
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('5400')
+  const rows = page.getByRole('list', { name: 'Recorded replay events' })
+  await expect(rows.getByRole('button').first()).toContainText('FULLTIME')
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('0')
+  await expect(rows.getByRole('button')).toHaveCount(1)
+  await expect(rows).not.toContainText('FULLTIME')
+  await expect(page.locator('.cue-row')).toHaveCount(0)
+  await expect(page.locator('.moment')).toHaveCount(0)
+  await rows.getByRole('button').focus()
+  await page.keyboard.press('Enter')
+  await expect(rows.getByRole('button')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByText(/Live tactical changes, checkpoint restore and ForkCast are awaiting/)).toBeVisible()
+})
+
+test('duplicate generation is blocked and leaving the workspace cancels a pending result', async ({ page }) => {
+  let release: () => void = () => {}
+  const gate = new Promise<void>(resolve => { release = resolve })
+  let finished: () => void = () => {}
+  const completion = new Promise<void>(resolve => { finished = resolve })
+  let calls = 0
+  await page.route('**/api/matches/generate', async route => {
+    calls += 1
+    const response = await route.fetch()
+    await gate
+    try { await route.fulfill({ response }) } catch { /* Client navigation aborted this request. */ }
+    finished()
+  })
+  await page.goto('/#/sandbox')
+  await page.getByLabel('REPRODUCIBLE MATCH SEED').fill('9876')
+  await page.getByRole('button', { name: 'Generate replay' }).click()
+  await expect(page.getByRole('button', { name: 'Generating…' })).toBeDisabled()
+  await page.getByRole('link', { name: 'MATCH INTELLIGENCE', exact: true }).click()
+  release()
+  await completion
+  expect(calls).toBe(1)
+  await expect(page.getByLabel('SELECT MATCH')).toHaveValue('comeback-1107')
+})
