@@ -1,0 +1,29 @@
+.forkcast-comparison, .comparison-state { background: #0b2026; color: #d7e9df; border: 1px solid #34564e; padding: 26px; font-family: Arial, sans-serif; }
+.comparison-fixture { border: 1px solid #b19050; background: #403b23; color: #ffdc92; padding: 12px; font-size: 12px; line-height: 1.5; }
+.forkcast-comparison header { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin: 26px 0; }
+.forkcast-comparison header small { font-size: 9px; color: #7bbaaa; letter-spacing: 1.4px; }
+.forkcast-comparison h1 { font-size: 30px; letter-spacing: -.8px; margin: 12px 0; }
+.comparison-window { display: flex; flex-direction: column; gap: 8px; color: #95b5a6; font-size: 11px; }
+.comparison-window strong { color: #e4eee6; font: 22px Consolas, monospace; }
+.comparison-branches { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.comparison-branches article { background: #12312f; padding: 18px; border-top: 2px solid #7cdbbe; }
+.comparison-branches article:last-child { border-color: #e9bc7d; }
+.comparison-branches small { font-size: 9px; letter-spacing: 1.5px; color: #a0c3b2; }
+.comparison-branches h2 { font-size: 19px; margin: 10px 0; }
+.comparison-branches p { color: #90afa0; font-size: 13px; line-height: 1.5; }
+.comparison-branches code { font-size: 10px; color: #789c8b; overflow-wrap: anywhere; }
+.forkcast-comparison table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 14px; table-layout: fixed; }
+.forkcast-comparison caption { text-align: left; color: #8dac9d; line-height: 1.5; font-size: 12px; padding: 0 0 16px; }
+.forkcast-comparison th, .forkcast-comparison td { text-align: left; padding: 14px 6px; border-bottom: 1px solid #2d4941; overflow-wrap: anywhere; }
+.forkcast-comparison thead th { font-size: 9px; letter-spacing: .5px; color: #9dbdac; }
+.forkcast-comparison tbody th { text-transform: capitalize; font-size: 12px; }
+.forkcast-comparison td small, .forkcast-comparison tbody th small { display: block; margin-top: 7px; font-size: 10px; line-height: 1.5; color: #86a895; font-weight: normal; text-transform: none; }
+.forkcast-comparison details { padding: 18px 0; border-bottom: 1px solid #2d4941; font-size: 12px; line-height: 1.7; }
+.forkcast-comparison summary { cursor: pointer; color: #9cdbbf; }
+.forkcast-comparison dl { display: grid; grid-template-columns: 150px 1fr; gap: 10px; }
+.forkcast-comparison dd { margin: 0; overflow-wrap: anywhere; font: 11px Consolas, monospace; }
+.comparison-evidence { margin-top: 18px; color: #9cbaaa; }
+.comparison-evidence code { overflow-wrap: anywhere; }
+.forkcast-comparison aside { margin-top: 20px; color: #95b39f; font-size: 12px; line-height: 1.7; }
+.comparison-state { font-size: 14px; line-height: 1.7; }
+@media (max-width: 650px) { .forkcast-comparison { padding: 15px; } .forkcast-comparison header { flex-direction: column; align-items: flex-start; gap: 10px; } .comparison-branches { grid-template-columns: 1fr; } .forkcast-comparison dl { grid-template-columns: 1fr; } .forkcast-comparison th, .forkcast-comparison td { padding: 12px 4px; font-size: 12px; } }
