@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
-    "test:e2e": "npm run build && playwright test"
+    "test:e2e": "npm run build && playwright test",
+    "measure:graphics": "node scripts/measure-graphics.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "9.4.0",
