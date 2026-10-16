@@ -178,7 +178,7 @@ export default function App() {
   const openProof = (insightId: string) => {
     proofRequest.current?.abort()
     const controller = new AbortController(); proofRequest.current = controller
-    fetch(`/api/insights/${encodeURIComponent(insightId)}/explain`, { method: 'POST', signal: controller.signal })
+    fetch(`/api/matches/${encodeURIComponent(matchId)}/insights/${encodeURIComponent(insightId)}/evidence?at_second=${Math.floor(second)}`, { signal: controller.signal })
       .then(response => { if (!response.ok) throw new Error('Proof request failed'); return response.json() as Promise<{ insight: Insight; source_events: Event[] }> })
       .then(value => { if (!controller.signal.aborted) setProof(value) }).catch(e => { if (!controller.signal.aborted) setError(e.message) })
   }
