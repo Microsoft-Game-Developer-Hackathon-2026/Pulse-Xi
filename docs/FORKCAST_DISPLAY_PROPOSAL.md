@@ -4,6 +4,8 @@ Status: **prepared and tested with development fixtures; real experiments remain
 
 ## Proposed comparison boundary
 
+Audit hardening: the validator accepts unknown input and rejects malformed nested shapes without throwing. It checks explicit metric/status enums, nonblank checkpoint and branch provenance, exact trial/hash key sets, duplicate evidence and single-trial range consistency. Development fixtures cannot claim `verified_rule_based`. Display limits are nine supported metrics, 20 paired trials and 10,000 evidence references per metric; these are proposed UI safety limits, not authorization or engine quotas. A backend auditor is still required to verify actual events, hashes and calculations.
+
 `ProposedExperimentComparison` is explicitly versioned `comparison/proposal-1`, pending agreement with Diyan and Mahir. It is a display DTO, not a replacement experiment manifest. It carries match/scenario/experiment IDs, one immutable parent checkpoint reference/hash, distinct branch IDs, engine version, an opaque manifest reference, common comparison window/cutoff, paired trial IDs/seeds/output hashes, descriptive metric means/ranges/differences and branch/trial/time-scoped evidence references.
 
 The internal consistency check rejects incompatible schemas, missing provenance, repeated branches/trials/metrics, mismatched trial counts/hashes, nonfinite or contradictory summaries, incorrect mean differences, unit mismatch and evidence outside the selected branch/trial/window. It cannot establish that an event exists or that a mean was calculated from the engine. The authoritative backend verifier must do that before returning a publishable result. Frontend types/checks do not confer authorization or factual verification.

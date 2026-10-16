@@ -2,6 +2,26 @@ import { expect, test } from '@playwright/test'
 import { comparisonProblems } from '../src/features/experiments/comparisonContract'
 import { fixture } from './fixtures'
 
+test('comparison boundary rejects malformed input and unsupported contract values without crashing', () => {
+  for (const value of [null, undefined, [], {}, { ...fixture, baseline: null },
+    { ...fixture, metrics: [null] }, { ...fixture, paired_trial_ids: null }]) {
+    expect(comparisonProblems(value as typeof fixture).length).toBeGreaterThan(0)
+  }
+  const changes = [
+    (value: typeof fixture) => { value.parent_checkpoint.checkpoint_id = ' ' },
+    (value: typeof fixture) => { value.baseline.trial_hashes.extra = 'unpaired-output' },
+    (value: typeof fixture) => { value.baseline.trial_hashes.t1 = ' ' },
+    (value: typeof fixture) => { value.verification_status = 'verified_rule_based' },
+    (value: typeof fixture) => { value.metrics[0].metric_id = 'invented' as 'shots' },
+    (value: typeof fixture) => { value.metrics[0].baseline.min = 1 },
+    (value: typeof fixture) => { value.metrics[0].supporting_events.push(value.metrics[0].supporting_events[0]) },
+  ]
+  for (const change of changes) {
+    const value = structuredClone(fixture); change(value)
+    expect(comparisonProblems(value).length).toBeGreaterThan(0)
+  }
+})
+
 test('proposed comparison rejects fabricated differences and invalid branch/trial/time provenance', () => {
   expect(comparisonProblems(fixture)).toEqual([])
   const bad = structuredClone(fixture)

@@ -21,8 +21,39 @@ export type ProposedExperimentComparison = {
   verification_status: 'unverified' | 'verified_rule_based'
 }
 
-export function comparisonProblems(value: ProposedExperimentComparison): string[] {
+const record = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value)
+const text = (value: unknown): value is string => typeof value === 'string' && !!value.trim() && value.length <= 4096
+const numeric = (value: unknown) => typeof value === 'number'
+const nullableNumber = (value: unknown) => value === null || numeric(value)
+function comparisonShape(value: unknown): value is ProposedExperimentComparison {
+  if (!record(value) || !record(value.parent_checkpoint) || !record(value.window)) return false
+  if (!['schema_version', 'source', 'experiment_id', 'scenario_id', 'match_id', 'engine_version', 'manifest_ref', 'verification_status'].every(key => text(value[key]))) return false
+  if (!text(value.parent_checkpoint.checkpoint_id) || !text(value.parent_checkpoint.state_hash) || !numeric(value.parent_checkpoint.match_second) ||
+      !numeric(value.window.start_second) || !numeric(value.window.end_second) || !numeric(value.at_second)) return false
+  for (const branch of [value.baseline, value.alternative]) {
+    if (!record(branch) || !['branch_id', 'label', 'intervention_summary'].every(key => text(branch[key])) ||
+        !record(branch.trial_hashes) || !Object.values(branch.trial_hashes).every(text)) return false
+  }
+  if (!Array.isArray(value.paired_trial_ids) || !value.paired_trial_ids.every(text) ||
+      !Array.isArray(value.paired_seeds) || !value.paired_seeds.every(numeric) ||
+      !Array.isArray(value.limitations) || !value.limitations.every(text) ||
+      !Array.isArray(value.metrics) || value.metrics.length > 9) return false
+  for (const metric of value.metrics) {
+    if (!record(metric) || !text(metric.metric_id) || !text(metric.units) || !nullableNumber(metric.mean_delta) ||
+        !(metric.unavailable_reason === null || text(metric.unavailable_reason)) ||
+        !Array.isArray(metric.supporting_events) || metric.supporting_events.length > 10_000) return false
+    if (![metric.baseline, metric.alternative].every(summary => record(summary) &&
+      ['mean', 'min', 'max'].every(key => nullableNumber(summary[key])))) return false
+    if (!metric.supporting_events.every(event => record(event) && ['event_id', 'branch_id', 'trial_id'].every(key => text(event[key])) && numeric(event.match_second))) return false
+  }
+  return true
+}
+
+export function comparisonProblems(value: unknown): string[] {
   const errors: string[] = []
+  if (!comparisonShape(value)) return ['Malformed or incomplete comparison data.']
+  if (!['unverified', 'verified_rule_based'].includes(value.verification_status) ||
+      value.source === 'development_fixture' && value.verification_status !== 'unverified') errors.push('Invalid comparison verification status.')
   if (!['development_fixture', 'authoritative_engine'].includes(value.source)) errors.push('Unknown comparison source.')
   if (value.schema_version !== 'comparison/proposal-1') errors.push('Unsupported comparison schema.')
   if (!value.experiment_id || !value.scenario_id || !value.match_id || !value.engine_version || !value.manifest_ref || !value.parent_checkpoint.state_hash) errors.push('Comparison provenance is incomplete.')
@@ -35,10 +66,12 @@ export function comparisonProblems(value: ProposedExperimentComparison): string[
       value.paired_trial_ids.length !== value.paired_seeds.length ||
       !value.paired_seeds.every(seed => Number.isSafeInteger(seed) && seed >= 0)) errors.push('Paired trials/seeds are invalid or exceed the proposed limit.')
   for (const branch of [value.baseline, value.alternative]) {
-    if (value.paired_trial_ids.some(id => !branch.trial_hashes[id])) errors.push('A paired trial output hash is missing.')
+    if (Object.keys(branch.trial_hashes).length !== value.paired_trial_ids.length ||
+        value.paired_trial_ids.some(id => !Object.hasOwn(branch.trial_hashes, id))) errors.push('Paired trial output hashes do not match the trial set.')
   }
   if (new Set(value.metrics.map(metric => metric.metric_id)).size !== value.metrics.length) errors.push('Duplicate metric definitions.')
   for (const metric of value.metrics) {
+    if (!['possession_sequences', 'completed_passes', 'recoveries', 'turnovers', 'pressure_events', 'final_third_entries', 'shots', 'goals', 'momentum_points'].includes(metric.metric_id)) errors.push('Unknown comparison metric.')
     const expectedUnits = metric.metric_id === 'possession_sequences' ? 'sequence count' : metric.metric_id === 'momentum_points' ? 'activity points' : 'event count'
     if (metric.units !== expectedUnits) errors.push(`Metric units disagree: ${metric.metric_id}.`)
     for (const summary of [metric.baseline, metric.alternative]) {
@@ -46,6 +79,7 @@ export function comparisonProblems(value: ProposedExperimentComparison): string[
       const absent = values.every(item => item === null)
       if (!absent && (!values.every(item => item !== null && Number.isFinite(item) && item >= 0) ||
           summary.min! > summary.mean! || summary.mean! > summary.max!)) errors.push(`Invalid descriptive values: ${metric.metric_id}.`)
+      if (!absent && value.paired_trial_ids.length === 1 && (summary.min !== summary.mean || summary.max !== summary.mean)) errors.push(`Single-trial range disagrees: ${metric.metric_id}.`)
     }
     if (metric.baseline.mean === null || metric.alternative.mean === null) {
       if (metric.mean_delta !== null || !metric.unavailable_reason) errors.push(`Missing unavailable reason: ${metric.metric_id}.`)
@@ -55,6 +89,7 @@ export function comparisonProblems(value: ProposedExperimentComparison): string[
       ![value.baseline.branch_id, value.alternative.branch_id].includes(event.branch_id) ||
       !value.paired_trial_ids.includes(event.trial_id) || !Number.isSafeInteger(event.match_second) ||
       event.match_second <= value.window.start_second || event.match_second > value.window.end_second)) errors.push(`Unsupported event scope/time: ${metric.metric_id}.`)
+    if (new Set(metric.supporting_events.map(event => JSON.stringify([event.branch_id, event.trial_id, event.event_id]))).size !== metric.supporting_events.length) errors.push(`Duplicate evidence: ${metric.metric_id}.`)
   }
   return errors
 }
