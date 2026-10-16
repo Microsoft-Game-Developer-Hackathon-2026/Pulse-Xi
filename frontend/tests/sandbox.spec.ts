@@ -1,5 +1,55 @@
 import { expect, test } from '@playwright/test'
 
+test('workspace fits representative viewports without runtime errors', async ({ page }, testInfo) => {
+  const failures: string[] = []
+  page.on('pageerror', error => failures.push(error.message))
+  await page.goto('/#/sandbox')
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('3500')
+  for (const [width, height] of [[1920,1080], [1366,768], [1024,768], [768,1024], [390,844], [360,800]]) {
+    await page.setViewportSize({ width, height })
+    await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeVisible()
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2)).toBe(true)
+    await page.screenshot({ path: testInfo.outputPath(`sandbox-${width}.png`), fullPage: true })
+  }
+  expect(failures).toEqual([])
+})
+
+test('evidence dialog traps keyboard focus and restores it on Escape', async ({ page }) => {
+  await page.goto('/#/sandbox')
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('5400')
+  const opener = page.locator('.insight-card').first().getByRole('button')
+  await opener.click()
+  const close = page.getByRole('button', { name: 'Close proof' })
+  await expect(close).toBeFocused()
+  await page.keyboard.press('Shift+Tab')
+  await expect(page.locator('.proof-event').last()).toBeFocused()
+  await page.keyboard.press('Tab')
+  await expect(close).toBeFocused()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(opener).toBeFocused()
+})
+
+test('pitch passes support keyboard inspection and exact event stepping preserves tied timestamps', async ({ page, request }) => {
+  const events = await (await request.get('/api/matches/comeback-1107/events?limit=1000')).json()
+  const index = events.findIndex((event: { match_second: number }, i: number) => i > 0 && event.match_second === events[i - 1].match_second)
+  expect(index).toBeGreaterThan(0)
+  const pass = events.find((event: { type: string }) => event.type === 'pass')
+  await page.goto('/#/sandbox')
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('5400')
+  await page.locator('.tactical-controls select').selectOption(pass.team_id)
+  const path = page.getByRole('button', { name: `Inspect pass ${pass.event_id} at`, exact: false })
+  await path.focus(); await page.keyboard.press('Enter')
+  await expect(page.getByTestId('pass-inspector')).toHaveAttribute('data-event-id', pass.event_id)
+  await page.getByRole('slider', { name: 'Seek match time' }).fill(String(events[index - 1].match_second))
+  await page.getByRole('list', { name: 'Recorded replay events' }).getByRole('button').filter({ hasText: events[index - 1].event_id }).click()
+  await page.getByRole('button', { name: 'Next event', exact: true }).click()
+  await expect(page.getByRole('slider', { name: 'Seek match time' })).toHaveValue(String(events[index].match_second))
+  await expect(page.getByRole('list', { name: 'Recorded replay events' }).getByRole('button', { pressed: true })).toContainText(events[index].event_id)
+  await page.getByRole('button', { name: 'Previous event', exact: true }).click()
+  await expect(page.getByRole('list', { name: 'Recorded replay events' }).getByRole('button', { pressed: true })).toContainText(events[index - 1].event_id)
+})
+
 test('generates a seeded replay through the real API, explores events, and survives reload', async ({ page, request }, testInfo) => {
   await page.goto('/#/sandbox')
   await expect(page.getByRole('region', { name: 'Sandbox fixture setup' })).toBeVisible()
