@@ -1,4 +1,4 @@
-import { Component, lazy, Suspense, useCallback, useMemo, useRef, useState } from 'react'
+import { Component, lazy, Suspense, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Event, Match } from '../../types'
 import { eventSnapshot } from './eventSnapshot'
@@ -39,9 +39,18 @@ export function ObserverSwitch({ match, event, atSecond, scope, children }: {
   const [assetStyle, setAssetStyle] = useState<'original' | 'procedural'>('original')
   const [asset, setAsset] = useState<AssetStatus>({ status: 'loading' })
   const started = useRef(0)
+  const container = useRef<HTMLElement>(null)
   const snapshot = useMemo(() => eventSnapshot(match, event, atSecond, scope),
     [match, event, atSecond, scope])
   const fail = useCallback(() => { setFailure('The 3D renderer is unavailable. The recorded 2D pitch remains active.'); setOpen(false) }, [])
+  useLayoutEffect(() => {
+    const element = container.current
+    const lost = (event: globalThis.Event) => { event.preventDefault(); fail() }
+    // Capture on the stable parent, including the gap while a quality change
+    // replaces the canvas before the new R3F effects have mounted.
+    element?.addEventListener('webglcontextlost', lost, true)
+    return () => element?.removeEventListener('webglcontextlost', lost, true)
+  }, [fail])
   const report = useCallback((value: RendererMetrics) => setMetrics(prior => ({ ...value, readyMs: prior?.readyMs ?? value.readyMs })), [])
   const reportAsset = useCallback((value: AssetStatus) => setAsset(prior => ({ ...value,
     readyMs: value.status === 'ready' ? prior.readyMs ?? performance.now() - started.current : undefined })), [])
@@ -51,7 +60,7 @@ export function ObserverSwitch({ match, event, atSecond, scope, children }: {
     started.current = performance.now(); setMetrics(null); setAsset({ status: assetStyle === 'original' ? 'loading' : 'procedural' }); setOpen(true)
   }
 
-  return <section className="observer" aria-label="Football pitch observer">
+  return <section ref={container} className="observer" aria-label="Football pitch observer">
     <div className="observer-bar"><div><strong>EVENT OBSERVER</strong><span>RECORDED SNAPSHOTS · NO CONTINUOUS TRACKING</span></div><div className="observer-view"><button aria-pressed={!open} onClick={() => setOpen(false)}>2D pitch</button><button aria-pressed={open} onClick={enable}>3D observer</button></div></div>
     {failure && <p className="observer-notice" role="status">{failure}</p>}
     {!open ? children : <>
