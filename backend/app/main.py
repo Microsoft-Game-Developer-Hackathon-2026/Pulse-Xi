@@ -49,7 +49,15 @@ def get_match(match_id: str) -> tuple[Match, list[MatchEvent]]:
             return stored(fixture)
     if match_id.startswith("custom-"):
         try:
-            return stored("custom", int(match_id.split("-", 1)[1]))
+            seed_text = match_id.removeprefix("custom-")
+            # GET must enforce the same bounded seed contract as generation,
+            # and one canonical ID must resolve to exactly that match identity.
+            if len(seed_text) > 10 or not seed_text.isascii() or not seed_text.isdecimal():
+                raise ValueError("invalid generated match ID")
+            seed = int(seed_text)
+            if seed > 2_147_483_647 or str(seed) != seed_text:
+                raise ValueError("invalid generated match ID")
+            return stored("custom", seed)
         except ValueError:
             pass
     raise HTTPException(404, "match not found")

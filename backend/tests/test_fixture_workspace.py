@@ -34,3 +34,15 @@ def test_generated_replay_proof_is_match_scoped_and_cutoff_checked():
     assert client.get(path.replace('matches/custom-0/', 'matches/comeback-1107/')).status_code == 404
     assert client.get(f'{path}?at_second=5401').status_code == 422
 
+
+def test_generated_match_lookup_enforces_seed_bounds_and_canonical_identity():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    client = TestClient(app)
+    for match_id in ['custom--1', 'custom-2147483648', 'custom-00', 'custom-+1', 'custom-1.0', 'custom-' + '9' * 100]:
+        assert client.get(f'/api/matches/{match_id}').status_code == 404
+    for seed in [0, 2_147_483_647]:
+        match_id = f'custom-{seed}'
+        response = client.get(f'/api/matches/{match_id}')
+        assert response.status_code == 200 and response.json()['match_id'] == match_id
+
