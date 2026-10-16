@@ -1,3 +1,5 @@
+> Historical report: statuses and counts below describe the dated build. See [current handoff](SATVIK_INDEPENDENT_HANDOFF.md) and [project status](PROJECT_STATUS.md) for the integrated baseline.
+
 # Satvik implementation audit and integration handoff
 
 Audit date: 2026-10-16. Base: `888a2a9` on organization `main`. The local working tree was clean; organization main matched it, no teammate branches or open PRs were available, and no `backend/app/sandbox/` package existed. The live descriptions of #6, #8, #10, #11, #12 and #27 were read. Prerequisites #2–#5, #7 and #9 remained open without an engine implementation in the repository.
