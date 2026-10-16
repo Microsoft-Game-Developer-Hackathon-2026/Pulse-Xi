@@ -5,8 +5,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import type { EventSnapshot } from './eventSnapshot'
 import type { CameraPreset } from './graphicsProfiles'
 
-export function CameraRig({ snapshot, cameraPreset, resetRevision, reducedMotion }: {
-  snapshot: EventSnapshot; cameraPreset: CameraPreset; resetRevision: number; reducedMotion: boolean
+export function CameraRig({ snapshot, cameraPreset, resetRevision, reducedMotion, onSettled }: {
+  snapshot: EventSnapshot; cameraPreset: CameraPreset; resetRevision: number; reducedMotion: boolean; onSettled?: (ready: boolean) => void
 }) {
   const { camera, gl, invalidate, size } = useThree()
   const target = useRef(new Vector3())
@@ -15,7 +15,7 @@ export function CameraRig({ snapshot, cameraPreset, resetRevision, reducedMotion
   const originX = snapshot.origin?.[0], originZ = snapshot.origin?.[2]
   const targetX = snapshot.target?.[0], targetZ = snapshot.target?.[2]
   useLayoutEffect(() => {
-    if (cameraPreset === 'free') { transition.current = null; return }
+    if (cameraPreset === 'free') { transition.current = null; onSettled?.(true); return }
     const look = new Vector3()
     const distance = Math.max(1, Math.min(1.6, 1.55 / (size.width / size.height)))
     let position = new Vector3(0, 72, 94).multiplyScalar(distance)
@@ -33,8 +33,9 @@ export function CameraRig({ snapshot, cameraPreset, resetRevision, reducedMotion
     } else transition.current = { start: performance.now(), from: camera.position.clone(), to: position,
       fromTarget: target.current.clone(), toTarget: look }
     mounted.current = true
+    onSettled?.(transition.current === null)
     invalidate()
-  }, [camera, cameraPreset, resetRevision, reducedMotion, size.width, size.height, originX, originZ, targetX, targetZ, invalidate])
+  }, [camera, cameraPreset, resetRevision, reducedMotion, size.width, size.height, originX, originZ, targetX, targetZ, invalidate, onSettled])
 
   useFrame(() => {
     const move = transition.current
@@ -44,7 +45,7 @@ export function CameraRig({ snapshot, cameraPreset, resetRevision, reducedMotion
     camera.position.lerpVectors(move.from, move.to, eased)
     target.current.lerpVectors(move.fromTarget, move.toTarget, eased)
     camera.lookAt(target.current)
-    if (t === 1) transition.current = null
+    if (t === 1) { transition.current = null; onSettled?.(true) }
     else invalidate()
   })
 
