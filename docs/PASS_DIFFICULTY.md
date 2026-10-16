@@ -29,6 +29,8 @@ Missing start or end returns `score: null`, band `unavailable`, and an explicit 
 
 Unknown match/pass, non-pass and future pass are 404. Invalid clocks, cursors and limits are 422. Existing match access and ingestion validation apply. No mutation, database migration, credential or paid service is required.
 
+Audit correction: the generic import schema permits teamless events. If a visible imported pass lacks valid team/player attribution, list and player-summary queries return a controlled 422 rather than crashing or silently omitting that pass. The single-pass endpoint retains its existing 404 contract. This does not change the scoring formula.
+
 ## Evidence and team handoff
 
 `backend/app/pass_difficulty.py::verify_pass_difficulty` reconstructs every packet field from one unique authoritative event, checks replay visibility and compares the entire versioned packet. Altered score, team/player, formula, factor or source IDs fails verification. This is an isolated adapter; it does not redefine Mahir's shared `Insight` categories or modify `evidence.py`.
