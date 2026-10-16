@@ -20,7 +20,9 @@ export function projectPoint(point: Point | null): ScenePoint | null {
 export function eventSnapshot(match: Match, event: Event | undefined, atSecond: number,
   scope: ObserverScope = { match_id: match.match_id }): EventSnapshot {
   const visible = Number.isFinite(atSecond) && atSecond >= 0 && scope.match_id === match.match_id &&
-    event?.match_id === match.match_id && event.match_second <= atSecond
+    atSecond <= match.duration_seconds && event?.match_id === match.match_id &&
+    Number.isSafeInteger(event.match_second) && event.match_second >= 0 && event.match_second <= atSecond &&
+    Number.isSafeInteger(event.sequence) && event.sequence > 0 && typeof event.event_id === 'string' && !!event.event_id.trim()
   const team = visible ? [match.home, match.away].find(item => item.team_id === event?.team_id) : undefined
   const validActor = !event?.actor_id || team?.players.some(player => player.player_id === event.actor_id)
   const validRecipient = !event?.recipient_id || team?.players.some(player => player.player_id === event.recipient_id)

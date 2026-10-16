@@ -166,7 +166,7 @@ def pass_difficulties(match_id: str, at_second: int = Query(5400, ge=0, le=5400)
     page = [e for e in visible if e.sequence > cursor][:limit]
     more = bool(page and any(e.sequence > page[-1].sequence for e in visible))
     return PassDifficultyPage(match_id=match_id, at_second=at_second,
-                              items=[score_pass(match, e, at_second) for e in page],
+                              items=score_pass_stream(match, page, at_second),
                               next_cursor=page[-1].sequence if more else None,
                               total_visible_passes=len(visible))
 
@@ -176,9 +176,18 @@ def pass_difficulty_players(match_id: str, at_second: int = Query(5400, ge=0, le
     match, events = get_match(match_id)
     if at_second > match.duration_seconds:
         raise HTTPException(422, "replay cutoff exceeds match duration")
-    items = [score_pass(match, e, at_second) for e in events
-             if e.event_type.value == "pass" and e.match_second <= at_second]
+    items = score_pass_stream(match, [e for e in events
+             if e.event_type.value == "pass" and e.match_second <= at_second], at_second)
     return {"match_id": match_id, "at_second": at_second, "players": player_summary(items)}
+
+
+def score_pass_stream(match: Match, events: list[MatchEvent], at_second: int) -> list[PassDifficulty]:
+    """Incomplete attribution is valid in the generic event schema, not a score input."""
+    try:
+        return [score_pass(match, event, at_second) for event in events]
+    except ValueError as error:
+        # Do not silently drop records or present a partial player summary as complete.
+        raise HTTPException(422, "pass stream contains invalid team or player attribution") from error
 
 
 @app.get("/api/matches/{match_id}/insights")
