@@ -1,5 +1,13 @@
 # Original asset pipeline (#12)
 
+## Professional v2 update
+
+The current default kit is the versioned field, stadium, ball and humanoid event marker under `assets/blender/v2/` and `frontend/src/features/observer/assets/v2/`. The original three v1 sources and exports are retained unchanged. The v1 measurements and original implementation narrative below are historical; see [the professional graphics report](PROFESSIONAL_3D_GRAPHICS_UPGRADE.md) for current profiles, sizes, validation and performance.
+
+Build v2 with `./scripts/blender.ps1 --background --factory-startup --python-exit-code 1 --python scripts/build-professional-assets.py`. Optional arguments after `--` select reference field dimensions or `--only field stadium`. Run `python scripts/asset_contract.py` and, in frontend, `npm run validate:assets`. `python scripts/verify-blender.py` tests CLI/bpy/export/import in a cleaned temporary directory. No runtime Blender or compression decoder is required.
+
+Sources preserve editable quads and UVs. Export copies strip unused UVs, triangulate fixed diagonals and canonicalize opaque triangle index order without changing winding, geometry or materials. Two complete rebuilds produced identical GLB hashes on Blender 5.2.2; source .blend byte identity across saves/versions is not promised. Both generators preserve the other version's manifest records. Release approval remains pending under #23.
+
 The committed generator builds a stylized field with markings/goalposts, schematic football and neutral generic player marker from Blender primitives. No external geometry, textures, fonts, add-ons, logos or real-player likenesses are used. Blender 5.2.2 LTS was actually executed and all three editable `.blend` files and GLB exports were produced.
 
 ## Rebuild and validate
