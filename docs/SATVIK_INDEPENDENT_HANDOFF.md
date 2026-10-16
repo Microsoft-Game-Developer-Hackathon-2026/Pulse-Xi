@@ -124,3 +124,8 @@ Same verified Intel renderer, driver/browser/viewport as above. Five-second acti
 Raw results and actual inspected profile screenshots live in ignored `test-results/main-intel/` in the clean release worktree. Main production bundles: default JS 86.88kB gzip, optional renderer 250.39kB gzip. The optional >500kB uncompressed chunk warning remains visible; default 2D does not fetch it.
 
 Repository hygiene: tracked .env.example only, no tracked SQLite/build/test-output artifacts; focused private-key/token pattern scan found no matches. This is a bounded safety check, not Vishwam's formal audit. README relative documentation links are checked for actual files. Full localization, billable inference, cloud deployment and final submission remain separate teammate work.
+
+
+### Reusable probe confirmation
+
+The committed `npm run measure:graphics` command also ran successfully on physical Iris Xe against the procedural application, exercising 12 rapid camera/quality/replay actions, three 2D/3D cycles and 30s idle. Raw output: [iris-xe-procedural-main.json](benchmarks/iris-xe-procedural-main.json). Median rAF interval was 16.7ms in each profile; p95 was 16.9/17.1/17.0ms for Low/Medium/High. No runtime errors, one lazy renderer request and no GLBs. Heap before/after/idle was 14,597,695 / 19,339,626 / 13,374,712 bytes; no forced GC or leak guarantee. First-ready 3142.4ms was observed while browser/build work was also active; it is not a controlled cold-load benchmark. The commit field identifies the probe checkout; the served production runtime is unchanged from feature baseline 79d1211. This raw probe complements, rather than replaces, the separate seeded full-user journey above.
