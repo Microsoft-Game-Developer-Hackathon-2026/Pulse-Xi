@@ -1,5 +1,7 @@
 # Event contract v1.0
 
+Pass difficulty is a separate versioned read-only contract; see [formula, API and limitations](PASS_DIFFICULTY.md). It preserves the event and existing metrics contracts.
+
 The authoritative schema is `backend/app/models.py`; FastAPI serves machine-readable OpenAPI at `/openapi.json`. Every event has a stable `event_id`, a `match_id`, a delivery `sequence`, a logical `match_second`, `period`, `source_type`, `schema_version`, and a UTC generation timestamp. Coordinates are normalized to 0–100 from the attacking team's point of view. Team/player references must belong to the fixture.
 
 `POST /api/matches/ingest` accepts a synthetic match and up to 1,000 versioned events. It validates identities, deduplicates identical event IDs, rejects conflicting IDs, sorts out-of-order events by match clock and ID, then assigns contiguous delivery sequence numbers. Imported matches are stored atomically in SQLite (schema migration `user_version=1`, WAL mode) at `backend/data/pulse_xi.sqlite`, or `PULSE_DB_PATH`. They survive process restarts. The built-in fixtures regenerate exactly from their seeds.
