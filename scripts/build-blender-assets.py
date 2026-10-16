@@ -144,5 +144,12 @@ manifest = {"schema_version": "1.0", "generator": "scripts/build-blender-assets.
     "blender_version": bpy.app.version_string, "release_approval": "pending-team-review",
     "coordinate_system": "glTF Y-up; X length; Z width; origin pitch center; display units, not metres",
     "external_assets": [], "assets": assets}
+manifest_path = ROOT / "assets/manifest.json"
+if manifest_path.exists():
+    previous = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["assets"].extend(asset for asset in previous["assets"] if asset["version"] != "1.0")
+    for key in ("professional_generator", "reference_pitch_metres"):
+        if key in previous:
+            manifest[key] = previous[key]
 (ROOT / "assets/manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 print(json.dumps(validate_manifest(ROOT), indent=2))

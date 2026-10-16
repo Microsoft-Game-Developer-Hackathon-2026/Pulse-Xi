@@ -28,6 +28,8 @@ API docs: http://localhost:8000/docs. Tests: `cd backend; python -m pytest tests
 
 The **Sandbox Lab** navigation opens a working fixture workspace at `/#/sandbox`: generate a fictional replay from a seed, select recorded events and inspect pass difficulty and evidence. This currently uses the existing precomputed fixture API. Live tactical interventions, engine checkpoints and ForkCast await the authoritative simulator contracts. See the [implementation and team handoff](docs/SATVIK_IMPLEMENTATION.md) and [pass formula](docs/PASS_DIFFICULTY.md).
 
+The optional **3D Observer** adds an original Blender stadium, recorded event markers, five camera modes and Low/Medium/High graphics profiles. The default 2D view remains independent of WebGL. See the [graphics toolchain, reproducible assets and measured results](docs/PROFESSIONAL_3D_GRAPHICS_UPGRADE.md). Positions remain sparse synthetic event snapshots; no continuous player tracking is inferred.
+
 ```mermaid
 flowchart LR
   S[Seeded synthetic simulator] --> E[Versioned events]
