@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
-    "test:e2e": "npm run build && playwright test"
+    "test:e2e": "npm run build && playwright test",
+    "test:contracts": "tsc -p tsconfig.contracts.json && playwright test --config playwright.contracts.config.ts"
   },
   "dependencies": {
     "@react-three/fiber": "9.4.0",
