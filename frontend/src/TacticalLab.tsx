@@ -1,11 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Event, Match, Tactics } from './types'
 import { PassInspector } from './features/passes/PassInspector'
 
 const time = (value: number) => `${Math.floor(value / 60)}:${String(value % 60).padStart(2, '0')}`
 
-export function TacticalLab({ match, tactics, seen, seek, atSecond }: { match: Match; tactics: Tactics | null; seen: Event[]; seek: (second: number) => void; atSecond: number }) {
+export function TacticalLab({ match, tactics, seen, seek, atSecond, selectedEvent, selectPass }: { match: Match; tactics: Tactics | null; seen: Event[]; seek: (second: number) => void; atSecond: number; selectedEvent?: Event; selectPass?: (eventId: string, second: number) => void }) {
   const [teamId, setTeamId] = useState(match.home.team_id)
+  useEffect(() => {
+    if (selectedEvent?.type === 'pass' && selectedEvent.team_id) setTeamId(selectedEvent.team_id)
+  }, [selectedEvent?.event_id, selectedEvent?.team_id, selectedEvent?.type])
   const chosenId = teamId === match.away.team_id ? teamId : match.home.team_id
   const team = chosenId === match.home.team_id ? match.home : match.away
   const data = tactics?.teams[chosenId]
@@ -44,6 +47,6 @@ export function TacticalLab({ match, tactics, seen, seek, atSecond }: { match: M
       <div className="tactical-chart"><h3>OBSERVED PASSING NETWORK / {team.name.toUpperCase()}</h3><svg className="analysis-pitch" viewBox="0 0 100 100" role="img" aria-label="Player passing links positioned by observed pass locations"><rect x="1" y="1" width="98" height="98" fill="#103b37" stroke="#7ea9a0" strokeWidth=".5"/><path d="M50 1V99" stroke="#7ea9a0" strokeWidth=".5"/>{data?.passing_network.map(link => { const from = position(link.from_player_id); const to = position(link.to_player_id); return from && to ? <line key={`${link.from_player_id}-${link.to_player_id}`} x1={from.x} y1={from.y} x2={to.x} y2={to.y} stroke={team.color} strokeOpacity=".7" strokeWidth={Math.min(2.5, .35 + link.completed_passes * .35)}><title>{`${link.completed_passes} completed passes`}</title></line> : null })}{Array.from(observed.entries()).map(([id]) => { const at = position(id)!; return <g key={id}><circle cx={at.x} cy={at.y} r="2.4" fill="#f3f8ee" stroke={team.color} strokeWidth=".7"/><text x={at.x + 2.8} y={at.y - 2.8} fill="#e8f5ed" fontSize="3">{team.players.find(player => player.player_id === id)?.shirt_number}</text></g> })}</svg><p>Links count completed observed passes. Player positions average recorded pass origins and receipt points; no tracking coordinates are implied.</p></div>
       <div className="tactical-chart"><h3>PRESSURE EVENT DENSITY / {team.name.toUpperCase()}</h3><svg className="analysis-pitch" viewBox="0 0 100 100" role="img" aria-label="Five by five count grid of recorded pressure events"><rect x="1" y="1" width="98" height="98" fill="#103b37" stroke="#7ea9a0" strokeWidth=".5"/>{pressureBins.map((count, index) => <g key={index}><rect x={(index % 5) * 20 + 1} y={Math.floor(index / 5) * 20 + 1} width="18" height="18" fill={team.color} fillOpacity={count ? .15 + .75 * count / maxPressure : 0} stroke="#8db0a2" strokeOpacity=".25" strokeWidth=".3"/><title>{`${count} recorded pressure events`}</title></g>)}</svg><p>{data?.pressure_events.length ?? 0} explicit pressure events. Color shows event counts per normalized 20 × 20 grid cell.</p></div>
     </div>
-    <PassInspector match={match} atSecond={atSecond} teamId={chosenId} seek={seek}/>
+    <PassInspector match={match} atSecond={atSecond} dataSecond={seen.filter(event => event.type === 'pass').at(-1)?.match_second ?? 0} teamId={chosenId} seek={seek} selectedEventId={selectedEvent?.type === 'pass' ? selectedEvent.event_id : undefined} selectPass={selectPass}/>
   </section>
 }

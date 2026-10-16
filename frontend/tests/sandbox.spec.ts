@@ -85,3 +85,31 @@ test('duplicate generation is blocked and leaving the workspace cancels a pendin
   expect(calls).toBe(1)
   await expect(page.getByLabel('SELECT MATCH')).toHaveValue('comeback-1107')
 })
+
+test('timeline pass selection synchronizes the pitch and pass inspector', async ({ page, request }) => {
+  const events = await (await request.get('/api/matches/comeback-1107/events?limit=1000')).json()
+  const pass = events.filter((event: { type: string; team_id: string }) => event.type === 'pass' && event.team_id === 'northbank').at(-1)
+  await page.goto('/#/sandbox')
+  await page.getByRole('slider', { name: 'Seek match time' }).fill(String(pass.match_second))
+  await page.getByRole('combobox', { name: /^EVENT TYPE/ }).selectOption('pass')
+  await page.getByRole('list', { name: 'Recorded replay events' }).getByRole('button').first().click()
+  await expect(page.getByTestId('pass-inspector')).toHaveAttribute('data-event-id', pass.event_id)
+  await expect(page.getByRole('img', { name: /^Pitch position of pass/ })).toBeVisible()
+})
+
+test('event pagination and connection retry preserve the selected replay clock', async ({ page }) => {
+  let pages = 0
+  page.on('request', request => { if (request.url().includes('/events?limit=200')) pages += 1 })
+  await page.goto('/#/sandbox')
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('3500')
+  await expect(page.locator('.score')).toContainText('0:2')
+  await expect.poll(() => pages).toBeGreaterThan(1)
+  await page.route('**/metrics?*', route => route.fulfill({ status: 503, body: '{}' }))
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('3501')
+  await expect(page.getByRole('button', { name: 'Retry connection' })).toBeVisible()
+  await page.unroute('**/metrics?*')
+  await page.getByRole('button', { name: 'Retry connection' }).click()
+  await expect(page.getByRole('slider', { name: 'Seek match time' })).toHaveValue('3501')
+  await expect(page.locator('.error')).toHaveCount(0)
+  await expect(page.getByText(/COMPUTED FROM \d+ EVENTS/)).toBeVisible()
+})

@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Activity, ArrowRight, ChevronLeft, ChevronRight, CirclePause, CirclePlay, Radio, RotateCcw, Wifi } from 'lucide-react'
 import type { Cue, Event, Insight, Match, Metrics, Recap, Tactics } from './types'
 import { TacticalLab } from './TacticalLab'
 import { PassPlayerSummary } from './features/passes/PassInspector'
 import { SandboxSetup } from './features/sandbox/SandboxSetup'
 import { EventTimeline } from './features/sandbox/EventTimeline'
+import { readReplayEvents } from './features/sandbox/replayApi'
 
 const important = new Set(['goal', 'shot', 'turnover', 'recovery', 'halftime', 'fulltime', 'kickoff'])
 const clock = (seconds: number) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`
@@ -56,6 +57,8 @@ export default function App() {
   const [error, setError] = useState('')
   const [workspace, setWorkspace] = useState(window.location.hash === '#/sandbox' ? 'sandbox' : 'command')
   const [selectedEventId, setSelectedEventId] = useState('')
+  const [connectionAttempt, setConnectionAttempt] = useState(0)
+  const priorMatch = useRef('')
 
   useEffect(() => {
     const change = () => setWorkspace(window.location.hash === '#/sandbox' ? 'sandbox' : 'command')
@@ -81,19 +84,22 @@ export default function App() {
     }
     void load()
     return () => controller.abort()
-  }, [])
+  }, [connectionAttempt])
   useEffect(() => {
     if (!matchId) return
     const controller = new AbortController()
     try { localStorage.setItem('pulse-xi-match', matchId) } catch { /* Replay still works without browser storage. */ }
     setError('')
-    setEvents([]); setSecond(0); setPlaying(false); setMetrics(null); setTactics(null); setProof(null); setRecap(null); setFavoriteTeamId(''); setFavoritePlayerId(''); setInsights([]); setCues([]); setSelectedEventId('')
+    if (priorMatch.current !== matchId) {
+      setEvents([]); setSecond(0); setPlaying(false); setMetrics(null); setTactics(null); setProof(null); setRecap(null); setFavoriteTeamId(''); setFavoritePlayerId(''); setInsights([]); setCues([]); setSelectedEventId('')
+      priorMatch.current = matchId
+    }
     const failed = (reason: unknown) => { if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : 'Match loading failed') }
-    api<Event[]>(`/api/matches/${matchId}/events?limit=1000`, controller.signal).then(value => { if (!controller.signal.aborted) setEvents(value) }).catch(failed)
+    readReplayEvents(matchId, controller.signal).then(value => { if (!controller.signal.aborted) setEvents(value) }).catch(failed)
     api<Insight[]>(`/api/matches/${matchId}/insights`, controller.signal).then(value => { if (!controller.signal.aborted) setInsights(value) }).catch(failed)
     api<Cue[]>(`/api/matches/${matchId}/overlays`, controller.signal).then(value => { if (!controller.signal.aborted) setCues(value) }).catch(failed)
     return () => controller.abort()
-  }, [matchId])
+  }, [matchId, connectionAttempt])
   useEffect(() => {
     if (!matchId) return
     let active = true
@@ -107,19 +113,19 @@ export default function App() {
         .then(value => { if (active) setRecap(value) }).catch(e => { if (active) setError(e.message) })
     }, 220)
     return () => { active = false; window.clearTimeout(timer) }
-  }, [matchId, locale, persona, second, favoriteTeamId, favoritePlayerId])
+  }, [matchId, locale, persona, second, favoriteTeamId, favoritePlayerId, connectionAttempt])
   useEffect(() => {
     if (!matchId) return
     const controller = new AbortController()
     const timer = window.setTimeout(() => api<Metrics>(`/api/matches/${matchId}/metrics?at_second=${Math.floor(second)}`, controller.signal).then(value => { if (!controller.signal.aborted) setMetrics(value) }).catch(e => { if (!controller.signal.aborted) setError(e.message) }), 120)
     return () => { controller.abort(); window.clearTimeout(timer) }
-  }, [matchId, second])
+  }, [matchId, second, connectionAttempt])
   useEffect(() => {
     if (!matchId) return
     const controller = new AbortController()
     const timer = window.setTimeout(() => api<Tactics>(`/api/matches/${matchId}/tactics?at_second=${Math.floor(second)}`, controller.signal).then(value => { if (!controller.signal.aborted) setTactics(value) }).catch(e => { if (!controller.signal.aborted) setError(e.message) }), 180)
     return () => { controller.abort(); window.clearTimeout(timer) }
-  }, [matchId, second])
+  }, [matchId, second, connectionAttempt])
   useEffect(() => {
     if (!playing) return
     const timer = window.setInterval(() => setSecond(current => { const next = Math.min(5400, current + speed * 6); if (next === 5400) setPlaying(false); return next }), 200)
@@ -161,7 +167,7 @@ export default function App() {
     <main className="main">
       <header className="header"><div className="brand"><div className="eyebrow">FOOTBALL INTELLIGENCE OPERATING SYSTEM</div><h1>PULSE <em>XI</em><span className="brand-slash">/</span><small>{workspace === 'sandbox' ? 'SANDBOX LAB' : 'COMMAND CENTER'}</small></h1></div><div className="header-right"><span className="synthetic-tag">SYNTHETIC SIMULATION</span><span className="status"><Wifi size={16}/> LOCAL ENGINE</span></div></header>
       <nav className="workspace-nav" aria-label="Workspace"><a href="#/" aria-current={workspace === 'command' ? 'page' : undefined}>MATCH INTELLIGENCE</a><a href="#/sandbox" aria-current={workspace === 'sandbox' ? 'page' : undefined}>SANDBOX LAB</a></nav>
-      {error && <div className="error" role="alert">{error}. Start the FastAPI backend on port 8000, then reload.</div>}
+      {error && <div className="error" role="alert">{error}. <button onClick={() => { setPlaying(false); setError(''); setConnectionAttempt(value => value + 1) }}>Retry connection</button></div>}
       {!match ? <div className="loading">Connecting to match engine…</div> : <>
         {workspace === 'sandbox' && <SandboxSetup match={match} onGenerated={generated}/>}
         <div className="topbar"><div><span className="section-index">01 / LIVE MATCH INTELLIGENCE</span><h2>{match.title}</h2></div><label className="match-select">SELECT MATCH <select value={matchId} onChange={e => setMatchId(e.target.value)}>{matches.map(m => <option key={m.match_id} value={m.match_id}>{m.title}</option>)}</select></label></div>
@@ -172,7 +178,7 @@ export default function App() {
         </div><div className="secondary-column"><section className="metrics panel"><div className="panel-title"><span>MATCH SIGNALS</span><small>COMPUTED FROM {metrics?.computed_from_event_count ?? 0} EVENTS</small></div>{[['Shots', metrics?.home.shots, metrics?.away.shots], ['Completed passes', metrics?.home.completed_passes, metrics?.away.completed_passes], ['Pass accuracy', metrics?.home.pass_completion_pct, metrics?.away.pass_completion_pct, '%'], ['Final-third entries', metrics?.home.final_third_entries, metrics?.away.final_third_entries], ['Recoveries', metrics?.home.recoveries, metrics?.away.recoveries], ['Pressure events', metrics?.home.pressure_events, metrics?.away.pressure_events]].map(([label, a, b, suffix]) => <div className="metric-row" key={String(label)}><span>{a ?? '—'}{suffix ?? ''}</span><div><label>{label}</label><div className="metric-bars"><i style={{width: `${((Number(a) || 0) / Math.max(1, Number(a) + Number(b))) * 100}%`}}/><b style={{width: `${((Number(b) || 0) / Math.max(1, Number(a) + Number(b))) * 100}%`}}/></div></div><span>{b ?? '—'}{suffix ?? ''}</span></div>)}</section>
           <section className="feed panel"><div className="panel-title"><span>EVENT WIRE</span><small><span className="live-dot"/> SEQUENCED FEED</small></div><div className="feed-list">{feed.length ? feed.map(e => <button key={e.event_id} className="feed-item" onClick={() => { setSecond(e.match_second); setPlaying(false) }}><span className="feed-time">{clock(e.match_second)}</span><span className={`feed-symbol ${e.type}`}>{e.type === 'goal' ? '●' : '◇'}</span><span><strong>{e.type.toUpperCase()}</strong><small>{e.team_id === match.home.team_id ? match.home.name : e.team_id === match.away.team_id ? match.away.name : 'Match official'} · {e.outcome}</small></span></button>) : <div className="empty">Press play or seek to inspect the event stream.</div>}</div></section></div></div>
         {workspace === 'sandbox' && <EventTimeline match={match} seen={seen} atSecond={second} selectedId={current?.event_id} select={event => { setSecond(event.match_second); setPlaying(false); setProof(null); setSelectedEventId(event.event_id) }}/>}
-        <TacticalLab match={match} tactics={tactics} seen={seen} atSecond={second} seek={value => { setSecond(value); setPlaying(false) }}/>
+        <TacticalLab match={match} tactics={tactics} seen={seen} selectedEvent={current} selectPass={(eventId, time) => { setSelectedEventId(eventId); setSecond(time); setPlaying(false) }} atSecond={second} seek={value => { setSecond(value); setPlaying(false) }}/>
         {persona === 'favorite_player' && <PassPlayerSummary matchId={matchId} playerId={favoritePlayerId || match.home.players[0].player_id} atSecond={second}/>}
         <div className="intelligence-grid">
           <section className="panel"><div className="panel-title"><span>PROOFTRAIL / VERIFIED MOMENTS</span><small>RULE-BASED · EVENT CITATIONS</small></div><div className="insight-list">{visibleInsights.length ? visibleInsights.map(insight => <article className="insight-card" key={insight.insight_id}><div><span className="insight-minute">{Math.floor(insight.match_second / 60)}′</span><div><strong>{insight.title}</strong><p>{insight.explanation}</p></div></div><button onClick={() => openProof(insight.insight_id)}>VIEW PROOF · {insight.supporting_event_ids.length} EVENTS <ArrowRight size={14}/></button></article>) : <div className="empty">Verified insights will appear as the replay reaches them.</div>}</div></section>
