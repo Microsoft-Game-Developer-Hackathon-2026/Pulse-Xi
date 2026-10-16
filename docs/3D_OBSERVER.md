@@ -18,6 +18,8 @@ Original procedural pitch geometry contains sidelines, halfway line, center circ
 
 ## Data and future engine integration
 
+The selected-event card shows recorded actor/outcome/normalized coordinates and retrieves a pass score through the existing read-only, match-scoped difficulty API. Requests cancel when selection changes; event ID, match, cutoff and score bounds must match before display. Its evidence link uses the same source pass. No scorer or simulation is duplicated in the renderer. Diagnostics identify the sampled quality/event, and camera-settled state makes finite transitions testable without guessing animation delays.
+
 `eventSnapshot.ts` is a pure validated adapter. It rejects future/cross-match events, unknown actor/recipient IDs and invalid coordinates. Props carry `ObserverScope {match_id, scenario_id?, branch_id?}` for a future authorized branch adapter. Optional IDs do not create branches or enforce backend session isolation; the production fixture path supplies only match_id.
 
 Diyan's future frame needs an engine-owned schema with scenario/branch/match IDs, authoritative tick, revision, monotonic cursor, coordinate frame/units, modeled actor and ball positions, action/source IDs and provenance. Confirm lineup membership and snapshot/delta semantics. A cursor gap, branch change, revision rollback or missing base snapshot must trigger a real resnapshot before displaying interpolated frames. No such stream is currently connected. Do not map sparse v1 events into invented continuous frames.
