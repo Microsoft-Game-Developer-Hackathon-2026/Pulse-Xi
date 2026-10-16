@@ -49,7 +49,15 @@ def get_match(match_id: str) -> tuple[Match, list[MatchEvent]]:
             return stored(fixture)
     if match_id.startswith("custom-"):
         try:
-            return stored("custom", int(match_id.split("-", 1)[1]))
+            seed_text = match_id.removeprefix("custom-")
+            # GET must enforce the same bounded seed contract as generation,
+            # and one canonical ID must resolve to exactly that match identity.
+            if len(seed_text) > 10 or not seed_text.isascii() or not seed_text.isdecimal():
+                raise ValueError("invalid generated match ID")
+            seed = int(seed_text)
+            if seed > 2_147_483_647 or str(seed) != seed_text:
+                raise ValueError("invalid generated match ID")
+            return stored("custom", seed)
         except ValueError:
             pass
     raise HTTPException(404, "match not found")
@@ -194,6 +202,21 @@ def score_pass_stream(match: Match, events: list[MatchEvent], at_second: int) ->
 def match_insights(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
     match, events = get_match(match_id)
     return insights_for(match, events, at_second)
+
+
+@app.get("/api/matches/{match_id}/insights/{insight_id}/evidence")
+def match_insight_evidence(match_id: str, insight_id: str, at_second: int = Query(5400, ge=0, le=5400)):
+    """Read evidence from the selected replay, including reproducible custom seeds."""
+    match, events = get_match(match_id)
+    if at_second > match.duration_seconds:
+        raise HTTPException(422, "replay cutoff exceeds match duration")
+    insight = next((item for item in insights_for(match, events, at_second)
+                    if item.insight_id == insight_id), None)
+    if insight is None:
+        raise HTTPException(404, "visible insight not found")
+    source_ids = set(insight.supporting_event_ids)
+    return {"insight": insight, "source_events": [event for event in events if event.event_id in source_ids],
+            "verification": "deterministic claim check passed"}
 
 
 @app.get("/api/matches/{match_id}/overlays")

@@ -12,16 +12,20 @@ async function read<T>(path: string, signal: AbortSignal): Promise<T> {
   return response.json() as Promise<T>
 }
 
-export function PassInspector({ match, atSecond, teamId, seek }: {
-  match: Match; atSecond: number; teamId: string; seek: (second: number) => void
+export function PassInspector({ match, atSecond, teamId, seek, dataSecond = atSecond, selectedEventId, selectPass }: {
+  match: Match; atSecond: number; teamId: string; seek: (second: number) => void; dataSecond?: number
+  selectedEventId?: string; selectPass?: (eventId: string, second: number) => void
 }) {
-  const cutoff = Math.floor(atSecond)
+  const cutoff = Math.floor(Math.min(dataSecond, atSecond))
   const [result, setResult] = useState<{ key: string; items: PassDifficulty[] } | null>(null)
   const [selectedId, setSelectedId] = useState('')
   const [filter, setFilter] = useState('all')
   const [error, setError] = useState('')
   const [retry, setRetry] = useState(0)
   const key = `${match.match_id}:${cutoff}`
+  useEffect(() => {
+    if (selectedEventId) { setSelectedId(selectedEventId); setFilter('all') }
+  }, [selectedEventId])
   useEffect(() => {
     const controller = new AbortController()
     setError('')
@@ -41,7 +45,8 @@ export function PassInspector({ match, atSecond, teamId, seek }: {
     }, 140)
     return () => { controller.abort(); window.clearTimeout(timer) }
   }, [match.match_id, cutoff, key, retry])
-  // A response from a different replay clock is never rendered, even before cleanup.
+  // v1 geometry scores cannot change between passes. Cache by visible pass
+  // boundary, never by a future cutoff, to avoid request churn during playback.
   const loaded = result?.key === key
   const all = loaded ? result.items.filter(item => item.team_id === teamId) : []
   const passes = all.filter(item => filter === 'all' || item.score !== null && item.score >= 70 &&
@@ -53,9 +58,9 @@ export function PassInspector({ match, atSecond, teamId, seek }: {
   return <section className="pass-workbench" aria-label="Pass difficulty analysis">
     <div className="pass-heading"><div><span className="section-index">PASS INTELLIGENCE</span><h3>Every pass, explained.</h3></div><span className="pass-badge">EVENT-DERIVED HEURISTIC</span></div>
     <p className="pass-intro">Explore distance and forward progression. Scores describe this synthetic formula; they are not pass-failure probabilities.</p>
-    <div className="pass-filters"><label>PASS FILTER <select value={filter} onChange={event => { setFilter(event.target.value); setSelectedId('') }}><option value="all">All recorded passes</option><option value="high-complete">High difficulty · completed</option><option value="high-failed">High difficulty · not completed</option></select></label><span>{loaded ? `${passes.length} ELIGIBLE EVENTS · ${clock(cutoff)}` : 'UPDATING AT REPLAY CLOCK'}</span></div>
+    <div className="pass-filters"><label>PASS FILTER <select value={filter} onChange={event => { setFilter(event.target.value); setSelectedId('') }}><option value="all">All recorded passes</option><option value="high-complete">High difficulty · completed</option><option value="high-failed">High difficulty · not completed</option></select></label><span>{loaded ? `${passes.length} ELIGIBLE EVENTS · ${clock(Math.floor(atSecond))}` : 'UPDATING AT REPLAY CLOCK'}</span></div>
     {error ? <div role="alert" className="pass-empty">{error} <button onClick={() => setRetry(value => value + 1)}>Retry pass analysis</button></div> : !loaded ? <p className="pass-empty" role="status">Loading pass analysis…</p> : !selected ? <p className="pass-empty">{filter === 'all' ? 'No passes recorded for this team at the selected time.' : 'No passes meet this filter. High difficulty starts at 70/100; the current fixtures may contain none.'}</p> : <>
-      <label className="pass-select">SELECT PASS <select value={selected.event_id} onChange={event => setSelectedId(event.target.value)}>{passes.map(pass => <option key={pass.event_id} value={pass.event_id}>{clock(pass.match_second)} · {playerName(pass.player_id)} · {pass.outcome ?? 'unknown outcome'} · {pass.score ?? 'unavailable'}/100</option>)}</select></label>
+      <label className="pass-select">SELECT PASS <select value={selected.event_id} onChange={event => { setSelectedId(event.target.value); const pass = passes.find(item => item.event_id === event.target.value); if (pass) selectPass?.(pass.event_id, pass.match_second) }}>{passes.map(pass => <option key={pass.event_id} value={pass.event_id}>{clock(pass.match_second)} · {playerName(pass.player_id)} · {pass.outcome ?? 'unknown outcome'} · {pass.score ?? 'unavailable'}/100</option>)}</select></label>
       <div className="pass-inspection" data-testid="pass-inspector" data-event-id={selected.event_id}>
         <div className="pass-detail">
           <div className="pass-route"><strong>{playerName(selected.player_id)}</strong><span>→</span><strong>{playerName(selected.recipient_id)}</strong></div>
