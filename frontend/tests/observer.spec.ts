@@ -12,6 +12,9 @@ test('three graphics profiles, cinematic cameras and free controls preserve the 
   await page.getByRole('button', { name: '3D observer', exact: true }).click()
   const canvas = page.getByTestId('observer-canvas').locator('canvas')
   await expect(canvas).toBeVisible()
+  const expectedPacket = await (await request.get(`/api/matches/comeback-1107/passes/${pass.event_id}/difficulty?at_second=${pass.match_second}`)).json()
+  await expect(page.getByTestId('observer-pass-difficulty')).toHaveAttribute('data-event-id', pass.event_id)
+  await expect(page.getByTestId('observer-pass-difficulty')).toContainText(`${expectedPacket.score}/100`)
   for (const quality of ['low', 'standard', 'high', 'low', 'high', 'standard']) {
     await page.getByLabel('3D QUALITY').selectOption(quality)
     await expect(page.getByTestId('observer-canvas')).toHaveAttribute('data-quality', quality)
@@ -28,6 +31,7 @@ test('three graphics profiles, cinematic cameras and free controls preserve the 
   await expect(page.getByTestId('observer-canvas')).toHaveAttribute('data-camera', 'broadcast')
   await page.getByLabel('3D QUALITY').selectOption('high')
   await expect.poll(() => page.getByTestId('observer-metrics').textContent()).toContain('triangles')
+  await expect(page.getByTestId('observer-canvas')).toHaveAttribute('data-camera-settled', 'true')
   await page.getByTestId('observer-canvas').screenshot({ path: testInfo.outputPath('cinematic-stadium.png') })
   await canvas.evaluate(element => element.dispatchEvent(new Event('webglcontextlost', { cancelable: true })))
   await expect(page.getByRole('button', { name: '2D pitch', exact: true })).toHaveAttribute('aria-pressed', 'true')
