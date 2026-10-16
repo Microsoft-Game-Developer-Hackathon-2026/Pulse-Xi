@@ -2,6 +2,40 @@ import { expect, test } from '@playwright/test'
 import { eventSnapshot, projectPoint } from '../src/features/observer/eventSnapshot'
 import type { Event, Match } from '../src/types'
 
+test('three graphics profiles, cinematic cameras and free controls preserve the selected event', async ({ page, request }, testInfo) => {
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  await page.goto('/#/sandbox')
+  const events: Event[] = await (await request.get('/api/matches/comeback-1107/events?limit=1000')).json()
+  const pass = events.find(event => event.type === 'pass')!
+  await page.getByRole('slider', { name: 'Seek match time' }).fill(String(pass.match_second))
+  await page.getByRole('button', { name: '3D observer', exact: true }).click()
+  const canvas = page.getByTestId('observer-canvas').locator('canvas')
+  await expect(canvas).toBeVisible()
+  for (const quality of ['low', 'standard', 'high', 'low', 'high', 'standard']) {
+    await page.getByLabel('3D QUALITY').selectOption(quality)
+    await expect(page.getByTestId('observer-canvas')).toHaveAttribute('data-quality', quality)
+    await expect(page.getByTestId('observer-snapshot')).toHaveAttribute('data-event-id', pass.event_id)
+    await expect(canvas).toHaveCount(1)
+  }
+  for (const name of ['Isometric camera', 'Top-down camera', 'Broadcast camera', 'Focus event', 'Free camera']) {
+    await page.getByRole('button', { name, exact: true }).click()
+    await expect(page.getByRole('button', { name, exact: true })).toHaveAttribute('aria-pressed', 'true')
+  }
+  await canvas.focus(); await page.keyboard.press('ArrowLeft')
+  await canvas.hover(); await page.mouse.wheel(0, -100)
+  await page.getByRole('button', { name: 'Reset camera' }).click()
+  await expect(page.getByTestId('observer-canvas')).toHaveAttribute('data-camera', 'broadcast')
+  await page.getByLabel('3D QUALITY').selectOption('high')
+  await expect.poll(() => page.getByTestId('observer-metrics').textContent()).toContain('triangles')
+  await page.getByTestId('observer-canvas').screenshot({ path: testInfo.outputPath('cinematic-stadium.png') })
+  await canvas.evaluate(element => element.dispatchEvent(new Event('webglcontextlost', { cancelable: true })))
+  await expect(page.getByRole('button', { name: '2D pitch', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await page.getByRole('button', { name: '3D observer', exact: true }).click()
+  await expect(page.getByTestId('observer-canvas').locator('canvas')).toBeVisible()
+  expect(errors).toEqual([])
+})
+
 test('event projection validates normalized coordinates and excludes future or foreign events', async ({ request }) => {
   expect(projectPoint({ x: 0, y: 0 })).toEqual([-50, .8, -32])
   expect(projectPoint({ x: 100, y: 100 })).toEqual([50, .8, 32])
