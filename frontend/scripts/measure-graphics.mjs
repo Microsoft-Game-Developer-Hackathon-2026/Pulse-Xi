@@ -19,13 +19,15 @@ try {
   await page.getByRole('slider', { name: 'Seek match time' }).fill('3500')
   if (Object.keys(requests).length) throw new Error('Default 2D requested renderer resources')
   await page.getByRole('button', { name: '3D observer', exact: true }).click()
-  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status', 'ready')
+  await expect(page.getByTestId('observer-canvas').locator('canvas')).toBeVisible()
+  const assetStatus = page.getByTestId('asset-status')
+  if (await assetStatus.count()) await expect(assetStatus).toHaveAttribute('data-status', 'ready')
   await page.getByText('Renderer diagnostics and provenance', { exact: true }).click()
   const gpu = await page.getByTestId('observer-canvas').locator('canvas').evaluate(canvas => {
     const gl = canvas.getContext('webgl2'), extension = gl.getExtension('WEBGL_debug_renderer_info')
     return { renderer: extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : 'unavailable', vendor: gl.getParameter(gl.VENDOR) }
   })
-  const assetReadiness = await page.getByTestId('asset-status').textContent()
+  const assetReadiness = await assetStatus.count() ? await assetStatus.textContent() : 'Procedural scene; no GLB activation'
   const profiles = []
   if (hardware && /SwiftShader|llvmpipe|software/i.test(gpu.renderer)) throw new Error(`Physical GPU required, received ${gpu.renderer}`)
   for (const quality of ['low', 'standard', 'high']) {

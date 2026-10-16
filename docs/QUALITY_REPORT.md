@@ -1,3 +1,5 @@
+> Historical report: statuses and counts below describe the dated build. See [current handoff](SATVIK_INDEPENDENT_HANDOFF.md) and [project status](PROJECT_STATUS.md) for the integrated baseline.
+
 # Quality report — first vertical slice
 
 - `python -m pytest tests -q -p no:cacheprovider`: 6 passed (fixture invariants, golden scores, REST/WebSocket, idempotent out-of-order ingest, ProofTrail/overlay/recap, guarded agent auditor).
