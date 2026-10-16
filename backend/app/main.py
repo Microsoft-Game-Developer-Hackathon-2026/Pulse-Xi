@@ -15,6 +15,10 @@ from .analytics import metrics_at, state_at, tactics_at
 from .agents import TRACES, configured, run_specialists
 from .evidence import insights_for, overlays_for, recap_for
 from .models import Match, MatchEvent
+from .pass_difficulty import (
+    PassDifficulty, PassDifficultyEvidence, PassDifficultyPage, PlayerDifficultyResponse,
+    player_summary, score_pass, verify_pass_difficulty,
+)
 from .simulator import FIXTURES, generate
 from .storage import StorageConflict, imported_match, imported_matches, ingest
 
@@ -128,6 +132,62 @@ def match_metrics(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
 def match_tactics(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
     match, events = get_match(match_id)
     return tactics_at(match, events, at_second)
+
+
+@app.get("/api/matches/{match_id}/passes/{event_id}/difficulty", response_model=PassDifficulty)
+def pass_difficulty(match_id: str, event_id: str, at_second: int = Query(5400, ge=0, le=5400)):
+    match, events = get_match(match_id)
+    if at_second > match.duration_seconds:
+        raise HTTPException(422, "replay cutoff exceeds match duration")
+    event = next((e for e in events if e.event_id == event_id and e.match_second <= at_second), None)
+    if event is None:
+        raise HTTPException(404, "visible pass not found")
+    try:
+        return score_pass(match, event, at_second)
+    except ValueError as error:
+        raise HTTPException(404, "visible pass not found") from error
+
+
+@app.get("/api/matches/{match_id}/passes/{event_id}/difficulty/evidence", response_model=PassDifficultyEvidence)
+def pass_difficulty_evidence(match_id: str, event_id: str, at_second: int = Query(5400, ge=0, le=5400)):
+    packet = pass_difficulty(match_id, event_id, at_second)
+    match, events = get_match(match_id)
+    return {"claim": packet, "verified": verify_pass_difficulty(packet, match, events),
+            "source_events": [e for e in events if e.event_id in packet.supporting_event_ids]}
+
+
+@app.get("/api/matches/{match_id}/pass-difficulty", response_model=PassDifficultyPage)
+def pass_difficulties(match_id: str, at_second: int = Query(5400, ge=0, le=5400),
+                      cursor: int = Query(0, ge=0), limit: int = Query(200, ge=1, le=200)):
+    match, events = get_match(match_id)
+    if at_second > match.duration_seconds:
+        raise HTTPException(422, "replay cutoff exceeds match duration")
+    visible = [e for e in events if e.event_type.value == "pass" and e.match_second <= at_second]
+    page = [e for e in visible if e.sequence > cursor][:limit]
+    more = bool(page and any(e.sequence > page[-1].sequence for e in visible))
+    return PassDifficultyPage(match_id=match_id, at_second=at_second,
+                              items=score_pass_stream(match, page, at_second),
+                              next_cursor=page[-1].sequence if more else None,
+                              total_visible_passes=len(visible))
+
+
+@app.get("/api/matches/{match_id}/pass-difficulty/players", response_model=PlayerDifficultyResponse)
+def pass_difficulty_players(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
+    match, events = get_match(match_id)
+    if at_second > match.duration_seconds:
+        raise HTTPException(422, "replay cutoff exceeds match duration")
+    items = score_pass_stream(match, [e for e in events
+             if e.event_type.value == "pass" and e.match_second <= at_second], at_second)
+    return {"match_id": match_id, "at_second": at_second, "players": player_summary(items)}
+
+
+def score_pass_stream(match: Match, events: list[MatchEvent], at_second: int) -> list[PassDifficulty]:
+    """Incomplete attribution is valid in the generic event schema, not a score input."""
+    try:
+        return [score_pass(match, event, at_second) for event in events]
+    except ValueError as error:
+        # Do not silently drop records or present a partial player summary as complete.
+        raise HTTPException(422, "pass stream contains invalid team or player attribution") from error
 
 
 @app.get("/api/matches/{match_id}/insights")
