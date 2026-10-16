@@ -1,4 +1,4 @@
-import { DataTexture, RepeatWrapping, RGBAFormat, SRGBColorSpace } from 'three'
+import { DataTexture, LinearFilter, LinearMipmapLinearFilter, RepeatWrapping, RGBAFormat, SRGBColorSpace } from 'three'
 
 /** Small original deterministic albedo, generated locally; no external texture. */
 export function createGrassTexture() {
@@ -11,6 +11,8 @@ export function createGrassTexture() {
   }
   const texture = new DataTexture(data, size, size, RGBAFormat)
   texture.colorSpace = SRGBColorSpace; texture.wrapS = texture.wrapT = RepeatWrapping
+  texture.magFilter = LinearFilter; texture.minFilter = LinearMipmapLinearFilter
+  texture.generateMipmaps = true; texture.anisotropy = 2
   texture.repeat.set(28, 18); texture.needsUpdate = true
   return texture
 }
