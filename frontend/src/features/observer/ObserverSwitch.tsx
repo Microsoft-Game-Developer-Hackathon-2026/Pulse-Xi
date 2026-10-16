@@ -4,6 +4,7 @@ import type { Event, Match } from '../../types'
 import { eventSnapshot } from './eventSnapshot'
 import type { ObserverScope } from './eventSnapshot'
 import type { RendererMetrics } from './SceneCanvas'
+import type { AssetStatus } from './AssetKit'
 import './observer.css'
 
 const SceneCanvas = lazy(() => import('./SceneCanvas'))
@@ -35,15 +36,19 @@ export function ObserverSwitch({ match, event, atSecond, scope, children }: {
   const [quality, setQuality] = useState<'low' | 'standard'>(() =>
     window.matchMedia('(prefers-reduced-motion: reduce), (max-width: 700px)').matches ? 'low' : 'standard')
   const [metrics, setMetrics] = useState<RendererMetrics | null>(null)
+  const [assetStyle, setAssetStyle] = useState<'original' | 'procedural'>('original')
+  const [asset, setAsset] = useState<AssetStatus>({ status: 'loading' })
   const started = useRef(0)
   const snapshot = useMemo(() => eventSnapshot(match, event, atSecond, scope),
     [match, event, atSecond, scope])
   const fail = useCallback(() => { setFailure('The 3D renderer is unavailable. The recorded 2D pitch remains active.'); setOpen(false) }, [])
   const report = useCallback((value: RendererMetrics) => setMetrics(prior => ({ ...value, readyMs: prior?.readyMs ?? value.readyMs })), [])
+  const reportAsset = useCallback((value: AssetStatus) => setAsset(prior => ({ ...value,
+    readyMs: value.status === 'ready' ? prior.readyMs ?? performance.now() - started.current : undefined })), [])
   const enable = () => {
     setFailure('')
     if (!supportsWebGL2()) { setFailure('WebGL2 is unavailable. The recorded 2D pitch remains active.'); return }
-    started.current = performance.now(); setMetrics(null); setOpen(true)
+    started.current = performance.now(); setMetrics(null); setAsset({ status: assetStyle === 'original' ? 'loading' : 'procedural' }); setOpen(true)
   }
 
   return <section className="observer" aria-label="Football pitch observer">
@@ -56,13 +61,15 @@ export function ObserverSwitch({ match, event, atSecond, scope, children }: {
         <button disabled={!snapshot.origin} aria-pressed={camera === 'focus'} onClick={() => setCamera('focus')}>Focus event</button>
         <button onClick={() => { setCamera('broadcast'); setRevision(value => value + 1) }}>Reset camera</button>
         <label>3D QUALITY <select value={quality} onChange={event => setQuality(event.target.value as 'low' | 'standard')}><option value="low">Low power</option><option value="standard">Standard</option></select></label>
+        <label>SCENE STYLE <select value={assetStyle} onChange={event => { const value = event.target.value as 'original' | 'procedural'; setAssetStyle(value); setAsset({ status: value === 'original' ? 'loading' : 'procedural' }); started.current = performance.now() }}><option value="original">Original asset kit</option><option value="procedural">Procedural primitives</option></select></label>
       </div>
       <RenderBoundary key={revision} fail={fail}><Suspense fallback={<><p className="observer-notice" role="status">Loading optional 3D renderer…</p>{children}</>}>
-        <SceneCanvas snapshot={snapshot} cameraPreset={camera} resetRevision={revision} quality={quality} fail={fail} report={report} startedAt={started.current}/>
+        <SceneCanvas snapshot={snapshot} cameraPreset={camera} resetRevision={revision} quality={quality} fail={fail} report={report} startedAt={started.current} assetStyle={assetStyle} assetStatus={asset.status} reportAsset={reportAsset}/>
       </Suspense></RenderBoundary>
       <div className="observer-caption" data-testid="observer-snapshot" data-event-id={snapshot.event_id ?? ''}><span>{snapshot.team_name ? `${snapshot.team_name} attacking frame` : 'Recorded event frame'} · {snapshot.event_type ?? 'no event'} · {Math.floor(atSecond / 60)}:{String(Math.floor(atSecond % 60)).padStart(2, '0')}</span><code>{snapshot.event_id ?? 'No visible source event'}</code></div>
       {snapshot.unavailable_reason && <p className="observer-notice">{snapshot.unavailable_reason}</p>}
       <p className="observer-note">Markers show recorded origins and endpoints only. Display units are schematic; no player movement, speed, defender location or live ball trajectory is inferred.</p>
+      <p className="observer-note" data-testid="asset-status" data-status={asset.status} data-surface-size={JSON.stringify(asset.surfaceSize)}>{asset.status === 'ready' ? `Original Blender kit loaded · ${asset.readyMs?.toFixed(1)} ms from activation · team release review pending` : asset.status === 'fallback' ? 'Asset kit unavailable; procedural geometry is active.' : asset.status === 'loading' ? 'Loading original asset kit; procedural pitch remains available.' : 'Procedural pitch active.'}</p>
       <details className="observer-diagnostics"><summary>Renderer diagnostics and provenance</summary><output data-testid="observer-metrics" data-sampled={metrics?.framesInSample !== null && metrics !== null} data-origin={JSON.stringify(snapshot.origin)} data-target={JSON.stringify(snapshot.target)}>{metrics ? `${metrics.calls} draw calls · ${metrics.triangles} triangles · ${metrics.geometries} geometries · ${metrics.textures} textures · first ready ${metrics.readyMs.toFixed(1)} ms · frames in 500 ms sample: ${metrics.framesInSample ?? 'sampling'}` : 'Renderer initializing'}</output><p>{snapshot.provenance} · match {snapshot.scope.match_id}{snapshot.scope.branch_id ? ` · branch ${snapshot.scope.branch_id}` : ''}. No observer-frame stream is connected.</p></details>
     </>}
   </section>

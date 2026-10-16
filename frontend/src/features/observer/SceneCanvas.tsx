@@ -1,12 +1,23 @@
-import { memo, useEffect, useLayoutEffect, useMemo } from 'react'
+import { Component, memo, Suspense, useEffect, useLayoutEffect, useMemo } from 'react'
+import type { ReactNode } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { BufferGeometry, Float32BufferAttribute, Vector3 } from 'three'
 import type { EventSnapshot } from './eventSnapshot'
+import { AssetKit } from './AssetKit'
+import type { AssetStatus } from './AssetKit'
 
 export type RendererMetrics = { calls: number; triangles: number; geometries: number; textures: number; readyMs: number; framesInSample: number | null }
 type Props = {
   snapshot: EventSnapshot; cameraPreset: 'broadcast' | 'tactical' | 'focus'; resetRevision: number
   quality: 'low' | 'standard'; fail: () => void; report: (value: RendererMetrics) => void; startedAt: number
+  assetStyle: 'original' | 'procedural'; assetStatus: AssetStatus['status']; reportAsset: (value: AssetStatus) => void
+}
+
+class AssetBoundary extends Component<{ children: ReactNode; fallback: ReactNode; fail: () => void }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  componentDidCatch() { this.props.fail() }
+  render() { return this.state.failed ? this.props.fallback : this.props.children }
 }
 
 function pitchLines() {
@@ -41,14 +52,14 @@ function Pitch() {
   </group>
 }
 
-function EventMarkers({ snapshot }: { snapshot: EventSnapshot }) {
+function EventMarkers({ snapshot, spheres = true }: { snapshot: EventSnapshot; spheres?: boolean }) {
   const path = useMemo(() => snapshot.origin && snapshot.target ? new BufferGeometry().setFromPoints([
     new Vector3(...snapshot.origin), new Vector3(...snapshot.target),
   ]) : null, [snapshot.origin, snapshot.target])
   useEffect(() => () => path?.dispose(), [path])
   return <group>
-    {snapshot.origin && <mesh position={snapshot.origin}><sphereGeometry args={[1.1, 16, 10]}/><meshStandardMaterial color={snapshot.color} emissive={snapshot.color} emissiveIntensity={.2}/></mesh>}
-    {snapshot.target && <mesh position={snapshot.target}><sphereGeometry args={[.65, 12, 8]}/><meshStandardMaterial color="#f4f2db"/></mesh>}
+    {spheres && snapshot.origin && <mesh position={snapshot.origin}><sphereGeometry args={[1.1, 16, 10]}/><meshStandardMaterial color={snapshot.color} emissive={snapshot.color} emissiveIntensity={.2}/></mesh>}
+    {spheres && snapshot.target && <mesh position={snapshot.target}><sphereGeometry args={[.65, 12, 8]}/><meshStandardMaterial color="#f4f2db"/></mesh>}
     {path && <lineSegments geometry={path}><lineBasicMaterial color={snapshot.color}/></lineSegments>}
   </group>
 }
@@ -67,7 +78,7 @@ function Camera({ snapshot, cameraPreset, resetRevision }: Pick<Props, 'snapshot
   return null
 }
 
-function Probe({ snapshot, cameraPreset, quality, fail, report, startedAt }: Props) {
+function Probe({ snapshot, cameraPreset, quality, fail, report, startedAt, assetStatus }: Props) {
   const { gl, invalidate } = useThree()
   useEffect(() => {
     const lost = (event: Event) => { event.preventDefault(); fail() }
@@ -87,7 +98,7 @@ function Probe({ snapshot, cameraPreset, quality, fail, report, startedAt }: Pro
       timer = window.setTimeout(() => report({ ...metrics, framesInSample: gl.info.render.frame - before }), 500)
     }) })
     return () => { cancelAnimationFrame(first); cancelAnimationFrame(second); window.clearTimeout(timer) }
-  }, [snapshot.event_id, cameraPreset, quality, gl, invalidate, report, startedAt])
+  }, [snapshot.event_id, cameraPreset, quality, assetStatus, gl, invalidate, report, startedAt])
   return null
 }
 
@@ -95,7 +106,10 @@ export default memo(function SceneCanvas(props: Props) {
   return <div className="observer-canvas" data-testid="observer-canvas" data-camera={props.cameraPreset} data-quality={props.quality}>
     <Canvas key={props.quality} frameloop="demand" dpr={props.quality === 'low' ? 1 : [1, 1.5]} camera={{ fov: 48, near: .1, far: 500 }} gl={{ antialias: props.quality !== 'low', powerPreference: 'low-power', alpha: false }} fallback={<p>WebGL is unavailable. Select 2D pitch.</p>}>
       <color attach="background" args={['#08191f']}/><hemisphereLight args={['#d1f3e6', '#1b323b', 2]}/><directionalLight position={[20, 50, 15]} intensity={2}/>
-      <Pitch/><EventMarkers snapshot={props.snapshot}/><Camera {...props}/><Probe {...props}/>
+      {props.assetStyle === 'original' ? <AssetBoundary fail={() => props.reportAsset({ status: 'fallback' })} fallback={<><Pitch/><EventMarkers snapshot={props.snapshot}/></>}>
+        <Suspense fallback={<><Pitch/><EventMarkers snapshot={props.snapshot}/></>}><AssetKit snapshot={props.snapshot} lowPower={props.quality === 'low'} report={props.reportAsset}/><EventMarkers snapshot={props.snapshot} spheres={false}/></Suspense>
+      </AssetBoundary> : <><Pitch/><EventMarkers snapshot={props.snapshot}/></>}
+      <Camera {...props}/><Probe {...props}/>
     </Canvas>
   </div>
 })
