@@ -19,6 +19,8 @@ No proposed route is registered until the engine adapter and authorization contr
 
 ## UI state contract and failures
 
+Metadata validation accepts unknown JSON at the boundary and returns diagnostic codes for malformed/null input rather than throwing. UTC timestamps require explicit seconds and a valid calendar date (optional millisecond precision); JavaScript's normalization of impossible dates is rejected. These checks remain metadata-only and cannot establish engine-state integrity or exact continuation.
+
 The typed state union describes unavailable, loading, saving, restoring, ready and explicit errors. Unavailable means a readable dependency explanation with no fake save/restore controls. Mutations require single-flight progress, disabled duplicate actions, preserved current view on recoverable failure and confirmation before changing runtime context.
 
 Required server codes: not_found (404), unauthorized (403 or concealed 404), stale_revision (409), incompatible_version (409), corrupt_snapshot (422), transaction_failed (503). Confirm these with the API owner. Missing RNG/queue data is corruption, never a default seed or empty queue. A concurrent restore may succeed only into distinct authorized runtimes; otherwise one must receive a revision conflict. Interrupted writes must remain atomic. Reconnect must reconcile an operation whose response was lost.

@@ -24,3 +24,13 @@ test('checkpoint metadata rejects incompatible versions, scope and invalid bound
   expect(checkpointMetadataProblems({ ...metadata, state_hash: '' }, expected)).toContain('missing_provenance')
   expect(checkpointMetadataProblems({ ...metadata, created_at_utc: 'invalid' }, expected)).toContain('invalid_timestamp')
 })
+
+test('checkpoint boundary safely rejects untrusted shapes and impossible UTC dates', () => {
+  for (const value of [null, undefined, [], true, 'metadata', {}, { ...metadata, tick: '900' }]) {
+    expect(checkpointMetadataProblems(value as ProposedCheckpointMetadata, expected).length).toBeGreaterThan(0)
+  }
+  for (const date of ['2026-02-31T00:00:00Z', '2026-10-16T00:00Z', '2026-10-16T00:00:00+00:00']) {
+    expect(checkpointMetadataProblems({ ...metadata, created_at_utc: date }, expected)).toContain('invalid_timestamp')
+  }
+  expect(checkpointMetadataProblems({ ...metadata, created_at_utc: '2024-02-29T23:59:59.123Z' }, expected)).toEqual([])
+})
