@@ -41,6 +41,8 @@ While GLBs load, a procedural pitch is rendered. Missing/invalid GLBs use the pr
 
 ## Review handoff
 
+Audit on 2026-10-16: Blender 5.2.2 reopened all three editable sources without missing external images. Source polygon counts were field 460, ball 80 and marker 102, matching the manifest. No assets were regenerated or changed. The standard-library validator now also checks BIN chunk bounds/type, embedded buffer size, buffer-view ranges, source file bytes and measured draw primitive counts. Corrupt BIN lengths and changed metadata reproduced failures in the prior validator; seven asset tests now pass. This is a kit-specific structural check, not a complete Khronos glTF conformance certification.
+
 Artwork is declared CC0-1.0 in `assets/LICENSE.md`. The offline bpy generator is GPL-3.0-or-later and is not imported into the website. Blender's [official license/output guidance](https://www.blender.org/about/license/) distinguishes generated artwork from the authoring software. The export uses the [documented glTF operator](https://docs.blender.org/api/main/bpy.ops.export_scene.html).
 
 Vishwam should review the source/provenance/license manifest under #23 before release approval; it currently says `pending-team-review`. No teammate issue was changed or approval assumed. Deployment continues to serve generated `/assets/` through Vite/FastAPI, without Blender, a rendering service or a GPU server.

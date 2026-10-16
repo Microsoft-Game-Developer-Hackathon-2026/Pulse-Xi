@@ -30,6 +30,12 @@ test('event projection validates normalized coordinates and excludes future or f
   expect(eventSnapshot(match, { ...pass, actor_id: 'unknown' }, 5400).event_id).toBeNull()
   expect(eventSnapshot(match, { ...pass, recipient_id: 'unknown' }, 5400).event_id).toBeNull()
   expect(eventSnapshot(match, { ...pass, start: null }, 5400).origin).toBeNull()
+  for (const match_second of [-1, -Infinity, NaN, 1.5]) {
+    expect(eventSnapshot(match, { ...pass, match_second }, 5400).event_id).toBeNull()
+  }
+  expect(eventSnapshot(match, pass, 5401).event_id).toBeNull()
+  expect(eventSnapshot(match, { ...pass, event_id: ' ' }, 5400).event_id).toBeNull()
+  expect(eventSnapshot(match, { ...pass, sequence: 0 }, 5400).event_id).toBeNull()
 })
 
 test('lazy 3D snapshots, cameras, quality and context-loss fallback work', async ({ page, request }, testInfo) => {

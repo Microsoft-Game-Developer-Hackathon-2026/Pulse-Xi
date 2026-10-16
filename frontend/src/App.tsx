@@ -60,6 +60,10 @@ export default function App() {
   const [selectedEventId, setSelectedEventId] = useState('')
   const [connectionAttempt, setConnectionAttempt] = useState(0)
   const priorMatch = useRef('')
+  const proofDrawer = useRef<HTMLElement>(null)
+  const proofRequest = useRef<AbortController | null>(null)
+
+  useEffect(() => () => proofRequest.current?.abort(), [matchId])
 
   useEffect(() => {
     const change = () => setWorkspace(window.location.hash === '#/sandbox' ? 'sandbox' : 'command')
@@ -139,6 +143,23 @@ export default function App() {
   const recap = recapResponse?.match_id === matchId && recapResponse.at_second === Math.floor(second) ? recapResponse : null
   const cues = cueResponse.filter(cue => cue.match_id === matchId && (workspace !== 'sandbox' || cue.trigger_match_second <= second))
   const proof = proofResponse?.insight.match_id === matchId && proofResponse.insight.match_second <= second ? proofResponse : null
+  useEffect(() => {
+    if (!proof) return
+    const opener = document.activeElement as HTMLElement | null
+    const drawer = proofDrawer.current
+    const focusable = () => Array.from(drawer?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input, select, summary, [tabindex="0"]') ?? [])
+    focusable()[0]?.focus()
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') { proofRequest.current?.abort(); setProof(null) }
+      if (event.key === 'Tab') {
+        const items = focusable(); const first = items[0]; const last = items.at(-1)
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
+      }
+    }
+    document.addEventListener('keydown', keydown)
+    return () => { document.removeEventListener('keydown', keydown); if (opener?.isConnected) opener.focus() }
+  }, [proof?.insight.insight_id])
   const seen = useMemo(() => events.filter(e => e.match_id === matchId && e.match_second <= second), [events, matchId, second])
   const current = seen.find(event => event.event_id === selectedEventId && event.match_second === second) ?? [...seen].reverse().find(e => e.start)
   const highlights = events.filter(e => e.match_id === matchId && e.type === 'goal' && (workspace !== 'sandbox' || e.match_second <= second))
@@ -148,15 +169,19 @@ export default function App() {
   const homeGoals = seen.filter(e => e.type === 'goal' && e.team_id === match?.home.team_id).length
   const awayGoals = seen.filter(e => e.type === 'goal' && e.team_id === match?.away.team_id).length
   const step = (direction: number) => {
-    const list = direction > 0 ? events.filter(e => e.match_second > second) : events.filter(e => e.match_second < second)
-    const target = direction > 0 ? list[0] : list.at(-1)
-    if (target) setSecond(target.match_second)
+    const selectedIndex = events.findIndex(event => event.event_id === selectedEventId && event.match_second === second)
+    const target = selectedIndex >= 0 ? events[selectedIndex + direction] : direction > 0
+      ? events.find(event => event.match_second > second)
+      : events.filter(event => event.match_second < second).at(-1)
+    if (target) { setSecond(target.match_second); setSelectedEventId(target.event_id) }
     setPlaying(false)
   }
   const openProof = (insightId: string) => {
-    fetch(`/api/insights/${insightId}/explain`, { method: 'POST' })
+    proofRequest.current?.abort()
+    const controller = new AbortController(); proofRequest.current = controller
+    fetch(`/api/insights/${encodeURIComponent(insightId)}/explain`, { method: 'POST', signal: controller.signal })
       .then(response => { if (!response.ok) throw new Error('Proof request failed'); return response.json() as Promise<{ insight: Insight; source_events: Event[] }> })
-      .then(setProof).catch(e => setError(e.message))
+      .then(value => { if (!controller.signal.aborted) setProof(value) }).catch(e => { if (!controller.signal.aborted) setError(e.message) })
   }
   const generated = (value: Match) => {
     setMatches(items => items.some(item => item.match_id === value.match_id) ? items : [...items, value])
@@ -186,7 +211,7 @@ export default function App() {
           <section className="panel"><div className="panel-title"><span>FANDNA / RECAP</span><small>{recap?.provider.replaceAll('_', ' ').toUpperCase() ?? 'LOADING'}</small></div><div className="recap-controls"><label>VIEW <select value={persona} onChange={e => setPersona(e.target.value)}><option value="casual">Casual fan</option><option value="analyst">Tactical analyst</option><option value="favorite_team">Favorite team</option><option value="favorite_player">Favorite player</option><option value="broadcaster">Broadcast producer</option></select></label><label>LANGUAGE <select value={locale} onChange={e => setLocale(e.target.value)}><option value="en">English</option><option value="es">Español</option><option value="hi">हिन्दी</option></select></label></div>{persona === 'favorite_team' && <div className="focus-control"><label>FOLLOW TEAM <select value={favoriteTeamId || match.home.team_id} onChange={e => setFavoriteTeamId(e.target.value)}><option value={match.home.team_id}>{match.home.name}</option><option value={match.away.team_id}>{match.away.name}</option></select></label></div>}{persona === 'favorite_player' && <div className="focus-control"><label>FOLLOW PLAYER <select value={favoritePlayerId || match.home.players[0].player_id} onChange={e => setFavoritePlayerId(e.target.value)}>{[...match.home.players, ...match.away.players].map(player => <option key={player.player_id} value={player.player_id}>{player.name}</option>)}</select></label></div>}<div className="recap-body"><p>{recap?.lead ?? 'Loading event-verified recap…'}</p>{recap?.moments.map(moment => <button key={moment.insight_id} onClick={() => { setSecond(moment.match_second); openProof(moment.insight_id) }}><span>{moment.text}</span><small>{moment.supporting_event_ids.length} SOURCE EVENTS</small></button>)}</div></section>
         </div>
         <section className="studio panel"><div className="panel-title"><span>BROADCAST STUDIO / MACHINE-READABLE CUES</span><label className="cue-toggle"><input type="checkbox" checked={showOverlays} onChange={e => setShowOverlays(e.target.checked)}/> SHOW OVERLAYS</label></div><div className="studio-layout"><div className="studio-screen"><span className="studio-label">PREVIEW · SYNTHETIC FIELD</span>{activeCue ? <div className="studio-lower"><small>{activeCue.overlay_type.toUpperCase()} / {clock(activeCue.start_match_second)}</small><strong>{activeCue.text}</strong><span>{activeCue.overlay_type === 'goal' ? `${activeCue.metrics.score_home} — ${activeCue.metrics.score_away}` : `${activeCue.metrics.momentum_previous} → ${activeCue.metrics.momentum_current} ACTIVITY POINTS`}</span></div> : <div className="studio-idle">CUE STANDBY</div>}<span className="safe-area">SAFE AREA</span></div><div className="studio-queue"><div className="studio-queue-head"><span>UPCOMING / ALL CUES</span><a href={`/api/matches/${matchId}/overlays`} download={`pulse-xi-${matchId}-cues.json`}>EXPORT ALL JSON ↗</a></div>{cues.map(cue => <div key={cue.cue_id} className="cue-entry"><button className={activeCue?.cue_id === cue.cue_id ? 'cue-row active' : 'cue-row'} onClick={() => { setSecond(cue.start_match_second); setPlaying(false) }}><span>{clock(cue.start_match_second)}</span><strong>{cue.text}</strong><small>{cue.show_duration_seconds}s</small></button><a aria-label={`Export ${cue.text} cue JSON`} href={`/api/matches/${matchId}/overlays/${cue.cue_id}`} download={`${cue.cue_id}.json`}>JSON</a></div>)}<p>Rule-scheduled overlays cite source events. No model inference has run.</p></div></div></section>
-        {proof && <div className="proof-scrim" onClick={() => setProof(null)}><aside className="proof-drawer" role="dialog" aria-modal="true" aria-label="Insight evidence" onClick={event => event.stopPropagation()}><button className="proof-close" onClick={() => setProof(null)} aria-label="Close proof">×</button><div className="section-index">PROOFTRAIL / AUDITED EVIDENCE</div><h2>{proof.insight.title}</h2><p>{proof.insight.explanation}</p><div className="proof-verified">✓ {proof.insight.verification_status.replaceAll('_', ' ').toUpperCase()}</div><h3>CALCULATIONS</h3>{proof.insight.factual_claims.map(claim => <div className="proof-row" key={`${claim.metric}-${claim.window_start}`}><span>{claim.metric.replaceAll('_', ' ')} · {clock(claim.window_start)}–{clock(claim.at_second)}</span><strong>{claim.value}</strong></div>)}{proof.insight.comparison_window && <p>Compared with {clock(proof.insight.comparison_window[0])}–{clock(proof.insight.comparison_window[1])}</p>}<h3>SOURCE EVENTS</h3>{proof.source_events.map(event => <button className="proof-event" key={event.event_id} onClick={() => { setSecond(event.match_second); setProof(null) }}><b>{clock(event.match_second)} · {event.type.toUpperCase()}</b><code>{event.event_id}</code><small>{event.outcome}</small></button>)}<p className="proof-note">{proof.insight.data_quality} {proof.insight.uncertainty}</p></aside></div>}
+        {proof && <div className="proof-scrim" onClick={() => setProof(null)}><aside ref={proofDrawer} className="proof-drawer" role="dialog" aria-modal="true" aria-label="Insight evidence" onClick={event => event.stopPropagation()}><button className="proof-close" onClick={() => setProof(null)} aria-label="Close proof">×</button><div className="section-index">PROOFTRAIL / AUDITED EVIDENCE</div><h2>{proof.insight.title}</h2><p>{proof.insight.explanation}</p><div className="proof-verified">✓ {proof.insight.verification_status.replaceAll('_', ' ').toUpperCase()}</div><h3>CALCULATIONS</h3>{proof.insight.factual_claims.map(claim => <div className="proof-row" key={`${claim.metric}-${claim.window_start}`}><span>{claim.metric.replaceAll('_', ' ')} · {clock(claim.window_start)}–{clock(claim.at_second)}</span><strong>{claim.value}</strong></div>)}{proof.insight.comparison_window && <p>Compared with {clock(proof.insight.comparison_window[0])}–{clock(proof.insight.comparison_window[1])}</p>}<h3>SOURCE EVENTS</h3>{proof.source_events.map(event => <button className="proof-event" key={event.event_id} onClick={() => { setSecond(event.match_second); setProof(null) }}><b>{clock(event.match_second)} · {event.type.toUpperCase()}</b><code>{event.event_id}</code><small>{event.outcome}</small></button>)}<p className="proof-note">{proof.insight.data_quality} {proof.insight.uncertainty}</p></aside></div>}
         <footer><span>POWERED BY DETERMINISTIC SYNTHETIC EVENTS</span><span>MODEL INFERENCE: NOT CONFIGURED · RULE-BASED ENGINE</span><span>SCHEMA v1.0</span></footer>
       </>}
     </main>
