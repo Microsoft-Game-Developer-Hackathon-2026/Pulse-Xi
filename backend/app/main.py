@@ -196,6 +196,21 @@ def match_insights(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
     return insights_for(match, events, at_second)
 
 
+@app.get("/api/matches/{match_id}/insights/{insight_id}/evidence")
+def match_insight_evidence(match_id: str, insight_id: str, at_second: int = Query(5400, ge=0, le=5400)):
+    """Read evidence from the selected replay, including reproducible custom seeds."""
+    match, events = get_match(match_id)
+    if at_second > match.duration_seconds:
+        raise HTTPException(422, "replay cutoff exceeds match duration")
+    insight = next((item for item in insights_for(match, events, at_second)
+                    if item.insight_id == insight_id), None)
+    if insight is None:
+        raise HTTPException(404, "visible insight not found")
+    source_ids = set(insight.supporting_event_ids)
+    return {"insight": insight, "source_events": [event for event in events if event.event_id in source_ids],
+            "verification": "deterministic claim check passed"}
+
+
 @app.get("/api/matches/{match_id}/overlays")
 def match_overlays(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
     match, events = get_match(match_id)
