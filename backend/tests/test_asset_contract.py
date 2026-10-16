@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import shutil
+import struct
 from pathlib import Path
 
 import pytest
@@ -57,3 +58,23 @@ def test_truncated_glb_is_rejected(tmp_path):
     path.write_bytes(b"glTF")
     with pytest.raises(ValueError, match="truncated"):
         contract.read_glb(path)
+
+
+def test_binary_chunk_length_corruption_is_rejected(tmp_path):
+    output = ROOT / "frontend/src/features/observer/assets/field.glb"
+    data = bytearray(output.read_bytes())
+    json_size = struct.unpack_from('<I', data, 12)[0]
+    struct.pack_into('<I', data, 20 + json_size, 0)
+    path = tmp_path / 'bad-binary.glb'
+    path.write_bytes(data)
+    with pytest.raises(ValueError, match='BIN chunk'):
+        contract.read_glb(path)
+
+
+@pytest.mark.parametrize('field', ['source_bytes', 'draw_primitives'])
+def test_manifest_measured_metadata_must_match(asset_copy, field):
+    root, manifest = asset_copy
+    manifest['assets'][0][field] += 1
+    (root / 'assets/manifest.json').write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match='metadata mismatch'):
+        contract.validate_manifest(root)
