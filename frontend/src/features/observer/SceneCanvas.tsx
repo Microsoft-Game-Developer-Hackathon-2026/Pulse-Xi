@@ -67,13 +67,8 @@ function Camera({ snapshot, cameraPreset, resetRevision }: Pick<Props, 'snapshot
   return null
 }
 
-function Probe({ snapshot, cameraPreset, quality, fail, report, startedAt }: Props) {
+function Probe({ snapshot, cameraPreset, quality, report, startedAt }: Props) {
   const { gl, invalidate } = useThree()
-  useEffect(() => {
-    const lost = (event: Event) => { event.preventDefault(); fail() }
-    gl.domElement.addEventListener('webglcontextlost', lost)
-    return () => gl.domElement.removeEventListener('webglcontextlost', lost)
-  }, [gl, fail])
   useEffect(() => {
     let second = 0
     let timer = 0
