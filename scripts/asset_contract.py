@@ -60,6 +60,10 @@ def validate_manifest(root: Path) -> list[dict]:
     manifest = json.loads((root / "assets/manifest.json").read_text(encoding="utf-8"))
     if manifest["schema_version"] != "1.0" or manifest["release_approval"] != "pending-team-review":
         raise ValueError("unexpected asset review/schema state")
+    expected = {'field', 'ball', 'player-marker', 'field-v2', 'ball-v2', 'player-marker-v2', 'stadium-v2'}
+    names = [asset['name'] for asset in manifest['assets']]
+    if len(names) != len(expected) or set(names) != expected:
+        raise ValueError('release asset inventory is incomplete or duplicated')
     results = []
     for asset in manifest["assets"]:
         output = (root / asset["output"]).resolve()
@@ -69,6 +73,9 @@ def validate_manifest(root: Path) -> list[dict]:
         if sha256(output) != asset["output_sha256"] or sha256(source) != asset["source_sha256"]:
             raise ValueError(f"asset hash mismatch: {asset['name']}")
         info = read_glb(output)
+        materials = sorted(item['name'] for item in info['document'].get('materials', []))
+        if sorted(asset['materials']) != materials:
+            raise ValueError(f"asset materials mismatch: {asset['name']}")
         if info["bytes"] > asset["budget_bytes"] or info["triangles"] > asset["budget_triangles"]:
             raise ValueError(f"asset budget exceeded: {asset['name']}")
         if (info["triangles"] != asset["triangles"] or info["bytes"] != asset["bytes"] or info["textures"] or

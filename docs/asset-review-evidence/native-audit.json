@@ -1,0 +1,363 @@
+{
+  "blender": "5.2.2 LTS",
+  "assets": [
+    {
+      "name": "field",
+      "source": {
+        "polygons": 460,
+        "bounds": [
+          [
+            -54.0,
+            54.0
+          ],
+          [
+            -36.0,
+            36.0
+          ],
+          [
+            -1.25,
+            2.6500000953674316
+          ]
+        ],
+        "materials": [
+          "FieldWhite",
+          "Plinth",
+          "Turf",
+          "TurfBands"
+        ]
+      },
+      "reimport": {
+        "polygons": 920,
+        "bounds": [
+          [
+            -54.0,
+            54.0
+          ],
+          [
+            -36.0,
+            36.0
+          ],
+          [
+            -1.25,
+            2.6500000953674316
+          ]
+        ],
+        "materials": [
+          "FieldWhite",
+          "Plinth",
+          "Turf",
+          "TurfBands"
+        ]
+      },
+      "external_resources": [],
+      "embedded_texts": 0,
+      "linked_libraries": 0
+    },
+    {
+      "name": "ball",
+      "source": {
+        "polygons": 80,
+        "bounds": [
+          [
+            -0.6181876063346863,
+            0.6181876063346863
+          ],
+          [
+            -0.6499999761581421,
+            0.6499999761581421
+          ],
+          [
+            -0.6499999761581421,
+            0.6499999761581421
+          ]
+        ],
+        "materials": [
+          "BallIvory",
+          "BallPanels"
+        ]
+      },
+      "reimport": {
+        "polygons": 80,
+        "bounds": [
+          [
+            -0.6181876063346863,
+            0.6181876063346863
+          ],
+          [
+            -0.6499999761581421,
+            0.6499999761581421
+          ],
+          [
+            -0.6499999761581421,
+            0.6499999761581421
+          ]
+        ],
+        "materials": [
+          "BallIvory",
+          "BallPanels"
+        ]
+      },
+      "external_resources": [],
+      "embedded_texts": 0,
+      "linked_libraries": 0
+    },
+    {
+      "name": "player-marker",
+      "source": {
+        "polygons": 102,
+        "bounds": [
+          [
+            -1.100000023841858,
+            1.100000023841858
+          ],
+          [
+            -1.100000023841858,
+            1.100000023841858
+          ],
+          [
+            0.0,
+            3.299999952316284
+          ]
+        ],
+        "materials": [
+          "MarkerNeutral",
+          "TeamAccent"
+        ]
+      },
+      "reimport": {
+        "polygons": 216,
+        "bounds": [
+          [
+            -1.100000023841858,
+            1.100000023841858
+          ],
+          [
+            -1.100000023841858,
+            1.100000023841858
+          ],
+          [
+            0.0,
+            3.299999952316284
+          ]
+        ],
+        "materials": [
+          "MarkerNeutral",
+          "TeamAccent"
+        ]
+      },
+      "external_resources": [],
+      "embedded_texts": 0,
+      "linked_libraries": 0
+    },
+    {
+      "name": "field-v2",
+      "source": {
+        "polygons": 1786,
+        "bounds": [
+          [
+            -57.0,
+            57.0
+          ],
+          [
+            -39.0,
+            39.0
+          ],
+          [
+            -0.29499998688697815,
+            2.5500001907348633
+          ]
+        ],
+        "materials": [
+          "CuttingBands",
+          "FieldWhite",
+          "FlagTeal",
+          "GoalNet",
+          "Runoff",
+          "Turf"
+        ]
+      },
+      "reimport": {
+        "polygons": 3772,
+        "bounds": [
+          [
+            -57.0,
+            57.0
+          ],
+          [
+            -39.0,
+            39.0
+          ],
+          [
+            -0.29499998688697815,
+            2.5500001907348633
+          ]
+        ],
+        "materials": [
+          "CuttingBands",
+          "FieldWhite",
+          "FlagTeal",
+          "GoalNet",
+          "Runoff",
+          "Turf"
+        ]
+      },
+      "external_resources": [],
+      "embedded_texts": 0,
+      "linked_libraries": 0
+    },
+    {
+      "name": "stadium-v2",
+      "source": {
+        "polygons": 6532,
+        "bounds": [
+          [
+            -66.0,
+            66.0
+          ],
+          [
+            -53.5,
+            53.5
+          ],
+          [
+            0.0,
+            25.100000381469727
+          ]
+        ],
+        "materials": [
+          "LampPanels",
+          "OriginalNeutralBoards",
+          "RoofMetal",
+          "SeatingSilver",
+          "SeatingTeal",
+          "StadiumConcrete"
+        ]
+      },
+      "reimport": {
+        "polygons": 13168,
+        "bounds": [
+          [
+            -66.0,
+            66.0
+          ],
+          [
+            -53.5,
+            53.5
+          ],
+          [
+            0.0,
+            25.100000381469727
+          ]
+        ],
+        "materials": [
+          "LampPanels",
+          "OriginalNeutralBoards",
+          "RoofMetal",
+          "SeatingSilver",
+          "SeatingTeal",
+          "StadiumConcrete"
+        ]
+      },
+      "external_resources": [],
+      "embedded_texts": 0,
+      "linked_libraries": 0
+    },
+    {
+      "name": "ball-v2",
+      "source": {
+        "polygons": 1280,
+        "bounds": [
+          [
+            -0.10999999195337296,
+            0.10999999940395355
+          ],
+          [
+            -0.10999999940395355,
+            0.10999999940395355
+          ],
+          [
+            -0.10999999940395355,
+            0.10999999940395355
+          ]
+        ],
+        "materials": [
+          "BallIvory",
+          "BallPanels"
+        ]
+      },
+      "reimport": {
+        "polygons": 1280,
+        "bounds": [
+          [
+            -0.10999999195337296,
+            0.10999999940395355
+          ],
+          [
+            -0.10999999940395355,
+            0.10999999940395355
+          ],
+          [
+            -0.10999999940395355,
+            0.10999999940395355
+          ]
+        ],
+        "materials": [
+          "BallIvory",
+          "BallPanels"
+        ]
+      },
+      "external_resources": [],
+      "embedded_texts": 0,
+      "linked_libraries": 0
+    },
+    {
+      "name": "player-marker-v2",
+      "source": {
+        "polygons": 220,
+        "bounds": [
+          [
+            -0.800000011920929,
+            0.800000011920929
+          ],
+          [
+            -0.800000011920929,
+            0.800000011920929
+          ],
+          [
+            0.0,
+            1.9800000190734863
+          ]
+        ],
+        "materials": [
+          "Boots",
+          "MarkerNeutral",
+          "TeamAccent"
+        ]
+      },
+      "reimport": {
+        "polygons": 496,
+        "bounds": [
+          [
+            -0.800000011920929,
+            0.800000011920929
+          ],
+          [
+            -0.800000011920929,
+            0.800000011920929
+          ],
+          [
+            0.0,
+            1.9800000190734863
+          ]
+        ],
+        "materials": [
+          "Boots",
+          "MarkerNeutral",
+          "TeamAccent"
+        ]
+      },
+      "external_resources": [],
+      "embedded_texts": 0,
+      "linked_libraries": 0
+    }
+  ]
+}

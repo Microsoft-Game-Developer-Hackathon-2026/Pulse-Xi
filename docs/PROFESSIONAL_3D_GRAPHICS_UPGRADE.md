@@ -1,3 +1,5 @@
+> Release review update (2026-10-18): see [asset/security review](ASSET_SECURITY_RELEASE_REVIEW.md). The archived v1 GLBs now use canonical triangle indices to fix repeat-export nondeterminism; their source geometry and size budgets are unchanged. Older hashes/unchanged-byte statements below describe the earlier revision. Human release approval remains pending.
+
 # Professional football graphics upgrade
 
 ## Environment and integration
