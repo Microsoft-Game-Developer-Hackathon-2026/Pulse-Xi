@@ -8,7 +8,6 @@ from pathlib import Path
 from fastapi import FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .analytics import metrics_at, state_at, tactics_at
@@ -21,13 +20,15 @@ from .pass_difficulty import (
 )
 from .simulator import FIXTURES, generate
 from .storage import StorageConflict, imported_match, imported_matches, ingest
+from .security import LocalStaticFiles, RequestBoundary
 
 app = FastAPI(title="PULSE XI API", version="0.1.0")
+app.add_middleware(RequestBoundary)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
                    allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
 DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 if (DIST / "assets").is_dir():
-    app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
+    app.mount("/assets", LocalStaticFiles(directory=DIST / "assets"), name="assets")
 
 
 @app.get("/", include_in_schema=False)
