@@ -1,40 +1,24 @@
-# Current project status — 2026-10-17
+# Current project status - 2026-10-18
 
-Authoritative integration summary: [Satvik handoff](SATVIK_INDEPENDENT_HANDOFF.md). Historical phase/quality reports describe their dated builds, not today's complete feature set.
+## Integrated product
 
-## Integrated on main
+- Seeded synthetic fixtures, REST/WebSocket replay, event-derived analytics and SQLite persistence.
+- Pass Difficulty (#28), replay Sandbox subset (#29), optional procedural 3D event observer (#30), persistent browser-local analysis, bookmarks and verified exports (#37).
+- Match Data Hub (#38, merged at `9eeeb2d74feb61fa4783ebfeb994f2a2f8044126`): canonical JSON validation/preview, authorized atomic import, searchable library, quality inspection and portable packages.
 
-- Seeded fictional fixtures, validated custom seeds, replay REST/WebSocket APIs, deterministic event analytics and durable SQLite imported-event ingest.
-- Evidence-backed goal/tactical insights, synchronized cue JSON and studio preview; five audience recap modes with limited English/Hindi/Spanish templates.
-- PR #28: versioned pass-difficulty geometry heuristic, verified factors, replay cutoff and player summaries. Pressure remains unavailable, and scores are not calibrated probabilities.
-- PR #29: useful fixture Sandbox Lab with seed setup, replay/event exploration, cancellation/retry, keyboard access and saved custom-match recovery. This is only the independent subset of #10.
-- PR #30: lazy procedural 3D event observer, five camera modes, three quality profiles, real event/pass evidence and 2D/WebGL recovery. No continuous tracking is inferred.
+## Lifecycle integration
 
-Feature integration main commit: `79d1211`; a separate documentation PR updates this status/README. Main was previously `888a2a9`.
+PR #39 extends #38 with local-only authorized archive/restore/delete, stale-confirmation protection, deletion tombstones, checksummed package recovery, schema-2 migration and trusted offline SQLite backup. Its exact merge state is available on [PR #39](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/39). Satvik explicitly waived the previous Vishwam review gate for #38/#39; no independent human approval is claimed. Normal repository checks remain required.
 
-## Verified but not merged
+Current local combined verification: 94 backend tests and 33 mixed browser/contract cases, including real FastAPI/SQLite import, replay, pass analysis, bookmarks, archive/restore, deletion and recovery. Strict TypeScript and production build passed. Final integrated-main results are recorded on the PR after merge; branch results alone do not certify main.
 
-- PR #31 original Blender sources/GLBs, validation, provenance and physical GPU probe: awaiting Vishwam's #23 release/security approval. No approval is assumed.
-- PR #32 checkpoint metadata proposal and tests: draft, inherits #31; no snapshot persistence or exact continuation.
-- PR #33 isolated comparison DTO/UI/tests: draft, inherits #31/#32; no production experiment runner or fake branch API.
+See [README](../README.md) and [CONTRACT](CONTRACT.md) for limits, permissions, migrations, packages and backup commands. Browser notes are local references, packages are datasets, and neither is an engine checkpoint. These are public-read synthetic datasets; a shared administrative token is not multi-user ownership isolation.
 
-## External dependencies and remaining scope
+## Separate gates and dependencies
 
-- Diyan #2–#5/#7/#9: actual authoritative scenario/state/clock, complete RNG/pending queue, intervention semantics and canonical manifests. These block real checkpoints, live tactical controls and ForkCast.
-- Mahir: branch-scoped evidence/AI integration; Foundry remains guarded and authenticated inference unverified. No billable calls made.
-- Vishwam: formal release/security/provenance review, Azure/cost approval, submission workflow and broader accessibility/release validation.
-- Optional #34: Diyan's RTX/Unreal cinematics and cross-hardware validation. It cannot block core engine development.
+- #31 Blender assets retains its separate release/provenance review; #32/#33 preparation remains stacked separately. This data integration does not merge those branches.
+- Diyan #2-#5/#7/#9 owns authoritative clock/state, complete RNG/pending queues, interventions, checkpoint continuation and experiment manifests. No competing engine or fabricated tracking is introduced.
+- Mahir owns downstream evidence/AI integration. Hosted inference is guarded and unverified; no billable calls are required.
+- Vishwam retains broader release/deployment responsibilities. Optional RTX/Unreal work #34 does not block the recorded-event product.
 
-## Verification boundaries
-
-Fresh combined pre-merge stack: 34 backend tests, 32 mixed application/API/browser/contract cases and five isolated comparison cases passed; strict builds and seven Khronos asset checks passed. Final main has fewer tests because asset/preparation work is excluded; see handoff for final measured results. Physical Iris Xe hardware was identified and tested separately from CI SwiftShader. No public deployment, real experiment run, calibrated football prediction or successful hosted inference is claimed.
-
-
-## Product analysis workstream ? 2026-10-18
-
-The production replay-analysis branch adds versioned browser-local workspace restoration, bounded event bookmarks/notes, safe deep links and actual JSON/CSV exports backed by existing source events/scoring/metrics. It introduces no authoritative clock, checkpoint, experiment runner, account system or cloud requirement. See README's durable analysis section and CONTRACT's analysis-export/1 endpoint. Existing asset/preparation PRs remain separate and unmodified. Integration status is established by the focused product PR and its checks, not this feature description.
-
-
-## Match Data Hub workstream
-
-PR #37 merged into main at 119bfb5046f42a5952e500363fb1d04c8ce57bfd after 45 backend and 29 browser/contract tests passed; its main CI succeeded. The separate Match Data Hub branch adds authorized canonical JSON import/preview, a searchable library, source-preserving SQLite packages, data quality and portable exports. See README and CONTRACT for actual limits, schema and security boundaries. Its merge status is established by its own PR, not by this entry. Asset/checkpoint/ForkCast PRs #31-#33 remain independent and unchanged; authoritative engine integration is still Diyan-owned.
+[The independent handoff](SATVIK_INDEPENDENT_HANDOFF.md) records the earlier feature integration and hardware evidence; its dated test counts are historical, not current totals.
