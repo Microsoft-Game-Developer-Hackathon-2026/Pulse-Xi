@@ -108,13 +108,14 @@ def test_fixture_reproducibility_and_api_pagination(source):
 
 
 def test_unattributed_imported_pass_is_a_validation_error_not_a_server_crash(source, tmp_path, monkeypatch):
+    monkeypatch.setenv("PULSE_IMPORT_TOKEN", "test-import-token-at-least-32-characters")
     monkeypatch.setenv("PULSE_DB_PATH", str(tmp_path / "passes.sqlite"))
     match, event, _ = source
     match = match.model_copy(update={"match_id": "audit-unattributed-pass"})
     event = event.model_copy(update={"match_id": match.match_id, "team_id": None,
                                      "actor_id": None, "recipient_id": None})
     client = TestClient(app, raise_server_exceptions=False)
-    assert client.post("/api/matches/ingest", json={"match": match.model_dump(mode="json"),
+    assert client.post("/api/matches/ingest", headers={"Authorization": "Bearer test-import-token-at-least-32-characters"}, json={"match": match.model_dump(mode="json"),
         "events": [event.model_dump(mode="json", by_alias=True)]}).status_code == 200
     for route in ["pass-difficulty", "pass-difficulty/players"]:
         response = client.get(f"/api/matches/{match.match_id}/{route}")

@@ -6,9 +6,9 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
 from .analytics import metrics_at, state_at, tactics_at
@@ -22,12 +22,14 @@ from .pass_difficulty import (
 from .simulator import FIXTURES, generate
 from .storage import StorageConflict, imported_match, imported_matches, ingest
 from .security import LocalStaticFiles, RequestBoundary
+from .data_hub import MatchPackage, package_bytes, package_conflict, quality, require_import_token
+from .storage import ingest_package, package_provenance
 from .exports import AnalysisExport, analysis_export
 
 app = FastAPI(title="PULSE XI API", version="0.1.0")
 app.add_middleware(RequestBoundary)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-                   allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
+                   allow_methods=["GET", "POST"], allow_headers=["Content-Type", "Authorization"])
 DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 if (DIST / "assets").is_dir():
     app.mount("/assets", LocalStaticFiles(directory=DIST / "assets"), name="assets")
@@ -101,7 +103,7 @@ def create_match(request: GenerateRequest):
     return stored("custom", request.seed)[0]
 
 
-@app.post("/api/matches/ingest")
+@app.post("/api/matches/ingest", dependencies=[Depends(require_import_token)])
 def ingest_match(request: IngestRequest):
     """Idempotent, out-of-order tolerant ingestion of compatible synthetic events."""
     match = request.match
@@ -124,6 +126,56 @@ def ingest_match(request: IngestRequest):
         raise HTTPException(409, str(error)) from error
     except ValueError as error:
         raise HTTPException(422, str(error)) from error
+
+
+@app.get("/api/data-hub")
+def match_library():
+    generated = [stored(name) for name in FIXTURES]
+    imported = [get_match(m.match_id) for m in imported_matches()]
+    return {"import_enabled": len(os.getenv("PULSE_IMPORT_TOKEN", "")) >= 32,
+            "limits": {"bytes": 2_000_000, "events": 1000, "imported_matches": 100},
+            "matches": [{"match": match, "origin": origin, "quality": quality(match, events),
+                         "provenance": package_provenance(match.match_id) if origin == "imported" else None}
+                        for origin, items in (("built-in", generated), ("imported", imported)) for match, events in items]}
+
+
+def check_package_identity(package: MatchPackage):
+    if package.match.match_id.startswith("custom-") or any(package.match.match_id == f"{name}-{seed}" for name, (seed, _, _) in FIXTURES.items()):
+        raise HTTPException(409, "reserved generated match ID; use a distinct imported match ID")
+
+
+@app.post("/api/data-hub/preview", dependencies=[Depends(require_import_token)])
+def preview_package(package: MatchPackage):
+    check_package_identity(package)
+    try:
+        status = package_conflict(package)
+    except StorageConflict as error:
+        raise HTTPException(409, str(error)) from error
+    return {"match": package.match, "quality": quality(package.match, package.events), "status": status,
+            "warnings": ["Imported metadata is user-supplied, not independently authenticated.",
+                         "Only the supplied recorded interval is available; this is not an engine checkpoint."]}
+
+
+@app.post("/api/data-hub/import", dependencies=[Depends(require_import_token)])
+def import_package(package: MatchPackage):
+    check_package_identity(package)
+    try:
+        return ingest_package(package.match, sorted(package.events, key=lambda e: e.sequence), package.provenance)
+    except StorageConflict as error:
+        raise HTTPException(409, str(error)) from error
+
+
+@app.get("/api/matches/{match_id}/package")
+def export_match_package(match_id: str):
+    match, events = get_match(match_id)
+    from pydantic import ValidationError
+    try:
+        content = package_bytes(match, events, package_provenance(match_id))
+    except (ValidationError, ValueError) as error:
+        raise HTTPException(422, "Stored data is incompatible with the complete package schema; use analysis exports to inspect it") from error
+    return Response(content, media_type="application/json",
+                    headers={"Content-Disposition": 'attachment; filename="pulse-xi-match-package.json"',
+                             "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
 
 
 @app.get("/api/matches/{match_id}", response_model=Match)
