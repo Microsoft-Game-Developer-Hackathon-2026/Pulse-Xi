@@ -1,5 +1,7 @@
 """Small local/public-demo boundary; no session or authentication architecture."""
 import ntpath
+import json
+import math
 
 from starlette.responses import JSONResponse
 from starlette.staticfiles import StaticFiles
@@ -44,6 +46,39 @@ class RequestBoundary:
             if not message.get('more_body', False):
                 break
         body = b''.join(chunks)
+        if path in ('/api/data-hub/preview', '/api/data-hub/import', '/api/matches/ingest'):
+            def unique_object(pairs):
+                result = {}
+                for key, value in pairs:
+                    if key in result:
+                        raise ValueError('duplicate JSON object key')
+                    result[key] = value
+                return result
+
+            def finite_float(value):
+                number = float(value)
+                if not math.isfinite(number):
+                    raise ValueError('non-finite JSON number')
+                return number
+
+            def invalid_constant(value):
+                raise ValueError('non-finite JSON number')
+
+            try:
+                parsed = json.loads(body, object_pairs_hook=unique_object, parse_float=finite_float, parse_constant=invalid_constant)
+                pending = [(parsed, 0)]
+                while pending:
+                    value, depth = pending.pop()
+                    if depth > 32:
+                        raise ValueError('JSON nesting exceeds import limit')
+                    if isinstance(value, dict):
+                        pending.extend((child, depth + 1) for child in value.values())
+                    elif isinstance(value, list):
+                        pending.extend((child, depth + 1) for child in value)
+            except json.JSONDecodeError:
+                pass  # FastAPI supplies its usual located malformed-JSON error.
+            except (ValueError, RecursionError, UnicodeError):
+                return await JSONResponse({'detail': 'invalid, ambiguous or excessively nested JSON'}, status_code=400)(scope, receive, send)
         delivered = False
 
         async def bounded_receive():
