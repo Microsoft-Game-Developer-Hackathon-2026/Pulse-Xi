@@ -84,9 +84,28 @@ export default function App() {
   useEffect(() => { if (workspace === 'data') { setPlaying(false); setProof(null); proofRequest.current?.abort() } }, [workspace])
 
   useEffect(() => () => proofRequest.current?.abort(), [matchId])
+  useEffect(() => {
+    const changed = (value: unknown) => {
+      if (!value || typeof value !== 'object') return
+      const data = value as {match_id?: unknown; action?: unknown}
+      if (typeof data.match_id !== 'string' || !['archive','restore','delete','recover'].includes(String(data.action))) return
+      if (data.match_id !== matchId) return
+      if (data.action === 'delete' && data.match_id === matchId) {
+        conflictRef.current = true; setStorageConflict(true); setLoadedMatchId(''); setEvents([]); setPlaying(false); setProof(null)
+        setWorkspaceNotice('The selected source was deleted. Saved workspace references and bookmark notes are retained. Recover its package in Match Data Hub, or explicitly choose Keep this tab to replace the saved workspace.')
+      }
+      setConnectionAttempt(n => n + 1)
+    }
+    const local = (event: globalThis.Event) => changed((event as CustomEvent).detail)
+    window.addEventListener('pulse-xi-library-changed',local)
+    const channel = 'BroadcastChannel' in window ? new BroadcastChannel('pulse-xi-library') : null
+    if (channel) channel.onmessage = event => changed(event.data)
+    return () => {window.removeEventListener('pulse-xi-library-changed',local);channel?.close()}
+  },[matchId])
+
 
   useEffect(() => {
-    const change = () => { setWorkspace(window.location.hash.split('?')[0] === '#/data' ? 'data' : window.location.hash.split('?')[0] === '#/sandbox' ? 'sandbox' : 'command'); try { const link = deepWorkspace(); if (link) { pendingRestore.current = link; setConnectionAttempt(value => value + 1) } } catch (e) { setWorkspaceNotice(String(e)) } }
+    const change = () => { setWorkspace(window.location.hash.split('?')[0] === '#/data' ? 'data' : window.location.hash.split('?')[0] === '#/sandbox' ? 'sandbox' : 'command'); try { const link = deepWorkspace(); if (link) { pendingRestore.current = link; setLoadedMatchId(''); setPlaying(false); setConnectionAttempt(value => value + 1) } } catch (e) { setWorkspaceNotice(String(e)) } }
     window.addEventListener('hashchange', change)
     return () => window.removeEventListener('hashchange', change)
   }, [])

@@ -3,6 +3,7 @@ import json
 import os
 import re
 import secrets
+import hashlib
 from collections import Counter
 from datetime import datetime, timezone
 from typing import Literal
@@ -67,12 +68,23 @@ class PackageEvent(MatchEvent):
         return self
 
 
+class PackageIntegrity(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    algorithm: Literal["sha256"]
+    content_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+def package_digest(value: dict) -> str:
+    return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False, allow_nan=False, separators=(",", ":")).encode('utf-8')).hexdigest()
+
+
 class MatchPackage(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    schema_version: Literal["pulse-xi-match-package/1"]
+    schema_version: Literal["pulse-xi-match-package/1", "pulse-xi-match-package/2"]
     match: PackageMatch
     events: list[PackageEvent] = Field(max_length=1000)
     provenance: dict[Literal["source", "exported_at", "application_revision"], str | None] = Field(default_factory=dict)
+    integrity: PackageIntegrity | None = None
 
     @model_validator(mode="after")
     def references(self):
@@ -92,6 +104,13 @@ class MatchPackage(BaseModel):
             if not re.fullmatch(r"#[0-9a-fA-F]{6}", team.color):
                 raise ValueError("team color must be a six-digit hex color")
         validate_events(match, self.events)
+        if self.schema_version == 'pulse-xi-match-package/2' and not self.integrity:
+            raise ValueError('version 2 packages require SHA-256 integrity metadata')
+        if self.integrity:
+            value = self.model_dump(mode='json', by_alias=True, exclude={'integrity'})
+            value['events'].sort(key=lambda e: e['sequence'])
+            if not secrets.compare_digest(self.integrity.content_sha256, package_digest(value)):
+                raise ValueError('package checksum mismatch; source data or provenance was altered')
         return self
 
 
@@ -158,11 +177,12 @@ def package_conflict(package: MatchPackage) -> str:
 def package_bytes(match: Match, events: list[MatchEvent], provenance: dict | None = None) -> bytes:
     if len(events) > 1000:
         raise HTTPException(413, "Complete package exceeds the 1,000-event import limit; no data was truncated")
-    value = {"schema_version": "pulse-xi-match-package/1", "match": match.model_dump(mode="json"),
+    value = {"schema_version": "pulse-xi-match-package/2", "match": match.model_dump(mode="json"),
              "events": [e.model_dump(mode="json", by_alias=True) for e in sorted(events, key=lambda e: e.sequence)],
              "provenance": {"source": (provenance or {}).get("source", "Pulse-Xi recorded match export"),
                             "application_revision": (provenance or {}).get("application_revision"),
                             "exported_at": datetime.now(timezone.utc).isoformat()}}
+    value['integrity'] = {'algorithm':'sha256', 'content_sha256':package_digest(value)}
     result = json.dumps(value, ensure_ascii=False, allow_nan=False, separators=(",", ":")).encode("utf-8")
     if len(result) > MAX_BYTES:
         raise HTTPException(413, "Complete package exceeds the 2 MB import limit; no data was truncated")

@@ -20,8 +20,10 @@ export function AnalysisTools({ match, events, selected, second, filters, panel,
   useEffect(() => { setNote(existing?.note ?? '') }, [selected?.event_id, match.match_id, existing?.note])
   useEffect(() => { request.current?.abort(); setBusy(false); return () => request.current?.abort() }, [match.match_id, second, selected?.event_id, filters.kind, filters.team, category, format])
   useEffect(() => {
-    const sync = (event: StorageEvent) => { if (event.key === BOOKMARK_KEY) { const next = readBookmarks(); setBookmarks(next.items); setNotice(next.notice || 'Bookmarks updated from another tab.') } }
-    window.addEventListener('storage', sync); return () => window.removeEventListener('storage', sync)
+    const refresh = () => { const next = readBookmarks(); setBookmarks(next.items); setNotice(next.notice || 'Bookmarks updated.') }
+    const sync = (event: StorageEvent) => { if (event.key === BOOKMARK_KEY) refresh() }
+    window.addEventListener('storage', sync); window.addEventListener('pulse-xi-bookmarks-changed',refresh)
+    return () => {window.removeEventListener('storage', sync);window.removeEventListener('pulse-xi-bookmarks-changed',refresh)}
   }, [])
   const update = (transform: (items: Bookmark[]) => Bookmark[]) => {
     void bookmarkTransaction(() => {
