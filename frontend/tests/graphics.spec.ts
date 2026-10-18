@@ -1,4 +1,14 @@
 import { expect, test } from '@playwright/test'
+
+test('runtime package license notices ship with the production assets', async ({ request }) => {
+  const response = await request.get('/assets/THIRD_PARTY_NOTICES.txt')
+  expect(response.status()).toBe(200)
+  const notice = await response.text()
+  expect(notice).toContain('@react-three/fiber 9.4.0')
+  expect(notice).toContain('Copyright (c) 2019-2025 Poimandres')
+  expect(notice).toContain('lucide-react')
+  expect(notice).toContain('BSD')
+})
 import { readFile } from 'node:fs/promises'
 import { Box3, Mesh, MeshStandardMaterial, Vector3 } from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
