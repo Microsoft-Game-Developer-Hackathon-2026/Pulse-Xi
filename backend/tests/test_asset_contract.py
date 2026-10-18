@@ -61,6 +61,20 @@ def test_truncated_glb_is_rejected(tmp_path):
         contract.read_glb(path)
 
 
+@pytest.mark.parametrize('mutation', ['empty', 'duplicate', 'materials'])
+def test_release_manifest_cannot_omit_duplicate_or_misdescribe_assets(asset_copy, mutation):
+    root, manifest = asset_copy
+    if mutation == 'empty':
+        manifest['assets'] = []
+    elif mutation == 'duplicate':
+        manifest['assets'].append(manifest['assets'][0])
+    else:
+        manifest['assets'][0]['materials'] = ['InventedMaterial']
+    (root / 'assets/manifest.json').write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match='inventory|materials'):
+        contract.validate_manifest(root)
+
+
 def test_binary_chunk_length_corruption_is_rejected(tmp_path):
     output = ROOT / "frontend/src/features/observer/assets/field.glb"
     data = bytearray(output.read_bytes())

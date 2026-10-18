@@ -13,6 +13,7 @@ import bpy
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from asset_contract import read_glb, sha256, validate_manifest
+from glb_indices import canonicalize_indices
 
 SOURCE = ROOT / "assets/blender"
 OUTPUT = ROOT / "frontend/src/features/observer/assets"
@@ -130,6 +131,7 @@ for name, build, budget_bytes, budget_triangles in (
     bpy.ops.export_scene.gltf(filepath=str(output), export_format="GLB", export_yup=True,
         export_animations=False, export_cameras=False, export_lights=False, export_extras=True,
         export_copyright="PULSE XI original procedural artwork — CC0-1.0")
+    canonicalize_indices(output)
     info = read_glb(output)
     assets.append({"name": name, "version": "1.0", "author": "Satvik Patel / PULSE XI procedural source",
         "license": "CC0-1.0", "source": source.relative_to(ROOT).as_posix(),
