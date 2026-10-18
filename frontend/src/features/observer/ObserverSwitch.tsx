@@ -1,4 +1,4 @@
-import { Component, lazy, Suspense, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { Component, lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { Event, Match } from '../../types'
 import { eventSnapshot } from './eventSnapshot'
@@ -28,8 +28,9 @@ function supportsWebGL2() {
   } catch { return false }
 }
 
-export function ObserverSwitch({ match, event, atSecond, scope, children }: {
-  match: Match; event?: Event; atSecond: number; scope?: ObserverScope; children: ReactNode
+export function ObserverSwitch({ match, event, atSecond, scope, children, preferredView, preferredQuality, onViewChange, onQualityChange }: {
+  match: Match; event?: Event; atSecond: number; scope?: ObserverScope; children: ReactNode;
+  preferredView?: '2d' | '3d'; preferredQuality?: GraphicsQuality; onViewChange?: (view: '2d' | '3d') => void; onQualityChange?: (quality: GraphicsQuality) => void
 }) {
   const [open, setOpen] = useState(false)
   const [failure, setFailure] = useState('')
@@ -43,7 +44,7 @@ export function ObserverSwitch({ match, event, atSecond, scope, children }: {
   const container = useRef<HTMLElement>(null)
   const snapshot = useMemo(() => eventSnapshot(match, event, atSecond, scope),
     [match, event, atSecond, scope])
-  const fail = useCallback(() => { setFailure('The 3D renderer is unavailable. The recorded 2D pitch remains active.'); setOpen(false) }, [])
+  const fail = useCallback(() => { setFailure('The 3D renderer is unavailable. The recorded 2D pitch remains active.'); setOpen(false); onViewChange?.('2d') }, [onViewChange])
   useLayoutEffect(() => {
     const element = container.current
     const lost = (event: globalThis.Event) => { event.preventDefault(); fail() }
@@ -55,12 +56,14 @@ export function ObserverSwitch({ match, event, atSecond, scope, children }: {
   const report = useCallback((value: RendererMetrics) => setMetrics(prior => ({ ...value, readyMs: prior?.readyMs ?? value.readyMs })), [])
   const enable = () => {
     setFailure('')
-    if (!supportsWebGL2()) { setFailure('WebGL2 is unavailable. The recorded 2D pitch remains active.'); return }
-    started.current = performance.now(); setMetrics(null); setOpen(true)
+    if (!supportsWebGL2()) { setFailure('WebGL2 is unavailable. The recorded 2D pitch remains active.'); onViewChange?.('2d'); return }
+    started.current = performance.now(); setMetrics(null); setOpen(true); onViewChange?.('3d')
   }
+  useEffect(() => { if (preferredQuality) setQuality(preferredQuality) }, [preferredQuality])
+  useEffect(() => { if (preferredView === '3d' && !open) enable(); else if (preferredView === '2d') setOpen(false) }, [preferredView])
 
   return <section ref={container} className="observer" aria-label="Football pitch observer">
-    <div className="observer-bar"><div><strong>EVENT OBSERVER</strong><span>RECORDED SNAPSHOTS · NO CONTINUOUS TRACKING</span></div><div className="observer-view"><button aria-pressed={!open} onClick={() => setOpen(false)}>2D pitch</button><button aria-pressed={open} onClick={enable}>3D observer</button></div></div>
+    <div className="observer-bar"><div><strong>EVENT OBSERVER</strong><span>RECORDED SNAPSHOTS · NO CONTINUOUS TRACKING</span></div><div className="observer-view"><button aria-pressed={!open} onClick={() => { setOpen(false); onViewChange?.('2d') }}>2D pitch</button><button aria-pressed={open} onClick={enable}>3D observer</button></div></div>
     {failure && <p className="observer-notice" role="status">{failure}</p>}
     {!open ? children : <>
       <div className="observer-controls" aria-label="3D camera controls">
@@ -70,7 +73,7 @@ export function ObserverSwitch({ match, event, atSecond, scope, children }: {
         <button aria-pressed={camera === 'free'} onClick={() => setCamera('free')}>Free camera</button>
         <button disabled={!snapshot.origin} aria-pressed={camera === 'focus'} onClick={() => setCamera('focus')}>Focus event</button>
         <button onClick={() => { setCamera('broadcast'); setRevision(value => value + 1) }}>Reset camera</button>
-        <label>3D QUALITY <select value={quality} onChange={event => setQuality(event.target.value as GraphicsQuality)}>{Object.entries(graphicsProfiles).map(([id, profile]) => <option key={id} value={id}>{profile.label}</option>)}</select></label>
+        <label>3D QUALITY <select value={quality} onChange={event => { setQuality(event.target.value as GraphicsQuality); onQualityChange?.(event.target.value as GraphicsQuality) }}>{Object.entries(graphicsProfiles).map(([id, profile]) => <option key={id} value={id}>{profile.label}</option>)}</select></label>
       </div>
       <RenderBoundary key={revision} fail={fail}><Suspense fallback={<><p className="observer-notice" role="status">Loading optional 3D renderer…</p>{children}</>}>
         <SceneCanvas snapshot={snapshot} reducedMotion={reducedMotion} cameraPreset={camera} resetRevision={revision} quality={quality} fail={fail} report={report} startedAt={started.current}/>

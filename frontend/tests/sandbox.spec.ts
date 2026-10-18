@@ -68,7 +68,7 @@ test('generates a seeded replay through the real API, explores events, and survi
   await page.getByRole('region', { name: 'Sandbox fixture setup' }).screenshot({ path: testInfo.outputPath('sandbox-setup.png') })
   await page.reload()
   await expect(page.getByLabel('SELECT MATCH')).toHaveValue('custom-0')
-  await expect(page.getByRole('slider', { name: 'Seek match time' })).toHaveValue('0')
+  await expect(page.getByRole('slider', { name: 'Seek match time' })).toHaveValue(String(pass.match_second))
   await page.getByRole('button', { name: 'Generate replay' }).click()
   await expect(page.getByLabel('SELECT MATCH')).toHaveValue('custom-4411')
   await page.getByLabel('REPRODUCIBLE MATCH SEED').fill('0')
