@@ -70,6 +70,10 @@ def test_empty_one_event_unordered_large_and_special_cells():
     from fastapi import HTTPException
     with pytest.raises(HTTPException) as error: analysis_export(match, [event]*5001, 5400, 'events', 'json', None, None, None)
     assert error.value.status_code == 413
+    oversized = event.model_copy(update={'qualifiers': {'adversarial_text': 'x' * 8_000_001}})
+    with pytest.raises(HTTPException) as byte_error:
+        analysis_export(match, [oversized], 5400, 'events', 'json', None, None, None)
+    assert byte_error.value.status_code == 413
     output = analysis_export(match, list(reversed(events[:2])), 5400, 'events', 'json', None, None, None)
     import json
     assert [e['sequence'] for e in json.loads(output.body)['data']] == [e.sequence for e in events[:2]]
