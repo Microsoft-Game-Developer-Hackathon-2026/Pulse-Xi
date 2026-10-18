@@ -4,6 +4,7 @@ import os
 import secrets
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from fastapi import FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,7 +14,7 @@ from pydantic import BaseModel, Field
 from .analytics import metrics_at, state_at, tactics_at
 from .agents import TRACES, configured, run_specialists
 from .evidence import insights_for, overlays_for, recap_for
-from .models import Match, MatchEvent
+from .models import EventType, Match, MatchEvent
 from .pass_difficulty import (
     PassDifficulty, PassDifficultyEvidence, PassDifficultyPage, PlayerDifficultyResponse,
     player_summary, score_pass, verify_pass_difficulty,
@@ -21,6 +22,7 @@ from .pass_difficulty import (
 from .simulator import FIXTURES, generate
 from .storage import StorageConflict, imported_match, imported_matches, ingest
 from .security import LocalStaticFiles, RequestBoundary
+from .exports import AnalysisExport, analysis_export
 
 app = FastAPI(title="PULSE XI API", version="0.1.0")
 app.add_middleware(RequestBoundary)
@@ -77,6 +79,16 @@ class IngestRequest(BaseModel):
 def health():
     return {"status": "ok", "simulation": "synthetic",
             "narrative_provider": "configured_not_verified" if configured() else "not_configured"}
+
+
+@app.get('/api/matches/{match_id}/analysis-export', responses={200: {'description': 'Bounded analysis download', 'content': {
+    'application/json': {'schema': AnalysisExport.model_json_schema()}, 'text/csv': {'schema': {'type': 'string'}}}}})
+def export_analysis(match_id: str, at_second: int = Query(ge=0),
+                    category: Literal['events', 'pass', 'metrics'] = 'events',
+                    format: Literal['json', 'csv'] = 'json', team_id: str | None = Query(default=None, max_length=160),
+                    event_type: EventType | None = None, event_id: str | None = Query(default=None, max_length=160)):
+    match, events = get_match(match_id)
+    return analysis_export(match, events, at_second, category, format, team_id, event_type, event_id)
 
 
 @app.get("/api/matches")

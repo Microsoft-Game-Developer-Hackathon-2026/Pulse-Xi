@@ -28,3 +28,8 @@ Feature integration main commit: `79d1211`; a separate documentation PR updates 
 ## Verification boundaries
 
 Fresh combined pre-merge stack: 34 backend tests, 32 mixed application/API/browser/contract cases and five isolated comparison cases passed; strict builds and seven Khronos asset checks passed. Final main has fewer tests because asset/preparation work is excluded; see handoff for final measured results. Physical Iris Xe hardware was identified and tested separately from CI SwiftShader. No public deployment, real experiment run, calibrated football prediction or successful hosted inference is claimed.
+
+
+## Product analysis workstream ? 2026-10-18
+
+The production replay-analysis branch adds versioned browser-local workspace restoration, bounded event bookmarks/notes, safe deep links and actual JSON/CSV exports backed by existing source events/scoring/metrics. It introduces no authoritative clock, checkpoint, experiment runner, account system or cloud requirement. See README's durable analysis section and CONTRACT's analysis-export/1 endpoint. Existing asset/preparation PRs remain separate and unmodified. Integration status is established by the focused product PR and its checks, not this feature description.
