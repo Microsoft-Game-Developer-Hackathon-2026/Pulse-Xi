@@ -6,7 +6,13 @@ const token = 'test-import-token-at-least-32-characters'
 test('real package preview, SQLite import, replay, bookmark recovery and verified exports', async ({page, request}, testInfo) => {
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message))
   const packet = await (await request.get('/api/matches/comeback-1107/package')).json()
+  packet.schema_version='pulse-xi-match-package/1'; delete packet.integrity // This test authors a distinct dataset, not an unchanged backup.
   const id = `browser-research-match-${testInfo.repeatEachIndex}`
+  const traffic: string[] = []
+  const relevant = (url:string) => url.includes(`/api/matches/${id}/`) && /metrics|tactics|pass-difficulty|recap/.test(url)
+  page.on('request',r=>{if(relevant(r.url()))traffic.push(`${Date.now()} start ${r.url()}`)})
+  page.on('response',r=>{if(relevant(r.url()))traffic.push(`${Date.now()} response ${r.status()} ${r.url()}`)})
+  page.on('requestfailed',r=>{if(relevant(r.url()))traffic.push(`${Date.now()} failed ${r.failure()?.errorText} ${r.url()}`)})
   packet.match.match_id = id; packet.match.title = `Research import ${testInfo.repeatEachIndex}`
   for (const event of packet.events) event.match_id = id
   packet.provenance.source = 'Locally repackaged synthetic fixture'
@@ -34,7 +40,9 @@ test('real package preview, SQLite import, replay, bookmark recovery and verifie
   await card.getByRole('button',{name:'Open for analysis',exact:true}).click()
   await expect(page.getByLabel('SELECT MATCH')).toHaveValue(id)
   await page.goto(`/#/sandbox?match=${id}&at=${source.match_second}&event=${source.event_id}`)
-  await expect(page.getByTestId('pass-inspector')).toHaveAttribute('data-event-id',source.event_id)
+  await expect(page.getByRole('slider',{name:'Seek match time'})).toHaveValue(String(source.match_second))
+  try { await expect(page.getByTestId('pass-inspector')).toHaveAttribute('data-event-id',source.event_id) }
+  catch(e) { console.log(traffic.join('\n')); throw e }
   await page.getByRole('button',{name:'3D observer',exact:true}).click()
   await expect(page.getByTestId('observer-canvas').locator('canvas')).toBeVisible()
   await expect(page.getByTestId('observer-snapshot')).toHaveAttribute('data-event-id',source.event_id)
@@ -71,6 +79,7 @@ test('real package preview, SQLite import, replay, bookmark recovery and verifie
 
 test('invalid files, schema errors, idempotent reimport and unavailable coordinates are honest', async ({page, request}) => {
   const packet = await (await request.get('/api/matches/high-press-2209/package')).json()
+  packet.schema_version='pulse-xi-match-package/1'; delete packet.integrity
   packet.match.match_id = 'browser-short-match'; packet.match.duration_seconds = 60
   packet.events = packet.events.filter((e: {match_second: number}) => e.match_second <= 60)
   for (const e of packet.events) {e.match_id = packet.match.match_id; e.start = null; e.end = null}
