@@ -6,8 +6,8 @@ const token = 'test-import-token-at-least-32-characters'
 test('real package preview, SQLite import, replay, bookmark recovery and verified exports', async ({page, request}, testInfo) => {
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message))
   const packet = await (await request.get('/api/matches/comeback-1107/package')).json()
-  const id = 'browser-research-match'
-  packet.match.match_id = id; packet.match.title = 'Research import'
+  const id = `browser-research-match-${testInfo.repeatEachIndex}`
+  packet.match.match_id = id; packet.match.title = `Research import ${testInfo.repeatEachIndex}`
   for (const event of packet.events) event.match_id = id
   packet.provenance.source = 'Locally repackaged synthetic fixture'
   const source = packet.events.find((e: {type: string; match_second: number}) => e.type === 'pass' && e.match_second > 500)
@@ -27,8 +27,8 @@ test('real package preview, SQLite import, replay, bookmark recovery and verifie
   const actual = await (await request.get(`/api/matches/${id}/events?limit=1000`)).json()
   expect(actual).toEqual(packet.events)
   await page.getByLabel('Match origin').selectOption('imported')
-  await page.getByLabel('Search matches').fill('Research import')
-  const card = page.getByRole('article').filter({has:page.getByRole('heading',{name:'Research import',exact:true})})
+  await page.getByLabel('Search matches').fill(packet.match.title)
+  const card = page.getByRole('article').filter({has:page.getByRole('heading',{name:packet.match.title,exact:true})})
   await card.getByText('Inspect metadata and data quality',{exact:true}).click()
   await expect(card).toContainText('Locally repackaged synthetic fixture')
   await card.getByRole('button',{name:'Open for analysis',exact:true}).click()
@@ -41,6 +41,10 @@ test('real package preview, SQLite import, replay, bookmark recovery and verifie
   await page.getByRole('button',{name:'2D pitch',exact:true}).click()
   await page.getByLabel('Event note',{exact:true}).fill('Research note')
   await page.getByRole('button',{name:'Bookmark selected event',exact:true}).click()
+  // Bookmark writes acquire a browser Web Lock. Do not reload before that
+  // asynchronous operation commits; the workspace was already saved earlier.
+  await expect(page.getByRole('list',{name:'Saved event bookmarks'})).toContainText('Research note')
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('pulse-xi-bookmarks-v1') ?? '{}').items?.some((b: {note: string}) => b.note === 'Research note'))).toBe(true)
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('pulse-xi-workspace-v1') ?? '{}').eventId)).toBe(source.event_id)
   await page.reload()
   await expect(page.getByTestId('pass-inspector')).toHaveAttribute('data-event-id',source.event_id)
@@ -53,7 +57,7 @@ test('real package preview, SQLite import, replay, bookmark recovery and verifie
   expect(exported.data).toEqual([authoritative]); expect(exported.match_id).toBe(id)
   await page.getByRole('link',{name:'MATCH DATA HUB',exact:true}).click()
   await expect(page.getByLabel('Import token',{exact:true})).toHaveValue('')
-  const imported = page.getByRole('article').filter({has:page.getByRole('heading',{name:'Research import',exact:true})})
+  const imported = page.getByRole('article').filter({has:page.getByRole('heading',{name:packet.match.title,exact:true})})
   const packageDownload = page.waitForEvent('download'); await imported.getByRole('button',{name:'Download complete package'}).click()
   const portable = JSON.parse(await readFile(await (await packageDownload).path() as string,'utf8'))
   expect(portable.events).toEqual(actual); expect(portable.match).toEqual(packet.match)
