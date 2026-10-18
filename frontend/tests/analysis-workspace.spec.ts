@@ -158,3 +158,21 @@ test('seeking cancels an in-flight real export before it can download stale data
   release();await done;await page.waitForTimeout(150)
   expect(downloads).toEqual([])
 })
+
+test('temporary match lookup failure preserves the saved workspace for real recovery', async ({page})=>{
+  await page.goto('/#/sandbox')
+  await expect(page.getByRole('slider',{name:'Seek match time'})).toBeVisible()
+  await page.evaluate(()=>localStorage.setItem('pulse-xi-workspace-v1',JSON.stringify({version:1,matchId:'custom-0',second:1200,eventId:'',sequence:null,eventSecond:null,
+    speed:1,filters:{team:'all',kind:'all'},view:'2d',quality:'standard',panel:'bookmarks'})))
+  // Block autosave in this old tab before navigating to the stored workspace.
+  await page.evaluate(()=>dispatchEvent(new StorageEvent('storage',{key:'pulse-xi-workspace-v1'})))
+  await page.route('**/api/matches/custom-0', route=>route.fulfill({status:503,body:'temporarily unavailable'}))
+  await page.reload()
+  await expect(page.getByText('Saved or linked match is unavailable.',{exact:false})).toBeVisible()
+  await page.waitForTimeout(250)
+  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('pulse-xi-workspace-v1')??'{}').matchId)).toBe('custom-0')
+  await page.unroute('**/api/matches/custom-0')
+  await page.getByRole('button',{name:'Reload saved workspace',exact:true}).click()
+  await expect(page.getByLabel('SELECT MATCH')).toHaveValue('custom-0')
+  await expect(page.getByRole('slider',{name:'Seek match time'})).toHaveValue('1200')
+})
