@@ -182,3 +182,16 @@ def test_legacy_import_can_be_adopted_without_rewriting_events(package):
     assert client.post('/api/data-hub/import', json=portable, headers=HEADERS).json()['inserted'] == 0
     assert client.get('/api/matches/research-match/events').json() == before
     assert client.post('/api/matches/ingest', json=legacy, headers=HEADERS).status_code == 409
+
+
+def test_unsorted_input_keeps_sequences_and_locates_source_errors(package):
+    package['events'].reverse()
+    original_team = package['events'][0]['team_id']
+    package['events'][0]['team_id'] = 'wrong-team'
+    invalid = client.post('/api/data-hub/preview', json=package, headers=HEADERS)
+    assert invalid.status_code == 422
+    assert 'events[0]' in invalid.json()['detail'][0]['msg']
+    package['events'][0]['team_id'] = original_team
+    response = client.post('/api/data-hub/import', json=package, headers=HEADERS)
+    assert response.status_code == 200, response.text
+    assert client.get('/api/matches/research-match/events').json() == sorted(package['events'], key=lambda e: e['sequence'])

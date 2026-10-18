@@ -99,10 +99,11 @@ def validate_events(match: Match, events: list[MatchEvent]) -> None:
     members = {t.team_id: {p.player_id for p in t.players} for t in (match.home, match.away)}
     ids: set[str] = set()
     sequences: set[int] = set()
+    locations = {id(event): index for index, event in enumerate(events)}
     ordered = sorted(events, key=lambda e: e.sequence)
     previous_time = -1
     for index, event in enumerate(ordered):
-        prefix = f"events[{index}] ({event.event_id})"
+        prefix = f"events[{locations[id(event)]}] ({event.event_id})"
         if not ID.fullmatch(event.event_id) or event.event_id in ids or event.sequence in sequences:
             raise ValueError(f"{prefix}: invalid or duplicate event ID/sequence")
         ids.add(event.event_id)
