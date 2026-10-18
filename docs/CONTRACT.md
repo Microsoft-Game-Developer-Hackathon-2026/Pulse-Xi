@@ -28,6 +28,8 @@ Browser-local `bookmark-export/1` contains only source-validated references at/b
 
 ## Match Data Hub / portable packages versions 1 and 2
 
+Database schema 2 is forward-only for older application branches: take a trusted SQLite backup before upgrading an existing schema-1 installation. Do not point an older application at the migrated file. Migration DDL, lifecycle identities and the version marker commit atomically; interruption rolls back and a later startup retries without replacing source events. Concurrent administrative confirmations use the same generation/revision comparison under the SQLite writer lock; exactly one conflicting transition can commit.
+
 - `GET /api/data-hub`: public read-only library, origin, metadata, event counts/categories/coverage, missing optional-field counts, sequence consistency, supplied provenance and configured import availability. No secret is returned.
 - `POST /api/data-hub/preview`: requires the server import capability. Validates `MatchPackage` and checks stored conflicts using read-only SQLite access. Does not create a database or persist preview state. Returns match, quality, new/identical/deleted status, deletion_id when applicable, and warnings; conflicts are 409.
 - `POST /api/data-hub/import`: same schema and authorization, with atomic full-dataset persistence. Returns match_id/inserted/total. Identical concurrent imports are safe no-ops. Stored complete datasets are immutable; conflicting metadata, event content or membership are 409. Capacity is 100 imported matches. Ordinary import does not delete or overwrite data; separate local-admin lifecycle routes are described below.

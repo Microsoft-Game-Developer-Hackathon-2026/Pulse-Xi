@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import json
 import sqlite3
 import subprocess
@@ -247,3 +248,53 @@ def test_local_windows_loop_factory_uses_selector(monkeypatch):
         assert isinstance(loop,asyncio.SelectorEventLoop)
     finally:
         loop.close()
+
+
+def test_interrupted_v1_migration_is_atomic_and_retryable(tmp_path, monkeypatch):
+    from app import storage
+    path = tmp_path / 'interrupted.sqlite'
+    monkeypatch.setenv('PULSE_DB_PATH', str(path))
+    with sqlite3.connect(path) as db:
+        db.execute('CREATE TABLE matches(match_id TEXT PRIMARY KEY,payload TEXT NOT NULL)')
+        db.execute('CREATE TABLE events(match_id TEXT,event_id TEXT,sequence INTEGER,match_second INTEGER,payload TEXT)')
+        db.execute("INSERT INTO matches VALUES ('preserved','original payload')")
+        db.execute('PRAGMA user_version=1')
+    original_uuid = storage.uuid4
+    def interrupted():
+        raise RuntimeError('injected migration interruption')
+    monkeypatch.setattr(storage, 'uuid4', interrupted)
+    with pytest.raises(RuntimeError, match='injected migration interruption'):
+        with connect():
+            pytest.fail('migration should fail before yielding')
+    with sqlite3.connect(path) as db:
+        assert db.execute('PRAGMA user_version').fetchone()[0] == 1
+        assert db.execute('SELECT payload FROM matches').fetchone()[0] == 'original payload'
+        assert not db.execute("SELECT 1 FROM sqlite_master WHERE name='match_lifecycle'").fetchone()
+    monkeypatch.setattr(storage, 'uuid4', original_uuid)
+    with connect() as db:
+        assert db.execute('PRAGMA user_version').fetchone()[0] == 2
+        assert db.execute('SELECT COUNT(*) FROM match_lifecycle').fetchone()[0] == 1
+
+
+def test_concurrent_confirmations_have_exactly_one_winner(dataset):
+    body = action('archive')
+    barrier = Barrier(2)
+    def attempt():
+        barrier.wait()
+        return mutate(body).status_code
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [pool.submit(attempt) for _ in range(2)]
+        assert sorted(f.result() for f in futures) == [200, 409]
+    assert mutate(body).status_code == 409
+    assert entry()['lifecycle']['revision'] == body['revision'] + 1
+
+
+def test_package_checksum_independent_reference_and_metadata_tampering(dataset):
+    package = client.get('/api/matches/lifecycle-match/package').json()
+    content = {key: value for key, value in package.items() if key != 'integrity'}
+    content['events'] = sorted(content['events'], key=lambda event: event['sequence'])
+    canonical = json.dumps(content, sort_keys=True, ensure_ascii=False, allow_nan=False, separators=(',', ':')).encode('utf-8')
+    assert hashlib.sha256(canonical).hexdigest() == package['integrity']['content_sha256']
+    package['provenance']['source'] = 'modified metadata'
+    assert client.post('/api/data-hub/preview', json=package, headers=HEADERS).status_code == 422
+    assert entry()['provenance']['source'] == dataset['provenance']['source']
