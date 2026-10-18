@@ -93,13 +93,14 @@ def test_missing_coordinates_stay_unavailable_and_filename_is_safe():
 
 
 def test_export_recovers_imported_sqlite_events_without_mutating_them(tmp_path, monkeypatch):
+    monkeypatch.setenv('PULSE_IMPORT_TOKEN', 'test-import-token-at-least-32-characters')
     monkeypatch.setenv('PULSE_DB_PATH', str(tmp_path / 'export.sqlite'))
     match, events = get_match('comeback-1107')
     match = match.model_copy(update={'match_id': 'analysis-imported'})
     event = next(e for e in events if e.event_type == 'pass').model_copy(update={
         'match_id': match.match_id, 'event_id': 'analysis-imported-e1', 'sequence': 1})
     payload = {'match': match.model_dump(mode='json'), 'events': [event.model_dump(mode='json', by_alias=True)]}
-    assert client.post('/api/matches/ingest', json=payload).status_code == 200
+    assert client.post('/api/matches/ingest', headers={'Authorization': 'Bearer test-import-token-at-least-32-characters'}, json=payload).status_code == 200
     path = '/api/matches/analysis-imported/analysis-export'
     first = client.get(path, params={'at_second': 5400}).json()
     assert first['data'] == payload['events']
