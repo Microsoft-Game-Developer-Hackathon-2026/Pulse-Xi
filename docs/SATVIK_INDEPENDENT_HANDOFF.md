@@ -1,3 +1,5 @@
+> Historical handoff (2026-10-17). For the current Data Hub/lifecycle baseline and gates, use [PROJECT_STATUS](PROJECT_STATUS.md), README and CONTRACT. The review waiver for #38/#39 does not change #31's separate asset gate.
+
 # Satvik independent integration handoff — 2026-10-17
 
 ## Executive status: CONDITIONALLY READY

@@ -18,5 +18,5 @@ def test_concurrent_cold_database_migration(tmp_path, monkeypatch, attempt):
     with ThreadPoolExecutor(max_workers=8) as pool:
         assert list(pool.map(read, range(8))) == [[]] * 8
     with connect() as db:
-        assert db.execute("PRAGMA user_version").fetchone()[0] == 1
+        assert db.execute("PRAGMA user_version").fetchone()[0] == 2
         assert db.execute("PRAGMA integrity_check").fetchone()[0] == "ok"
