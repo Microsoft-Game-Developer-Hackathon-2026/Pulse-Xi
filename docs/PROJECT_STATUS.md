@@ -33,3 +33,8 @@ Fresh combined pre-merge stack: 34 backend tests, 32 mixed application/API/brows
 ## Product analysis workstream ? 2026-10-18
 
 The production replay-analysis branch adds versioned browser-local workspace restoration, bounded event bookmarks/notes, safe deep links and actual JSON/CSV exports backed by existing source events/scoring/metrics. It introduces no authoritative clock, checkpoint, experiment runner, account system or cloud requirement. See README's durable analysis section and CONTRACT's analysis-export/1 endpoint. Existing asset/preparation PRs remain separate and unmodified. Integration status is established by the focused product PR and its checks, not this feature description.
+
+
+## Match Data Hub workstream
+
+PR #37 merged into main at 119bfb5046f42a5952e500363fb1d04c8ce57bfd after 45 backend and 29 browser/contract tests passed; its main CI succeeded. The separate Match Data Hub branch adds authorized canonical JSON import/preview, a searchable library, source-preserving SQLite packages, data quality and portable exports. See README and CONTRACT for actual limits, schema and security boundaries. Its merge status is established by its own PR, not by this entry. Asset/checkpoint/ForkCast PRs #31-#33 remain independent and unchanged; authoritative engine integration is still Diyan-owned.
