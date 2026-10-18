@@ -6,7 +6,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
@@ -23,13 +23,15 @@ from .simulator import FIXTURES, generate
 from .storage import StorageConflict, imported_match, imported_matches, ingest
 from .security import LocalStaticFiles, RequestBoundary
 from .data_hub import MatchPackage, package_bytes, package_conflict, quality, require_import_token
-from .storage import ingest_package, package_provenance
+from .storage import ingest_package, imported_snapshot
+from .library_lifecycle import (LifecycleAction, change_lifecycle, deletion_record, library_entries,
+                                local_admin_enabled, require_local_admin)
 from .exports import AnalysisExport, analysis_export
 
 app = FastAPI(title="PULSE XI API", version="0.1.0")
 app.add_middleware(RequestBoundary)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-                   allow_methods=["GET", "POST"], allow_headers=["Content-Type", "Authorization"])
+                   allow_methods=["GET", "POST"], allow_headers=["Content-Type", "Authorization", "X-Pulse-Deletion-ID"])
 DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 if (DIST / "assets").is_dir():
     app.mount("/assets", LocalStaticFiles(directory=DIST / "assets"), name="assets")
@@ -129,14 +131,13 @@ def ingest_match(request: IngestRequest):
 
 
 @app.get("/api/data-hub")
-def match_library():
+def match_library(request: Request):
     generated = [stored(name) for name in FIXTURES]
-    imported = [get_match(m.match_id) for m in imported_matches()]
     return {"import_enabled": len(os.getenv("PULSE_IMPORT_TOKEN", "")) >= 32,
+            "local_admin_enabled": local_admin_enabled(request),
             "limits": {"bytes": 2_000_000, "events": 1000, "imported_matches": 100},
-            "matches": [{"match": match, "origin": origin, "quality": quality(match, events),
-                         "provenance": package_provenance(match.match_id) if origin == "imported" else None}
-                        for origin, items in (("built-in", generated), ("imported", imported)) for match, events in items]}
+            "matches": [{"match": match, "origin": "built-in", "quality": quality(match, events), "provenance":None, "lifecycle":None}
+                        for match, events in generated] + library_entries()}
 
 
 def check_package_identity(package: MatchPackage):
@@ -151,7 +152,9 @@ def preview_package(package: MatchPackage):
         status = package_conflict(package)
     except StorageConflict as error:
         raise HTTPException(409, str(error)) from error
-    return {"match": package.match, "quality": quality(package.match, package.events), "status": status,
+    deleted = deletion_record(package.match.match_id)
+    return {"match": package.match, "quality": quality(package.match, package.events), "status": "deleted" if deleted else status,
+            "deletion_id": deleted['deletion_id'] if deleted else None,
             "warnings": ["Imported metadata is user-supplied, not independently authenticated.",
                          "Only the supplied recorded interval is available; this is not an engine checkpoint."]}
 
@@ -165,12 +168,34 @@ def import_package(package: MatchPackage):
         raise HTTPException(409, str(error)) from error
 
 
+@app.post('/api/data-hub/recover', dependencies=[Depends(require_local_admin)])
+def recover_package(package: MatchPackage, x_pulse_deletion_id: str = Header(pattern=r'^[0-9a-f]{32}$')):
+    check_package_identity(package)
+    try:
+        return ingest_package(package.match, sorted(package.events, key=lambda e:e.sequence), package.provenance, x_pulse_deletion_id)
+    except StorageConflict as error:
+        raise HTTPException(409,str(error)) from error
+
+
+@app.post('/api/data-hub/matches/{match_id}/lifecycle', dependencies=[Depends(require_local_admin)])
+def manage_imported_match(match_id: str, request: LifecycleAction):
+    try:
+        return change_lifecycle(match_id, request)
+    except KeyError as error:
+        raise HTTPException(404,'imported match not found; generated fixtures cannot be modified') from error
+    except StorageConflict as error:
+        raise HTTPException(409,str(error)) from error
+    except ValueError as error:
+        raise HTTPException(422,str(error)) from error
+
+
 @app.get("/api/matches/{match_id}/package")
 def export_match_package(match_id: str):
-    match, events = get_match(match_id)
+    snapshot = imported_snapshot(match_id)
+    match, events, provenance = snapshot if snapshot else (*get_match(match_id),None)
     from pydantic import ValidationError
     try:
-        content = package_bytes(match, events, package_provenance(match_id))
+        content = package_bytes(match, events, provenance)
     except (ValidationError, ValueError) as error:
         raise HTTPException(422, "Stored data is incompatible with the complete package schema; use analysis exports to inspect it") from error
     return Response(content, media_type="application/json",
