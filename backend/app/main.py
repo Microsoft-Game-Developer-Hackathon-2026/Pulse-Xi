@@ -2,6 +2,7 @@
 import asyncio
 import os
 import secrets
+from contextlib import asynccontextmanager
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
@@ -28,8 +29,22 @@ from .library_lifecycle import (LifecycleAction, change_lifecycle, deletion_reco
                                 local_admin_enabled, require_local_admin)
 from .exports import AnalysisExport, analysis_export
 from .sandbox.api import router as sandbox_router
+from .sandbox.control import driver as sandbox_driver
 
-app = FastAPI(title="PULSE XI API", version="0.1.0")
+@asynccontextmanager
+async def lifespan(app):
+    stop = asyncio.Event()
+    enabled = os.getenv('PULSE_RUNTIME_DRIVER', '1') != '0' and bool(os.getenv('PULSE_RUNTIME_TOKEN') or os.getenv('PULSE_RUNTIME_TOKENS'))
+    task = asyncio.create_task(sandbox_driver(stop)) if enabled else None
+    try:
+        yield
+    finally:
+        stop.set()
+        if task:
+            await task
+
+
+app = FastAPI(title="PULSE XI API", version="0.1.0", lifespan=lifespan)
 app.include_router(sandbox_router)
 app.add_middleware(RequestBoundary)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
