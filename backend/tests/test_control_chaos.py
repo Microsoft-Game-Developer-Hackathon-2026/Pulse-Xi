@@ -104,6 +104,9 @@ def test_partial_halftime_match_edges_and_api_validation(fixture_data):
     assert client.get("/api/matches/missing/control-chaos").status_code == 404
     assert client.get(url, params={"at_second": 6000}).status_code == 422
     assert client.get(url, params={"window_seconds": 301}).status_code == 422
+    valid = client.get(url, params={"at_second": 1200, "window_seconds": 600})
+    assert valid.status_code == 200, valid.text
+    assert valid.json()["window"] == {"start_second": 600, "end_second": 1200}
 
 
 def test_missing_coordinates_and_possession_are_unavailable(fixture_data):
@@ -138,7 +141,7 @@ def test_rapid_transition_requires_same_possession_and_30_second_bound(fixture_d
         make_event(match, template, "entry-1", 130, 2, home, EventType.carry, "complete",
                    {"x": 60, "y": 30}, {"x": 70, "y": 30}, "p1"),
         make_event(match, template, "rec-2", 200, 3, home, EventType.recovery, possession_id="p2"),
-        make_event(match, template, "shot-2", 231, 4, home, EventType.shot, possession_id="p2"),
+        make_event(match, template, "shot-2", 230, 4, home, EventType.shot, possession_id="p2"),
         make_event(match, template, "opp-turnover", 300, 5, away, EventType.turnover, possession_id="p3"),
         make_event(match, template, "shot-3", 330, 6, home, EventType.shot, possession_id="p3"),
         make_event(match, template, "rec-4", 350, 7, home, EventType.recovery, possession_id="p4"),

@@ -298,12 +298,14 @@ def match_tactics(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
 def match_control_chaos(
     match_id: str,
     at_second: int | None = Query(None, ge=0, le=5400),
-    window_seconds: Literal[300, 600, 900] = 300,
+    window_seconds: int = Query(300, ge=1, le=900),
 ):
     match, events = get_match(match_id)
     cutoff = match.duration_seconds if at_second is None else at_second
     if cutoff > match.duration_seconds:
         raise HTTPException(422, "replay cutoff exceeds match duration")
+    if window_seconds not in (300, 600, 900):
+        raise HTTPException(422, "window_seconds must be 300, 600, or 900")
     try:
         packet = control_chaos_at(match, events, cutoff, window_seconds)
     except ValueError as error:
