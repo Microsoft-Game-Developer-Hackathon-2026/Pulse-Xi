@@ -15,14 +15,14 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 | Analytics | Event-derived passes, shots, recoveries, pressure activity, networks, player summaries and windowed activity proxies |
 | ProofTrail | Goal/tactical insights with supporting events and deterministic numerical verification |
 | Pass Difficulty | Versioned 0–100 geometry heuristic with inspectable factors and player summaries; not a failure probability; pressure coverage unavailable |
-| Sandbox Lab | Working fixture-generation and replay workspace; live engine controls remain blocked |
+| Sandbox Lab | Working fixture replay workspace; authoritative backend controls, checkpoints, branches and manifests are available through the authenticated API, pending frontend integration |
 | 3D Observer | Lazy procedural pitch/stadium, five cameras, Low/Medium/High profiles, recorded-event evidence and 2D/WebGL fallback |
 | Broadcast/FanDNA | Timed cue JSON/preview and five recap modes; limited English, Hindi and Spanish templates, not full interface translation |
 | Match Data Hub | Searchable source-labelled library, authorized canonical JSON import, no-write preview, factual data-quality inspection, archive/restore/delete controls and checksummed portable match packages |
 | Persistence | SQLite imported-event persistence and idempotent ingest; built-in/custom fixtures regenerate |
 | Microsoft AI | Guarded optional provider code; verified local path uses deterministic fallback, not authenticated model inference |
 
-**Not merged:** PR #31's editable Blender/GLB kit awaits Vishwam's asset/security approval. PRs #32/#33 prepare checkpoint metadata and isolated comparison display; they remain behind #31. No checkpoint continuation, intervention engine, branch runner, calibrated prediction, public Azure deployment or real multi-agent inference is claimed. See the [current handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
+The [authoritative engine integration guide](docs/AUTHORITATIVE_ENGINE.md) documents real backend controls, exact checkpoint continuation, isolated runtime branches, tactical interventions and independent manifest verification. The existing Sandbox UI still uses fixture replay. **Separate gates:** PR #31's editable Blender/GLB kit awaits Vishwam's asset/security approval; PRs #32/#33 remain separate. Higher-level ForkCast trial/comparison integration, calibrated prediction, public Azure deployment and real multi-agent inference are not supplied by the engine. See the [earlier handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
 
 ## Windows quick start
 
