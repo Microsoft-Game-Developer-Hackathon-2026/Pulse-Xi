@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import './prooftrail.css'
 
 type Metrics = { goals: number; shots: number; recoveries: number; turnovers: number; passes: number; carries: number }
@@ -42,9 +42,14 @@ export function SandboxProofTrail() {
   const [result, setResult] = useState<ProofTrail | null>(null)
   const [error, setError] = useState('')
   const [pending, setPending] = useState(false)
+  const request = useRef<AbortController | null>(null)
+  useEffect(() => () => request.current?.abort(), [])
 
   async function compare(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    request.current?.abort()
+    const controller = new AbortController()
+    request.current = controller
     setError('')
     setResult(null)
     setPending(true)
@@ -52,17 +57,18 @@ export function SandboxProofTrail() {
       const query = new URLSearchParams({ baseline_session_id: baseline.trim(), intervention_id: intervention.trim(), at_tick: atTick })
       const response = await fetch(`/api/sandbox/sessions/${encodeURIComponent(branch.trim())}/prooftrail?${query}`, {
         headers: { Authorization: `Bearer ${token.trim()}` },
+        signal: controller.signal,
       })
       const body = await response.json() as ProofTrail | { detail?: { code?: string } }
       if (!response.ok) {
         const code = 'detail' in body ? body.detail?.code : undefined
         throw new Error(code ? `ProofTrail unavailable (${code}). Check the operator access and session IDs.` : 'ProofTrail request failed.')
       }
-      setResult(body as ProofTrail)
+      if (!controller.signal.aborted) setResult(body as ProofTrail)
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'ProofTrail request failed.')
+      if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : 'ProofTrail request failed.')
     } finally {
-      setPending(false)
+      if (request.current === controller) setPending(false)
     }
   }
 
@@ -75,7 +81,7 @@ export function SandboxProofTrail() {
       <label>Branch session ID<input value={branch} onChange={event => setBranch(event.target.value)} required autoComplete="off"/></label>
       <label>Intervention operation ID<input value={intervention} onChange={event => setIntervention(event.target.value)} required autoComplete="off"/></label>
       <label>Compare through tick<input type="number" min="1" max="5400" step="1" value={atTick} onChange={event => setAtTick(event.target.value)} required/></label>
-      <div className="prooftrail-actions"><button type="submit" disabled={pending}>{pending ? 'Verifying…' : 'Verify and compare'}</button><button type="button" className="prooftrail-clear" onClick={() => { setToken(''); setBaseline(''); setBranch(''); setIntervention(''); setResult(null); setError('') }}>Clear</button></div>
+      <div className="prooftrail-actions"><button type="submit" disabled={pending}>{pending ? 'Verifying…' : 'Verify and compare'}</button><button type="button" className="prooftrail-clear" onClick={() => { request.current?.abort(); request.current = null; setPending(false); setToken(''); setBaseline(''); setBranch(''); setIntervention(''); setResult(null); setError('') }}>Clear</button></div>
     </form>
     {error && <p className="prooftrail-error" role="alert">{error}</p>}
     {result && <div className="prooftrail-result" aria-live="polite">
