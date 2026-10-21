@@ -14,3 +14,43 @@ When explicitly enabled, Tactical Analyst and Story Editor run as separate Found
 Install optional dependencies with `python -m pip install -r backend/requirements-foundry.txt`. Supply server-side `FOUNDRY_PROJECT_ENDPOINT`, `FOUNDRY_MODEL`, `PULSE_FOUNDRY_ADMIN_TOKEN`, and `PULSE_ENABLE_FOUNDRY=true`, then authenticate to Azure with `az login` for local development. Only an explicit `POST /api/insights/{id}/agent-run` with the `X-Admin-Token` header starts a hosted workflow. Inference can incur Azure charges. Never set these secrets in frontend files or commit them.
 
 On 2026-10-14, the optional packages were installed locally. Imports of `FoundryChatClient`, `SequentialBuilder`, and `AzureCliCredential` succeeded, and a two-agent `SequentialBuilder(...).build()` completed without making a network inference call. The check found that `agent-framework-orchestrations` is a separate dependency; it is now pinned in `requirements-foundry.txt`. This matches the [current Microsoft sequential workflow example](https://learn.microsoft.com/en-us/agent-framework/workflows/orchestrations/sequential) and [Foundry provider guide](https://learn.microsoft.com/en-us/agent-framework/agents/providers/microsoft-foundry). No Foundry project, deployment, credentials, authenticated invocation, model trace, latency or cost measurement is available. The application does not claim that a model has run.
+
+
+## Issue #14 validation path
+
+Run the pinned SDK compatibility job with `python backend/scripts/foundry_smoke.py --check-only`.
+It installs the optional Foundry dependencies, imports the configured client and
+orchestration APIs, and builds the two-agent workflow without obtaining a token
+or sending a request. The `foundry-compat` GitHub Actions workflow runs only this
+no-inference check.
+
+A hosted check requires complete server-side configuration and an explicit
+operator confirmation:
+
+```sh
+cd backend
+python scripts/foundry_smoke.py --confirm-cost --fixture late-winner
+```
+
+This starts the existing Tactical Analyst → Story Editor workflow over one
+verified synthetic insight. Since the workflow contains two model-backed agent
+stages, one run may issue more than one billable model request. The script does
+not retry, accepts a 5–120 second timeout (45 seconds by default), and prints
+only an allowlisted redacted report: invocation/trace IDs, model deployment
+name, evidence packet hash, actual provider and audit status, elapsed time, and
+token counts if returned by Agent Framework. It never prints the endpoint,
+credentials, prompts, raw provider errors, or raw completion. The SDK does not
+provide a dependable per-call cost value here; cost must be checked in the
+Foundry/Azure billing view and must not be inferred from tokens.
+
+The command is not a substitute for approval. Do not pass `--confirm-cost`
+until the operator has explicitly approved the expected charge. Missing
+configuration exits before dispatch. Failed or timed-out calls report a
+redacted error type and preserve the deterministic application fallback. A
+successful authenticated run and its report must be reviewed and attached to
+the issue before it can be closed.
+
+The current [Microsoft Agent Framework response API](https://learn.microsoft.com/en-us/python/api/agent-framework-core/agent_framework.chatresponse?view=agent-framework-python-latest)
+exposes optional `usage_details`; this change records only nonnegative integer
+input/output/total token counters when returned. It does not claim that every
+Foundry deployment returns usage or billing data.
