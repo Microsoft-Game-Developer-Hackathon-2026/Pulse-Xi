@@ -1,5 +1,34 @@
 # Current project status - 2026-10-21
 
+## Issue #2 architecture audit
+
+Live browser inspection confirms main 50f72e2, open #40 (224be7c) -> main,
+open #41 (f2854ae) -> engine branch, open #43 (b715e6a) -> live integration.
+#40/#41 each displayed six successful checks; Issues #2-#10 remain open.
+The existing [architecture specification](AUTHORITATIVE_ENGINE.md) now includes
+component/lifecycle/sequence diagrams, model/API ownership/status, store/rollback
+boundaries, mismatch register and test matrix. [Decisions](DECISIONS.md) replaces
+stale clock/storage statements. No new engine implementation was introduced.
+
+Verification recovered after the restricted execution profile changed: the
+existing Python 3.13.15 .venv and npm.cmd work without dependency or security-policy
+changes. Architecture checkpoint b6a420c passed **171 backend cases**, both
+independent file verifiers, strict TypeScript/production build and **39 Playwright
+cases**. All commands exited 0; no skipped tests. Actual OpenAPI 3.1.0 inspection
+covered 73 schemas and all 30 Sandbox HTTP operations/operator dependencies.
+The publication follow-up changes documentation only. GitHub fetch/auth work.
+Architecture publication uses a narrow PR from feat/issue-2-architecture-alignment
+to feat/live-sandbox-integration, preserving #40/#41/#43 and normal review gates.
+Issue #2 remains open; no merge or teammate approval is claimed.
+
+Issue #44 was reproduced with local synthetic trace records: unset/empty admin
+configuration returned 200, and a malformed credential raised an exception. A
+separate main-based [PR #45](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/45) on fix/44-agent-trace-authorization passed 97 backend and
+33 browser cases; those are separate results, not added to the architecture count.
+Review/integration of that fix is required before exposing privileged traces.
+The original architecture head used the older Vite lockfile. This analysis integration retains #43's Vite 7.3.7 upgrade; its current scan is reported separately from historical architecture results. Upstream TestClient
+deprecations and the existing optional-renderer chunk warning remain.
+
 ## Authoritative engine branch
 
 The engine foundation PR #40 adds scenario configuration, deterministic bounded transitions, durable sessions, revision/idempotency controls, complete checkpoint capture/restore, isolated branches, effective-tick tactics and replayable manifests. Its follow-up implements the live Control Room, durable server runs, authenticated snapshot/delta observer, historical seek and verified paired ForkCast with source-event drilldown and file-only experiment verification. See [the actual workflow and contracts](LIVE_SANDBOX.md). Foundation verification was 148 backend tests and 33 browser cases; the follow-up adds integration/recovery/concurrency/backup and browser workflow tests. These are branch results, not evidence of a merge or teammate approval. Shared contract review remains open. The asset and preparation PRs are untouched.
