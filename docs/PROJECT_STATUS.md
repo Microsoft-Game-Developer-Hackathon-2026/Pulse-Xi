@@ -1,4 +1,22 @@
-# Current project status - 2026-10-20
+# Current project status - 2026-10-21
+
+## Issue #2 architecture audit
+
+Live browser inspection confirms main 50f72e2, open #40 (224be7c) -> main,
+open #41 (f2854ae) -> engine branch, open #43 (b715e6a) -> live integration.
+#40/#41 each displayed six successful checks; Issues #2-#10 remain open.
+The existing [architecture specification](AUTHORITATIVE_ENGINE.md) now includes
+component/lifecycle/sequence diagrams, model/API ownership/status, store/rollback
+boundaries, mismatch register and test matrix. [Decisions](DECISIONS.md) replaces
+stale clock/storage statements. No new engine implementation was introduced.
+
+This revision is local, pending verification/publication/review. Python's base
+interpreter execution was denied, blocking pytest and both independent verifiers.
+npm.cmd run test:e2e passed TypeScript then failed Vite configuration resolution
+because esbuild could not read an ancestor directory; browser tests never started.
+Direct TypeScript build passed. New compatibility/observer assertions require a
+successful rerun. Terminal GitHub access is blocked; no push/merge/approval is
+claimed. Historical results below do not re-certify this revision.
 
 ## Authoritative engine branch
 
