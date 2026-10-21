@@ -258,3 +258,50 @@ submit the team video. Those are separate issues/review/service requirements.
 Provisioned operator authentication and deployment gateway rate limits remain
 necessary. The simulation's documented football-model limitations still apply.
 Shared contract review and normal PR/CI approval remain required before merge.
+## Checkpoint inspection and experiment acceptance
+
+Saved checkpoint inspection uses the existing authenticated checkpoint endpoint.
+The Control Room shows the original runtime/scenario, saved tick, revision/cursor,
+engine/schema versions, saved state hash, score, possession, actor/pending-action
+counts and every RNG stream counter. It downloads the unchanged server envelope;
+this is not a client-side serializer or a new upload/restore format. Creation UTC
+is unavailable in the current contract and is not invented. Inspection failures
+can be retried; changing checkpoint, owner or session invalidates pending reads.
+"Inspect saved checkpoint tick" changes only the event inspection cutoff.
+
+Completed/cancelled sessions may save checkpoints because the engine explicitly
+permits that operation. A checkpoint with no remaining time cannot start ForkCast;
+the UI explains that an earlier checkpoint is required. Restoring a terminal
+checkpoint preserves its terminal state and does not create additional play.
+
+Completed ForkCast results support "Verify experiment independently", which gets
+the actual experiment bundle and invokes the existing independent verifier.
+Verification failure is reported, never relabeled as success. Cited event
+drilldown checks sequence, tick, type and actor before offering navigation to
+the exact source branch and inspection tick. Runtime and experiment manifests
+remain separate from imported-match packages and database backups.
+
+### Reproducible local resource measurements
+
+Run `python scripts/benchmark-runtime-acceptance.py --iterations 3` from the
+repository root. It creates disposable SQLite data, checks restored hashes and
+independently verifies every measured experiment. It never opens a user database.
+
+Observed 2026-10-21 on Windows 11 10.0.26300, Python 3.13.14, Intel64 family 6
+model 186, seed 7, 5,400-second scenario, three samples per boundary:
+
+| Tick | Events | Snapshot bytes | Median save ms | Median restore ms |
+|---|---:|---:|---:|---:|
+| 0 | 1 | 5,957 | 23.988 | 32.517 |
+| 2,700 | 918 | 198,410 | 70.977 | 81.954 |
+| 5,400 | 1,819 | 389,573 | 76.414 | 91.178 |
+
+Read-only history at tick 5,399: median 373.793 ms, maximum 434.039 ms. A 120-second
+ForkCast horizon took median 718.403 ms for one pair and 1,914.376 ms for three
+pairs, with peak traced Python allocations 251,811 and 2,181,750 bytes respectively.
+Experiment timing includes `tracemalloc` overhead; these are not process RSS or
+HTTP timings. Backend/browser tests were also running on the laptop, so these
+load-sensitive samples are acceptance evidence, not a controlled benchmark or
+deployment guarantee. The canonical engine is unchanged from runtime base
+`fed64f3`; no performance optimization or budget increase was justified.
+
