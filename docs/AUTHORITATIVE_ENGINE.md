@@ -1,5 +1,14 @@
 # Football Sandbox Lab architecture and authoritative engine
 
+## Integration baseline (2026-10-21)
+
+The analysis branch now includes the architecture PR #46 through a normal merge,
+with both status sections retained. Its five additional owner-scoped HTTP analysis
+operations are documented in [LIVE_SANDBOX](LIVE_SANDBOX.md#existing-analysis-integration).
+The original #46 audit below describes its dated branch/test evidence; it does not
+certify a merged main. Trace security #45 and its command-credential follow-up
+retain independent review gates. Combined-stack verification is recorded on #43.
+
 ## Issue #2 review scope (2026-10-21)
 
 This is the shared architecture specification, extended rather than duplicated.
@@ -12,7 +21,7 @@ The blueprint/master prompt express product intentions, not implemented schemas.
 | main | `50f72e2` | Legacy fixtures/replay, analytics, procedural observer and library schema-2 lifecycle |
 | PR #40 -> main | `224be7c` | Implemented on an open feature branch: pure engine, runtime schema 1, checkpoints/manifests |
 | PR #41 -> engine branch | `f2854ae` | Implemented on an open feature branch: runtime schema 2, Control Room, jobs, observer, ForkCast |
-| PR #43 -> live integration branch | `b715e6a` | Implemented on an open feature branch: private runtime analysis/export/3D adapters; absent from this checkout |
+| PR #43 -> live integration branch | `b715e6a` | Implemented on an open feature branch: private runtime analysis/export/3D adapters; included after normal merge of the architecture baseline; not on main |
 
 Live browser inspection found #40/#41 open with six successful checks each;
 Issues #2-#10 remain open. PR descriptions report respectively 148/171 backend
@@ -31,7 +40,7 @@ confirmed unchanged. Nothing below is claimed merged or approved.
 
 ## Component ownership and trust boundaries
 
-Solid components exist in this checkout (#40 + #41); main contains the legacy
+Solid components exist in this checkout (#40 + #41 + #43); main contains the legacy
 side. Optional provider code exists, but authenticated hosted inference remains
 unverified. No event broker, tracking service or account service is implemented.
 
@@ -357,10 +366,9 @@ it is not part of this architecture diff and must pass its own review. Do not
 claim a completely protected privileged trace boundary or complete security audit.
 Further review areas: proxy redaction/HTTPS, dependency licensing, validation-error
 echo, filesystem aliases, observer limits/backpressure, shared DB quota exhaustion
-and costly bounded verification. `npm audit --json` exits 1 with one high-severity
-Vite finding on this branch's 7.3.6 lockfile (launch-editor advisories). PR #43
-already upgrades to 7.3.7; dependency remediation remains a separate integration
-gate, not a fabricated zero-vulnerability claim or a reason to change this lockfile.
+and costly bounded verification. The original architecture head used Vite 7.3.6;
+this analysis branch retains the 7.3.7 correction from #43. Current combined scans
+must be rerun rather than inferred from either historical branch's result.
 Experiments are descriptive model hypotheses,
 not calibrated probabilities, causal validation or real-match predictions.
 
