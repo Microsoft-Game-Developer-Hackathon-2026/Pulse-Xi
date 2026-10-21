@@ -2,6 +2,16 @@
 
 ## Current implementation and acceptance evidence
 
+Verified implementation merge: **`100106ade274bbb7da137c73b22009f929a72e8c`**,
+[PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64).
+[Post-merge main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39625055824)
+passed 248 backend and 55 browser cases, production build and asset validation.
+A separate clean worktree at this merge reran 248 backend tests and both verifiers.
+The verification handoff adds one mobile/keyboard library case: its full local
+frontend run passed **56 cases**. The screenshot was visually inspected; resolved
+rosters/hash/provenance wrap within the 390px viewport. This handoff changes docs
+and tests only; the application implementation remains the verified #64 tree.
+
 Starting main for the Issues #2-#5 sprint was `d1d099ebb75cb912003b3bf99b24e4d67111110a`,
 merged #53, with [passing post-merge CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39617299612).
 Runtime, architecture, private analysis, command security and original graphics
@@ -14,7 +24,7 @@ PR and Issues #2-#5. Resolve the latest main with `git fetch origin` and
 | Issue | Inspected implementation and completion scope | Acceptance evidence |
 |---|---|---|
 | #2 | Existing component/lifecycle/sequence diagrams, clock/RNG/transaction/observer contracts; current API/model/storage map and ADR corrected for integrated code and archive metadata | Model/OpenAPI, v1 reference/replay, authorization, observer reconnect and migration tests; authorized self-review, not an invented teammate approval |
-| #3 | Existing ScenarioConfig, four presets, hash and RNG reused. Add owner library, scenario-archive/1, atomic runtime schema 3 metadata, verified import/export and real builder save/reload | 50 focused scenario-library cases, including fulltime archive->tactic->persisted events->analysis->manifest journey; four real-browser library cases |
+| #3 | Existing ScenarioConfig, four presets, hash and RNG reused. Add owner library, scenario-archive/1, atomic runtime schema 3 metadata, verified import/export and real builder save/reload | 50 focused scenario-library cases, including fulltime archive->tactic->persisted events->analysis->manifest journey; five real-browser library cases (including mobile/keyboard handoff) |
 | #4 | Existing integer-clock engine, bounded jobs, event adapter, ordering, state/score invariants, cancellation and persistence retained | Fulltime same-seed/golden/replay tests, terminal-step rejection and stronger foreign-actor/possession snapshot regressions; 20 fulltime benchmark runs |
 | #5 | Existing six tactical policies retained; away controls and full resolved-policy display/effect notes added | Existing paired ten-seed pressure/tempo tests and five-seed other-policy tests; deterministic interventions, manifests and browser workflow |
 
