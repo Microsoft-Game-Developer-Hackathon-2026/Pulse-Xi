@@ -15,10 +15,12 @@ def test_runtime_control_source_windows_and_read_only(database, duration):
     for cutoff in sorted({0, duration//2, duration}):
         for window in [300,600,900]:
             response = client.get(f'/api/sandbox/sessions/{view.session_id}/control-chaos',
-                params={'at_second':cutoff,'window_seconds':window}, headers=HEADERS)
+                params={'at_second':cutoff,'window_seconds':window,'projection':'native'}, headers=HEADERS)
             assert response.status_code == 200, response.text
             assert response.headers['cache-control'] == 'no-store'
             result = response.json()
+            assert result['projection'] == 'native'
+            assert result['halftime_tick'] == duration//2
             assert result['session_id'] == result['branch_id'] == view.session_id
             assert result['state_hash'] == view.state_hash and result['event_hash'] == view.event_hash
             assert result['revision'] == view.revision and result['event_cursor'] == view.event_cursor
@@ -41,6 +43,8 @@ def test_runtime_control_authorization_and_invalid_bounds(database, monkeypatch)
     path = f'/api/sandbox/sessions/{view.session_id}/control-chaos'
     assert client.get(path,params={'at_second':120}).status_code in [401,403]
     assert client.get(path,params={'at_second':120},headers={'Authorization':'Bearer other-owner-token-at-least-32-characters'}).status_code==404
+    for invalid in ['legacy','unknown','']:
+        assert client.get(path,params={'at_second':120,'projection':invalid},headers=HEADERS).status_code==422
     for params in [{'at_second':121},{'at_second':-1},{'at_second':120,'window_seconds':30}]:
         assert client.get(path,params=params,headers=HEADERS).status_code==422
     assert client.get('/api/sandbox/sessions/missing/control-chaos?at_second=0',headers=HEADERS).status_code==404

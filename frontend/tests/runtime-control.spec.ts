@@ -10,6 +10,8 @@ test('native runtime Control vs Chaos uses authenticated source and cancels revo
   const sid = session.session_id
   expect((await request.post(`/api/sandbox/sessions/${sid}/commands`,{headers,data:{operation_id:'control-step',expected_revision:0,kind:'step',ticks:120}})).ok()).toBe(true)
   const publicReads: string[] = []
+  const projections: (string|null)[] = []
+  page.on('request',r=>{const url=new URL(r.url()); if(url.pathname===`/api/sandbox/sessions/${sid}/control-chaos`) projections.push(url.searchParams.get('projection'))})
   page.on('request',r=>{if(r.url().includes(`/api/matches/${sid}`)) publicReads.push(r.url())})
   await page.goto('/#/runtime')
   await page.getByLabel('Operator access token').fill(token)
@@ -41,6 +43,8 @@ test('native runtime Control vs Chaos uses authenticated source and cancels revo
   release()
   await expect(panel).toHaveCount(0)
   expect(publicReads).toEqual([])
+  expect(projections.length).toBeGreaterThan(0)
+  expect(projections.every(value=>value==='native')).toBe(true)
   expect(await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}))).not.toContain(token)
 })
 

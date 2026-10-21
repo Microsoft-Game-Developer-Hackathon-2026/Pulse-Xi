@@ -36,6 +36,7 @@ class RecordedAnalysis(BaseModel):
 
 class RuntimeControlChaos(BaseModel):
     schema_version: Literal['runtime-control-chaos/1'] = 'runtime-control-chaos/1'
+    projection: Literal['native'] = 'native'
     session_id: str
     branch_id: str
     scenario_id: str
@@ -85,11 +86,12 @@ def register(router: APIRouter, operator: Callable[..., str]) -> None:
 
     @router.get('/sessions/{session_id}/control-chaos', response_model=RuntimeControlChaos, dependencies=[Depends(private_response)])
     def runtime_control(session_id: str, at_second: int = Query(ge=0, le=5400),
-                        window_seconds: int = Query(300, ge=300, le=900), owner: str = Depends(operator)):
+                        window_seconds: int = Query(300, ge=300, le=900), projection: Literal['native'] = 'native',
+                        owner: str = Depends(operator)):
         if window_seconds not in (300, 600, 900):
             raise EngineError('unsupported_control_window', 422)
         # One owner-scoped captured view supplies events, revision and hashes.
-        view, match, events = source(owner, session_id, at_second, 'native')
+        view, match, events = source(owner, session_id, at_second, projection)
         packet = control_chaos_at(match, events, at_second, window_seconds)
         if any(not verify_control_turning_point(claim, match, events, at_second, window_seconds)
                for claim in packet.interpretation.turning_points):

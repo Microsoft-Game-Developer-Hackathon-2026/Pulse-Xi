@@ -36,10 +36,12 @@ export function RuntimeAnalysis({ token, view, cutoff, sequence, select }: {
     return fetch(`${base}/analysis-export?${params}`, { headers: {Authorization: `Bearer ${token}`}, signal })
   }, [base, token, native])
   const loadControl = useCallback(async (params: string, signal: AbortSignal) => {
-    const response = await fetch(`${base}/control-chaos?${params}`, {headers: {Authorization: `Bearer ${token}`}, signal})
+    const query = new URLSearchParams(params)
+    query.set('projection', 'native')
+    const response = await fetch(`${base}/control-chaos?${query}`, {headers: {Authorization: `Bearer ${token}`}, signal})
     if (!response.ok) throw Error(`Runtime Control vs Chaos unavailable (${response.status}).`)
-    const packet = await response.json() as {session_id: string; revision: number; at_second: number; analysis: ControlChaos}
-    if (packet.session_id !== view.session_id || packet.revision < view.revision || packet.at_second !== cutoff)
+    const packet = await response.json() as {projection: 'native'; session_id: string; revision: number; at_second: number; analysis: ControlChaos}
+    if (packet.projection !== 'native' || packet.session_id !== view.session_id || packet.revision < view.revision || packet.at_second !== cutoff)
       throw Error('Control vs Chaos response does not match the requested runtime boundary.')
     return packet.analysis
   }, [base, token, view.session_id, view.revision, cutoff])
