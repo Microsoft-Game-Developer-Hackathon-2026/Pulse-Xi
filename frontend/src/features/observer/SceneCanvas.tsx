@@ -1,6 +1,9 @@
-import { memo, useEffect, useMemo, useState } from 'react'
+import { Component, memo, useEffect, useMemo, useState } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { ACESFilmicToneMapping, BufferGeometry, Float32BufferAttribute, Quaternion, SRGBColorSpace, Vector3 } from 'three'
+import type { ReactNode } from 'react'
+import { AssetKit, useOriginalAssets } from './AssetKit'
+import type { AssetStatus } from './AssetKit'
 import type { EventSnapshot } from './eventSnapshot'
 import { CameraRig } from './CameraRig'
 import { Stadium } from './Stadium'
@@ -8,10 +11,18 @@ import { createGrassTexture } from './grassTexture'
 import { graphicsProfiles } from './graphicsProfiles'
 import type { CameraPreset, GraphicsQuality } from './graphicsProfiles'
 
-export type RendererMetrics = { quality: GraphicsQuality; eventId: string | null; calls: number; triangles: number; geometries: number; textures: number; readyMs: number; framesInSample: number | null }
+export type RendererMetrics = { quality: GraphicsQuality; eventId: string | null; calls: number; triangles: number; geometries: number; textures: number; readyMs: number; framesInSample: number | null; ballPosition: number[] | null; actorPosition: number[] | null; recipientPosition: number[] | null }
 type Props = {
   snapshot: EventSnapshot; cameraPreset: CameraPreset; resetRevision: number
+  assetStyle: 'original' | 'procedural'; assetStatus: AssetStatus['status']; reportAsset: (value: AssetStatus) => void
   quality: GraphicsQuality; reducedMotion: boolean; fail: () => void; report: (value: RendererMetrics) => void; startedAt: number
+}
+
+class AssetBoundary extends Component<{ children: ReactNode; fallback: ReactNode; fail: () => void }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() { return { failed: true } }
+  componentDidCatch() { this.props.fail() }
+  render() { return this.state.failed ? this.props.fallback : this.props.children }
 }
 
 function pitchLines() {
@@ -60,7 +71,7 @@ function Pitch({ quality }: { quality: GraphicsQuality }) {
   </group>
 }
 
-function EventMarkers({ snapshot }: { snapshot: EventSnapshot }) {
+function EventMarkers({ snapshot, spheres = true }: { snapshot: EventSnapshot; spheres?: boolean }) {
   const arrow = useMemo(() => {
     if (!snapshot.origin || !snapshot.target) return null
     const direction = new Vector3(...snapshot.target).sub(new Vector3(...snapshot.origin))
@@ -71,22 +82,25 @@ function EventMarkers({ snapshot }: { snapshot: EventSnapshot }) {
   ]) : null, [snapshot.origin, snapshot.target])
   useEffect(() => () => path?.dispose(), [path])
   return <group>
-    {snapshot.origin && <mesh position={snapshot.origin}><sphereGeometry args={[1.1, 16, 10]}/><meshStandardMaterial color={snapshot.color} emissive={snapshot.color} emissiveIntensity={.2}/></mesh>}
-    {snapshot.target && <mesh position={snapshot.target}><sphereGeometry args={[.65, 12, 8]}/><meshStandardMaterial color="#f4f2db"/></mesh>}
+    {spheres && snapshot.actor_id && snapshot.origin && <mesh name="recorded-actor" position={snapshot.origin}><sphereGeometry args={[1.1, 16, 10]}/><meshStandardMaterial color={snapshot.color} emissive={snapshot.color} emissiveIntensity={.2}/></mesh>}
+    {spheres && snapshot.recipient_position && <mesh name="recorded-recipient" position={snapshot.recipient_position}><sphereGeometry args={[1.1,16,10]}/><meshStandardMaterial color={snapshot.color}/></mesh>}
+    {spheres && snapshot.ball && <mesh name="recorded-ball" position={snapshot.ball}><sphereGeometry args={[.65, 12, 8]}/><meshStandardMaterial color="#f4f2db"/></mesh>}
+    {snapshot.ball && <mesh position={[snapshot.ball[0], .14, snapshot.ball[2]]} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.95,1.3,32]}/><meshBasicMaterial color="#ffffff" toneMapped={false}/></mesh>}
     {snapshot.origin && <mesh position={[snapshot.origin[0], .12, snapshot.origin[2]]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[1.8, 2.15, 40]}/><meshBasicMaterial color={snapshot.color} toneMapped={false}/></mesh>}
     {snapshot.target && arrow && <mesh position={arrow.position} quaternion={arrow.rotation}><coneGeometry args={[.8, 2.1, 12]}/><meshBasicMaterial color={snapshot.color} toneMapped={false}/></mesh>}
     {path && <lineSegments geometry={path}><lineBasicMaterial color={snapshot.color}/></lineSegments>}
   </group>
 }
 
-function Probe({ snapshot, cameraPreset, quality, report, startedAt }: Props) {
-  const { gl, invalidate } = useThree()
+function Probe({ snapshot, cameraPreset, quality, report, startedAt, assetStatus }: Props) {
+  const { gl, scene, invalidate } = useThree()
   useEffect(() => {
     let second = 0
     let timer = 0
     invalidate()
     const first = requestAnimationFrame(() => { second = requestAnimationFrame(() => {
-      const metrics = { quality, eventId: snapshot.event_id, calls: gl.info.render.calls, triangles: gl.info.render.triangles,
+      const position = (name: string) => scene.getObjectByName(name)?.getWorldPosition(new Vector3()).toArray() ?? null
+      const metrics = { ballPosition: position('recorded-ball'), actorPosition: position('recorded-actor'), recipientPosition: position('recorded-recipient'), quality, eventId: snapshot.event_id, calls: gl.info.render.calls, triangles: gl.info.render.triangles,
         geometries: gl.info.memory.geometries, textures: gl.info.memory.textures,
         readyMs: performance.now() - startedAt, framesInSample: null }
       report(metrics)
@@ -94,8 +108,15 @@ function Probe({ snapshot, cameraPreset, quality, report, startedAt }: Props) {
       timer = window.setTimeout(() => report({ ...metrics, framesInSample: gl.info.render.frame - before }), 500)
     }) })
     return () => { cancelAnimationFrame(first); cancelAnimationFrame(second); window.clearTimeout(timer) }
-  }, [snapshot.event_id, cameraPreset, quality, gl, invalidate, report, startedAt])
+  }, [snapshot.event_id, snapshot.ball, cameraPreset, quality, assetStatus, gl, scene, invalidate, report, startedAt])
   return null
+}
+
+function OriginalScene(props: Props) {
+  const {models, failed} = useOriginalAssets(props.quality === 'low')
+  useEffect(() => { if (!models) props.reportAsset({status:failed ? 'fallback' : 'loading'}) }, [models, failed, props.reportAsset])
+  if (!models) return <><Pitch quality={props.quality}/><Stadium quality={props.quality}/><EventMarkers snapshot={props.snapshot}/></>
+  return <><AssetKit models={models} snapshot={props.snapshot} lowPower={props.quality === 'low'} quality={props.quality} report={props.reportAsset}/><EventMarkers snapshot={props.snapshot} spheres={false}/></>
 }
 
 export default memo(function SceneCanvas(props: Props) {
@@ -104,7 +125,10 @@ export default memo(function SceneCanvas(props: Props) {
   return <div className="observer-canvas" data-testid="observer-canvas" data-camera={props.cameraPreset} data-quality={props.quality} data-camera-settled={cameraSettled}>
     <Canvas shadows={profile.shadows} frameloop="demand" dpr={profile.dpr} camera={{ fov: 48, near: .5, far: 350 }} gl={{ antialias: props.quality !== 'low', powerPreference: 'low-power', alpha: false, toneMapping: ACESFilmicToneMapping, toneMappingExposure: profile.exposure, outputColorSpace: SRGBColorSpace }} fallback={<p>WebGL is unavailable. Select 2D pitch.</p>}>
       <color attach="background" args={['#101d29']}/><fog attach="fog" args={['#101d29', 150, 340]}/><hemisphereLight args={['#d1e7f4', '#25312a', 2.2]}/><directionalLight position={[-25, 70, 25]} intensity={3} color="#fff1d9" castShadow={profile.shadows} shadow-mapSize={[profile.shadowSize, profile.shadowSize]} shadow-camera-left={-80} shadow-camera-right={80} shadow-camera-top={65} shadow-camera-bottom={-65} shadow-camera-far={160} shadow-bias={-.0003}/>
-      <Pitch quality={props.quality}/><Stadium quality={props.quality}/><EventMarkers snapshot={props.snapshot}/><CameraRig {...props} onSettled={setCameraSettled}/><Probe {...props}/>
+      {props.assetStyle === 'original' ? <AssetBoundary fail={() => props.reportAsset({ status: 'fallback' })} fallback={<><Pitch quality={props.quality}/><Stadium quality={props.quality}/><EventMarkers snapshot={props.snapshot}/></>}>
+        <OriginalScene {...props}/>
+      </AssetBoundary> : <><Pitch quality={props.quality}/><Stadium quality={props.quality}/><EventMarkers snapshot={props.snapshot}/></>}
+      <CameraRig {...props} onSettled={setCameraSettled}/><Probe {...props}/>
     </Canvas>
   </div>
 })
