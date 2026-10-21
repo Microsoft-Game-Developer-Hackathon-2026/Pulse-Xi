@@ -1,8 +1,42 @@
 # Current project status - 2026-10-21
 
-## Current repository state
+## Issues #6-#9 acceptance update
 
-Main `4d1d11c7deac2a5632ff8d374e362732c2828491` includes approved observer synchronization #67. [Exact-main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39643934520) passed 248 backend and 59 browser tests plus strict TypeScript/build. #52/#31 are closed as implementation duplicates; #32/#33 as superseded proposals; #63 as an obsolete validation PR. Branches are preserved. Asset rights/release review remains open in #23. Native #57, acceptance #59, runtime Control vs Chaos #58 and separate teammate feature PRs remain review-gated. Combined validation is not main.
+Integration baseline: main `c2f8c622d21d3db804e57c9a02e4c09b264f9c4b`
+(PR #61). Its [exact-main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39653135823)
+passed before this update. The source tree incorporates #59's checkpoint/history,
+ForkCast verification/source navigation and recovery consumers by normal merge,
+preserving Satvik's commits. Only PROJECT_STATUS conflicted; the newer #61 main
+record was retained. No other feature branch was absorbed.
+
+| Issue | Current code and acceptance evidence |
+|---|---|
+| #6 | Nullable original checkpoint UTC in schema-4 sidecar/API/UI; atomic first write, retries/lost responses, schema 0/1/2/3 upgrades, legacy NULL, backup/reopen and separate-process retry. Snapshot/continuation/ForkCast bytes match across different dates. Existing complete snapshot/RNG/pending continuation and corruption tests retained. |
+| #7 | Existing revision/idempotent command handler and append-only audit retained. UI shows engine pending/applied state; real reset creates a fresh runtime. Recovery uses isolated checkpoint restore; in-place undo/redo and substitutions are explicitly unsupported. Real browser journey and existing stale/auth/concurrency/parent-isolation replay tests pass. |
+| #8 | Existing bounded paired-trial engine retained. #59 adds independent verification, source navigation and reload recovery. Completed/cancelled checkpoints are inspectable; fulltime/no-future and non-paused sources disable trials honestly. Real metrics/parent isolation/paired reruns/sparse/cancellation tests retained. |
+| #9 | Raw manifests remain compatible. Versioned reproduction wrappers add unsigned export-build Git/Python/OS context; unrecorded original execution environment is explicit. API/CLI accept wrappers and legacy files; bounded reads, schema/version/unknown/duplicate/oversize rejection and named first-divergence tests pass. CI now explicitly runs both committed example CLIs and pip check. |
+
+Local final regression: **292 backend tests passed** (one existing TestClient
+httpx deprecation warning), **63 Playwright cases passed** with strict TypeScript
+and production build, both committed CLI verifiers returned verified=true,
+pip check passed, seven assets validated with zero errors/warnings, npm audit
+reported zero advisories and pip-audit found zero known advisories in the 29-package
+audit runtime closure. These are local results; fresh published-head and post-merge
+CI must be read from GitHub, not inferred from this record.
+
+Self-review A checked deterministic boundaries, atomic migration/receipt recovery,
+branch isolation and compatibility. B checked owner concealment, export trust,
+private caching, bounded JSON/file reads and credential handling. Corrections:
+private exports use no-store; cancelled source checkpoints cannot appear eligible
+for ForkCast; CLI reads are capped themselves; unrelated enclosing Git roots are
+not misattributed. Hash-sensitive models/engine/manifest/control/experiments,
+committed golden/example artifacts, dependencies and original assets are unchanged.
+
+Existing unrelated release work remains separate: native analysis #57, runtime
+Control vs Chaos #58 and other teammate PRs are not integrated by this update;
+asset rights/release approval #23 is not supplied by technical validation. No
+hosted inference, paid service, deployment or third-party approval is claimed.
+Issue closure/merge evidence belongs in the corresponding GitHub records.
 
 ## Historical implementation and acceptance evidence
 
