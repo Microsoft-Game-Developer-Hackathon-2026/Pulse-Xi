@@ -82,3 +82,44 @@ test('complete native windows expose real turning point sources and recover afte
   await expect(panel.getByRole('alert')).toHaveCount(0)
   await expect(panel).toContainText('control-chaos-formulas/1')
 })
+
+test('switching real runtime sessions discards a delayed private analysis response',async ({page,request},info)=>{
+  async function create(duration:number) {
+    const config = (await (await request.get('/api/sandbox/presets',{headers})).json()).balanced
+    config.duration_seconds=duration
+    const scenario = await (await request.post('/api/sandbox/scenarios',{headers,data:config})).json()
+    const session = await (await request.post('/api/sandbox/sessions',{headers,data:{operation_id:`control-switch-${duration}`,scenario_id:scenario.scenario_id}})).json()
+    expect((await request.post(`/api/sandbox/sessions/${session.session_id}/commands`,{headers,data:{operation_id:'switch-step',expected_revision:0,kind:'step',ticks:duration}})).ok()).toBe(true)
+    return session.session_id as string
+  }
+  const first=await create(120), second=await create(60)
+  await page.goto('/#/runtime')
+  await page.getByLabel('Operator access token').fill(token)
+  await page.getByRole('button',{name:'Connect operator',exact:true}).click()
+  await page.getByLabel('Runtime / branch').selectOption(first)
+  await expect(page.getByLabel('Authoritative match clock')).toHaveText('02:00')
+  await page.getByText('Recorded-event analysis, bookmarks and 3D',{exact:true}).click()
+  await page.getByText('Runtime Control vs Chaos',{exact:true}).click()
+  const panel=page.getByRole('region',{name:'Control vs Chaos analysis'})
+  await expect(panel).toContainText('control-chaos-formulas/1')
+  let release!:()=>void, started!:()=>void
+  const blocked=new Promise<void>(r=>{release=r}), intercepted=new Promise<void>(r=>{started=r})
+  await page.route(`**/sessions/${first}/control-chaos?**`,async route=>{
+    const response=await route.fetch(); started(); await blocked
+    await route.fulfill({response}).catch(()=>{})
+  })
+  await panel.getByLabel('Control vs Chaos window').selectOption('600')
+  await intercepted
+  await page.getByLabel('Runtime / branch').selectOption(second)
+  await expect(page.getByLabel('Authoritative match clock')).toHaveText('01:00')
+  await page.getByText('Recorded-event analysis, bookmarks and 3D',{exact:true}).click()
+  await page.getByText('Runtime Control vs Chaos',{exact:true}).click()
+  await expect(panel).toContainText('control-chaos-formulas/1')
+  release()
+  await expect(page.locator('.runtime-analysis')).toContainText(second)
+  await expect(page.locator('.runtime-analysis')).not.toContainText(first)
+  await expect(panel.getByLabel('Control vs Chaos window')).toHaveValue('300')
+  await page.setViewportSize({width:390,height:844})
+  await panel.scrollIntoViewIfNeeded()
+  await page.screenshot({path:info.outputPath('runtime-control-mobile.png'),fullPage:true})
+})
