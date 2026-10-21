@@ -149,6 +149,8 @@ JSON includes schema, real generation time, cutoff, source IDs, fixture seed and
 
 ## Architecture and stack
 
+The optional **3D Observer** adds an original Blender stadium, recorded event markers, five camera modes and Low/Medium/High graphics profiles. The default 2D view remains independent of WebGL. See the [graphics toolchain, reproducible assets and measured results](docs/PROFESSIONAL_3D_GRAPHICS_UPGRADE.md). Positions remain sparse synthetic event snapshots; no continuous player tracking is inferred.
+
 ```mermaid
 flowchart LR
   S[Seeded fixture generator] --> E[Typed synthetic events]
