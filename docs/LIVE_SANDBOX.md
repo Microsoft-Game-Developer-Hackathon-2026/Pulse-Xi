@@ -638,7 +638,7 @@ verification. TestClient includes auth/validation/serialization but no remote
 network round trip. These are bounded local samples, not release SLAs or physics
 accuracy measurements.
 
-The final local regression passed 292 backend tests and 64 real browser cases
+The final local regression passed 293 backend tests and 64 real browser cases
 with strict TypeScript/build. Both original example CLIs pass without regenerating
 fixtures; pip check and dependency audits pass. One existing TestClient deprecation
 and the existing large lazy-renderer chunk advisory remain visible. See
@@ -656,3 +656,12 @@ checks that no oversized verification upload is attempted, downloads the archive
 and runs the CLI successfully. The UI explains the offline command and explicitly
 states that browser verification has not completed. The 20 MB offline cap is
 preserved; the HTTP safety limit is not raised.
+
+
+The atomicity regression also terminates an owned subprocess immediately after
+metadata INSERT and before commit. Reopening sees no checkpoint, UTC, command or
+state change; integrity_check passes and the next successful retry records its
+own original creation UTC. The maximum-workload browser fixture uses a separate
+provisioned test operator, with explicit foreign-owner 404/list checks. It does
+not share saved runtimes with ordinary browser journeys; the two-worker suite,
+functional assertions, upload limit and timeouts are unchanged.
