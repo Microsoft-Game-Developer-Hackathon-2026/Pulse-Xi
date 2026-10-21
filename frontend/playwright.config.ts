@@ -3,6 +3,8 @@ import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
+const testDirectory = mkdtempSync(join(tmpdir(), 'pulse-xi-browser-'))
+
 export default defineConfig({
   testDir: './tests',
   // Bound software-rendering concurrency on developer laptops and shared CI.
@@ -12,8 +14,8 @@ export default defineConfig({
   webServer: {
     command: 'python -m uvicorn app.main:app --loop app.local_event_loop:create_loop --app-dir ../backend --host 127.0.0.1 --port 8765',
     url: 'http://127.0.0.1:8765/health',
-    // Each run owns its database and explicitly authorizes only the test importer.
-    env: { PULSE_ENABLE_LOCAL_DATA_ADMIN: '1', PULSE_IMPORT_TOKEN: 'test-import-token-at-least-32-characters', PULSE_RUNTIME_TOKEN: 'test-runtime-token-at-least-32-characters', PULSE_RUNTIME_TOKENS: '', PULSE_DB_PATH: join(mkdtempSync(join(tmpdir(), 'pulse-xi-browser-')), 'events.sqlite') },
+    // Each run owns both databases and authorizes only its test importer/operator.
+    env: { PULSE_ENABLE_LOCAL_DATA_ADMIN: '1', PULSE_IMPORT_TOKEN: 'test-import-token-at-least-32-characters', PULSE_RUNTIME_TOKEN: 'test-runtime-token-at-least-32-characters', PULSE_RUNTIME_TOKENS: '', PULSE_RUNTIME_DRIVER: '1', PULSE_DB_PATH: join(testDirectory, 'events.sqlite'), PULSE_RUNTIME_DB_PATH: join(testDirectory, 'runtime.sqlite') },
     reuseExistingServer: false,
     timeout: 30000,
   },

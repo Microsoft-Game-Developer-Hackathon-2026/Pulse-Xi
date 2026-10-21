@@ -1,0 +1,62 @@
+[
+  {
+    "trial": 1,
+    "generator": "build-blender-assets.py",
+    "seconds": 5.162525199993979,
+    "hashes": {
+      "field": "9cf7c40308a3e9d98485a7676b6f042b3734fb5fd74456fbd26a9a29d6a24223",
+      "ball": "a741caae81b4edce422332e7f9010b6f02e8922bdb57144ef4dead122243c024",
+      "player-marker": "a09dc49fd79688993e3dd6781a9128d37d068b81aaeac98f6b5c644966a77fa5",
+      "field-v2": "fe8cccc093a6e605290cc661e6e1f29033f84826e83334a0213d1083259d8591",
+      "stadium-v2": "0c7891b7da5ebbcf839e1e3974ad71e32011936e8badb284bcefbec361807f31",
+      "ball-v2": "260909418e1f655506c158540dbefd9f88cc6c7a64e97dfaf830bfaa1fe01996",
+      "player-marker-v2": "697b42348e6373973b3e25c012d7f96e6b705aa197e463bc4f739898c6c24cf2"
+    },
+    "matches_committed": true
+  },
+  {
+    "trial": 1,
+    "generator": "build-professional-assets.py",
+    "seconds": 17.6476629999961,
+    "hashes": {
+      "field": "9cf7c40308a3e9d98485a7676b6f042b3734fb5fd74456fbd26a9a29d6a24223",
+      "ball": "a741caae81b4edce422332e7f9010b6f02e8922bdb57144ef4dead122243c024",
+      "player-marker": "a09dc49fd79688993e3dd6781a9128d37d068b81aaeac98f6b5c644966a77fa5",
+      "field-v2": "fe8cccc093a6e605290cc661e6e1f29033f84826e83334a0213d1083259d8591",
+      "stadium-v2": "0c7891b7da5ebbcf839e1e3974ad71e32011936e8badb284bcefbec361807f31",
+      "ball-v2": "260909418e1f655506c158540dbefd9f88cc6c7a64e97dfaf830bfaa1fe01996",
+      "player-marker-v2": "697b42348e6373973b3e25c012d7f96e6b705aa197e463bc4f739898c6c24cf2"
+    },
+    "matches_committed": true
+  },
+  {
+    "trial": 2,
+    "generator": "build-blender-assets.py",
+    "seconds": 4.7375299999985145,
+    "hashes": {
+      "field": "9cf7c40308a3e9d98485a7676b6f042b3734fb5fd74456fbd26a9a29d6a24223",
+      "ball": "a741caae81b4edce422332e7f9010b6f02e8922bdb57144ef4dead122243c024",
+      "player-marker": "a09dc49fd79688993e3dd6781a9128d37d068b81aaeac98f6b5c644966a77fa5",
+      "field-v2": "fe8cccc093a6e605290cc661e6e1f29033f84826e83334a0213d1083259d8591",
+      "stadium-v2": "0c7891b7da5ebbcf839e1e3974ad71e32011936e8badb284bcefbec361807f31",
+      "ball-v2": "260909418e1f655506c158540dbefd9f88cc6c7a64e97dfaf830bfaa1fe01996",
+      "player-marker-v2": "697b42348e6373973b3e25c012d7f96e6b705aa197e463bc4f739898c6c24cf2"
+    },
+    "matches_committed": true
+  },
+  {
+    "trial": 2,
+    "generator": "build-professional-assets.py",
+    "seconds": 20.57909369999834,
+    "hashes": {
+      "field": "9cf7c40308a3e9d98485a7676b6f042b3734fb5fd74456fbd26a9a29d6a24223",
+      "ball": "a741caae81b4edce422332e7f9010b6f02e8922bdb57144ef4dead122243c024",
+      "player-marker": "a09dc49fd79688993e3dd6781a9128d37d068b81aaeac98f6b5c644966a77fa5",
+      "field-v2": "fe8cccc093a6e605290cc661e6e1f29033f84826e83334a0213d1083259d8591",
+      "stadium-v2": "0c7891b7da5ebbcf839e1e3974ad71e32011936e8badb284bcefbec361807f31",
+      "ball-v2": "260909418e1f655506c158540dbefd9f88cc6c7a64e97dfaf830bfaa1fe01996",
+      "player-marker-v2": "697b42348e6373973b3e25c012d7f96e6b705aa197e463bc4f739898c6c24cf2"
+    },
+    "matches_committed": true
+  }
+]
