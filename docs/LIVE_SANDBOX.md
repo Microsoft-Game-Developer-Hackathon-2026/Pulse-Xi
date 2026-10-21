@@ -402,7 +402,7 @@ inference, integrate Blender assets awaiting review, make Unreal cinematics or
 submit the team video. Those are separate issues/review/service requirements.
 Provisioned operator authentication and deployment gateway rate limits remain
 necessary. The simulation's documented football-model limitations still apply.
-Shared contract review and normal PR/CI approval remain required before merge.
+Integration follows the repository protection rules and exact-head CI. Historical review gates below describe their recorded revisions, not new approvals.
 ## Checkpoint inspection and experiment acceptance
 
 Saved checkpoint inspection uses the existing authenticated checkpoint endpoint.
@@ -410,7 +410,7 @@ The Control Room shows the original runtime/scenario, saved tick, revision/curso
 engine/schema versions, saved state hash, score, possession, actor/pending-action
 counts and every RNG stream counter. It downloads the unchanged server envelope;
 this is not a client-side serializer or a new upload/restore format. Creation UTC
-is unavailable in the current contract and is not invented. Inspection failures
+is the original persisted UTC in schema 4, or explicitly unavailable for historical records. Inspection failures
 can be retried; changing checkpoint, owner or session invalidates pending reads.
 "Inspect saved checkpoint tick" changes only the event inspection cutoff.
 
@@ -426,7 +426,7 @@ drilldown checks sequence, tick, type and actor before offering navigation to
 the exact source branch and inspection tick. Runtime and experiment manifests
 remain separate from imported-match packages and database backups.
 
-### Reproducible local resource measurements
+### Historical #59 local resource measurements
 
 Run `python scripts/benchmark-runtime-acceptance.py --iterations 3` from the
 repository root. It creates disposable SQLite data, checks restored hashes and
@@ -491,3 +491,155 @@ revision. Replay is performed by the server using its owned checkpoint and
 command history. The frontend neither synthesizes states nor rewinds the live
 runtime. Cutoff/session/credential changes cancel obsolete requests; the original
 response can be downloaded as source evidence, not as a new checkpoint format.
+
+
+## Checkpoint metadata and reproduction contracts
+
+### Original checkpoint UTC (runtime schema 4)
+
+`checkpoint_metadata.py` defines the additive API boundary; canonical models in
+models.py are unchanged. `StoredCheckpoint` extends the original CheckpointView
+with required nullable `created_at_utc` (ISO UTC, Z suffix). Checkpoint summaries
+include that field and the snapshot lifecycle. `CommandReceipt` adds nullable
+`checkpoint_created_at_utc`; non-checkpoint receipts return null. A retry returns
+the original recorded timestamp even after a lost post-commit response. The
+persisted deterministic MutationResult receipt itself is unchanged.
+
+Schema 3->4 creates checkpoint_metadata(id FK checkpoints, created_at_utc) and
+backfills historical checkpoints with NULL, in one BEGIN IMMEDIATE transaction.
+New checkpoint state, replay prefix, ancestry, metadata, events, command receipt
+and audit commit together. Concurrent workers serialize; retries do not insert or
+sample UTC twice. Migration/write failure rolls back its transaction. Reopening
+retries the failed migration; never infer a date from migration or file mtime.
+Versions 0/1/2/3 upgrade through the existing atomic steps. Offline backup accepts
+versions 1/2/3/4 and preserves metadata. Rollback requires a matching pre-upgrade
+backup/build; old binaries reject schema 4. Library schema 2 is untouched.
+
+UTC is not in Snapshot bytes, EngineState, scenario hashes, RNG, events, output
+hashes or experiment manifests. `test_checkpoint_metadata.py` compares complete
+snapshot, continuation manifest and ForkCast bundle bytes across two fresh DBs
+with different creation dates, tests injected write/migration failure, historical
+backup/reopen, concurrent retries, lost HTTP responses and foreign-owner concealment.
+
+### Supported operator semantics
+
+Commands continue through POST /sessions/{id}/commands with expected_revision and
+operation_id. Current-tick intervention requests schedule at tick+1; formation and
+all five bounded numeric tactics use the existing policy schema. A successful
+acknowledgment means accepted; pending queue and engine intervention result show
+pending/applied separately. Audit rows never rewrite their original acceptance.
+Stale revisions/idempotency conflicts return 409; schema errors 422; missing or
+wrong credentials 403, unconfigured credentials 503, foreign-owned objects 404.
+Rejected legal-schema requests are audited; failed transactions commit no partial
+state/audit/receipt. The caller sees a failure and can retry the same command.
+
+Pause/resume/step and bounded durable runs remain the time controls. Run rate
+changes how many authoritative seconds each worker pass requests, not a browser
+clock. Reset calls the existing session API to create a fresh tick-zero runtime;
+previous history remains intact. Recovery/undo uses Restore as new branch from a
+saved checkpoint. In-place undo/redo and substitutions are unsupported and are
+not presented as successful actions. Reconnect reloads actual owned state; the
+explicit retry preserves an uncertain operation while connected; disconnect
+clears private retry/evidence state without cancelling accepted server work.
+
+ForkCast requires a paused checkpoint with remaining time, 1..5 pairs,
+1..600 seconds and at most six distinct tactical changes per arm. Both children
+copy the same full state; paired trial commands use equal documented RNG counter
+offsets. Parent state stays immutable. Failed/cancelled jobs cannot yield verified
+comparisons. Zero counts are zero, not missing probability estimates. Comparisons
+replay actual events; evidence navigation checks sequence/tick/type/actor. A page
+reload recovers the real experiment and comparison. Full-time and cancelled
+checkpoints remain inspectable/downloadable, but cannot start future trials.
+
+### Portable reproduction envelopes
+
+All routes below require the existing operator credential. Reads conceal foreign
+owners as 404; private runtime responses use no-store. Existing raw endpoints
+remain compatible; the Control Room download buttons use the new envelopes.
+
+| Route | Success 200 contract |
+|---|---|
+| GET /api/sandbox/checkpoints/{id} | StoredCheckpoint, including original UTC/null |
+| GET /api/sandbox/sessions/{id}/checkpoints | bounded owned summaries, UTC/null and saved lifecycle |
+| POST /api/sandbox/sessions/{id}/commands | CommandReceipt, original checkpoint UTC/null |
+| GET /api/sandbox/sessions/{id}/manifest | unchanged ExperimentManifest, sandbox/1 |
+| GET /api/sandbox/sessions/{id}/reproduction | RuntimeReproduction: archive_version runtime-reproduction/1, manifest, provenance |
+| POST /api/sandbox/verify | raw ExperimentManifest or RuntimeReproduction -> Verification |
+| GET /api/sandbox/experiments/{id}/manifest | unchanged ExperimentBundle, forkcast-manifest/1; completed jobs only |
+| GET /api/sandbox/experiments/{id}/reproduction | ForkCastReproduction: archive_version forkcast-reproduction/1, manifest, provenance |
+| POST /api/sandbox/experiments/verify | raw ExperimentBundle or ForkCastReproduction -> Verification |
+
+Provenance version execution-provenance/1 records the **exporting build**, not an
+invented original execution host: observed Git HEAD, dirty flag, Python version,
+OS family, and the explicit absence of external football-data/presentation-asset
+simulation dependencies. Git revision/dirty are null if Git is unavailable.
+No usernames, tokens, hostnames, remotes, absolute paths or arbitrary environment
+variables are exported. Actual code implementation hashes, full resolved config,
+seed/stream derivation, interventions/effective ticks, parent snapshot/ancestry
+and per-operation/event/output hashes remain inside the unchanged manifests.
+Presentation assets are not simulation inputs; their licensing/hash validation
+is a separate contract. Original execution revision/environment are unavailable
+when not recorded, never inferred from the exporter's checkout.
+
+Wrappers and provenance do not participate in deterministic hashes. They are
+unsigned claims, not authenticated authorship or timestamp attestations. Replay
+success means the supported local implementation reproduces the recorded inputs
+and hashes; it does not authenticate observational metadata. Object-key order and
+JSON whitespace do not matter. Unknown fields/versions, missing required fields,
+nonfinite numbers and duplicate keys are rejected; content is never executed.
+
+HTTP bodies are capped at 2 MB and depth 32 before validation. Invalid schemas
+return 422, ambiguous/deep/nonfinite JSON 400 and oversized bodies 413. A typed
+but divergent manifest returns 200 with verified=false, first component and
+operation_index/expected/actual where available. Missing/failed verification is
+never displayed as PASS. CLI reads are themselves bounded (runtime 2 MB,
+ForkCast 20 MB), even if a file grows after opening; malformed/schema/version
+failures return exit 1 and schema_or_version. Large bundles may be verified
+offline within that 20 MB bound rather than uploaded beyond the HTTP limit.
+
+From backend, both original examples still verify, without fixture regeneration:
+
+```text
+python -m pytest tests -q -p no:cacheprovider
+python -m app.sandbox.verify_manifest ../docs/examples/sandbox/experiment.json
+python -m app.sandbox.verify_experiment ../docs/examples/sandbox/forkcast.json
+python -m app.sandbox.verify_manifest downloaded-runtime.json
+python -m app.sandbox.verify_experiment downloaded-forkcast.json
+python -m pip check
+```
+
+From frontend run npm ci, npm run test:e2e (strict TypeScript + production build +
+real Playwright), npm run validate:assets and npm audit --json. On Windows use
+npm.cmd. The isolated test server creates fresh runtime/imported-match DBs.
+No hosted inference, deployment or paid operation is part of this verification.
+
+
+### Current local acceptance measurements (2026-10-21)
+
+`python scripts/benchmark-runtime-acceptance.py --iterations 3` completed on
+Windows/Python 3.13.15 using disposable SQLite and seed 7. Each checkpoint boundary
+has three samples; no production latency guarantee follows from these values.
+
+| Tick | Events | Snapshot bytes | Median save ms | Median restore ms |
+|---|---:|---:|---:|---:|
+| 0 | 1 | 5,957 | 7.600 | 6.842 |
+| 2,700 | 918 | 198,410 | 34.903 | 34.332 |
+| 5,400 | 1,819 | 389,573 | 56.984 | 62.371 |
+
+Tick-5,399 read-only seek: median 137.871 ms, maximum 138.429 ms. For a 120-second
+horizon, one/three pairs took median 211.980/596.841 ms (max 224.395/1022.212 ms),
+including tracemalloc, with peak traced allocations 251,977/2,167,508 bytes; these
+are not process RSS. The same script measures 20 authenticated TestClient
+intervention/next-tick HTTP requests at ticks 2700-2720: median 27.423/24.757 ms,
+maximum 74.626/38.214 ms. Five independent HTTP manifest replays took median
+448.677 ms, maximum 481.840 ms for an 85,398-byte manifest. Each run asserts
+applied effective ticks, restored hashes, unchanged parent state and independent
+verification. TestClient includes auth/validation/serialization but no remote
+network round trip. These are bounded local samples, not release SLAs or physics
+accuracy measurements.
+
+The final local regression passed 292 backend tests and 63 real browser cases
+with strict TypeScript/build. Both original example CLIs pass without regenerating
+fixtures; pip check and dependency audits pass. One existing TestClient deprecation
+and the existing large lazy-renderer chunk advisory remain visible. See
+PROJECT_STATUS and the integration PR for exact-head CI and acceptance evidence.
