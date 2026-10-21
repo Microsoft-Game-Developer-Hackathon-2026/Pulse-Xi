@@ -349,7 +349,9 @@ def explain_insight(insight_id: str):
 @app.get("/api/agent-traces")
 def agent_traces(x_admin_token: str | None = Header(default=None)):
     expected = os.getenv("PULSE_FOUNDRY_ADMIN_TOKEN", "")
-    if expected and (not x_admin_token or not secrets.compare_digest(expected, x_admin_token)):
+    if not expected:
+        raise HTTPException(503, "trace administration is not configured")
+    if not x_admin_token or not secrets.compare_digest(expected.encode('utf-8'), x_admin_token.encode('utf-8')):
         raise HTTPException(403, "admin token required")
     return TRACES
 
