@@ -364,12 +364,16 @@ def explain_insight(insight_id: str):
 
 
 @app.get("/api/agent-traces")
-def agent_traces(x_admin_token: str | None = Header(default=None)):
+def agent_traces(response: Response, x_admin_token: str | None = Header(default=None)):
+    # Custom administrative headers do not supply HTTP Authorization cache rules.
+    # Explicitly prohibit retention on both successful and rejected trace reads.
+    private = {'Cache-Control': 'no-store'}
     expected = os.getenv("PULSE_FOUNDRY_ADMIN_TOKEN", "")
     if not expected:
-        raise HTTPException(503, "trace administration is not configured")
+        raise HTTPException(503, "trace administration is not configured", headers=private)
     if not x_admin_token or not secrets.compare_digest(expected.encode('utf-8'), x_admin_token.encode('utf-8')):
-        raise HTTPException(403, "admin token required")
+        raise HTTPException(403, "admin token required", headers=private)
+    response.headers.update(private)
     return TRACES
 
 
