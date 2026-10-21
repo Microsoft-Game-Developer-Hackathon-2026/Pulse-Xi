@@ -60,3 +60,8 @@
 .control-source-list p,.control-proof-note{color:#86a6a4;font-size:10px;line-height:1.5}
 @media(max-width:800px){.control-team-grid{grid-template-columns:1fr}.control-team{border-right:0;border-bottom:1px solid #29464a}.control-proof-windows{grid-template-columns:1fr}}
 @media(max-width:500px){.control-toolbar{align-items:flex-start;flex-direction:column}.rhythm-row{grid-template-columns:85px minmax(50px,1fr) 75px;gap:7px;font-size:9px}.control-team{padding:14px}.control-metric{grid-template-columns:minmax(100px,1fr) auto}}
+
+.locale-status,.recap-scope{display:block;padding:8px 20px;color:#8eaead;font-size:10px;line-height:1.5}
+.locale-status{border-bottom:1px solid #29464a}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+

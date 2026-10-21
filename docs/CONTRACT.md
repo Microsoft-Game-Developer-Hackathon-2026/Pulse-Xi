@@ -103,3 +103,10 @@ identity verification, idempotence, errors, migration and rollback details.
 ## Authenticated runtime Control vs Chaos
 
 GET `/api/sandbox/sessions/{id}/control-chaos?at_second=T&window_seconds=300&projection=native` reuses `control-chaos-formulas/1` over one owner-scoped captured native view. Only `projection=native` is accepted (default for older clients); other values return 422. Response `runtime-control-chaos/1` identifies projection, session/branch/scenario, revision, actual duration/halftime, captured tick/cursor/hash scope, window completeness and genuine source evidence. The frontend sends and validates native explicitly for all durations. Private responses use no-store, future cutoffs return 422 and other owners remain concealed. Partial histories never imply two complete windows.
+
+## FanDNA localization and preference boundary
+
+The FanDNA replay controls have typed English, Spanish and Hindi message catalogs. A missing catalog entry falls back to English and the interface announces that fallback. The locale is applied to the main application region for assistive technology. The existing recap API remains a deterministic template over verified goal evidence; localized copy does not alter scores, clocks, insight IDs or supporting event IDs. Persona labels and analyst/broadcaster templates are localized in all three supported locales.
+
+FanDNA preferences use browser-local `pulse-xi-fandna-preferences-v1`, schema version 1. It stores only locale, persona and selected synthetic team/player IDs; invalid or unknown values return to defaults, and favorites are checked against the selected fixture. Storage failure does not block replay. No speech provider, voice cloning, network speech request, or paid Azure Speech feature is enabled; voice requires a separately approved cost and consent design.
+
