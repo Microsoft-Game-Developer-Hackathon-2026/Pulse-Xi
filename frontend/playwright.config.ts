@@ -13,7 +13,7 @@ export default defineConfig({
     command: 'python -m uvicorn app.main:app --loop app.local_event_loop:create_loop --app-dir ../backend --host 127.0.0.1 --port 8765',
     url: 'http://127.0.0.1:8765/health',
     // Each run owns its database and explicitly authorizes only the test importer.
-    env: { PULSE_ENABLE_LOCAL_DATA_ADMIN: '1', PULSE_IMPORT_TOKEN: 'test-import-token-at-least-32-characters', PULSE_DB_PATH: join(mkdtempSync(join(tmpdir(), 'pulse-xi-browser-')), 'events.sqlite') },
+    env: { PULSE_ENABLE_LOCAL_DATA_ADMIN: '1', PULSE_IMPORT_TOKEN: 'test-import-token-at-least-32-characters', PULSE_RUNTIME_TOKEN: 'test-runtime-token-at-least-32-characters', PULSE_RUNTIME_TOKENS: '', PULSE_DB_PATH: join(mkdtempSync(join(tmpdir(), 'pulse-xi-browser-')), 'events.sqlite') },
     reuseExistingServer: false,
     timeout: 30000,
   },
