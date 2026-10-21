@@ -1,13 +1,20 @@
 # Football Sandbox Lab architecture and authoritative engine
 
-## Integration baseline (2026-10-21)
+## Integrated baseline and current contracts (2026-10-21)
 
-The analysis branch now includes the architecture PR #46 through a normal merge,
-with both status sections retained. Its five additional owner-scoped HTTP analysis
-operations are documented in [LIVE_SANDBOX](LIVE_SANDBOX.md#existing-analysis-integration).
-The original #46 audit below describes its dated branch/test evidence; it does not
-certify a merged main. Trace security #45 and its command-credential follow-up
-retain independent review gates. Combined-stack verification is recorded on #43.
+Main `100106ade274bbb7da137c73b22009f929a72e8c` integrated #64's saved-scenario
+library/archive contracts and runtime schema 3 metadata, following #53's runtime,
+architecture, analysis and command hardening. Post-merge CI passed 248 backend and
+55 browser cases; the handoff adds a mobile/keyboard test without changing runtime code. Core engine/schema/RNG versions and golden hashes
+are unchanged. See [LIVE_SANDBOX](LIVE_SANDBOX.md#saved-scenario-library-and-archives)
+for the current scenario API, provenance and migration rules. Self-review and
+exact-head CI are recorded on the completion PR; no other person's approval,
+cloud deployment or paid inference is claimed.
+
+The branch availability table and dated verification counts in the next section
+are historical audit evidence, superseded by this integrated baseline. Original
+component, lifecycle and sequence contracts below still apply; scenario metadata
+is outside the engine state/clock/manifest boundary.
 
 ## Issue #2 review scope (2026-10-21)
 
@@ -80,7 +87,7 @@ flowchart TB
   Replay --> Legacy
   Room --> API
   Legacy <--> Library[(Imported library SQLite schema 2)]
-  Store <--> Runtime[(Separate runtime SQLite schema 2)]
+  Store <--> Runtime[(Separate runtime SQLite schema 3)]
   Jobs <--> Runtime
   Adapter -. projection with private UI integration in PR 43 .-> Analytics
 ```
@@ -174,6 +181,7 @@ and independent replay. Structural validity alone does not prove authenticity.
 | Requested concept | Code authority/version | Validation and relationships |
 |---|---|---|
 | ScenarioConfig | `sandbox.models.ScenarioConfig`, sandbox/1, zone-engine/1 | Seed 0..2147483647; even duration 60..5400; neutral-dry; distinct teams and 22 unique player IDs; 11 players/team; attributes/tactics 0..100; defaults resolved and hashed in Scenario |
+| Scenario archive | `scenario_archive.ScenarioArchive`, scenario-archive/1 | Existing Scenario + explicit engine-owned RNG provenance + UTC/null; outside EngineState; import rebuilds ID/hash; owner metadata stored separately |
 | WorldState | `EngineState`, sandbox/1; no separate class | Full scenario, clock, score, possession/ball, 22 actors, tactics/policy revision, RNG, queue/decision counters, events/interventions; validate_state on load/transition/restore |
 | Actor/tactical state | `ActorState`, `Tactics`, `PendingAction` within EngineState | GK/DF/MF/FW roles follow formation; stamina 0..10000, last action <= tick; no continuous actor positions, substitutions or physics |
 | ClockState | EngineState tick/period/lifecycle + config duration; no separate class | Integer seconds, separate from UTC and browser elapsed time; period 2 starts at duration/2 after halftime event |
@@ -261,7 +269,9 @@ Existing main `/api/matches` and replay WS remain stable and public.
 | Branch | Method/path | Request/query -> response | Consumer, concurrency and errors |
 |---|---|---|---|
 | #40 | GET /versions; /presets | none -> VersionInfo; map of ScenarioConfig | Setup, limits/build inspection |
-| #40 | POST /scenarios; GET /scenarios/{id} | ScenarioConfig -> Scenario; none -> Scenario | Builder/JSON import/save; content-addressed, owner scoped; no distinct file import/export routes |
+| #40 | POST /scenarios; GET /scenarios/{id} | ScenarioConfig -> Scenario; none -> Scenario | Existing raw-config create/read; content-addressed, owner scoped; unchanged response |
+| #3 completion | GET /scenarios | none -> ScenarioSummary[] | Owned stable ID order, <=100; no-store |
+| #3 completion | POST /scenarios/import; GET /scenarios/{id}/archive | ScenarioArchive or ScenarioConfig -> ScenarioArchive; none -> ScenarioArchive | Recomputed identity, first stored metadata retained, 409 conflict; located 422/400/413 boundaries; no-store |
 | #40 | POST /sessions | CreateSession -> MutationResult | Owner+operation identity; identical retry returns original creation boundary |
 | #41 | GET /sessions | none -> SessionSummary[] | Owner's runtime/branch selector |
 | #40 | GET /sessions/{id}/state; /snapshot | none -> RuntimeView; Snapshot | Current committed state/resync |
@@ -308,7 +318,7 @@ clients from this actual schema and preserve the documented error-family caveat.
 | Store | Responsibility | Recovery |
 |---|---|---|
 | Library PULSE_DB_PATH, schema 2 | matches/events/package_metadata/match_lifecycle/deleted_matches; public reads, shared import capability | Separate atomic 0->1 and 1->2 migrations; scripts/database-admin.py; restored admin generations rotate |
-| Runtime PULSE_RUNTIME_DB_PATH, schema 2 | scenarios/sessions/commands/runtime_events/checkpoints/audit plus #41 runs/experiments; owner scope | Separate atomic migration steps; app.sandbox.backup; restore preserves runtime/job/receipt identities |
+| Runtime PULSE_RUNTIME_DB_PATH, schema 3 | scenarios/scenario_metadata/sessions/commands/runtime_events/checkpoints/audit/runs/experiments; owner scope | Atomic 0->1->2->3 steps; metadata migration preserves deterministic payloads; app.sandbox.backup supports versions 1/2/3 |
 | Browser storage | Replay workspace/notes and runtime ID only | Origin/profile-local; not credentials, engine state or server backup |
 | Process memory | Regenerable fixture cache, optional bounded TRACES, worker task | Traces/cache lost on restart; accepted runtimes/jobs reload from SQLite |
 
@@ -514,7 +524,7 @@ authentication, not a public signup/judge login UI or collaborative role system.
 Token rotation keeps ownership if the mapped operator ID stays the same.
 
 `PULSE_RUNTIME_DB_PATH` defaults to `pulse_runtime.sqlite` beside `PULSE_DB_PATH`.
-It MUST be a different file. Runtime schema `user_version=2` retains scenarios,
+It MUST be a different file. Runtime schema `user_version=3` retains scenarios and separate scenario_metadata,
 sessions, commands, runtime_events, checkpoints, audit and adds runs/experiments. It never changes
 the data-hub schema 2 or that database's backup whitelist. Cold migration is
 atomic and rechecks the version under the writer lock. Future versions are
