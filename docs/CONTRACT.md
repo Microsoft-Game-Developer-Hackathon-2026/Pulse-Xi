@@ -112,3 +112,17 @@ history, continuous possession or tracking. Runtime datasets stay private and
 separate from imported-match storage.
 
 Runtime Control vs Chaos accepts `projection=native` only (default native for existing clients). Other values return 422; the response identifies `projection: "native"`. The Control Room always sends it explicitly, including 5,400-second sessions. Native projection retains original timestamps and halftime; formulas are unchanged.
+
+The integrated runtime exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. They reuse existing calculations over a committed engine-owned v1 projection, reject future cutoffs and conceal other owners. Private runtime datasets are not resolved through public `/api/matches` routes. Current compatibility is 5400-second scenarios only. See [LIVE_SANDBOX](LIVE_SANDBOX.md#existing-analysis-integration) for every route, local bookmark namespace, export limits and runtime-boundary hash scope. Neither dataset lifecycle nor engine state serialization is replaced.
+
+## Saved scenarios (runtime schema 3)
+
+The scenario library remains separate from imported-match storage (library schema 2).
+Authenticated GET `/api/sandbox/scenarios` returns at most 100 owned summaries,
+ordered by scenario ID. Existing create/read/preset payloads remain compatible.
+POST `/api/sandbox/scenarios/import` accepts strict raw ScenarioConfig or
+scenario-archive/1; GET `/api/sandbox/scenarios/{id}/archive` exports the persisted
+record. New private responses use Cache-Control: no-store. See
+[LIVE_SANDBOX](LIVE_SANDBOX.md#saved-scenario-library-and-archives) for schema,
+identity verification, idempotence, errors, migration and rollback details.
+

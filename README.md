@@ -14,6 +14,15 @@ Match Data Hub. Live runtime/ForkCast and analysis forward integration remains
 in #53; native-period analysis is #57. This dependent Control vs Chaos branch
 combines #57 and the recorded algorithms from #42 for integration testing, not
 as evidence of approval or incorporation into main. See the shared
+
+**Integrated baseline:** main `100106a` includes #64's saved-scenario library and #53's live runtime, architecture,
+private analysis and command-credential hardening, alongside original graphics #62.
+PR #52 remains open, but its code is present through #53; its separate PR state
+does not mean the fix is absent. The [completion PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64) integrated owner-scoped saved-scenario
+listing, versioned archives and creation provenance without changing engine hashes.
+See the [scenario library contract](docs/LIVE_SANDBOX.md#saved-scenario-library-and-archives)
+and shared
+
 [architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
 
 | Capability | Status and boundary |
@@ -24,13 +33,13 @@ as evidence of approval or incorporation into main. See the shared
 | ProofTrail | Goal/tactical insights with supporting events and deterministic numerical verification |
 | Pass Difficulty | Versioned 0–100 geometry heuristic with inspectable factors and player summaries; not a failure probability; pressure coverage unavailable |
 | Sandbox Lab | Fixture replay plus a separate authenticated live Control Room with server-driven runs, tactical interventions, exact checkpoints, isolated branches and verified paired ForkCast experiments |
-| 3D Observer | Lazy procedural pitch/stadium, five cameras, Low/Medium/High profiles, recorded-event evidence and 2D/WebGL fallback |
+| 3D Observer | Lazy original Blender kit with procedural fallback, five cameras, Low/Medium/High profiles, recorded-event evidence and 2D/WebGL fallback |
 | Broadcast/FanDNA | Timed cue JSON/preview and five recap modes; limited English, Hindi and Spanish templates, not full interface translation |
 | Match Data Hub | Searchable source-labelled library, authorized canonical JSON import, no-write preview, factual data-quality inspection, archive/restore/delete controls and checksummed portable match packages |
 | Persistence | SQLite imported-event persistence and idempotent ingest; built-in/custom fixtures regenerate |
 | Microsoft AI | Guarded optional provider code; verified local path uses deterministic fallback, not authenticated model inference |
 
-The [Live Sandbox guide](docs/LIVE_SANDBOX.md) documents the working Control Room at `/#/runtime`: configure, run on the server, pause, intervene, checkpoint, restore, run paired trials and inspect/verify event evidence. Runtime access requires provisioned operator credentials, kept only in page memory. The fixture workspace remains unchanged at `/#/sandbox`. **Separate gates:** PR #31's editable Blender/GLB kit awaits Vishwam's asset/security approval; PRs #32/#33 remain separate. Calibrated prediction, public Azure deployment and real multi-agent inference are not supplied by the engine. See the [earlier handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
+The [Live Sandbox guide](docs/LIVE_SANDBOX.md) documents the proposed Control Room at `/#/runtime`: configure, run on the server, pause, intervene, checkpoint, restore, run paired trials and inspect/verify event evidence. Runtime access requires provisioned operator credentials, kept only in page memory. The fixture workspace remains at `/#/sandbox`. Original graphics, licensing notices and fallback behavior from merged #62 are preserved; see its [asset review record](docs/ASSET_SECURITY_RELEASE_REVIEW.md). Other preparation and feature PRs retain separate review gates. Calibrated prediction, public Azure deployment and real multi-agent inference are not supplied by the engine. See the [earlier handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
 
 ## Windows quick start
 
@@ -157,6 +166,8 @@ JSON includes schema, real generation time, cutoff, source IDs, fixture seed and
 
 ## Architecture and stack
 
+The optional **3D Observer** adds an original Blender stadium, recorded event markers, five camera modes and Low/Medium/High graphics profiles. The default 2D view remains independent of WebGL. See the [graphics toolchain, reproducible assets and measured results](docs/PROFESSIONAL_3D_GRAPHICS_UPGRADE.md). Positions remain sparse synthetic event snapshots; no continuous player tracking is inferred.
+
 ```mermaid
 flowchart LR
   S[Seeded fixture generator] --> E[Typed synthetic events]
@@ -282,3 +293,6 @@ Source buttons select actual recorded runtime events in the existing inspector
 and 2D/3D observer. Credentials remain in memory. This dependent implementation
 requires the runtime/native analysis and recorded Control vs Chaos workstreams;
 its presence on a feature branch does not establish integration into `main`.
+
+In the integrated runtime, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to existing pass analysis, ProofTrail, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. The current engine projection requires a 5400-second scenario; shortened runs retain native controls. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#existing-analysis-integration) for authenticated routes, cutoff/hash semantics and limitations. The base runtime/analysis integration reached main through #53; native-period analysis and other open feature PRs are not implied.
+
