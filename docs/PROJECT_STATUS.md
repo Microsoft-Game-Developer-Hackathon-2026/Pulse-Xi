@@ -26,8 +26,7 @@ configuration returned 200, and a malformed credential raised an exception. A
 separate main-based [PR #45](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/45) on fix/44-agent-trace-authorization passed 97 backend and
 33 browser cases; those are separate results, not added to the architecture count.
 Review/integration of that fix is required before exposing privileged traces.
-npm audit reports one high-severity Vite finding on the older lockfile; #43 already
-contains its upgrade. This task preserves dependency versions. Upstream TestClient
+The original architecture head used the older Vite lockfile. This analysis integration retains #43's Vite 7.3.7 upgrade; its current scan is reported separately from historical architecture results. Upstream TestClient
 deprecations and the existing optional-renderer chunk warning remain.
 
 ## Authoritative engine branch
