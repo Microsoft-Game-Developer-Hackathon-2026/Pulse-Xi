@@ -89,6 +89,10 @@ async def run_one_workflow(fixture: str, timeout_seconds: int) -> dict:
             "elapsed_ms": round((time.perf_counter() - started) * 1000, 1),
         }
         trace.setdefault("elapsed_ms", round((time.perf_counter() - started) * 1000, 1))
+        if trace.get("status") == "running":
+            trace["status"] = "failed"
+            trace["provider_status"] = "error"
+            trace["error_type"] = "TimeoutError"
         report = _safe_report(trace, {}, evidence_hash)
         report["workflow_status"] = "failed"
         return report
