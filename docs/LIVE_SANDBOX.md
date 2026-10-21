@@ -193,9 +193,8 @@ bookmarks, CSV/JSON exports and lazy observer. All new reads remain under
 Cutoffs after the committed engine tick are rejected (422); wrong-owner identities
 remain concealed (404). Reads do not step the engine or copy private runtime data
 into the public match library. Analysis responses are no-store. The engine's
-current v1 projection supports **5400-second scenarios only**. Shortened scenarios
-keep their native controls/checkpoints/ForkCast; this panel explicitly reports
-unavailability rather than rescaling timestamps or periods.
+default v1 projection supports **5400-second scenarios only**. The explicit native
+projection below supplies short-scenario analysis without rescaling time or periods.
 
 The projection preserves engine-generated event identities and each team's
 attacking coordinate frame. The observer shows discrete event coordinates only.
@@ -258,3 +257,42 @@ submit the team video. Those are separate issues/review/service requirements.
 Provisioned operator authentication and deployment gateway rate limits remain
 necessary. The simulation's documented football-model limitations still apply.
 Shared contract review and normal PR/CI approval remain required before merge.
+
+## Native-period analysis
+
+Optional `projection=native` applies to the existing authenticated analysis, pass
+list/detail/evidence and analysis-export routes. Omitting it retains legacy behavior.
+No engine transition, RNG, snapshot, state version or canonical hash is changed.
+
+`runtime-native-analysis/1` reports session/scenario/branch identity, revision,
+committed cursor, boundary hashes, cutoff and `clock`: actual duration, native
+halftime, current engine period and inspection period, in authoritative match
+seconds. At halftime inspection switches to period 2, while the halftime event
+retains period 1 as emitted before the engine's switch. Either period can occur
+exactly at that boundary. `runtime-match/1` preserves roster and duration;
+`runtime-event/1` preserves scoped IDs (`session_id-sequence`), sequence, native
+tick/match_second, period and observations. Its validator checks native boundaries.
+Away x uses the existing attacking-frame transform. Calendar generation time is
+null: no observed calendar timestamp exists. Native events are not import packages.
+
+Metrics reuse existing event-count calculations. The response adds cutoff score,
+per-team type counts (including carries) and explicit unavailable reasons. Legacy
+match-state/insight templates and continuous tracking remain unavailable. Native
+pass geometry reuses synthetic-pass-difficulty/1.0 and its independent verifier;
+`runtime-pass-evidence/1` embeds native events. Branch ProofTrail/ForkCast remain
+separate and unchanged. No pressure coverage or tactical causality is invented.
+
+Exports reuse analysis-export/1, CSV escaping and existing budgets. Provenance
+adds analysis_projection, duration_seconds and halftime_tick; event CSV includes
+native fields. Hashes identify the captured boundary, potentially later than the
+inspection cutoff, not a rewound state. Future source events are excluded.
+The UI chooses native projection for short scenarios and legacy for 5400 seconds.
+It reuses event selection, pass evidence, bookmarks, draft preservation, exports
+and 2D/3D. Tokens stay memory-only; saved notes restore after re-authentication.
+
+Backend tests run actual engines at 60/120/300/600/1800/2700/5400 seconds, checking
+halftime/fulltime, identities, counts, geometry, hashes, JSON/CSV, owner isolation,
+concurrent reads and stale mutations. Browser tests create and step a 120-second
+runtime, inspect native periods, verify evidence, bookmark/export, switch 2D/3D
+and refresh. Use standard backend pytest and frontend test:e2e commands. This
+dependent branch requires runtime-forward and native-contract review before main.
