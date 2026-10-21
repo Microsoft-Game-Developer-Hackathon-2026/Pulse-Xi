@@ -322,3 +322,5 @@ Local startup/test serving uses an explicit Uvicorn loop factory: Windows Select
 ### Authoritative recorded-event analysis
 
 In the integrated runtime, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to existing pass analysis, ProofTrail, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. The current engine projection requires a 5400-second scenario; shortened runs retain native controls. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#existing-analysis-integration) for authenticated routes, cutoff/hash semantics and limitations. The base runtime/analysis integration reached main through #53; native-period analysis and other open feature PRs are not implied.
+
+Frontend visual materials and layout invariants: [Precision Glass design system](docs/UI_DESIGN_SYSTEM.md).
