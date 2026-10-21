@@ -1,12 +1,11 @@
-import { Suspense, useCallback, useEffect, useMemo, useState } from 'react'
-import { useLoader } from '@react-three/fiber'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Box3, EdgesGeometry, Mesh, MeshStandardMaterial, Vector3 } from 'three'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import type { GLTF } from 'three/addons/loaders/GLTFLoader.js'
 import type { EventSnapshot } from './eventSnapshot'
 import type { GraphicsQuality } from './graphicsProfiles'
 import { cloneTeamMarker } from './cloneTeamMarker'
 import { createGrassTexture } from './grassTexture'
-import { Stadium } from './Stadium'
 import type { Object3D } from 'three'
 
 function useDisposeMaterials(scene: Object3D) {
@@ -21,8 +20,37 @@ const urls = [new URL('./assets/v2/field.glb', import.meta.url).href,
 const stadiumUrl = new URL('./assets/v2/stadium.glb', import.meta.url).href
 export type AssetStatus = { status: 'loading' | 'ready' | 'fallback' | 'procedural'; surfaceSize?: [number, number, number]; readyMs?: number }
 
-function StadiumKit({ quality, ready }: { quality: GraphicsQuality; ready: () => void }) {
-  const model = useLoader(GLTFLoader, stadiumUrl)
+export type LoadedKit = { field: GLTF; ball: GLTF; player: GLTF; stadium?: GLTF }
+// Four immutable project URLs only: successful resources survive canvas remounts.
+// Expected loader failures are handled as data, not thrown into the R3F root.
+const cache = new Map<string, Promise<GLTF>>()
+function loadModel(url: string) {
+  let job = cache.get(url)
+  if (!job) {
+    job = new GLTFLoader().loadAsync(url).catch(error => { cache.delete(url); throw error })
+    cache.set(url, job)
+  }
+  return job
+}
+export function useOriginalAssets(lowPower: boolean) {
+  const [result, setResult] = useState<{lowPower: boolean; models: LoadedKit | null; failed: boolean} | null>(null)
+  useEffect(() => {
+    let stopped = false
+    setResult({lowPower, models:null, failed:false})
+    void Promise.all([...urls, ...(lowPower ? [] : [stadiumUrl])].map(loadModel)).then(([field, ball, player, stadium]) => {
+      const surface = field.scene.getObjectByName('PlayingSurface')
+      if (!surface) throw Error('Asset field surface is missing')
+      field.scene.updateMatrixWorld(true)
+      const size = new Box3().setFromObject(surface).getSize(new Vector3())
+      if (Math.abs(size.x-100)>.01 || Math.abs(size.z-64)>.01 || size.y>.1) throw Error('Asset coordinate/scale contract mismatch')
+      if (!stopped) setResult({lowPower, models:{field,ball,player,stadium}, failed:false})
+    }).catch(() => { if (!stopped) setResult({lowPower, models:null, failed:true}) })
+    return () => { stopped = true }
+  }, [lowPower])
+  return result?.lowPower === lowPower ? result : {models:null, failed:false}
+}
+
+function StadiumKit({ quality, ready, model }: { quality: GraphicsQuality; ready: () => void; model: GLTF }) {
   const scene = useMemo(() => model.scene.clone(true), [model])
   useEffect(() => {
     scene.traverse(object => { if (object instanceof Mesh) { object.castShadow = quality === 'high'; object.receiveShadow = false } })
@@ -31,10 +59,10 @@ function StadiumKit({ quality, ready }: { quality: GraphicsQuality; ready: () =>
   return <primitive object={scene} dispose={null}/>
 }
 
-export function AssetKit({ snapshot, lowPower, quality = 'standard', report }: {
-  snapshot: EventSnapshot; lowPower: boolean; quality?: GraphicsQuality; report: (value: AssetStatus) => void
+export function AssetKit({ snapshot, lowPower, quality = 'standard', report, models }: {
+  snapshot: EventSnapshot; lowPower: boolean; quality?: GraphicsQuality; report: (value: AssetStatus) => void; models: LoadedKit
 }) {
-  const [field, ball, player] = useLoader(GLTFLoader, urls)
+  const {field, ball, player} = models
   const [stadiumReady, setStadiumReady] = useState(false)
   const markStadiumReady = useCallback(() => setStadiumReady(true), [])
   const grass = useMemo(createGrassTexture, [])
@@ -85,7 +113,7 @@ export function AssetKit({ snapshot, lowPower, quality = 'standard', report }: {
   return <group>
     <primitive object={surface} dispose={null}/>
     {paintOutlines.map((geometry, index) => <lineSegments key={index} geometry={geometry} dispose={null} position={[0, .03, 0]}><lineBasicMaterial color="#dcebd5"/></lineSegments>)}
-    {!lowPower && <Suspense fallback={<Stadium quality={quality}/>}><StadiumKit quality={quality} ready={markStadiumReady}/></Suspense>}
+    {!lowPower && models.stadium && <StadiumKit model={models.stadium} quality={quality} ready={markStadiumReady}/>}
     {snapshot.origin && <group position={[snapshot.origin[0], .06, snapshot.origin[2]]}>
       {!lowPower && snapshot.actor_id ? <primitive object={tinted} dispose={null}/> : <mesh position={[0, .8, 0]}><sphereGeometry args={[1.1, 12, 8]}/><meshStandardMaterial color={snapshot.color}/></mesh>}
     </group>}

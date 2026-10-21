@@ -71,13 +71,13 @@ export function ObserverSwitch({ match, event, atSecond, scope, children, prefer
     {failure && <p className="observer-notice" role="status">{failure}</p>}
     {!open ? children : <>
       <div className="observer-controls" aria-label="3D camera controls">
+        <label>SCENE STYLE <select value={assetStyle} onChange={event => { setAssetStyle(event.target.value as 'original' | 'procedural'); setAsset({ status: 'loading' }); started.current = performance.now() }}><option value="original">Original Blender kit</option><option value="procedural">Procedural fallback</option></select></label>
         <button aria-pressed={camera === 'broadcast'} onClick={() => setCamera('broadcast')}>Broadcast camera</button>
         <button aria-pressed={camera === 'tactical'} onClick={() => setCamera('tactical')}>Top-down camera</button>
         <button aria-pressed={camera === 'isometric'} onClick={() => setCamera('isometric')}>Isometric camera</button>
         <button aria-pressed={camera === 'free'} onClick={() => setCamera('free')}>Free camera</button>
         <button disabled={!snapshot.origin} aria-pressed={camera === 'focus'} onClick={() => setCamera('focus')}>Focus event</button>
         <button onClick={() => { setCamera('broadcast'); setRevision(value => value + 1) }}>Reset camera</button>
-        <label>SCENE STYLE <select value={assetStyle} onChange={event => { setAssetStyle(event.target.value as 'original' | 'procedural'); setAsset({ status: 'loading' }); started.current = performance.now() }}><option value="original">Original Blender kit</option><option value="procedural">Procedural fallback</option></select></label>
         <label>3D QUALITY <select value={quality} onChange={event => { setQuality(event.target.value as GraphicsQuality); onQualityChange?.(event.target.value as GraphicsQuality) }}>{Object.entries(graphicsProfiles).map(([id, profile]) => <option key={id} value={id}>{profile.label}</option>)}</select></label>
       </div>
       <RenderBoundary key={revision} fail={fail}><Suspense fallback={<><p className="observer-notice" role="status">Loading optional 3D renderer…</p>{children}</>}>
