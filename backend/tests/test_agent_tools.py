@@ -1,5 +1,4 @@
 import pytest
-from pydantic import ValidationError
 
 from app.agent_tools import ToolContext, ToolFailure, execute_tool
 from app.evidence import insights_for, overlays_for
