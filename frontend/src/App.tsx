@@ -6,6 +6,7 @@ import { PassPlayerSummary } from './features/passes/PassInspector'
 import { MatchDataHub } from './features/sandbox/MatchDataHub'
 import { SandboxSetup } from './features/sandbox/SandboxSetup'
 import { EventTimeline } from './features/sandbox/EventTimeline'
+import { replayObserverEvent } from './features/observer/eventSnapshot'
 import { ObserverSwitch } from './features/observer/ObserverSwitch'
 import { AnalysisTools } from './features/sandbox/AnalysisTools'
 import { readWorkspace, deepWorkspace, WORKSPACE_KEY } from './features/sandbox/analysisStorage'
@@ -14,6 +15,8 @@ import './features/sandbox/analysis.css'
 import { readReplayEvents } from './features/sandbox/replayApi'
 import { hasLocaleFallback, readFanPreferences, translate, writeFanPreferences } from './fandna'
 import type { Locale, MessageKey, Persona } from './fandna'
+import { RuntimeRoom } from './features/runtime/RuntimeRoom'
+
 
 const important = new Set(['goal', 'shot', 'turnover', 'recovery', 'halftime', 'fulltime', 'kickoff'])
 const clock = (seconds: number) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`
@@ -77,7 +80,7 @@ export default function App() {
   const [speed, setSpeed] = useState(initialWorkspace.value?.speed ?? 1)
   const [showOverlays, setShowOverlays] = useState(true)
   const [error, setError] = useState('')
-  const [workspace, setWorkspace] = useState(window.location.hash.split('?')[0] === '#/data' ? 'data' : window.location.hash.split('?')[0] === '#/sandbox' ? 'sandbox' : 'command')
+  const [workspace, setWorkspace] = useState(window.location.hash.split('?')[0] === '#/runtime' ? 'runtime' : window.location.hash.split('?')[0] === '#/data' ? 'data' : window.location.hash.split('?')[0] === '#/sandbox' ? 'sandbox' : 'command')
   const [selectedEventId, setSelectedEventId] = useState('')
   const [connectionAttempt, setConnectionAttempt] = useState(0)
   const priorMatch = useRef('')
@@ -88,7 +91,8 @@ export default function App() {
     writeFanPreferences({ version: 1, locale, persona, favoriteTeamId, favoritePlayerId })
   }, [locale, persona, favoriteTeamId, favoritePlayerId])
 
-  useEffect(() => { if (workspace === 'data') { setPlaying(false); setProof(null); proofRequest.current?.abort() } }, [workspace])
+  useEffect(() => { if (workspace === 'data' || workspace === 'runtime') { setPlaying(false); setProof(null); proofRequest.current?.abort() } }, [workspace])
+
 
   useEffect(() => () => proofRequest.current?.abort(), [matchId])
   useEffect(() => {
@@ -112,7 +116,7 @@ export default function App() {
 
 
   useEffect(() => {
-    const change = () => { setWorkspace(window.location.hash.split('?')[0] === '#/data' ? 'data' : window.location.hash.split('?')[0] === '#/sandbox' ? 'sandbox' : 'command'); try { const link = deepWorkspace(); if (link) { pendingRestore.current = link; setLoadedMatchId(''); setPlaying(false); setConnectionAttempt(value => value + 1) } } catch (e) { setWorkspaceNotice(String(e)) } }
+    const change = () => { setWorkspace(window.location.hash.split('?')[0] === '#/runtime' ? 'runtime' : window.location.hash.split('?')[0] === '#/data' ? 'data' : window.location.hash.split('?')[0] === '#/sandbox' ? 'sandbox' : 'command'); try { const link = deepWorkspace(); if (link) { pendingRestore.current = link; setLoadedMatchId(''); setPlaying(false); setConnectionAttempt(value => value + 1) } } catch (e) { setWorkspaceNotice(String(e)) } }
     window.addEventListener('hashchange', change)
     return () => window.removeEventListener('hashchange', change)
   }, [])
@@ -236,7 +240,7 @@ export default function App() {
     return () => { document.removeEventListener('keydown', keydown); if (opener?.isConnected) opener.focus() }
   }, [proof?.insight.insight_id])
   const seen = useMemo(() => events.filter(e => e.match_id === matchId && e.match_second <= second), [events, matchId, second])
-  const current = seen.find(event => event.event_id === selectedEventId) ?? [...seen].reverse().find(e => e.start)
+  const current = replayObserverEvent(seen, matchId, second, playing ? '' : selectedEventId, workspace === 'sandbox' ? filters : {team:'all',kind:'all'})
   useEffect(() => {
     if (!match || loadedMatchId !== matchId || storageConflict) return
     const saved: Workspace = { version: 1, matchId, second: Math.floor(second), eventId: current?.event_id ?? '',
@@ -261,7 +265,7 @@ export default function App() {
     window.addEventListener('storage', sync); return () => window.removeEventListener('storage', sync)
   }, [])
   const seekReplay = (time: number) => { proofRequest.current?.abort(); setSecond(time); setSelectedEventId(''); setPlaying(false); setProof(null) }
-  const selectRecorded = (event: Event) => { if (event.match_id !== matchId) return; proofRequest.current?.abort(); setSecond(event.match_second); setPlaying(false); setProof(null); setSelectedEventId(event.event_id) }
+  const selectRecorded = (event: Event) => { if (event.match_id !== matchId) return; setFilters({team:'all',kind:'all'}); proofRequest.current?.abort(); setSecond(event.match_second); setPlaying(false); setProof(null); setSelectedEventId(event.event_id) }
   const highlights = events.filter(e => e.match_id === matchId && e.type === 'goal' && (workspace !== 'sandbox' || e.match_second <= second))
   const feed = [...seen].reverse().filter(e => important.has(e.type)).slice(0, 7)
   const activeCue = showOverlays ? cues.find(cue => second >= cue.start_match_second && second < cue.end_match_second) : undefined
@@ -270,10 +274,11 @@ export default function App() {
   const awayGoals = seen.filter(e => e.type === 'goal' && e.team_id === match?.away.team_id).length
   const step = (direction: number) => {
     proofRequest.current?.abort(); setProof(null)
-    const selectedIndex = events.findIndex(event => event.event_id === selectedEventId && event.match_second === second)
-    const target = selectedIndex >= 0 ? events[selectedIndex + direction] : direction > 0
-      ? events.find(event => event.match_second > second)
-      : events.filter(event => event.match_second < second).at(-1)
+    const stepEvents = workspace === 'sandbox' ? events.filter(event => (filters.team === 'all' || event.team_id === filters.team) && (filters.kind === 'all' || event.type === filters.kind)) : events
+    const selectedIndex = stepEvents.findIndex(event => event.event_id === selectedEventId && event.match_second === second)
+    const target = selectedIndex >= 0 ? stepEvents[selectedIndex + direction] : direction > 0
+      ? stepEvents.find(event => event.match_second > second)
+      : stepEvents.filter(event => event.match_second < second).at(-1)
     if (target) { setSecond(target.match_second); setSelectedEventId(target.event_id) }
     setPlaying(false)
   }
@@ -293,14 +298,16 @@ export default function App() {
   return <div className="app-shell">
     <aside className="rail"><div className="rail-brand">P<span>XI</span></div><div className="rail-rule"/><div className="rail-item active" title="Command center"><Activity size={21}/></div><div className="rail-item" title="Live replay"><Radio size={21}/></div><div className="rail-end">01<br/><small>CORE</small></div></aside>
     <main className="main" lang={locale}>
-      <header className="header"><div className="brand"><div className="eyebrow">FOOTBALL INTELLIGENCE OPERATING SYSTEM</div><h1>PULSE <em>XI</em><span className="brand-slash">/</span><small>{workspace === 'data' ? 'MATCH DATA HUB' : workspace === 'sandbox' ? 'SANDBOX LAB' : 'COMMAND CENTER'}</small></h1></div><div className="header-right"><span className="synthetic-tag">SYNTHETIC SIMULATION</span><span className="status"><Wifi size={16}/> LOCAL ENGINE</span></div></header>
-      <nav className="workspace-nav" aria-label={tx("workspace")}><a href="#/" aria-current={workspace === 'command' ? 'page' : undefined}>{tx("match_intelligence")}</a><a href="#/sandbox" aria-current={workspace === 'sandbox' ? 'page' : undefined}>{tx("sandbox_lab")}</a><a href="#/data" aria-current={workspace === 'data' ? 'page' : undefined}>{tx("match_data_hub")}</a></nav>
-      {error && <div className="error" role="alert">{error}. <button onClick={() => { setPlaying(false); setError(''); setConnectionAttempt(value => value + 1) }}>Retry connection</button></div>}
-      {<div className="workspace-recovery" role="status">{workspaceNotice || 'Browser-local workspace autosave. Replay restores paused; no engine checkpoint is created.'} <button onClick={() => setResetWorkspacePending(true)}>Reset local workspace</button>{resetWorkspacePending && <span role="group" aria-label="Confirm workspace reset"><span>Reset replay position and preferences? Bookmarks will remain.</span><button onClick={() => {
+      <header className="header"><div className="brand"><div className="eyebrow">FOOTBALL INTELLIGENCE OPERATING SYSTEM</div><h1>PULSE <em>XI</em><span className="brand-slash">/</span><small>{workspace === 'runtime' ? 'ENGINE CONTROL ROOM' : workspace === 'data' ? 'MATCH DATA HUB' : workspace === 'sandbox' ? 'SANDBOX LAB' : 'COMMAND CENTER'}</small></h1></div><div className="header-right"><span className="synthetic-tag">SYNTHETIC SIMULATION</span><span className="status"><Wifi size={16}/> LOCAL ENGINE</span></div></header>
+      <nav className="workspace-nav" aria-label={tx("workspace")}><a href="#/" aria-current={workspace === 'command' ? 'page' : undefined}>{tx("match_intelligence")}</a><a href="#/sandbox" aria-current={workspace === 'sandbox' ? 'page' : undefined}>{tx("sandbox_lab")}</a><a href="#/runtime" aria-current={workspace === 'runtime' ? 'page' : undefined}>ENGINE CONTROL ROOM</a><a href="#/data" aria-current={workspace === 'data' ? 'page' : undefined}>{tx("match_data_hub")}</a></nav>
+      {workspace !== 'runtime' && error && <div className="error" role="alert">{error}. <button onClick={() => { setPlaying(false); setError(''); setConnectionAttempt(value => value + 1) }}>Retry connection</button></div>}
+      {workspace !== 'runtime' && <div className="workspace-recovery" role="status">{workspaceNotice || 'Browser-local workspace autosave. Replay restores paused; no engine checkpoint is created.'} <button onClick={() => setResetWorkspacePending(true)}>Reset local workspace</button>{resetWorkspacePending && <span role="group" aria-label="Confirm workspace reset"><span>Reset replay position and preferences? Bookmarks will remain.</span><button onClick={() => {
+
         try { localStorage.removeItem(WORKSPACE_KEY); localStorage.removeItem('pulse-xi-match'); pendingRestore.current = null; window.history.replaceState(null, '', window.location.pathname + window.location.search + window.location.hash.split('?')[0]); setSecond(0); setSelectedEventId(''); setFilters({team:'all',kind:'all'}); setViewPreference('2d'); setQualityPreference(window.matchMedia('(max-width: 700px), (prefers-reduced-motion: reduce)').matches ? 'low' : 'standard'); setAnalysisPanel('bookmarks'); setSpeed(1); setPlaying(false); setStorageConflict(false); setResetWorkspacePending(false); setWorkspaceNotice('Local replay workspace reset. Bookmarks were retained.') } catch { setWorkspaceNotice('Browser storage reset failed.') }
       }}>Confirm reset workspace</button><button onClick={() => setResetWorkspacePending(false)}>Cancel workspace reset</button></span>}{storageConflict && <><button onClick={() => location.reload()}>Reload saved workspace</button><button onClick={() => { setStorageConflict(false); setWorkspaceNotice('This tab will save its current analysis workspace.') }}>Keep this tab</button></>}</div>}
       {workspace === 'data' && <MatchDataHub open={value => { generated(value); window.location.hash = '/sandbox' }}/> }
-      <div hidden={workspace === 'data'}>
+      {workspace === 'runtime' && <RuntimeRoom/>}
+      <div hidden={workspace === 'data' || workspace === 'runtime'}>
       {workspace === 'sandbox' && match && <SandboxSetup match={match} onGenerated={generated}/>}
       {!match || loadedMatchId !== matchId ? <div className="loading" role="status">Loading recorded events and saved workspace…</div> : <>
         <div className="topbar"><div><span className="section-index">01 / LIVE MATCH INTELLIGENCE</span><h2>{match.title}</h2></div><label className="match-select">{tx("select_match")} <select value={matchId} onChange={e => setMatchId(e.target.value)}>{matches.map(m => <option key={m.match_id} value={m.match_id}>{m.title}</option>)}</select></label></div>
