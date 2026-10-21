@@ -25,6 +25,9 @@ and shared
 
 [architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
 
+This branch additionally contains #59 checkpoint/history inspection, independent ForkCast verification and recovery controls, pending review. Native analysis #57 remains separate.
+
+
 | Capability | Status and boundary |
 |---|---|
 | Synthetic fixtures | Three built-in seeded matches and validated custom seeds; reproducible on the same supported build |

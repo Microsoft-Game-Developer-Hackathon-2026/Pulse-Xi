@@ -1,6 +1,34 @@
 # Current project status - 2026-10-21
 
+
+## Current Satvik acceptance boundary (2026-10-21)
+
+Verified main `aefc046` includes runtime #53 and saved scenarios #64/#65. The #59 additions below remain review-gated.
+
+| Assigned issue | Implemented boundary | Remaining acceptance gate |
+|---|---|---|
+| #6 Checkpoints | Canonical save/isolated restore/parity in engine; #59 adds original snapshot and server-replayed historical state inspection, terminal checkpoints and measurements | Diyan runtime/consumer review and integration |
+| #8 ForkCast | Real paired trials, comparisons and provenance; #59 adds explicit independent verification and cited source-branch navigation | Diyan/Mahir review and integration |
+| #10 Control Room | Actual operator APIs, refresh/retry and analysis; #59 fixes retained private retry state after disconnect | #59 review and integration |
+| #11 Observer | Recorded snapshots, lazy scene/cameras/profiles/fallback; physical Iris Xe probe recorded in #59 | Runtime consumer review; continuous actor frames unavailable, never inferred |
+| #12 Blender | Seven GLBs pass unchanged manifest/hash/geometry contract; Blender 5.2.2 temporary export/reimport passes | #31 rights-holder provenance/licensing/release approval remains required |
+| #27 Pass Difficulty | Existing versioned formula, verifier, factors/player summaries/exports; runtime #53 and native #57 adapters tested | Native/runtime integration reviews |
+
+#57 and #58 are implemented and exact-head CI verified, with required reviews
+pending. #54 is the separately reviewed ProofTrail request-isolation correction
+for #51. Validation branches may combine #42/#48/#51/#54 for testing; they are
+not substitutes for review or main integration. #32/#33 remain historical
+preparation work; implemented engine contracts supersede those proposals and
+must not be overwritten by them. No issue is closed by this status update.
+
+The measurements and reproduction commands in [LIVE_SANDBOX](LIVE_SANDBOX.md)
+include bounded local checkpoint/ForkCast and physical Intel Iris Xe evidence.
+Earlier reports below describe their recorded revisions and remain historical.
+
+## Current integration boundary
+
 ## Current implementation and acceptance evidence
+
 
 Verified implementation merge: **`100106ade274bbb7da137c73b22009f929a72e8c`**,
 [PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64).
@@ -71,7 +99,7 @@ Follow-up local verification: **171 backend tests and 39 browser cases passed**,
 - Pass Difficulty (#28), replay Sandbox subset (#29), optional procedural 3D event observer (#30), persistent browser-local analysis, bookmarks and verified exports (#37).
 - Match Data Hub (#38, merged at `9eeeb2d74feb61fa4783ebfeb994f2a2f8044126`): canonical JSON validation/preview, authorized atomic import, searchable library, quality inspection and portable packages.
 
-## Issue #2 architecture audit
+## Issue #2 architecture audit (historical inspection)
 
 Live browser inspection confirms main 50f72e2, open #40 (224be7c) -> main,
 open #41 (f2854ae) -> engine branch, open #43 (b715e6a) -> live integration.

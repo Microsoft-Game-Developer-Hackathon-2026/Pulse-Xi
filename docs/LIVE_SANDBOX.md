@@ -443,3 +443,93 @@ concurrent reads and stale mutations. Browser tests create and step a 120-second
 runtime, inspect native periods, verify evidence, bookmark/export, switch 2D/3D
 and refresh. Use standard backend pytest and frontend test:e2e commands. This
 dependent branch requires runtime-forward and native-contract review before main.
+
+## Checkpoint inspection and experiment acceptance
+
+Saved checkpoint inspection uses the existing authenticated checkpoint endpoint.
+The Control Room shows the original runtime/scenario, saved tick, revision/cursor,
+engine/schema versions, saved state hash, score, possession, actor/pending-action
+counts and every RNG stream counter. It downloads the unchanged server envelope;
+this is not a client-side serializer or a new upload/restore format. Creation UTC
+is unavailable in the current contract and is not invented. Inspection failures
+can be retried; changing checkpoint, owner or session invalidates pending reads.
+"Inspect saved checkpoint tick" changes only the event inspection cutoff.
+
+Completed/cancelled sessions may save checkpoints because the engine explicitly
+permits that operation. A checkpoint with no remaining time cannot start ForkCast;
+the UI explains that an earlier checkpoint is required. Restoring a terminal
+checkpoint preserves its terminal state and does not create additional play.
+
+Completed ForkCast results support "Verify experiment independently", which gets
+the actual experiment bundle and invokes the existing independent verifier.
+Verification failure is reported, never relabeled as success. Cited event
+drilldown checks sequence, tick, type and actor before offering navigation to
+the exact source branch and inspection tick. Runtime and experiment manifests
+remain separate from imported-match packages and database backups.
+
+### Reproducible local resource measurements
+
+Run `python scripts/benchmark-runtime-acceptance.py --iterations 3` from the
+repository root. It creates disposable SQLite data, checks restored hashes and
+independently verifies every measured experiment. It never opens a user database.
+
+Observed 2026-10-21 on Windows 11 10.0.26300, Python 3.13.14, Intel64 family 6
+model 186, seed 7, 5,400-second scenario, three samples per boundary:
+
+| Tick | Events | Snapshot bytes | Median save ms | Median restore ms |
+|---|---:|---:|---:|---:|
+| 0 | 1 | 5,957 | 23.988 | 32.517 |
+| 2,700 | 918 | 198,410 | 70.977 | 81.954 |
+| 5,400 | 1,819 | 389,573 | 76.414 | 91.178 |
+
+Read-only history at tick 5,399: median 373.793 ms, maximum 434.039 ms. A 120-second
+ForkCast horizon took median 718.403 ms for one pair and 1,914.376 ms for three
+pairs, with peak traced Python allocations 251,811 and 2,181,750 bytes respectively.
+Experiment timing includes `tracemalloc` overhead; these are not process RSS or
+HTTP timings. Backend/browser tests were also running on the laptop, so these
+load-sensitive samples are acceptance evidence, not a controlled benchmark or
+deployment guarantee. The canonical engine is unchanged from runtime base
+`fed64f3`; no performance optimization or budget increase was justified.
+
+### Physical Intel Iris Xe verification
+
+The existing headed graphics probe ran against the production build at
+`c03435772fa03f988b075ee3d382777544c8be23` on Windows 11, Intel Iris Xe driver
+32.0.101.7088, Chromium 156.0.8078.4, viewport 1366×768 and DPR approximately 1.
+The actual renderer was ANGLE Intel Iris Xe Direct3D11, not SwiftShader.
+[Raw measurements](benchmarks/iris-xe-runtime-acceptance.json) record five-second
+active-orbit rAF pacing for Low/Medium/High: 60.18/60.15/60.10 callbacks per second,
+median 16.7 ms throughout, p95 17.0/17.0/16.9 ms. Draw calls were 19/39/69 and
+triangles 656/10,100/16,764 for the sampled recorded pass.
+
+This probe exercised the recorded-fixture observer served by the runtime build,
+not continuous actor simulation or a live-runtime GPU benchmark. It inspected
+all profile screenshots, rapid camera/quality changes, three 2D/3D cycles and
+30 seconds idle. Errors were empty, the lazy renderer loaded once and no GLB
+loaded; #31 remains separate. First renderer-ready was 551.8 ms. Heap before /
+after interactions / after idle: 12,970,464 / 21,673,764 / 13,556,690 bytes.
+These are browser pacing and bounded heap samples, not GPU timer queries, VRAM
+measurements or proof of long-session leak freedom. Keep existing quality defaults.
+
+Reproduce after build/start: set `PULSE_GRAPHICS_HARDWARE=1` and
+`PULSE_GRAPHICS_URL=http://127.0.0.1:<local-port>`, then run
+`npm run measure:graphics` from `frontend`. The hardware path rejects software
+renderer identity. Use isolated databases for verification.
+
+### Disconnect and uncertain operations
+
+An interrupted mutation response may leave a safe retry receipt in browser
+memory while the server has already committed it. Staying connected preserves
+the explicit idempotent retry. Disconnect clears that private retry body and
+comparison/evidence state; reconnect reads the actual owned runtime again.
+Disconnect does not undo or cancel committed server work. New commands then
+use the refreshed revision rather than replaying a previous operator's request.
+
+The committed observer also offers "Inspect historical engine state". It calls
+`GET /sessions/{id}/history?at_tick=N` with the operator credential, presenting
+its read-only snapshot, native period, historical state hash and captured source
+revision. Replay is performed by the server using its owned checkpoint and
+command history. The frontend neither synthesizes states nor rewinds the live
+runtime. Cutoff/session/credential changes cancel obsolete requests; the original
+response can be downloaded as source evidence, not as a new checkpoint format.
+
