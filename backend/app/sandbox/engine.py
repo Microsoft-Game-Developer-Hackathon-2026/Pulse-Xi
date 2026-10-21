@@ -100,6 +100,8 @@ def initial_state(scenario: Scenario) -> EngineState:
 
 def draw(state: EngineState, stream: str, bound: int = 100) -> int:
     rng = state.rng[stream]
+    if rng.counter >= 100000:
+        raise EngineError('rng_limit', 429)
     value = int.from_bytes(hashlib.sha256(f'{rng.key}:{rng.counter}'.encode('ascii')).digest(), 'big')
     rng.counter += 1
     # Modulo reduction is specified; these are synthetic policy draws, not cryptographic sampling.
@@ -267,6 +269,15 @@ def apply_command(original: EngineState, command: Command) -> EngineState:
         state.lifecycle = 'running'
     elif command.kind == 'cancel':
         state.lifecycle = 'cancelled'
+    elif command.kind == 'trial':
+        if state.lifecycle != 'paused' or any(i.operation_id == command.operation_id for i in state.interventions):
+            raise EngineError('trial_requires_pause')
+        # Explicit, replayable common-random-number blocks for bounded paired
+        # trials. The checkpoint itself is untouched; both arms skip equally.
+        if any(r.counter + command.trial_index * 4096 > 100000 for r in state.rng.values()):
+            raise EngineError('rng_limit', 429)
+        for rng in state.rng.values():
+            rng.counter += command.trial_index * 4096
     elif command.kind == 'intervene':
         if command.requested_tick != state.tick:
             raise EngineError('stale_tick')

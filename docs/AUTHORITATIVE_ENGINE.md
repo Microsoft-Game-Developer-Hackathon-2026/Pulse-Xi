@@ -1,5 +1,9 @@
 # Authoritative engine integration
 
+The follow-up [Live Sandbox guide](LIVE_SANDBOX.md) adds the working Control Room,
+server-driven runs, WebSocket observer, historical seek and verified paired
+ForkCast experiments. It supersedes the original integration limitations below.
+
 The executable backend foundation for #2/#3/#4/#5/#7/#9 and engine-owned
 checkpoint/branch hooks for #6/#8 is `backend/app/sandbox`. Versions are
 `zone-engine/1`, `sandbox/1`, `sha256-counter/1`. Machine-readable schemas are
@@ -24,9 +28,9 @@ flowchart LR
 
 The core owns an integer second tick. `step` advances a paused session;
 `advance` advances a resumed session. Both perform 1..300 ticks, stopping at full
-time. `resume` permits advance; it **does not start a wall-clock worker**. An
-operator/runner sends bounded commands. Reads, browser rendering and elapsed real
-time never change the tick. Browser interpolation is presentation only.
+time. `resume` permits advance. A durable server run schedules these same bounded
+commands; the Live Sandbox guide describes its pacing and recovery. Reads and
+browser rendering never change the tick. Browser interpolation is presentation only.
 
 Lifecycle: paused, running, completed, cancelled. Full time and cancellation
 reject further gameplay mutations. Terminal sessions may still be checkpointed.
@@ -46,8 +50,8 @@ authentication, not a public signup/judge login UI or collaborative role system.
 Token rotation keeps ownership if the mapped operator ID stays the same.
 
 `PULSE_RUNTIME_DB_PATH` defaults to `pulse_runtime.sqlite` beside `PULSE_DB_PATH`.
-It MUST be a different file. Runtime schema `user_version=1` has scenarios,
-sessions, commands, runtime_events, checkpoints, audit tables. It never changes
+It MUST be a different file. Runtime schema `user_version=2` retains scenarios,
+sessions, commands, runtime_events, checkpoints, audit and adds runs/experiments. It never changes
 the data-hub schema 2 or that database's backup whitelist. Cold migration is
 atomic and rechecks the version under the writer lock. Future versions are
 rejected. Accepted mutations atomically commit state, appended events, command
@@ -291,15 +295,14 @@ evidence on each actual platform; it is not assumed.
 
 ## Remaining integration work
 
-Satvik can integrate authoritative controls, cursor recovery, snapshot/checkpoint
+The Control Room now integrates authoritative controls, snapshot/checkpoint
 hooks, isolated branches and tactical acknowledgments. The v1 adapter serves
 90-minute scenarios; shortened training scenarios use native events because v1
 fixes halftime at 2700 seconds. Runtime streams do not silently become imported
-match records. No fabricated continuous tracking or runtime WebSocket is exposed;
-use state/cursor polling. No automatic real-time scheduler exists.
+match records. No fabricated continuous tracking is exposed. The authenticated
+WebSocket and durable server scheduler are documented in LIVE_SANDBOX.md.
 
-Higher-level ForkCast trial orchestration, paired-trial seed generation,
-comparison DTO/calculation verification, ProofTrail integration and frontend
-adapters remain their owners' work. This engine supplies the tested foundation,
-not a claim that those product flows are complete. Shared contract review (#2),
-external rate limits, deployment, teammate review and CI gates remain required.
+Bounded ForkCast orchestration, paired RNG blocks, verified comparisons, source
+event drilldown and frontend controls are implemented in the follow-up. Shared
+contract review (#2), external rate limits, deployment, teammate review and CI
+gates remain required.
