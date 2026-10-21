@@ -14,7 +14,7 @@ export function RuntimeAnalysis({ token, view, cutoff, sequence, select }: {
   token: string; view: View; cutoff: number; sequence?: number; select: (sequence: number, tick?: number) => void
 }) {
   const [open, setOpen] = useState(false)
-  const [result, setResult] = useState<{ key: string; data: Analysis } | null>(null)
+  const [result, setResult] = useState<{ key: string; credential: string; data: Analysis } | null>(null)
   const [error, setError] = useState(''), [retry, setRetry] = useState(0)
   const [panel, setPanel] = useState<'bookmarks' | 'exports'>('bookmarks')
   const base = `${root}/sessions/${encodeURIComponent(view.session_id)}`
@@ -32,17 +32,21 @@ export function RuntimeAnalysis({ token, view, cutoff, sequence, select }: {
     const controller = new AbortController(); setError('')
     void load<Analysis>(`${base}/analysis?at_second=${cutoff}`, controller.signal).then(data => {
       if (data.session_id !== view.session_id || data.at_second !== cutoff || data.revision < view.revision) throw Error('Analysis response does not match the requested runtime boundary.')
-      if (!controller.signal.aborted) setResult({key, data})
+      if (!controller.signal.aborted) setResult({key, credential: token, data})
     }).catch(reason => { if (!controller.signal.aborted) setError(String(reason.message)) })
     return () => controller.abort()
-  }, [open, supported, base, cutoff, key, load, retry, view.session_id, view.revision])
-  const data = result?.key === key ? result.data : null
+  }, [open, supported, base, cutoff, key, load, retry, token, view.session_id, view.revision])
+  // Keep controls mounted across revision refreshes so drafts and camera choices
+  // survive. Hide the old boundary until refreshed; never reuse another owner.
+  const data = result?.credential === token && result.data.session_id === view.session_id ? result.data : null
+  const current = result?.key === key && Boolean(data) && !error
   const selected = data?.events.find(e => e.sequence === sequence)
   return <details className="panel runtime-analysis" onToggle={e => setOpen(e.currentTarget.open)}>
     <summary>Recorded-event analysis, bookmarks and 3D</summary>
     <p>Read-only analysis follows the committed inspection cutoff. It never advances or rewinds the engine. Coordinates use each team's attacking frame, not continuous tracking.</p>
     {!supported ? <p role="status">The engine's existing analysis adapter requires a 5400-second scenario. Shortened scenarios retain native controls, checkpoints and ForkCast; no timestamps are rescaled.</p> : open && <>
-      {error ? <p role="alert">{error} <button onClick={() => setRetry(n => n + 1)}>Retry runtime analysis</button></p> : !data ? <p role="status">Loading committed recorded-event analysis...</p> : <>
+      {error ? <p role="alert">{error} <button onClick={() => setRetry(n => n + 1)}>Retry runtime analysis</button></p> : !current && <p role="status">Loading committed recorded-event analysis...</p>}
+      {data && <div hidden={!current}>
         <p>Runtime <code>{data.session_id}</code> / revision {data.revision} / inspection {data.at_second}s.</p>
         <div className="runtime-table-wrap"><table><caption>Recorded-event statistics through inspection cutoff</caption><thead><tr><th>Team</th><th>Passes</th><th>Shots</th><th>Goals</th><th>Recoveries</th></tr></thead><tbody>{(['home','away'] as const).map(side => <tr key={side}><th>{data.match[side].name}</th><td>{data.metrics[side].passes}</td><td>{data.metrics[side].shots}</td><td>{data.metrics[side].goals}</td><td>{data.metrics[side].recoveries}</td></tr>)}</tbody></table></div>
         <ObserverSwitch apiBase={base} load={load} match={data.match} event={selected} atSecond={cutoff} scope={{match_id: data.match.match_id, scenario_id: data.scenario_id, branch_id: data.session_id}}>
@@ -56,7 +60,7 @@ export function RuntimeAnalysis({ token, view, cutoff, sequence, select }: {
         <AnalysisTools match={data.match} events={data.events} selected={selected} second={cutoff}
           filters={{team:'all',kind:'all'}} panel={panel} setPanel={setPanel} runtimeExport={exportData}
           select={event => select(event.sequence, event.match_second)}/>
-      </>}
+      </div>}
     </>}
   </details>
 }

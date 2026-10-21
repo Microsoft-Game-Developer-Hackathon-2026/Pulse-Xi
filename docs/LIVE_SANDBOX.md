@@ -245,6 +245,12 @@ application regression suite.
 
 ## Remaining project boundaries
 
+Runtime analysis revision refreshes preserve unsaved event notes and observer
+choices within the mounted session. Old-boundary controls are hidden until
+the refreshed response arrives. Changing session or credential does not reuse
+the previous session's analysis. Unsaved notes are still memory-only; bookmark
+or update a note to persist it in this browser.
+
 This supplies the local live Sandbox/Checkpoint/ForkCast product path. It does
 not publish an Azure deployment, provision public accounts, run paid Foundry
 inference, integrate Blender assets awaiting review, make Unreal cinematics or

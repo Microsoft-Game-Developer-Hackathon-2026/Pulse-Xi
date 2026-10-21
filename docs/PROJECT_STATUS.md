@@ -1,5 +1,17 @@
 # Current project status - 2026-10-21
 
+## Current integration boundary
+
+Observed main is `4d8a01e5e3483f6a4aafb62cd09def6fcfdd3713`: engine foundation #40 and trace authorization #45 are included. PRs #41, #46, #43 and #47 were merged into intermediate feature branches; their merged status alone does not establish main availability.
+
+`integration/runtime-platform-main` forwards the published live Sandbox, architecture and runtime analysis implementations through normal merges, retaining Foundry command hardening from the separate main-targeted PR #52. It preserves the Vite 7.3.7 correction. No asset/preparation or independent teammate feature branch is absorbed. Review and exact-head CI remain required; this validation branch is not a claim that main has these features.
+
+The forward-integration backend run passed **185 tests**. Both file-only verifiers returned `verified: true`; strict TypeScript/build and the baseline **42 browser cases** passed. A new real-browser regression reproduced unsaved analyst notes being erased by checkpoint revision refreshes. The analysis controls now stay mounted while stale content is hidden, preserving drafts and observer preferences without showing an obsolete boundary. Final browser/CI results belong to the forward-integration PR.
+
+## Historical branch verification
+
+The sections below preserve earlier branch evidence and review context. Their open/merged descriptions and counts are historical; use the current boundary above and live GitHub PR state for integration decisions.
+
 ## Authoritative engine branch
 
 The engine foundation PR #40 adds scenario configuration, deterministic bounded transitions, durable sessions, revision/idempotency controls, complete checkpoint capture/restore, isolated branches, effective-tick tactics and replayable manifests. Its follow-up implements the live Control Room, durable server runs, authenticated snapshot/delta observer, historical seek and verified paired ForkCast with source-event drilldown and file-only experiment verification. See [the actual workflow and contracts](LIVE_SANDBOX.md). Foundation verification was 148 backend tests and 33 browser cases; the follow-up adds integration/recovery/concurrency/backup and browser workflow tests. These are branch results, not evidence of a merge or teammate approval. Shared contract review remains open. The asset and preparation PRs are untouched.
