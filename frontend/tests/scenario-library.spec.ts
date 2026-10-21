@@ -172,6 +172,7 @@ for (const locale of ['hi','es']) test(`localized replay and English saved-scena
   await page.getByLabel('Operator access token').fill(token)
   await page.getByRole('button',{name:'Connect operator',exact:true}).click()
   await expect(page.locator('.runtime-notice')).toContainText('Operator connected.')
+  if(await page.getByLabel('Runtime / branch').inputValue()) await expect(page.getByLabel('Authoritative match clock')).toBeVisible()
   await expect(page.getByRole('region',{name:'Authoritative Control Room'})).toHaveAttribute('lang','en')
   if(!await page.getByRole('button',{name:'Save scenario',exact:true}).isVisible()) await page.getByText('Scenario builder',{exact:true}).click()
   await page.getByLabel('Initial seed',{exact:true}).fill(locale==='hi'?'445566':'445567')
