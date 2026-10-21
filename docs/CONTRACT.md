@@ -64,3 +64,18 @@ Version 1 input remains supported. New exports use `schema_version: "pulse-xi-ma
 Offline `scripts/database-admin.py` is a trusted OS-level operation. SQLite backup API copies a consistent source read snapshot, validates supported schemas (1/2), integrity/foreign keys and payload-vs-column identities, rejects unknown tables/views/triggers, and exclusively creates a new destination. Restore requires the original backup's physical SHA-256. Existing files, including a live database, are never overwritten. To activate a recovered file, stop the app, set PULSE_DB_PATH and restart. Tokens and browser-local notes are not stored in this backup.
 
 Whole-database restore rotates dataset generation IDs and deletion nonces in the new file so forms/recovery requests from before restore are stale. Source match IDs, event IDs/order, provenance, revisions, archive flags and deletion times remain intact. The restored physical-file SHA-256 is reported after these administrative changes. Backup validation currently supports only schemas 1/2 and the documented tables; future engine storage migrations must update this allowlist deliberately.
+
+## Owner-scoped runtime analysis
+
+The integrated runtime exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. They reuse existing calculations over a committed engine-owned v1 projection, reject future cutoffs and conceal other owners. Private runtime datasets are not resolved through public `/api/matches` routes. Current compatibility is 5400-second scenarios only. See [LIVE_SANDBOX](LIVE_SANDBOX.md#existing-analysis-integration) for every route, local bookmark namespace, export limits and runtime-boundary hash scope. Neither dataset lifecycle nor engine state serialization is replaced.
+
+## Saved scenarios (runtime schema 3)
+
+The scenario library remains separate from imported-match storage (library schema 2).
+Authenticated GET `/api/sandbox/scenarios` returns at most 100 owned summaries,
+ordered by scenario ID. Existing create/read/preset payloads remain compatible.
+POST `/api/sandbox/scenarios/import` accepts strict raw ScenarioConfig or
+scenario-archive/1; GET `/api/sandbox/scenarios/{id}/archive` exports the persisted
+record. New private responses use Cache-Control: no-store. See
+[LIVE_SANDBOX](LIVE_SANDBOX.md#saved-scenario-library-and-archives) for schema,
+identity verification, idempotence, errors, migration and rollback details.

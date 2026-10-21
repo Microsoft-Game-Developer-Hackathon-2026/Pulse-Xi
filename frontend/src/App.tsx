@@ -12,6 +12,7 @@ import { readWorkspace, deepWorkspace, WORKSPACE_KEY } from './features/sandbox/
 import type { Workspace, Filters } from './features/sandbox/analysisStorage'
 import './features/sandbox/analysis.css'
 import { readReplayEvents } from './features/sandbox/replayApi'
+import { RuntimeRoom } from './features/runtime/RuntimeRoom'
 
 const important = new Set(['goal', 'shot', 'turnover', 'recovery', 'halftime', 'fulltime', 'kickoff'])
 const clock = (seconds: number) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`
@@ -74,14 +75,14 @@ export default function App() {
   const [speed, setSpeed] = useState(initialWorkspace.value?.speed ?? 1)
   const [showOverlays, setShowOverlays] = useState(true)
   const [error, setError] = useState('')
-  const [workspace, setWorkspace] = useState(window.location.hash.split('?')[0] === '#/data' ? 'data' : window.location.hash.split('?')[0] === '#/sandbox' ? 'sandbox' : 'command')
+  const [workspace, setWorkspace] = useState(window.location.hash.split('?')[0] === '#/runtime' ? 'runtime' : window.location.hash.split('?')[0] === '#/data' ? 'data' : window.location.hash.split('?')[0] === '#/sandbox' ? 'sandbox' : 'command')
   const [selectedEventId, setSelectedEventId] = useState('')
   const [connectionAttempt, setConnectionAttempt] = useState(0)
   const priorMatch = useRef('')
   const proofDrawer = useRef<HTMLElement>(null)
   const proofRequest = useRef<AbortController | null>(null)
 
-  useEffect(() => { if (workspace === 'data') { setPlaying(false); setProof(null); proofRequest.current?.abort() } }, [workspace])
+  useEffect(() => { if (workspace === 'data' || workspace === 'runtime') { setPlaying(false); setProof(null); proofRequest.current?.abort() } }, [workspace])
 
   useEffect(() => () => proofRequest.current?.abort(), [matchId])
   useEffect(() => {
@@ -105,7 +106,7 @@ export default function App() {
 
 
   useEffect(() => {
-    const change = () => { setWorkspace(window.location.hash.split('?')[0] === '#/data' ? 'data' : window.location.hash.split('?')[0] === '#/sandbox' ? 'sandbox' : 'command'); try { const link = deepWorkspace(); if (link) { pendingRestore.current = link; setLoadedMatchId(''); setPlaying(false); setConnectionAttempt(value => value + 1) } } catch (e) { setWorkspaceNotice(String(e)) } }
+    const change = () => { setWorkspace(window.location.hash.split('?')[0] === '#/runtime' ? 'runtime' : window.location.hash.split('?')[0] === '#/data' ? 'data' : window.location.hash.split('?')[0] === '#/sandbox' ? 'sandbox' : 'command'); try { const link = deepWorkspace(); if (link) { pendingRestore.current = link; setLoadedMatchId(''); setPlaying(false); setConnectionAttempt(value => value + 1) } } catch (e) { setWorkspaceNotice(String(e)) } }
     window.addEventListener('hashchange', change)
     return () => window.removeEventListener('hashchange', change)
   }, [])
@@ -277,14 +278,15 @@ export default function App() {
   return <div className="app-shell">
     <aside className="rail"><div className="rail-brand">P<span>XI</span></div><div className="rail-rule"/><div className="rail-item active" title="Command center"><Activity size={21}/></div><div className="rail-item" title="Live replay"><Radio size={21}/></div><div className="rail-end">01<br/><small>CORE</small></div></aside>
     <main className="main">
-      <header className="header"><div className="brand"><div className="eyebrow">FOOTBALL INTELLIGENCE OPERATING SYSTEM</div><h1>PULSE <em>XI</em><span className="brand-slash">/</span><small>{workspace === 'data' ? 'MATCH DATA HUB' : workspace === 'sandbox' ? 'SANDBOX LAB' : 'COMMAND CENTER'}</small></h1></div><div className="header-right"><span className="synthetic-tag">SYNTHETIC SIMULATION</span><span className="status"><Wifi size={16}/> LOCAL ENGINE</span></div></header>
-      <nav className="workspace-nav" aria-label="Workspace"><a href="#/" aria-current={workspace === 'command' ? 'page' : undefined}>MATCH INTELLIGENCE</a><a href="#/sandbox" aria-current={workspace === 'sandbox' ? 'page' : undefined}>SANDBOX LAB</a><a href="#/data" aria-current={workspace === 'data' ? 'page' : undefined}>MATCH DATA HUB</a></nav>
-      {error && <div className="error" role="alert">{error}. <button onClick={() => { setPlaying(false); setError(''); setConnectionAttempt(value => value + 1) }}>Retry connection</button></div>}
-      {<div className="workspace-recovery" role="status">{workspaceNotice || 'Browser-local workspace autosave. Replay restores paused; no engine checkpoint is created.'} <button onClick={() => setResetWorkspacePending(true)}>Reset local workspace</button>{resetWorkspacePending && <span role="group" aria-label="Confirm workspace reset"><span>Reset replay position and preferences? Bookmarks will remain.</span><button onClick={() => {
+      <header className="header"><div className="brand"><div className="eyebrow">FOOTBALL INTELLIGENCE OPERATING SYSTEM</div><h1>PULSE <em>XI</em><span className="brand-slash">/</span><small>{workspace === 'runtime' ? 'ENGINE CONTROL ROOM' : workspace === 'data' ? 'MATCH DATA HUB' : workspace === 'sandbox' ? 'SANDBOX LAB' : 'COMMAND CENTER'}</small></h1></div><div className="header-right"><span className="synthetic-tag">SYNTHETIC SIMULATION</span><span className="status"><Wifi size={16}/> LOCAL ENGINE</span></div></header>
+      <nav className="workspace-nav" aria-label="Workspace"><a href="#/" aria-current={workspace === 'command' ? 'page' : undefined}>MATCH INTELLIGENCE</a><a href="#/sandbox" aria-current={workspace === 'sandbox' ? 'page' : undefined}>SANDBOX LAB</a><a href="#/runtime" aria-current={workspace === 'runtime' ? 'page' : undefined}>ENGINE CONTROL ROOM</a><a href="#/data" aria-current={workspace === 'data' ? 'page' : undefined}>MATCH DATA HUB</a></nav>
+      {workspace !== 'runtime' && error && <div className="error" role="alert">{error}. <button onClick={() => { setPlaying(false); setError(''); setConnectionAttempt(value => value + 1) }}>Retry connection</button></div>}
+      {workspace !== 'runtime' && <div className="workspace-recovery" role="status">{workspaceNotice || 'Browser-local workspace autosave. Replay restores paused; no engine checkpoint is created.'} <button onClick={() => setResetWorkspacePending(true)}>Reset local workspace</button>{resetWorkspacePending && <span role="group" aria-label="Confirm workspace reset"><span>Reset replay position and preferences? Bookmarks will remain.</span><button onClick={() => {
         try { localStorage.removeItem(WORKSPACE_KEY); localStorage.removeItem('pulse-xi-match'); pendingRestore.current = null; window.history.replaceState(null, '', window.location.pathname + window.location.search + window.location.hash.split('?')[0]); setSecond(0); setSelectedEventId(''); setFilters({team:'all',kind:'all'}); setViewPreference('2d'); setQualityPreference(window.matchMedia('(max-width: 700px), (prefers-reduced-motion: reduce)').matches ? 'low' : 'standard'); setAnalysisPanel('bookmarks'); setSpeed(1); setPlaying(false); setStorageConflict(false); setResetWorkspacePending(false); setWorkspaceNotice('Local replay workspace reset. Bookmarks were retained.') } catch { setWorkspaceNotice('Browser storage reset failed.') }
       }}>Confirm reset workspace</button><button onClick={() => setResetWorkspacePending(false)}>Cancel workspace reset</button></span>}{storageConflict && <><button onClick={() => location.reload()}>Reload saved workspace</button><button onClick={() => { setStorageConflict(false); setWorkspaceNotice('This tab will save its current analysis workspace.') }}>Keep this tab</button></>}</div>}
       {workspace === 'data' && <MatchDataHub open={value => { generated(value); window.location.hash = '/sandbox' }}/> }
-      <div hidden={workspace === 'data'}>
+      {workspace === 'runtime' && <RuntimeRoom/>}
+      <div hidden={workspace === 'data' || workspace === 'runtime'}>
       {workspace === 'sandbox' && match && <SandboxSetup match={match} onGenerated={generated}/>}
       {!match || loadedMatchId !== matchId ? <div className="loading" role="status">Loading recorded events and saved workspace…</div> : <>
         <div className="topbar"><div><span className="section-index">01 / LIVE MATCH INTELLIGENCE</span><h2>{match.title}</h2></div><label className="match-select">SELECT MATCH <select value={matchId} onChange={e => setMatchId(e.target.value)}>{matches.map(m => <option key={m.match_id} value={m.match_id}>{m.title}</option>)}</select></label></div>
