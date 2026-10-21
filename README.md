@@ -222,7 +222,7 @@ backend/app/                  models, generator, analytics, evidence, APIs, stor
 backend/tests/                API, determinism, persistence and scoring tests
 frontend/src/features/passes/  pass inspector and typed responses
 frontend/src/features/sandbox/ fixture setup, timeline, replay transport
-frontend/src/features/observer/ lazy procedural 3D, cameras, evidence overlay
+frontend/src/features/observer/ lazy GLB/procedural 3D, cameras, evidence overlay
 frontend/tests/               browser and transport regressions
 scripts/                      Windows build/start and scoring benchmark
 docs/                         contracts, methodology and handoff
@@ -309,7 +309,7 @@ Use focused branches/PRs with reproducible evidence. Do not push directly to mai
 | Startup exits | Fix the first dependency/build error; startup stops on failures |
 | Blank/failed 3D | Return to 2D, try Low, check WebGL2/hardware acceleration; replay remains independent |
 | Blender not found | Main does not require Blender; asset authors can set `PULSE_BLENDER_PATH` |
-| Missing asset/contract command | Utilities remain on the unmerged branches, not this main baseline |
+| Missing asset validator | Use current main; run `python scripts/asset_contract.py` at the repository root or `npm run validate:assets` after `npm ci` in `frontend`. Historical proposal-only scripts are not current contracts. |
 
 ### Limitations
 
