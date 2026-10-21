@@ -12,6 +12,8 @@ import { readWorkspace, deepWorkspace, WORKSPACE_KEY } from './features/sandbox/
 import type { Workspace, Filters } from './features/sandbox/analysisStorage'
 import './features/sandbox/analysis.css'
 import { readReplayEvents } from './features/sandbox/replayApi'
+import { hasLocaleFallback, readFanPreferences, translate, writeFanPreferences } from './fandna'
+import type { Locale, MessageKey, Persona } from './fandna'
 
 const important = new Set(['goal', 'shot', 'turnover', 'recovery', 'halftime', 'fulltime', 'kickoff'])
 const clock = (seconds: number) => `${Math.floor(seconds / 60).toString().padStart(2, '0')}:${Math.floor(seconds % 60).toString().padStart(2, '0')}`
@@ -43,6 +45,7 @@ function Pitch({ event, match, cue }: { event?: Event; match: Match; cue?: Cue }
 }
 
 export default function App() {
+  const [fanPreferences] = useState(readFanPreferences)
   const [initialWorkspace] = useState(() => { const saved = readWorkspace(); try { return { ...saved, value: deepWorkspace() ?? saved.value } } catch (e) { return { ...saved, notice: String(e) } } })
   const pendingRestore = useRef<Workspace | null>(initialWorkspace.value)
   const [workspaceNotice, setWorkspaceNotice] = useState(initialWorkspace.notice)
@@ -65,10 +68,10 @@ export default function App() {
   const [cueResponse, setCues] = useState<Cue[]>([])
   const [proofResponse, setProof] = useState<{ insight: Insight; source_events: Event[] } | null>(null)
   const [recapResponse, setRecap] = useState<Recap | null>(null)
-  const [persona, setPersona] = useState('casual')
-  const [locale, setLocale] = useState('en')
-  const [favoriteTeamId, setFavoriteTeamId] = useState('')
-  const [favoritePlayerId, setFavoritePlayerId] = useState('')
+  const [persona, setPersona] = useState<Persona>(fanPreferences.persona)
+  const [locale, setLocale] = useState<Locale>(fanPreferences.locale)
+  const [favoriteTeamId, setFavoriteTeamId] = useState(fanPreferences.favoriteTeamId)
+  const [favoritePlayerId, setFavoritePlayerId] = useState(fanPreferences.favoritePlayerId)
   const [second, setSecond] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [speed, setSpeed] = useState(initialWorkspace.value?.speed ?? 1)
@@ -80,6 +83,10 @@ export default function App() {
   const priorMatch = useRef('')
   const proofDrawer = useRef<HTMLElement>(null)
   const proofRequest = useRef<AbortController | null>(null)
+
+  useEffect(() => {
+    writeFanPreferences({ version: 1, locale, persona, favoriteTeamId, favoritePlayerId })
+  }, [locale, persona, favoriteTeamId, favoritePlayerId])
 
   useEffect(() => { if (workspace === 'data') { setPlaying(false); setProof(null); proofRequest.current?.abort() } }, [workspace])
 
@@ -197,11 +204,20 @@ export default function App() {
   }, [playing, speed, matches, matchId])
 
   const match = matches.find(m => m.match_id === matchId)
+  const tx = (key: MessageKey, values?: Record<string, string | number>) => translate(locale, key, values)
   const metrics = metricResponse?.match_id === matchId && metricResponse.at_second === Math.floor(second) ? metricResponse : null
   const tactics = tacticResponse?.match_id === matchId && tacticResponse.at_second === Math.floor(second) ? tacticResponse : null
   const recap = recapResponse?.match_id === matchId && recapResponse.at_second === Math.floor(second) ? recapResponse : null
   const cues = cueResponse.filter(cue => cue.match_id === matchId && (workspace !== 'sandbox' || cue.trigger_match_second <= second))
   const proof = proofResponse?.insight.match_id === matchId && proofResponse.insight.match_second <= second ? proofResponse : null
+  useEffect(() => {
+    if (!match) return
+    const teamIds = [match.home.team_id, match.away.team_id]
+    const playerIds = [...match.home.players, ...match.away.players].map(player => player.player_id)
+    if (favoriteTeamId && !teamIds.includes(favoriteTeamId)) setFavoriteTeamId('')
+    if (favoritePlayerId && !playerIds.includes(favoritePlayerId)) setFavoritePlayerId('')
+  }, [matchId, matches, favoriteTeamId, favoritePlayerId])
+
   useEffect(() => {
     if (!proof) return
     const opener = document.activeElement as HTMLElement | null
@@ -276,7 +292,7 @@ export default function App() {
 
   return <div className="app-shell">
     <aside className="rail"><div className="rail-brand">P<span>XI</span></div><div className="rail-rule"/><div className="rail-item active" title="Command center"><Activity size={21}/></div><div className="rail-item" title="Live replay"><Radio size={21}/></div><div className="rail-end">01<br/><small>CORE</small></div></aside>
-    <main className="main">
+    <main className="main" lang={locale}>
       <header className="header"><div className="brand"><div className="eyebrow">FOOTBALL INTELLIGENCE OPERATING SYSTEM</div><h1>PULSE <em>XI</em><span className="brand-slash">/</span><small>{workspace === 'data' ? 'MATCH DATA HUB' : workspace === 'sandbox' ? 'SANDBOX LAB' : 'COMMAND CENTER'}</small></h1></div><div className="header-right"><span className="synthetic-tag">SYNTHETIC SIMULATION</span><span className="status"><Wifi size={16}/> LOCAL ENGINE</span></div></header>
       <nav className="workspace-nav" aria-label="Workspace"><a href="#/" aria-current={workspace === 'command' ? 'page' : undefined}>MATCH INTELLIGENCE</a><a href="#/sandbox" aria-current={workspace === 'sandbox' ? 'page' : undefined}>SANDBOX LAB</a><a href="#/data" aria-current={workspace === 'data' ? 'page' : undefined}>MATCH DATA HUB</a></nav>
       {error && <div className="error" role="alert">{error}. <button onClick={() => { setPlaying(false); setError(''); setConnectionAttempt(value => value + 1) }}>Retry connection</button></div>}
