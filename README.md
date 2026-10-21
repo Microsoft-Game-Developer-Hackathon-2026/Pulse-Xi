@@ -8,10 +8,10 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 
 ## Application functionality
 
-**Integrated baseline:** main `d1d099e` includes #53's live runtime, architecture,
+**Integrated baseline:** main `100106a` includes #64's saved-scenario library and #53's live runtime, architecture,
 private analysis and command-credential hardening, alongside original graphics #62.
 PR #52 remains open, but its code is present through #53; its separate PR state
-does not mean the fix is absent. This revision completes owner-scoped saved-scenario
+does not mean the fix is absent. The [completion PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64) integrated owner-scoped saved-scenario
 listing, versioned archives and creation provenance without changing engine hashes.
 See the [scenario library contract](docs/LIVE_SANDBOX.md#saved-scenario-library-and-archives)
 and shared

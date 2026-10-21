@@ -2,10 +2,10 @@
 
 ## Integrated baseline and current contracts (2026-10-21)
 
-Main `d1d099ebb75cb912003b3bf99b24e4d67111110a` integrated #53's runtime,
-architecture, analysis and command hardening; its post-merge CI passed. The
-Issues #2-#5 completion revision adds only saved-scenario library/archive contracts
-and runtime schema 3 metadata. Core engine/schema/RNG versions and golden hashes
+Main `100106ade274bbb7da137c73b22009f929a72e8c` integrated #64's saved-scenario
+library/archive contracts and runtime schema 3 metadata, following #53's runtime,
+architecture, analysis and command hardening. Post-merge CI passed 248 backend and
+55 browser cases; the handoff adds a mobile/keyboard test without changing runtime code. Core engine/schema/RNG versions and golden hashes
 are unchanged. See [LIVE_SANDBOX](LIVE_SANDBOX.md#saved-scenario-library-and-archives)
 for the current scenario API, provenance and migration rules. Self-review and
 exact-head CI are recorded on the completion PR; no other person's approval,
