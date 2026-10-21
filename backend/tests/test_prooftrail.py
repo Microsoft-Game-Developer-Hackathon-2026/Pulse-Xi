@@ -16,9 +16,9 @@ def runtime_db(tmp_path, monkeypatch):
     monkeypatch.setenv('PULSE_RUNTIME_TOKENS', '{"alice":"' + 'a' * 32 + '"}')
 
 
-def create(owner='alice'):
+def create(owner='alice', operation_id='root'):
     scenario = storage.save_scenario(owner, build_scenario(ScenarioConfig(seed=7, duration_seconds=120)))
-    return storage.create_session(owner, 'root', scenario.scenario_id)
+    return storage.create_session(owner, operation_id, scenario.scenario_id)
 
 
 def mutate(view, kind='step', operation_id=None, **kwargs):
@@ -80,7 +80,7 @@ def test_prooftrail_api_is_owner_scoped_and_rejects_unrelated_baseline(runtime_d
             params={'baseline_session_id': baseline.session_id, 'intervention_id': 'press-change', 'at_tick': 120},
         ).status_code == 403
 
-        unrelated = create()
+        unrelated = create(operation_id='other-root')
         rejected = client.get(
             f'/api/sandbox/sessions/{branch.session_id}/prooftrail',
             params={'baseline_session_id': unrelated.session_id, 'intervention_id': 'press-change', 'at_tick': 120},
