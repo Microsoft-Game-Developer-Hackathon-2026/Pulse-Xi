@@ -7,6 +7,7 @@ import asyncio
 
 from fastapi import APIRouter, Depends, Header, Query, Response, WebSocket, WebSocketDisconnect
 from starlette.concurrency import run_in_threadpool
+
 from fastapi.routing import APIRoute
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError, Field
@@ -351,10 +352,11 @@ from .analysis import register as register_analysis
 register_analysis(router, require_operator)
 
 @router.get('/sessions/{branch_session_id}/prooftrail', response_model=SandboxInsight)
-def prooftrail(branch_session_id: str, baseline_session_id: str = Query(min_length=1, max_length=100),
+def prooftrail(branch_session_id: str, response: Response, baseline_session_id: str = Query(min_length=1, max_length=100),
                intervention_id: str = Query(min_length=1, max_length=80),
                at_tick: int = Query(ge=0, le=5400), owner: str = Depends(require_operator)):
     """Compare one verified checkpoint descendant with its baseline for the same owner."""
+    response.headers['Cache-Control'] = 'no-store'
     branch = storage.get_runtime(owner, branch_session_id)
     baseline = storage.get_runtime(owner, baseline_session_id)
     branch_manifest = storage.manifest(owner, branch_session_id)
