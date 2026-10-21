@@ -6,6 +6,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from ..analytics import metrics_at
+from ..evidence import insights_for
 from ..models import Match, MatchEvent, Team, Player, Point, MatchMetrics, Insight
 from ..pass_difficulty import PassDifficulty
 from .models import RuntimeView
@@ -104,15 +105,18 @@ def project(view: RuntimeView) -> tuple[NativeMatch, list[NativeEvent]]:
 
 def analyze(view: RuntimeView, match: NativeMatch, events: list[NativeEvent], cutoff: int) -> NativeAnalysis:
     metrics = metrics_at(match, events, cutoff)
+    # Existing goal/activity claims consume only score and event counts. The
+    # legacy phase field computed internally by state_at is never exposed here.
     return NativeAnalysis(session_id=view.session_id, branch_id=view.session_id, scenario_id=view.scenario_id,
         revision=view.revision, authoritative_tick=view.tick, event_cursor=view.event_cursor,
         state_hash=view.state_hash, event_hash=view.event_hash, at_second=cutoff, match=match, events=events,
         clock=NativeClock(duration_seconds=match.duration_seconds, halftime_tick=match.halftime_tick,
             current_period=view.state.period, inspection_period=1 if cutoff < match.halftime_tick else 2),
         metrics=metrics, score={'home':metrics.home.goals, 'away':metrics.away.goals},
+        insights=insights_for(match, events, cutoff),
         event_counts_by_team={team.team_id:dict(Counter(e.event_type.value for e in events if e.team_id == team.team_id))
                              for team in (match.home, match.away)},
-        unavailable={'legacy_insight_templates':'Legacy match-state/insight templates assume a fixed 2700-second halftime; native pass evidence remains available.',
+        unavailable={'legacy_match_state':'The legacy match-state phase assumes a fixed 2700-second halftime; use the explicit native clock instead.',
             'continuous_tracking':'Only committed event observations exist, not continuous actor trajectories.',
             'event_wall_clock':'The engine supplies match ticks, not observed event calendar timestamps.'},
         provenance={'event_identity':'session_id + engine event sequence', 'coordinate_frame':'team attacking frame; away x mirrored from engine pitch',
