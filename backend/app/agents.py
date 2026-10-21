@@ -2,7 +2,6 @@
 
 No hosted call is made during startup, ingestion, tests, or deterministic replay.
 """
-import asyncio
 import json
 import os
 import re
@@ -104,9 +103,11 @@ async def run_specialists(match: Match, events: list[MatchEvent], insight: Insig
             {"role": "StoryEditor", "kind": "foundry_agent", "status": "completed"},
         ]
         if not audit_model_packet(packet, insight, match, events):
+            trace["audit_verdict"] = "rejected"
             trace["stages"].append({"role": "EvidenceAuditor", "kind": "deterministic_gate", "status": "rejected"})
             trace["status"] = "rejected"
             return {"status": "rejected", "reason": "unsupported model packet", "trace_id": trace["trace_id"]}
+        trace["audit_verdict"] = "approved"
         trace["stages"].append({"role": "EvidenceAuditor", "kind": "deterministic_gate", "status": "approved"})
         cue = next(cue for cue in overlays_for(match, events) if cue.insight_id == insight.insight_id)
         trace["stages"].append({"role": "BroadcastDirector", "kind": "deterministic_scheduler", "status": "completed"})
