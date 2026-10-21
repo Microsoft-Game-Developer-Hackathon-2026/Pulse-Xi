@@ -7,8 +7,8 @@ for (const width of [1280, 390]) {
     const seek = page.getByRole('slider', { name: 'Seek match time' })
     await seek.fill('1000')
     await expect(page.locator('.recap-body')).not.toContainText('Loading')
-    // Keep space below the viewport: shrinking past the document end necessarily clamps scroll.
-    await page.locator('.studio').evaluate(element => window.scrollTo(0, element.getBoundingClientRect().top + window.scrollY - 1600))
+    // Exercise near the document end, including temporary analytics loading collapse.
+    await page.locator('.studio').scrollIntoViewIfNeeded()
     const initial = await page.evaluate(() => window.scrollY)
     expect(initial).toBeGreaterThan(500)
     // Change the real React replay control without Playwright scrolling it into view.
@@ -32,5 +32,7 @@ for (const width of [1280, 390]) {
     await page.getByRole('button', { name: 'Next event', exact: true }).click()
     expect(await page.evaluate(() => window.scrollY)).toBeLessThan(initial)
     await expect(page.getByRole('slider', { name: 'Seek match time' })).toBeInViewport()
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await expect.poll(() => page.evaluate(() => Number.parseFloat(document.getElementById('root')!.style.minHeight))).toBe(844)
   })
 }
