@@ -2,6 +2,14 @@
 
 ## Integration baseline (2026-10-21)
 
+Current refresh baseline is main `0beb08de356a32870d1494d534a75642a23322ed`,
+including #40, #45 and #62. PR #53 proposes the live runtime/analysis integration;
+PR #52's separate security integration must precede it. The original #53 history
+already includes that command hardening. #62's original assets, licensing and
+fallback remain intact alongside authenticated runtime evidence. The older branch
+table and verification counts below are historical, not the current main state.
+See [PROJECT_STATUS](PROJECT_STATUS.md) and the PR's exact-head CI for this refresh.
+
 The analysis branch now includes the architecture PR #46 through a normal merge,
 with both status sections retained. Its five additional owner-scoped HTTP analysis
 operations are documented in [LIVE_SANDBOX](LIVE_SANDBOX.md#existing-analysis-integration).

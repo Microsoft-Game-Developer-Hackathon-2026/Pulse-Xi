@@ -8,12 +8,14 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 
 ## Application functionality
 
-**Branch boundary:** current main (`50f72e2`, inspected 2026-10-21) contains fixture
-replay and the Match Data Hub. Live runtime capabilities below are on open PRs
-[#40](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/40)
-and [#41](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/41).
-Private runtime analysis/3D adapters are a separate follow-up, PR #43. These are
-not merged or certified by this audit. See the shared
+**Branch boundary:** main at `0beb08d` (inspected 2026-10-21) includes the engine
+foundation #40, trace-read protection #45 and original Blender graphics #62.
+This branch refreshes the proposed live runtime, architecture and private analysis
+integration in [PR #53](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/53).
+Command-credential hardening is already present in this branch's published history;
+[PR #52](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/52)
+must receive its separate security review and integrate first. Live features below
+are not claimed available on main or approved. See the shared
 [architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
 
 | Capability | Status and boundary |
@@ -30,7 +32,7 @@ not merged or certified by this audit. See the shared
 | Persistence | SQLite imported-event persistence and idempotent ingest; built-in/custom fixtures regenerate |
 | Microsoft AI | Guarded optional provider code; verified local path uses deterministic fallback, not authenticated model inference |
 
-The [Live Sandbox guide](docs/LIVE_SANDBOX.md) documents the working Control Room at `/#/runtime`: configure, run on the server, pause, intervene, checkpoint, restore, run paired trials and inspect/verify event evidence. Runtime access requires provisioned operator credentials, kept only in page memory. The fixture workspace remains unchanged at `/#/sandbox`. **Separate gates:** PR #31's editable Blender/GLB kit awaits Vishwam's asset/security approval; PRs #32/#33 remain separate. Calibrated prediction, public Azure deployment and real multi-agent inference are not supplied by the engine. See the [earlier handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
+The [Live Sandbox guide](docs/LIVE_SANDBOX.md) documents the proposed Control Room at `/#/runtime`: configure, run on the server, pause, intervene, checkpoint, restore, run paired trials and inspect/verify event evidence. Runtime access requires provisioned operator credentials, kept only in page memory. The fixture workspace remains at `/#/sandbox`. Original graphics, licensing notices and fallback behavior from merged #62 are preserved; see its [asset review record](docs/ASSET_SECURITY_RELEASE_REVIEW.md). Other preparation and feature PRs retain separate review gates. Calibrated prediction, public Azure deployment and real multi-agent inference are not supplied by the engine. See the [earlier handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
 
 ## Windows quick start
 
@@ -156,6 +158,8 @@ Analysis exports support JSON and UTF-8 CSV: visible events, timeline-filtered e
 JSON includes schema, real generation time, cutoff, source IDs, fixture seed and available formula version/units. Build revision is null unless backend `PULSE_BUILD_REVISION` is set; generator version/engine manifest are explicitly unavailable. Local notes are unverified analyst text, never evidence claims. Bookmarks after the cutoff or with missing/changed source events are omitted from export. Clearing browser data/private browsing/origin changes can remove local records; export references when needed. There is no cloud backup or history of multiple workspaces.
 
 ## Architecture and stack
+
+The optional **3D Observer** adds an original Blender stadium, recorded event markers, five camera modes and Low/Medium/High graphics profiles. The default 2D view remains independent of WebGL. See the [graphics toolchain, reproducible assets and measured results](docs/PROFESSIONAL_3D_GRAPHICS_UPGRADE.md). Positions remain sparse synthetic event snapshots; no continuous player tracking is inferred.
 
 ```mermaid
 flowchart LR
