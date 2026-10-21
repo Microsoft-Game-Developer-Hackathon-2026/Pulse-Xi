@@ -47,8 +47,9 @@ export function ObserverSwitch({ match, event, atSecond, scope, children, prefer
   const assetActivation = useRef(0)
   const started = useRef(0)
   const container = useRef<HTMLElement>(null)
-  const snapshot = useMemo(() => eventSnapshot(match, event, atSecond, scope),
-    [match, event, atSecond, scope])
+  const [ballSample, setBallSample] = useState<'start' | 'end'>('end')
+  const snapshot = useMemo(() => eventSnapshot(match, event, atSecond, scope, ballSample),
+    [match, event, atSecond, scope, ballSample])
   const fail = useCallback(() => { setFailure('The 3D renderer is unavailable. The recorded 2D pitch remains active.'); setOpen(false); onViewChange?.('2d') }, [onViewChange])
   useLayoutEffect(() => {
     const element = container.current
@@ -87,15 +88,19 @@ export function ObserverSwitch({ match, event, atSecond, scope, children, prefer
         <button onClick={() => { setCamera('broadcast'); setRevision(value => value + 1) }}>Reset camera</button>
         <label>3D QUALITY <select value={quality} onChange={event => { setQuality(event.target.value as GraphicsQuality); onQualityChange?.(event.target.value as GraphicsQuality) }}>{Object.entries(graphicsProfiles).map(([id, profile]) => <option key={id} value={id}>{profile.label}</option>)}</select></label>
       </div>
+      <label className="observer-notice">Recorded ball sample <select aria-label="Recorded ball sample" value={ballSample} onChange={e=>setBallSample(e.target.value as 'start'|'end')}>
+        <option value="start">Recorded start</option><option value="end">Recorded end (start if unavailable)</option>
+      </select></label>
       <RenderBoundary key={revision} fail={fail}><Suspense fallback={<><p className="observer-notice" role="status">Loading optional 3D renderer…</p>{children}</>}>
         <SceneCanvas snapshot={snapshot} reducedMotion={reducedMotion} cameraPreset={camera} resetRevision={revision} quality={quality} fail={fail} report={report} startedAt={started.current} assetStyle={assetStyle} assetStatus={asset.status} reportAsset={reportAsset}/>
       </Suspense></RenderBoundary>
       <p className="observer-notice" data-testid="asset-status" data-status={assetStyle === 'procedural' ? 'procedural' : asset.status} data-surface-size={JSON.stringify(asset.surfaceSize)}>{assetStyle === 'procedural' ? 'Procedural field selected.' : asset.status === 'ready' ? `Original Blender geometry loaded in ${asset.readyMs?.toFixed(1)} ms.` : asset.status === 'fallback' ? 'Original assets unavailable; procedural geometry remains active.' : 'Loading original assets; procedural pitch remains available.'}</p>
       <EventOverlay match={match} event={event} snapshot={snapshot} apiBase={apiBase} load={load}/>
-      <div className="observer-caption" data-testid="observer-snapshot" data-event-id={snapshot.event_id ?? ''}><span>{snapshot.team_name ? `${snapshot.team_name} attacking frame` : 'Recorded event frame'} · {snapshot.event_type ?? 'no event'} · {Math.floor(atSecond / 60)}:{String(Math.floor(atSecond % 60)).padStart(2, '0')}</span><code>{snapshot.event_id ?? 'No visible source event'}</code></div>
+      <div className="observer-caption" data-testid="observer-snapshot" data-event-id={snapshot.event_id ?? ''} data-cutoff={atSecond} data-ball={JSON.stringify(snapshot.ball)} data-ball-sample={snapshot.ball_sample ?? ''} data-recipient={JSON.stringify(snapshot.recipient_position)}><span>{snapshot.team_name ? `${snapshot.team_name} attacking frame` : 'Recorded event frame'} · {snapshot.event_type ?? 'no event'} · {Math.floor(atSecond / 60)}:{String(Math.floor(atSecond % 60)).padStart(2, '0')}</span><code>{snapshot.event_id ?? 'No visible source event'}</code></div>
       {snapshot.unavailable_reason && <p className="observer-notice">{snapshot.unavailable_reason}</p>}
-      <p className="observer-note">{camera === 'free' && 'Free camera: drag to orbit, scroll/pinch to zoom; focus the canvas and use arrow keys to pan. '}Markers show recorded origins and endpoints only. The ball is enlarged for readability; model height is illustrative. Display units are schematic; no player movement, speed, defender location or live ball trajectory is inferred.</p>
-      <details className="observer-diagnostics"><summary>Renderer diagnostics and provenance</summary><output data-testid="observer-metrics" data-quality={metrics?.quality} data-event-id={metrics?.eventId ?? ''} data-sampled={metrics?.framesInSample !== null && metrics !== null} data-origin={JSON.stringify(snapshot.origin)} data-target={JSON.stringify(snapshot.target)}>{metrics ? `${metrics.calls} draw calls · ${metrics.triangles} triangles · ${metrics.geometries} geometries · ${metrics.textures} textures · first ready ${metrics.readyMs.toFixed(1)} ms · frames in 500 ms sample: ${metrics.framesInSample ?? 'sampling'}` : 'Renderer initializing'}</output><p>{snapshot.provenance} · match {snapshot.scope.match_id}{snapshot.scope.branch_id ? ` · branch ${snapshot.scope.branch_id}` : ''}. No observer-frame stream is connected.</p></details>
+      {snapshot.event_id && snapshot.origin && !snapshot.ball && <p className="observer-notice">Ball position is unavailable for this event type; only the recorded actor location is shown.</p>}
+      <p className="observer-note">{camera === 'free' && 'Free camera: drag to orbit, scroll/pinch to zoom; focus the canvas and use arrow keys to pan. '}Players show only the source actor and, for completed passes, the identified recipient at the recorded endpoint. These are event samples, not a simultaneous tracking frame. Ball samples switch discretely between recorded start/end; no travel time or intermediate path is inferred. The ball is enlarged for readability; model height is illustrative. Display units are schematic; no player movement, speed, defender location or live ball trajectory is inferred.</p>
+      <details className="observer-diagnostics"><summary>Renderer diagnostics and provenance</summary><output data-testid="observer-metrics" data-quality={metrics?.quality} data-event-id={metrics?.eventId ?? ''} data-sampled={metrics?.framesInSample !== null && metrics !== null} data-rendered-ball={JSON.stringify(metrics?.ballPosition ?? null)} data-rendered-actor={JSON.stringify(metrics?.actorPosition ?? null)} data-rendered-recipient={JSON.stringify(metrics?.recipientPosition ?? null)} data-origin={JSON.stringify(snapshot.origin)} data-target={JSON.stringify(snapshot.target)}>{metrics ? `${metrics.calls} draw calls · ${metrics.triangles} triangles · ${metrics.geometries} geometries · ${metrics.textures} textures · first ready ${metrics.readyMs.toFixed(1)} ms · frames in 500 ms sample: ${metrics.framesInSample ?? 'sampling'}` : 'Renderer initializing'}</output><p>{snapshot.provenance} · match {snapshot.scope.match_id}{snapshot.scope.branch_id ? ` · branch ${snapshot.scope.branch_id}` : ''}. No observer-frame stream is connected.</p></details>
     </>}
   </section>
 }
