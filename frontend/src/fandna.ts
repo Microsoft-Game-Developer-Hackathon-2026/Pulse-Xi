@@ -31,7 +31,7 @@ const en = {
   no_insights: 'Verified insights will appear as the replay reaches them.', fandna_recap: 'FanDNA / recap', loading: 'Loading event-verified recap…',
   view: 'View', language: 'Language', casual: 'Casual fan', analyst: 'Tactical analyst', favorite_team: 'Favorite team',
   favorite_player: 'Favorite player', broadcaster: 'Broadcast producer', follow_team: 'Follow team', follow_player: 'Follow player',
-  source_events: 'Source events', fallback: 'English fallback active', locale_status: 'All FanDNA interface labels are translated for this language.',
+  source_events: 'Source events', fallback: 'English fallback active', locale_status: 'FanDNA controls use the selected language.',
   recap_error: 'Recap unavailable. Your replay and other analysis remain available.',
   recap_scope: 'Verified goal recap · synthetic events',
 }
@@ -49,7 +49,7 @@ const es: typeof en = {
   no_insights: 'Los datos verificados aparecerán al avanzar la repetición.', fandna_recap: 'FanDNA / resumen', loading: 'Cargando resumen verificado por eventos…',
   view: 'Vista', language: 'Idioma', casual: 'Aficionado', analyst: 'Analista táctico', favorite_team: 'Equipo favorito',
   favorite_player: 'Jugador favorito', broadcaster: 'Productor de transmisión', follow_team: 'Seguir equipo', follow_player: 'Seguir jugador',
-  source_events: 'Eventos de origen', fallback: 'Se muestra la versión en inglés', locale_status: 'Todas las etiquetas de FanDNA están traducidas a este idioma.',
+  source_events: 'Eventos de origen', fallback: 'Se muestra la versión en inglés', locale_status: 'Los controles de FanDNA usan el idioma seleccionado.',
   recap_error: 'Resumen no disponible. La repetición y los demás análisis siguen disponibles.',
   recap_scope: 'Resumen verificado de goles · eventos sintéticos',
 }
@@ -67,7 +67,7 @@ const hi: typeof en = {
   no_insights: 'रीप्ले आगे बढ़ने पर सत्यापित जानकारी दिखाई देगी।', fandna_recap: 'FanDNA / सारांश', loading: 'घटना-सत्यापित सारांश लोड हो रहा है…',
   view: 'दृश्य', language: 'भाषा', casual: 'फुटबॉल प्रशंसक', analyst: 'रणनीति विश्लेषक', favorite_team: 'पसंदीदा टीम',
   favorite_player: 'पसंदीदा खिलाड़ी', broadcaster: 'प्रसारण निर्माता', follow_team: 'टीम का अनुसरण करें', follow_player: 'खिलाड़ी का अनुसरण करें',
-  source_events: 'स्रोत घटनाएँ', fallback: 'अंग्रेज़ी विकल्प दिखाया जा रहा है', locale_status: 'FanDNA के सभी इंटरफ़ेस लेबल इस भाषा में हैं।',
+  source_events: 'स्रोत घटनाएँ', fallback: 'अंग्रेज़ी विकल्प दिखाया जा रहा है', locale_status: 'FanDNA नियंत्रण चुनी गई भाषा का उपयोग करते हैं।',
   recap_error: 'सारांश उपलब्ध नहीं है। रीप्ले और अन्य विश्लेषण उपलब्ध हैं।',
   recap_scope: 'सत्यापित गोल सारांश · कृत्रिम घटनाएँ',
 }
