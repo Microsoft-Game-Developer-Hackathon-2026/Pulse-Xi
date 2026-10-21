@@ -276,8 +276,10 @@ Away x uses the existing attacking-frame transform. Calendar generation time is
 null: no observed calendar timestamp exists. Native events are not import packages.
 
 Metrics reuse existing event-count calculations. The response adds cutoff score,
-per-team type counts (including carries) and explicit unavailable reasons. Legacy
-match-state/insight templates and continuous tracking remain unavailable. Native
+per-team type counts (including carries) and explicit unavailable reasons. Existing
+goal/activity insight rules and their verifier use source counts/score and retain
+their published definitions. The legacy match-state phase and continuous tracking
+remain unavailable. Native
 pass geometry reuses synthetic-pass-difficulty/1.0 and its independent verifier;
 `runtime-pass-evidence/1` embeds native events. Branch ProofTrail/ForkCast remain
 separate and unchanged. No pressure coverage or tactical causality is invented.

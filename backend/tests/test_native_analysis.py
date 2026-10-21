@@ -10,11 +10,12 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from app.main import app
-from app.models import MatchEvent
+from app.models import MatchEvent, Insight
+from app.evidence import verify
 from app.sandbox import storage
 from app.sandbox.engine import build_scenario, digest
 from app.sandbox.models import Command, ScenarioConfig
-from app.sandbox.native_analysis import NativeEvent
+from app.sandbox.native_analysis import NativeEvent, NativeMatch
 
 TOKEN = 'native-analysis-owner-token-at-least-32-characters'
 HEADERS = {'Authorization': 'Bearer ' + TOKEN}
@@ -89,7 +90,12 @@ def test_native_boundaries_identity_metrics_evidence_and_exports(database, durat
     earlier = read(sid, f'analysis?at_second={half-1}').json()
     assert earlier['events'] == [e for e in events if e['tick']<half]
     assert earlier['clock']['inspection_period']==1
-    assert earlier['unavailable']['legacy_insight_templates']
+    assert earlier['unavailable']['legacy_match_state']
+    native_events=[NativeEvent.model_validate(e) for e in events]
+    native_match=NativeMatch.model_validate(result['match'])
+    assert sum(i['category']=='goal' for i in result['insights'])==sum(e['type']=='goal' for e in events)
+    assert all(verify(Insight.model_validate(i),native_match,native_events) for i in result['insights'])
+    assert all(i['match_second']<=half-1 for i in earlier['insights'])
     packet = read(sid, f'analysis-export?at_second={duration}').json()
     assert packet['data']==events
     assert packet['provenance']['runtime']['halftime_tick']==half
