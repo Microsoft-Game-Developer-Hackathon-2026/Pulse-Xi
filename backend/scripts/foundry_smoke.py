@@ -73,7 +73,7 @@ async def run_one_workflow(fixture: str, timeout_seconds: int) -> dict:
         raise RuntimeError("No verified synthetic evidence packet is available")
 
     evidence_hash = _evidence_hash(match, events, insight)
-    previous = len(TRACES)
+    previous_trace_id = TRACES[-1].get("trace_id") if TRACES else None
     started = time.perf_counter()
     try:
         result = await asyncio.wait_for(
@@ -81,7 +81,7 @@ async def run_one_workflow(fixture: str, timeout_seconds: int) -> dict:
             timeout=timeout_seconds,
         )
     except Exception:
-        trace = TRACES[-1] if len(TRACES) > previous else {
+        trace = TRACES[-1] if TRACES and TRACES[-1].get("trace_id") != previous_trace_id else {
             "provider": "microsoft_foundry_agent_framework",
             "provider_status": "error",
             "status": "failed",
@@ -97,7 +97,7 @@ async def run_one_workflow(fixture: str, timeout_seconds: int) -> dict:
         report["workflow_status"] = "failed"
         return report
 
-    trace = TRACES[-1] if len(TRACES) > previous else {}
+    trace = TRACES[-1] if TRACES and TRACES[-1].get("trace_id") != previous_trace_id else {}
     trace.setdefault("elapsed_ms", round((time.perf_counter() - started) * 1000, 1))
     return _safe_report(trace, result, evidence_hash)
 
