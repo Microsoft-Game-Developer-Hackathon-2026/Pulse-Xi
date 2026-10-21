@@ -134,14 +134,18 @@ def _control_team(team_id: str, other_team_id: str, events: list[MatchEvent]) ->
             )
             transition_targets.setdefault(key, []).append(event)
     transition_pairs: list[tuple[MatchEvent, MatchEvent]] = []
+    used_transition_targets: set[str] = set()
     for trigger in known_triggers:
         key = (team_id, trigger.possession_id)
         candidates = transition_targets.get(key, [])
         trigger_key = (trigger.match_second, trigger.sequence, trigger.event_id)
         index = bisect_right(transition_target_keys.get(key, []), trigger_key)
+        while index < len(candidates) and candidates[index].event_id in used_transition_targets:
+            index += 1
         target = candidates[index] if index < len(candidates) else None
         if target and target.match_second <= trigger.match_second + 30:
             transition_pairs.append((trigger, target))
+            used_transition_targets.add(target.event_id)
     transition_ids = {
         event.event_id for pair in transition_pairs for event in pair
     }
