@@ -1,6 +1,21 @@
 import { expect, test } from '@playwright/test'
 import { eventSnapshot, projectPoint } from '../src/features/observer/eventSnapshot'
 import type { Event, Match } from '../src/types'
+import { BoxGeometry, Mesh, MeshStandardMaterial } from 'three'
+import { cloneTeamMarker } from '../src/features/observer/cloneTeamMarker'
+
+test('team tint preserves single-mesh rendering and cached source materials', () => {
+  const material = new MeshStandardMaterial({ color: '#777777' })
+  material.name = 'TeamAccent'
+  const source = new Mesh(new BoxGeometry(), material)
+  const clone = cloneTeamMarker(source, '#27d5df') as Mesh
+  expect(Array.isArray(clone.material)).toBe(false)
+  expect((clone.material as MeshStandardMaterial).color.getHexString()).toBe('27d5df')
+  expect(material.color.getHexString()).toBe('777777')
+  expect(clone.geometry).toBe(source.geometry)
+  expect(clone.material).not.toBe(source.material)
+  source.geometry.dispose(); material.dispose(); (clone.material as MeshStandardMaterial).dispose()
+})
 
 test('three graphics profiles, cinematic cameras and free controls preserve the selected event', async ({ page, request }, testInfo) => {
   const errors: string[] = []
@@ -72,6 +87,10 @@ test('lazy 3D snapshots, cameras, quality and context-loss fallback work', async
   await page.getByRole('slider', { name: 'Seek match time' }).fill(String(pass.match_second))
   await page.getByRole('button', { name: '3D observer', exact: true }).click()
   await expect(page.getByTestId('observer-canvas').locator('canvas')).toBeVisible()
+  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status', 'ready')
+  const firstReady = await page.getByTestId('asset-status').textContent()
+  const size = JSON.parse(await page.getByTestId('asset-status').getAttribute('data-surface-size') ?? '[]')
+  expect(size[0]).toBeCloseTo(100, 2); expect(size[2]).toBeCloseTo(64, 2); expect(size[1]).toBeLessThan(.1)
   await page.getByText('Renderer diagnostics and provenance', { exact: true }).click()
   await expect(page.getByTestId('observer-metrics')).toHaveAttribute('data-sampled', 'true')
   await expect(page.getByTestId('observer-snapshot')).toHaveAttribute('data-event-id', pass.event_id)
@@ -80,6 +99,7 @@ test('lazy 3D snapshots, cameras, quality and context-loss fallback work', async
   const metrics = await page.getByTestId('observer-metrics').textContent()
   console.log(`3D measured: ${metrics}`)
   await testInfo.attach('renderer-metrics', { body: metrics ?? '', contentType: 'text/plain' })
+  await page.getByTestId('observer-canvas').screenshot({ path: testInfo.outputPath('original-asset-observer.png') })
   await page.getByRole('button', { name: 'Top-down camera' }).focus()
   await page.keyboard.press('Enter')
   await expect(page.getByTestId('observer-canvas')).toHaveAttribute('data-camera', 'tactical')
@@ -89,12 +109,77 @@ test('lazy 3D snapshots, cameras, quality and context-loss fallback work', async
   await expect(page.getByTestId('observer-canvas')).toHaveAttribute('data-camera', 'broadcast')
   await page.getByLabel('3D QUALITY').selectOption('low')
   await expect(page.getByTestId('observer-canvas')).toHaveAttribute('data-quality', 'low')
+  await expect(page.getByTestId('asset-status')).toHaveText(firstReady!)
   await page.getByTestId('observer-canvas').screenshot({ path: testInfo.outputPath('event-observer.png') })
   await page.getByRole('slider', { name: 'Seek match time' }).fill('0')
   await expect(page.getByTestId('observer-snapshot')).not.toHaveAttribute('data-event-id', pass.event_id)
   await page.getByTestId('observer-canvas').locator('canvas').evaluate(canvas => canvas.dispatchEvent(new Event('webglcontextlost', { cancelable: true })))
   await expect(page.getByText('The 3D renderer is unavailable. The recorded 2D pitch remains active.')).toBeVisible()
   await expect(page.getByRole('img', { name: /^Pitch position/ })).toBeVisible()
+})
+
+test('missing GLB assets fall back to a working procedural 3D pitch', async ({ page }) => {
+  await page.route('**/assets/field-*.glb', route => route.abort())
+  await page.goto('/#/sandbox')
+  await page.getByRole('button', { name: '3D observer', exact: true }).click()
+  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status', 'fallback')
+  await expect(page.getByTestId('observer-canvas').locator('canvas')).toBeVisible()
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('3500')
+  await expect(page.locator('.score')).toContainText('0:2')
+  await page.getByLabel('SCENE STYLE').selectOption('procedural')
+  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status', 'procedural')
+})
+
+test('corrupt GLB bytes recover without losing recorded source identity',async ({page})=>{
+  const failures:string[]=[];page.on('pageerror',error=>failures.push(error.message))
+  await page.route('**/assets/field-*.glb',route=>route.fulfill({status:200,contentType:'model/gltf-binary',body:Buffer.from('invalid glTF container')}))
+  await page.goto('/#/sandbox')
+  await page.getByRole('slider',{name:'Seek match time'}).fill('3500')
+  await page.getByRole('button',{name:'3D observer',exact:true}).click()
+  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status','fallback')
+  await expect(page.getByTestId('observer-canvas').locator('canvas')).toBeVisible()
+  const source=await page.getByTestId('observer-snapshot').getAttribute('data-event-id')
+  expect(source).toBeTruthy()
+  await page.getByLabel('SCENE STYLE').selectOption('procedural')
+  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status','procedural')
+  await expect(page.getByTestId('observer-snapshot')).toHaveAttribute('data-event-id',source!)
+  await page.getByRole('button',{name:'2D pitch',exact:true}).click()
+  await expect(page.getByRole('img',{name:/^Pitch position/})).toBeVisible()
+  await page.unroute('**/assets/field-*.glb')
+  await page.getByRole('button',{name:'3D observer',exact:true}).click()
+  await page.getByLabel('SCENE STYLE').selectOption('original')
+  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status','ready')
+  await expect(page.getByTestId('observer-snapshot')).toHaveAttribute('data-event-id',source!)
+  expect(failures).toEqual([])
+})
+
+test('slow asset loading leaves a usable pitch and does not block returning to 2D', async ({ page }) => {
+  let release: () => void = () => {}
+  const gate = new Promise<void>(resolve => { release = resolve })
+  let requested: () => void = () => {}
+  const started = new Promise<void>(resolve => { requested = resolve })
+  await page.route('**/assets/field-*.glb', async route => {
+    const response = await route.fetch(); requested(); await gate
+    try { await route.fulfill({ response }) } catch { /* Observer may already be closed. */ }
+  })
+  await page.goto('/#/sandbox')
+  await page.getByRole('button', { name: '3D observer', exact: true }).click()
+  await started
+  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status', 'loading')
+  await expect(page.getByTestId('observer-canvas').locator('canvas')).toBeVisible()
+  await page.getByRole('button', { name: '2D pitch', exact: true }).click()
+  release()
+  await expect(page.getByRole('img', { name: /^Pitch position/ })).toBeVisible()
+})
+
+test('mobile reduced-motion mode loads the kit at low power without overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/#/sandbox')
+  await page.getByRole('button', { name: '3D observer', exact: true }).click()
+  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status', 'ready')
+  await expect(page.getByTestId('observer-canvas')).toHaveAttribute('data-quality', 'low')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2)).toBe(true)
 })
 
 test('unavailable WebGL preserves mobile 2D replay and reduced-motion defaults', async ({ page }) => {

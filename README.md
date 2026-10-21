@@ -2,11 +2,26 @@
 
 [![verify](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/workflows/ci.yml)
 
-**A synthetic football intelligence and tactical experimentation platform.**
+**Synthetic football intelligence for fans, analysts and broadcast producers.**
 
-A Microsoft Game Developer Hackathon 2026 project turning fictional football events into deterministic statistics, inspectable tactical explanations, synchronized broadcast cues and personalized recaps. The browser Sandbox Lab explores reproducible recorded fixtures. A separate authenticated authoritative engine is already available through backend APIs; its live Control Room and ForkCast integrations remain under review. All teams, players and events are synthetic. No Premier League feed, club logos, real-player tracking or broadcast footage is used.
+A Microsoft Game Developer Hackathon 2026 project turning fictional football events into deterministic statistics, inspectable tactical explanations, synchronized broadcast cues and personalized recaps. Recorded fixture replay and an authenticated authoritative Control Room support reproducible tactical experiments. All teams, players and events are synthetic. No Premier League feed, club logos, real-player tracking or broadcast footage is used.
+
+## Availability and review status (2026-10-21)
+
+Main baseline `aefc046ccb4b54ad10f16575a57fa76f820a5051` includes live runtime #53, saved scenarios/archives and runtime schema 3 (#64/#65), plus original graphics #62. #52 remains open but its credential hardening and dependency constraints are present through #53; do not merge the older standalone branch over the runtime lifespan.
+
+Native analysis #57, checkpoint/history/ForkCast acceptance additions #59 and runtime Control vs Chaos #58 remain under review. Recorded Control vs Chaos #42, FanDNA expansion #48 and branch ProofTrail #51 with request-isolation fix #54 are separate review-gated work. Draft agent tools #55, cost-gated Foundry validation #56 and Broadcast Studio proposal #50 are not shipped. Assets are technically integrated; manifest release approval and rights-holder decisions remain separate. Main's current runtime analysis projection supports 5,400-second scenarios; native engine controls already support shorter scenarios.
 
 ## Application functionality
+
+**Integrated baseline:** main `100106a` includes #64's saved-scenario library and #53's live runtime, architecture,
+private analysis and command-credential hardening, alongside original graphics #62.
+PR #52 remains open, but its code is present through #53; its separate PR state
+does not mean the fix is absent. The [completion PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64) integrated owner-scoped saved-scenario
+listing, versioned archives and creation provenance without changing engine hashes.
+See the [scenario library contract](docs/LIVE_SANDBOX.md#saved-scenario-library-and-archives)
+and shared
+[architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
 
 | Capability | Status and boundary |
 |---|---|
@@ -15,41 +30,20 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 | Analytics | Event-derived passes, shots, recoveries, pressure activity, networks, player summaries and windowed activity proxies |
 | ProofTrail | Goal/tactical insights with supporting events and deterministic numerical verification |
 | Pass Difficulty | Versioned 0–100 geometry heuristic with inspectable factors and player summaries; not a failure probability; pressure coverage unavailable |
-| Sandbox Lab | Working fixture replay workspace; authoritative backend controls, checkpoints, branches and manifests are available through the authenticated API, pending frontend integration |
-| 3D Observer | Lazy procedural pitch/stadium, five cameras, Low/Medium/High profiles, recorded-event evidence and 2D/WebGL fallback |
+| Sandbox Lab | Fixture replay plus a separate authenticated live Control Room with server-driven runs, tactical interventions, exact checkpoints, isolated branches and verified paired ForkCast experiments |
+| 3D Observer | Lazy original Blender kit with procedural fallback, five cameras, Low/Medium/High profiles, recorded-event evidence and 2D/WebGL fallback |
 | Broadcast/FanDNA | Timed cue JSON/preview and five recap modes; limited English, Hindi and Spanish templates, not full interface translation |
 | Match Data Hub | Searchable source-labelled library, authorized canonical JSON import, no-write preview, factual data-quality inspection, archive/restore/delete controls and checksummed portable match packages |
 | Persistence | SQLite imported-event persistence and idempotent ingest; built-in/custom fixtures regenerate |
 | Microsoft AI | Guarded optional provider code; verified local path uses deterministic fallback, not authenticated model inference |
 
-The [authoritative engine integration guide](docs/AUTHORITATIVE_ENGINE.md) documents real backend controls, exact checkpoint continuation, isolated runtime branches, tactical interventions and independent manifest verification. The existing Sandbox UI still uses fixture replay. **Separate gates:** PR #31's editable Blender/GLB kit awaits Vishwam's asset/security approval; PRs #32/#33 remain separate. Higher-level ForkCast trial/comparison integration, calibrated prediction, public Azure deployment and real multi-agent inference are not supplied by the engine. See the [earlier handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
-
-## Availability on main and review-gated development
-
-This documentation describes the source baseline `4d8a01e5e3483f6a4aafb62cd09def6fcfdd3713`, checked on 2026-10-21. A PR merged into another feature branch does not establish availability on main.
-
-| Feature | Availability |
-|---|---|
-| Authoritative scenario/session APIs, bounded commands, checkpoints, isolated restore, interventions and manifest verification | Available on main; provisioned operator token required |
-| Live Control Room, background progression, runtime observations, paired ForkCast and runtime analysis | Under review in [#53](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/53) |
-| Native 60?5,400-second analysis and checkpoint/history/ForkCast acceptance controls | Under review in #57 and #59; sibling increments above #53 |
-| Recorded Control vs Chaos / runtime Control vs Chaos | Under review in #42 / #58; runtime adapter also depends on #57 |
-| Authenticated branch ProofTrail / request isolation correction | Under review in #51 / #54; existing recorded-insight ProofTrail remains available |
-| FanDNA localization/accessibility expansion | Under review in #48; existing limited recap templates remain available |
-| Additional Foundry command hardening | Under review in #52; trace authorization fix #45 is on main |
-| Original Blender kit / compatibility correction | Under review in #31 / #60; rights approval remains required |
-| Evidence-scoped agent tools / cost-gated validation / Broadcast Studio contract | Draft #55 / #56 / #50; not shipped features |
-| Historical checkpoint/ForkCast preparation | #32/#33 are proposals, superseded in substantial part by executable engine work; not production contracts |
-
-Validation branches and their benchmark reports are integration evidence, not releases. No hosted Foundry inference, public deployment or licensing clearance is claimed. [Current status](docs/PROJECT_STATUS.md) separates implementation from review.
+The [Live Sandbox guide](docs/LIVE_SANDBOX.md) documents the proposed Control Room at `/#/runtime`: configure, run on the server, pause, intervene, checkpoint, restore, run paired trials and inspect/verify event evidence. Runtime access requires provisioned operator credentials, kept only in page memory. The fixture workspace remains at `/#/sandbox`. Original graphics, licensing notices and fallback behavior from merged #62 are preserved; see its [asset review record](docs/ASSET_SECURITY_RELEASE_REVIEW.md). Other preparation and feature PRs retain separate review gates. Calibrated prediction, public Azure deployment and real multi-agent inference are not supplied by the engine. See the [earlier handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
 
 ## Windows quick start
 
-Prerequisites: Git, a current WebGL-capable browser (3D optional), Python 3.11+ (CI uses 3.13), Node **20.19+ or 22.12+** (Vite requirement), npm and PowerShell. Verification used Python 3.13 and Node 24. From the repository root:
+Prerequisites: Python 3.11+, Node **20.19+ or 22.12+** (Vite requirement), npm and PowerShell. Verification used Python 3.13 and Node 24. From the repository root:
 
 ```powershell
-git clone https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi.git
-cd Pulse-Xi
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 .\scripts\start.ps1
@@ -108,42 +102,7 @@ Set variables in the server shell before startup. Do not commit credentials or p
 
 Generate a development secret server-side with `python -c "import secrets; print(secrets.token_urlsafe(32))"`. Operator tokens scope private runtime records to provisioned owners; inaccessible identities are concealed with 404. They do not create public signup or a collaborative permission model. Public recorded/imported matches have a different access boundary.
 
-**Security qualification:** #52's command-credential hardening is not yet on main. Keep optional hosted agent execution disabled and do not expose privileged routes publicly while review is pending. CORS, localhost UI controls and a Host header alone are not authorization. Run development servers bound to loopback; this README does not certify public deployment.
-
-## Backend architecture and API groups
-
-```text
-React / TypeScript recorded replay and analysis UI
-    -> FastAPI
-       +-- Recorded fixtures, imported-match analytics and evidence
-       +-- Authoritative engine: scenarios, bounded commands, checkpoints, manifests
-       +-- Optional Microsoft agent/provider integration (disabled by default)
-       +-- Imported-match SQLite store (schema 2)
-       +-- Separate runtime SQLite store
-Browser profile: versioned local workspace, bookmarks and analyst notes
-Local procedural scene: optional WebGL presentation, not a simulation clock
-```
-
-| API group on main | Entry points and boundary |
-|---|---|
-| Recorded matches | `/api/matches`, `/generate`, `/{match_id}/events`, `/state`, `/metrics`, `/tactics`; `/ws/matches/{match_id}` is replay transport |
-| Data Hub | `/api/data-hub`, `/preview`, `/import`, `/recover`, `/matches/{match_id}/lifecycle`; mutations require server authorization |
-| Analysis/evidence | Match pass difficulty, insights/evidence, recap, overlays and `/analysis-export` |
-| Authoritative engine | `/api/sandbox/versions`, `/presets`, `/scenarios`, `/sessions`, session `/state`, `/snapshot`, `/commands`, `/events`, `/audit`, `/manifest` |
-| Checkpoints/verification | `/api/sandbox/checkpoints/{checkpoint_id}`, `/restore`, `/api/sandbox/verify` |
-| Optional agents | Insight explanation/agent-run and privileged `/api/agent-traces`; no cloud credentials needed for deterministic fallback |
-
-Use `/docs` and `/openapi.json` for exact request models. [CONTRACT](docs/CONTRACT.md) covers recorded data; [AUTHORITATIVE_ENGINE](docs/AUTHORITATIVE_ENGINE.md) documents executable engine commands and authenticated examples. On main, `resume` permits bounded `advance` commands; it does not start a background wall-clock worker. There is no shipped live runtime UI or paired-experiment API yet.
-
-### Reproducibility
-
-Fixture seeds reproduce supported generator output on the same build. Engine manifests additionally identify resolved scenario, versions, input history and expected hashes. Checkpoints preserve complete runtime state, RNG and pending actions; imported dataset packages and browser workspaces are different artifacts. Independently verify the checked-in engine example from `backend`:
-
-```powershell
-python -m app.sandbox.verify_manifest ../docs/examples/sandbox/experiment.json
-```
-
-`verify_experiment` belongs to the unmerged runtime/ForkCast stack and is not a main command. Do not rescale native engine time to imply a 90-minute observation. Formula versions and source citations make calculations inspectable; neither synthetic outcomes nor heuristic difficulty scores are calibrated real-football predictions.
+Runtime provisioned credentials remain memory-only in the browser. New saved scenarios and scenario archives reside in runtime SQLite schema 3, separately from imported-match schema 2 and browser notes. The live Control Room is available at `/#/runtime`; see [LIVE_SANDBOX](docs/LIVE_SANDBOX.md) for saved-scenario, archive, checkpoint, run and ForkCast workflows. Optional hosted agents remain disabled without explicit authorization; no hosted inference or public deployment is certified.
 
 ## Analysis workflow
 
@@ -239,6 +198,8 @@ JSON includes schema, real generation time, cutoff, source IDs, fixture seed and
 
 ## Architecture and stack
 
+The optional **3D Observer** adds an original Blender stadium, recorded event markers, five camera modes and Low/Medium/High graphics profiles. The default 2D view remains independent of WebGL. See the [graphics toolchain, reproducible assets and measured results](docs/PROFESSIONAL_3D_GRAPHICS_UPGRADE.md). Positions remain sparse synthetic event snapshots; no continuous player tracking is inferred.
+
 ```mermaid
 flowchart LR
   S[Seeded fixture generator] --> E[Typed synthetic events]
@@ -255,7 +216,7 @@ flowchart LR
   UI --> O[Lazy R3F event observer]
 ```
 
-Frontend: React 19, strict TypeScript, Vite, Tailwind/CSS, Three.js and React Three Fiber. Backend: Python, FastAPI, Pydantic and SQLite. pytest/Playwright exercise APIs and browsers. Calculations stay outside language models. The implemented authoritative engine owns state, clock and RNG; recorded replay only changes the inspection cutoff.
+Frontend: React 19, strict TypeScript, Vite, Tailwind/CSS, Three.js and React Three Fiber. Backend: Python, FastAPI, Pydantic and SQLite. pytest/Playwright exercise APIs and browsers. Calculations stay outside language models. Future authoritative state/clock/RNG ownership belongs to Diyan, not the replay client.
 
 ```text
 backend/app/                  models, generator, analytics, evidence, APIs, storage
@@ -271,17 +232,14 @@ docs/                         contracts, methodology and handoff
 
 ## Testing
 
-Dependency checks (from the repository root unless noted):
+From `backend`, independently verify both checked-in bundles:
 
 ```powershell
-python -m pip check
-python -m pip_audit -r backend/requirements.txt --progress-spinner off
-git diff --check
-# frontend directory
-npm audit
+python -m app.sandbox.verify_manifest ../docs/examples/sandbox/experiment.json
+python -m app.sandbox.verify_experiment ../docs/examples/sandbox/forkcast.json
 ```
 
-`pip_audit` is an optional development scanner (`python -m pip install pip-audit`), not a runtime dependency. At the documented main baseline, npm audit reports one high-severity direct Vite finding (locked 7.3.6); the compatible 7.3.7 correction exists in pending #53/#60. Do not treat a clean validation-branch scan as a clean main scan. Additional Python dependency hardening remains in #52.
+From the repository root, run `python scripts/asset_contract.py` and `git diff --check`; from `frontend`, run `npm run validate:assets` and `npm audit`. `python -m pip check` checks installed dependency consistency. Optional development scanner: `python -m pip_audit -r backend/requirements.txt --progress-spinner off` (install pip-audit separately). Results belong to the tested commit, not all future builds.
 
 
 ```powershell
@@ -324,7 +282,7 @@ The headed browser rejects a detected software renderer, records renderer identi
 ## Team and contributions
 
 - Diyan: authoritative simulator, tactics, interventions, manifests; optional RTX work.
-- Satvik: replay/frontend integrations, Pass Difficulty, observer, persistent analysis, bookmarks/exports, Data Hub and lifecycle; checkpoint/ForkCast consumers under review.
+- Satvik: Sandbox consumers, checkpoints/ForkCast UI, pass difficulty and observer.
 - Mahir: Microsoft AI, verified intelligence, personalization and broadcasts.
 - Vishwam: release/security/provenance, deployment, broader QA and submission documentation.
 
@@ -333,9 +291,6 @@ Use focused branches/PRs with reproducible evidence. Do not push directly to mai
 ## Documentation
 
 - [Current status](docs/PROJECT_STATUS.md)
-- [Authoritative backend engine](docs/AUTHORITATIVE_ENGINE.md)
-- [Architecture decisions](docs/DECISIONS.md)
-- [Local security boundary](docs/LOCAL_SECURITY_BOUNDARY.md)
 - [Independent handoff and next integration sequence](docs/SATVIK_INDEPENDENT_HANDOFF.md)
 - [API/event contract](docs/CONTRACT.md)
 - [Pass methodology](docs/PASS_DIFFICULTY.md)
@@ -349,12 +304,7 @@ Use focused branches/PRs with reproducible evidence. Do not push directly to mai
 |---|---|
 | Python import failure | Use the intended interpreter/venv; install `backend/requirements.txt` |
 | Missing or stale Node modules | Run `npm ci` in `frontend`; check Node version |
-| Port 8000 occupied | Use `.\scripts\start.ps1 -Port 8769`; Vite development proxy still targets 8000 unless explicitly configured. Do not terminate unknown processes |
-| Playwright browser missing | From `frontend`, run `npx playwright install chromium` (Linux CI uses `--with-deps`) |
-| Runtime returns 503 / 403 | Configure a valid server operator token / send the matching Bearer token; no browser runtime login exists on this main |
-| SQLite cannot write | Check the configured database parent directory and OS permissions; preserve the original database before recovery |
-| PowerShell activation blocked | Use `.\.venv\Scripts\python.exe` directly; do not weaken system execution policy |
-| Backup destination exists | Choose a new destination; recovery intentionally never overwrites an existing database |
+| Port 8000 occupied | Stop its known owner or use another manual uvicorn port; do not terminate unknown processes |
 | Startup exits | Fix the first dependency/build error; startup stops on failures |
 | Blank/failed 3D | Return to 2D, try Low, check WebGL2/hardware acceleration; replay remains independent |
 | Blender not found | Main does not require Blender; authors on #31 can set `PULSE_BLENDER_PATH` |
@@ -362,8 +312,12 @@ Use focused branches/PRs with reproducible evidence. Do not push directly to mai
 
 ### Limitations
 
-Synthetic streams are simplified and not calibrated against real football outcomes. Full localization, advanced studio editing, authenticated Microsoft inference and Azure hosting are not established on this main baseline. Engine checkpoints and isolated branches are implemented; the live Control Room and paired ForkCast orchestration remain under review. A seed alone is not a full experiment manifest. The handoff identifies owners and exact integration gates.
+Synthetic streams are simplified and not calibrated against real football outcomes. Full localization, advanced studio editing, authenticated Microsoft inference, Azure hosting and authoritative experimentation remain incomplete. A seed alone is not a full experiment manifest. The handoff identifies owners and exact integration gates.
 
 Browser regression runs are bounded to two workers to avoid oversubscribing software-rendering contexts on developer laptops; explicit multi-tab and database race tests retain their own concurrency. Deep-link navigation hides stale controls until recorded-source restoration completes. No test retries or suppressed failures are used.
 
 Local startup/test serving uses an explicit Uvicorn loop factory: Windows SelectorEventLoop avoids the observed Proactor socket-shutdown/reset race during request cancellation; Linux keeps Uvicorn auto/uvloop. This is a bounded local server (the Windows selector supports up to 512 sockets), not a high-concurrency public deployment configuration; the backend does not use asyncio subprocess APIs. Errors are not filtered or retried away.
+
+### Authoritative recorded-event analysis
+
+In the integrated runtime, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to existing pass analysis, ProofTrail, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. The current engine projection requires a 5400-second scenario; shortened runs retain native controls. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#existing-analysis-integration) for authenticated routes, cutoff/hash semantics and limitations. The base runtime/analysis integration reached main through #53; native-period analysis and other open feature PRs are not implied.
