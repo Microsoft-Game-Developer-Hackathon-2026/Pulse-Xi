@@ -86,3 +86,9 @@ Whole-database restore rotates dataset generation IDs and deletion nonces in the
 ## Owner-scoped runtime analysis
 
 The engine integration branch exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. They reuse existing calculations over a committed engine-owned v1 projection, reject future cutoffs and conceal other owners. Private runtime datasets are not resolved through public `/api/matches` routes. Current compatibility is 5400-second scenarios only. See [LIVE_SANDBOX](LIVE_SANDBOX.md#existing-analysis-integration) for every route, local bookmark namespace, export limits and runtime-boundary hash scope. Neither dataset lifecycle nor engine state serialization is replaced.
+
+## FanDNA localization and preference boundary
+
+The FanDNA replay controls have typed English, Spanish and Hindi message catalogs. A missing catalog entry falls back to English and the interface announces that fallback. The locale is applied to the main application region for assistive technology. The existing recap API remains a deterministic template over verified goal evidence; localized copy does not alter scores, clocks, insight IDs or supporting event IDs. Persona labels and analyst/broadcaster templates are localized in all three supported locales.
+
+FanDNA preferences use browser-local `pulse-xi-fandna-preferences-v1`, schema version 1. It stores only locale, persona and selected synthetic team/player IDs; invalid or unknown values return to defaults, and favorites are checked against the selected fixture. Storage failure does not block replay. No speech provider, voice cloning, network speech request, or paid Azure Speech feature is enabled; voice requires a separately approved cost and consent design.
