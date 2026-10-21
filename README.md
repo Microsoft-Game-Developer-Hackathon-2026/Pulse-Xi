@@ -8,9 +8,9 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 
 ## Availability and review status (2026-10-21)
 
-Main baseline `4d1d11c7deac2a5632ff8d374e362732c2828491` includes #67 recorded-event observer synchronization, live runtime #53, saved scenarios/archives and runtime schema 3 (#64/#65), plus original graphics #62. #52 is closed as superseded: its credential hardening and dependency constraints already reached main through #53. A verified three-way merge adds no changes.
+Integration baseline `c2f8c622d21d3db804e57c9a02e4c09b264f9c4b` (#61) includes #67 recorded-event observer synchronization, live runtime #53, saved scenarios/archives and runtime schema 3 (#64/#65), plus original graphics #62. #52 is closed as superseded: its credential hardening and dependency constraints already reached main through #53. A verified three-way merge adds no changes.
 
-Native analysis #57, checkpoint/history/ForkCast acceptance additions #59 and runtime Control vs Chaos #58 remain under review. Recorded Control vs Chaos #42, FanDNA expansion #48 and branch ProofTrail #51 with request-isolation fix #54 are separate review-gated work. Draft agent tools #55, cost-gated Foundry validation #56 and Broadcast Studio proposal #50 are not shipped. Assets are technically integrated; manifest release approval and rights-holder decisions remain separate. Main's current runtime analysis projection supports 5,400-second scenarios; native engine controls already support shorter scenarios.
+This acceptance update incorporates #59 checkpoint/history/ForkCast consumer work with original authorship, plus checkpoint UTC metadata and reproduction envelopes. Native analysis #57 and runtime Control vs Chaos #58 remain separate. Recorded Control vs Chaos #42, FanDNA expansion #48 and branch ProofTrail #51 with request-isolation fix #54 are separate review-gated work. Draft agent tools #55, cost-gated Foundry validation #56 and Broadcast Studio proposal #50 are not shipped. Assets are technically integrated; manifest release approval and rights-holder decisions remain separate. Main's current runtime analysis projection supports 5,400-second scenarios; native engine controls already support shorter scenarios.
 
 ## Application functionality
 
@@ -21,6 +21,9 @@ listing, versioned archives and creation provenance without changing engine hash
 See the [scenario library contract](docs/LIVE_SANDBOX.md#saved-scenario-library-and-archives)
 and shared
 [architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
+
+Checkpoint source inspection/download, terminal checkpoint capture, isolated restore/reset, auditable pending/applied tactics, ForkCast source navigation and independent reproduction use real authenticated APIs. Original checkpoint UTC stays outside deterministic state; historical dates remain unknown. See the [checkpoint/reproduction contract](docs/LIVE_SANDBOX.md#checkpoint-metadata-and-reproduction-contracts).
+
 
 | Capability | Status and boundary |
 |---|---|

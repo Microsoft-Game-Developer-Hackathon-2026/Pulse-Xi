@@ -15,13 +15,15 @@ from typing import Literal
 from . import storage
 from .engine import EngineError, build_scenario, capture_state, match_events, match_record, presets, implementation_hash, parse_json
 from .manifest import verify_manifest
-from .models import (AuditEntry, CheckpointView, Command, CreateSession, EventPage, ExperimentManifest,
+from .models import (AuditEntry, Command, CreateSession, EventPage, ExperimentManifest,
                      MutationResult, RestoreRequest, RuntimeView, Scenario, ScenarioConfig, Snapshot,
                      Verification, ErrorResponse, Model, ENGINE_VERSION, SCHEMA_VERSION, RNG_ALGORITHM)
 from ..models import Match, MatchEvent
 from .control import (Run, RunRequest, Experiment, ExperimentRequest, create_run, create_experiment,
                       cancel_run, cancel_experiment, read, list_runs, list_experiments)
 from .experiments import Comparison, ExperimentBundle, comparison, bundle, verify_bundle
+from .reproduction import RuntimeReproduction, ForkCastReproduction, runtime_reproduction, forkcast_reproduction
+from .checkpoint_metadata import CheckpointMetadata, StoredCheckpoint, CommandReceipt
 from .scenario_archive import ScenarioArchive, ScenarioSummary
 
 
@@ -34,7 +36,7 @@ class SessionSummary(Model):
     lifecycle: Literal['paused', 'running', 'completed', 'cancelled']
 
 
-class CheckpointSummary(Model):
+class CheckpointSummary(CheckpointMetadata):
     checkpoint_id: str
     session_id: str
     scenario_id: str
@@ -42,6 +44,7 @@ class CheckpointSummary(Model):
     revision: int
     event_cursor: int
     state_hash: str
+    lifecycle: Literal['paused', 'running', 'completed', 'cancelled']
 
 
 class HistoricalView(Model):
@@ -69,17 +72,19 @@ class RuntimeRoute(APIRoute):
 
         async def handler(request):
             try:
-                return await original(request)
+                response = await original(request)
             except EngineError as error:
-                return JSONResponse({'detail': {'code': error.code}}, status_code=error.status)
+                response = JSONResponse({'detail': {'code': error.code}}, status_code=error.status)
             except sqlite3.Error:
-                return JSONResponse({'detail': {'code': 'transaction_failed'}}, status_code=503)
+                response = JSONResponse({'detail': {'code': 'transaction_failed'}}, status_code=503)
             except ValidationError:
-                return JSONResponse({'detail': {'code': 'corrupt_snapshot'}}, status_code=422)
+                response = JSONResponse({'detail': {'code': 'corrupt_snapshot'}}, status_code=422)
             except json.JSONDecodeError:
-                return JSONResponse({'detail': {'code': 'corrupt_snapshot'}}, status_code=422)
+                response = JSONResponse({'detail': {'code': 'corrupt_snapshot'}}, status_code=422)
             except RuntimeError:
-                return JSONResponse({'detail': {'code': 'runtime_database_unavailable'}}, status_code=503)
+                response = JSONResponse({'detail': {'code': 'runtime_database_unavailable'}}, status_code=503)
+            response.headers['Cache-Control'] = 'no-store'
+            return response
         return handler
 
 
@@ -185,9 +190,11 @@ def history(session_id: str, at_tick: int = Query(ge=0, le=5400), owner: str = D
     return storage.history_at(owner, session_id, at_tick)
 
 
-@router.post('/sessions/{session_id}/commands', response_model=MutationResult)
+@router.post('/sessions/{session_id}/commands', response_model=CommandReceipt)
 def command(session_id: str, request: Command, owner: str = Depends(require_operator)):
-    return storage.mutate(owner, session_id, request)
+    result = storage.mutate(owner, session_id, request)
+    created = storage.get_checkpoint(owner, result.checkpoint_id).created_at_utc if result.checkpoint_id else None
+    return CommandReceipt(**result.model_dump(), checkpoint_created_at_utc=created)
 
 
 @router.get('/sessions/{session_id}/events', response_model=EventPage)
@@ -215,7 +222,7 @@ def audit(session_id: str, owner: str = Depends(require_operator)):
     return storage.audit_log(owner, session_id)
 
 
-@router.get('/checkpoints/{checkpoint_id}', response_model=CheckpointView)
+@router.get('/checkpoints/{checkpoint_id}', response_model=StoredCheckpoint)
 def checkpoint(checkpoint_id: str, owner: str = Depends(require_operator)):
     return storage.get_checkpoint(owner, checkpoint_id)
 
@@ -231,9 +238,15 @@ def manifest(session_id: str, owner: str = Depends(require_operator)):
     return storage.manifest(owner, session_id)
 
 
+@router.get('/sessions/{session_id}/reproduction', response_model=RuntimeReproduction)
+def runtime_archive(session_id: str, response: Response, owner: str = Depends(require_operator)):
+    response.headers['Cache-Control'] = 'no-store'
+    return runtime_reproduction(storage.manifest(owner, session_id))
+
+
 @router.post('/verify', response_model=Verification)
-def verify(manifest: ExperimentManifest, owner: str = Depends(require_operator)):
-    return verify_manifest(manifest)
+def verify(manifest: RuntimeReproduction | ExperimentManifest, owner: str = Depends(require_operator)):
+    return verify_manifest(manifest.manifest if isinstance(manifest, RuntimeReproduction) else manifest)
 
 
 @router.get('/sessions/{session_id}/checkpoints', response_model=list[CheckpointSummary])
@@ -272,8 +285,8 @@ def experiments(owner: str = Depends(require_operator)):
 
 
 @router.post('/experiments/verify', response_model=Verification)
-def verify_experiment(request: ExperimentBundle, owner: str = Depends(require_operator)):
-    return verify_bundle(request)
+def verify_experiment(request: ForkCastReproduction | ExperimentBundle, owner: str = Depends(require_operator)):
+    return verify_bundle(request.manifest if isinstance(request, ForkCastReproduction) else request)
 
 
 @router.get('/experiments/{experiment_id}', response_model=Experiment)
@@ -294,6 +307,12 @@ def experiment_comparison(experiment_id: str, owner: str = Depends(require_opera
 @router.get('/experiments/{experiment_id}/manifest', response_model=ExperimentBundle)
 def experiment_manifest(experiment_id: str, owner: str = Depends(require_operator)):
     return bundle(owner, experiment_id)
+
+
+@router.get('/experiments/{experiment_id}/reproduction', response_model=ForkCastReproduction)
+def experiment_archive(experiment_id: str, response: Response, owner: str = Depends(require_operator)):
+    response.headers['Cache-Control'] = 'no-store'
+    return forkcast_reproduction(bundle(owner, experiment_id))
 
 
 @router.websocket('/sessions/{session_id}/observe')
