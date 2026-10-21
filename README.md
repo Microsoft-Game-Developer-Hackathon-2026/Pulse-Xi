@@ -39,15 +39,15 @@ Checkpoint source inspection/download, terminal checkpoint capture, isolated res
 | Persistence | SQLite imported-event persistence and idempotent ingest; built-in/custom fixtures regenerate |
 | Microsoft AI | Guarded optional provider code; verified local path uses deterministic fallback, not authenticated model inference |
 
-The [Live Sandbox guide](docs/LIVE_SANDBOX.md) documents the proposed Control Room at `/#/runtime`: configure, run on the server, pause, intervene, checkpoint, restore, run paired trials and inspect/verify event evidence. Runtime access requires provisioned operator credentials, kept only in page memory. The fixture workspace remains at `/#/sandbox`. Original graphics, licensing notices and fallback behavior from merged #62 are preserved; see its [asset review record](docs/ASSET_SECURITY_RELEASE_REVIEW.md). Other preparation and feature PRs retain separate review gates. Calibrated prediction, public Azure deployment and real multi-agent inference are not supplied by the engine. See the [earlier handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
+The [Live Sandbox guide](docs/LIVE_SANDBOX.md) documents the integrated Control Room at `/#/runtime`: configure, run on the server, pause, intervene, checkpoint, restore, run paired trials and inspect/verify event evidence. Runtime access requires provisioned operator credentials, kept only in page memory. The fixture workspace remains at `/#/sandbox`. Original graphics, licensing notices and fallback behavior from merged #62 are preserved; see its [asset review record](docs/ASSET_SECURITY_RELEASE_REVIEW.md). Other preparation and feature PRs retain separate review gates. Calibrated prediction, public Azure deployment and real multi-agent inference are not supplied by the engine. See the [earlier handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
 
 ## Windows quick start
 
-Prerequisites: Python 3.11+, Node **20.19+ or 22.12+** (Vite requirement), npm and PowerShell. Verification used Python 3.13 and Node 24. From the repository root:
+Tested baseline: Python **3.13**, Node **24**, npm and PowerShell (also used by CI). Vite requires Node **20.19+ or 22.12+**; other Python/Node combinations were not verified in this release audit. From the repository root:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+$env:Path = "$(Resolve-Path .venv\Scripts);$env:Path"
 .\scripts\start.ps1
 ```
 
@@ -66,8 +66,8 @@ python -m uvicorn app.main:app --loop app.local_event_loop:create_loop --app-dir
 ```powershell
 # Terminal 2, repository root
 cd frontend
-npm ci
-npm run dev
+npm.cmd ci
+npm.cmd run dev
 ```
 
 Open the Vite URL printed by the command. Its API/WebSocket proxy targets port 8000. FastAPI serves `frontend/dist` after production build. Optional backend-only configuration is in [Foundry](docs/FOUNDRY.md); never put secrets in frontend variables. Keep hosted inference disabled without explicit authorization.
@@ -104,7 +104,7 @@ Set variables in the server shell before startup. Do not commit credentials or p
 
 Generate a development secret server-side with `python -c "import secrets; print(secrets.token_urlsafe(32))"`. Operator tokens scope private runtime records to provisioned owners; inaccessible identities are concealed with 404. They do not create public signup or a collaborative permission model. Public recorded/imported matches have a different access boundary.
 
-Runtime provisioned credentials remain memory-only in the browser. New saved scenarios and scenario archives reside in runtime SQLite schema 3, separately from imported-match schema 2 and browser notes. The live Control Room is available at `/#/runtime`; see [LIVE_SANDBOX](docs/LIVE_SANDBOX.md) for saved-scenario, archive, checkpoint, run and ForkCast workflows. Optional hosted agents remain disabled without explicit authorization; no hosted inference or public deployment is certified.
+Runtime provisioned credentials remain memory-only in the browser. New saved scenarios and scenario archives reside in runtime SQLite schema 4 (scenario metadata introduced in schema 3), separately from imported-match schema 2 and browser notes. The live Control Room is available at `/#/runtime`; see [LIVE_SANDBOX](docs/LIVE_SANDBOX.md) for saved-scenario, archive, checkpoint, run and ForkCast workflows. Optional hosted agents remain disabled without explicit authorization; no hosted inference or public deployment is certified.
 
 ## Analysis workflow
 
@@ -218,7 +218,7 @@ flowchart LR
   UI --> O[Lazy R3F event observer]
 ```
 
-Frontend: React 19, strict TypeScript, Vite, Tailwind/CSS, Three.js and React Three Fiber. Backend: Python, FastAPI, Pydantic and SQLite. pytest/Playwright exercise APIs and browsers. Calculations stay outside language models. Future authoritative state/clock/RNG ownership belongs to Diyan, not the replay client.
+Frontend: React 19, strict TypeScript, Vite, Tailwind/CSS, Three.js and React Three Fiber. Backend: Python, FastAPI, Pydantic and SQLite. pytest/Playwright exercise APIs and browsers. Calculations stay outside language models. The integrated authoritative backend owns simulation state, clock and RNG; browser replay/inspection state does not advance it.
 
 ```text
 backend/app/                  models, generator, analytics, evidence, APIs, storage
@@ -325,3 +325,7 @@ Local startup/test serving uses an explicit Uvicorn loop factory: Windows Select
 ### Authoritative recorded-event analysis
 
 In the integrated runtime, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to existing pass analysis, ProofTrail, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. The current engine projection requires a 5400-second scenario; shortened runs retain native controls. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#existing-analysis-integration) for authenticated routes, cutoff/hash semantics and limitations. The base runtime/analysis integration reached main through #53; native-period analysis and other open feature PRs are not implied.
+
+## Release verification and submission
+
+See [release readiness](docs/RELEASE_READINESS.md) for the tested clean setup, risk-weighted matrix, generated endpoint/dependency inventory, measured benchmarks and unresolved rights/public-service gates. After building, `python scripts/release-smoke.py` exercises a real temporary HTTP server and independently verifies its runtime/ForkCast exports without using personal databases or hosted inference. The [submission runbook](docs/SUBMISSION_RUNBOOK.md) contains the 110-second capture plan; it is not a claim that a final video or public deployment exists.
