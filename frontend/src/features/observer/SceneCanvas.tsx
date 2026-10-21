@@ -1,8 +1,8 @@
-import { Component, Suspense, memo, useEffect, useMemo, useState } from 'react'
+import { Component, memo, useEffect, useMemo, useState } from 'react'
 import { Canvas, useThree } from '@react-three/fiber'
 import { ACESFilmicToneMapping, BufferGeometry, Float32BufferAttribute, Quaternion, SRGBColorSpace, Vector3 } from 'three'
 import type { ReactNode } from 'react'
-import { AssetKit } from './AssetKit'
+import { AssetKit, useOriginalAssets } from './AssetKit'
 import type { AssetStatus } from './AssetKit'
 import type { EventSnapshot } from './eventSnapshot'
 import { CameraRig } from './CameraRig'
@@ -109,6 +109,13 @@ function Probe({ snapshot, cameraPreset, quality, report, startedAt, assetStatus
   return null
 }
 
+function OriginalScene(props: Props) {
+  const {models, failed} = useOriginalAssets(props.quality === 'low')
+  useEffect(() => { if (!models) props.reportAsset({status:failed ? 'fallback' : 'loading'}) }, [models, failed, props.reportAsset])
+  if (!models) return <><Pitch quality={props.quality}/><Stadium quality={props.quality}/><EventMarkers snapshot={props.snapshot}/></>
+  return <><AssetKit models={models} snapshot={props.snapshot} lowPower={props.quality === 'low'} quality={props.quality} report={props.reportAsset}/><EventMarkers snapshot={props.snapshot} spheres={false}/></>
+}
+
 export default memo(function SceneCanvas(props: Props) {
   const profile = graphicsProfiles[props.quality]
   const [cameraSettled, setCameraSettled] = useState(false)
@@ -116,7 +123,7 @@ export default memo(function SceneCanvas(props: Props) {
     <Canvas shadows={profile.shadows} frameloop="demand" dpr={profile.dpr} camera={{ fov: 48, near: .5, far: 350 }} gl={{ antialias: props.quality !== 'low', powerPreference: 'low-power', alpha: false, toneMapping: ACESFilmicToneMapping, toneMappingExposure: profile.exposure, outputColorSpace: SRGBColorSpace }} fallback={<p>WebGL is unavailable. Select 2D pitch.</p>}>
       <color attach="background" args={['#101d29']}/><fog attach="fog" args={['#101d29', 150, 340]}/><hemisphereLight args={['#d1e7f4', '#25312a', 2.2]}/><directionalLight position={[-25, 70, 25]} intensity={3} color="#fff1d9" castShadow={profile.shadows} shadow-mapSize={[profile.shadowSize, profile.shadowSize]} shadow-camera-left={-80} shadow-camera-right={80} shadow-camera-top={65} shadow-camera-bottom={-65} shadow-camera-far={160} shadow-bias={-.0003}/>
       {props.assetStyle === 'original' ? <AssetBoundary fail={() => props.reportAsset({ status: 'fallback' })} fallback={<><Pitch quality={props.quality}/><Stadium quality={props.quality}/><EventMarkers snapshot={props.snapshot}/></>}>
-        <Suspense fallback={<><Pitch quality={props.quality}/><Stadium quality={props.quality}/><EventMarkers snapshot={props.snapshot}/></>}><AssetKit snapshot={props.snapshot} lowPower={props.quality === 'low'} quality={props.quality} report={props.reportAsset}/><EventMarkers snapshot={props.snapshot} spheres={false}/></Suspense>
+        <OriginalScene {...props}/>
       </AssetBoundary> : <><Pitch quality={props.quality}/><Stadium quality={props.quality}/><EventMarkers snapshot={props.snapshot}/></>}
       <CameraRig {...props} onSettled={setCameraSettled}/><Probe {...props}/>
     </Canvas>

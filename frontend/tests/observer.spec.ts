@@ -143,6 +143,11 @@ test('corrupt GLB bytes recover without losing recorded source identity',async (
   await expect(page.getByTestId('observer-snapshot')).toHaveAttribute('data-event-id',source!)
   await page.getByRole('button',{name:'2D pitch',exact:true}).click()
   await expect(page.getByRole('img',{name:/^Pitch position/})).toBeVisible()
+  await page.unroute('**/assets/field-*.glb')
+  await page.getByRole('button',{name:'3D observer',exact:true}).click()
+  await page.getByLabel('SCENE STYLE').selectOption('original')
+  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status','ready')
+  await expect(page.getByTestId('observer-snapshot')).toHaveAttribute('data-event-id',source!)
   expect(failures).toEqual([])
 })
 
