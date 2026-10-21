@@ -118,3 +118,72 @@ Until those human decisions occur, PR #31 stays OPEN; #32/#33 remain intact and 
 ## Current integration result
 
 Security PR #36 merged normally as main `5f8d9c80ad7b50e7903624d4dfaca807497eee55`; its main workflow is successful: https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39100546734. Clean final main backend run: 32 passed (13.22s). Asset approval is separate and still pending; these main changes do not include the GLB kit.
+## Compatibility follow-up — 2026-10-21
+
+This follow-up preserves the earlier review as historical evidence. All `.blend`,
+GLB, manifest hashes and `release_approval: pending-team-review` are unchanged.
+No additional authorship proof, rights decision or human approval is claimed.
+
+Current main and #31 conflicted where scene-style selection met workspace quality
+callbacks. The focused correction preserves both and places the scene selector
+outside the quality-edit boundary; `git merge-tree --write-tree origin/main HEAD`
+then succeeds. A separate normal-merge validation branch checks the actual main
+combination. Original #31 is not changed until its owner accepts this follow-up.
+
+A new real-browser fault test exposed an uncaught GLTF loader rejection even
+though the procedural fallback appeared. Expected loader failures are now handled
+as asynchronous loading/fallback state, with cancelled consumers ignored and
+failed cache entries eligible for explicit retry. Only four immutable project
+URLs are cached; successful resources survive canvas remounts. The test requires
+zero uncaught page errors, unchanged recorded event identity, working 2D fallback
+and successful loading after the corrupt response is removed. No global error
+handler or weakened assertion hides failures. Semantic field bounds are checked
+before geometry is rendered. Renderer boundaries still catch unexpected defects.
+
+The older asset lockfile had one high-severity Vite package finding. The same
+compatible Vite 7.3.7 version used by runtime integration removes that finding;
+`npm audit` reports zero known vulnerabilities. Test databases are isolated and
+software-rendering concurrency matches the current main policy.
+
+### Separate physical GPU test with the GLB kit activated
+
+[Raw measurements and active hashes](benchmarks/iris-xe-glb-compatibility.json)
+identify source `42feb9ea146b392590475ba27116c0a99533b331`, Windows 11,
+Intel Iris Xe / driver 32.0.101.7088, headed Chromium 156.0.8078.4,
+1366×768 viewport and DPR approximately 1. The actual renderer is ANGLE Intel Iris
+Xe Direct3D11. All four v2 GLBs loaded once (989,084 bytes total), as did the lazy
+renderer chunk. The unchanged seven-file manifest SHA-256 is
+`5339ea3a2d76d159fbf6a9c66e1909fb347d6118252e6bc099c3973663075144`.
+
+| Profile | Active rAF callbacks/s | Median interval ms | P95 interval ms | Calls | Rendered triangles |
+|---|---:|---:|---:|---:|---:|
+| Low | 59.70 | 16.7 | 17.1 | 13 | 5,324 |
+| Medium | 59.73 | 16.7 | 17.0 | 21 | 18,820 |
+| High | 59.95 | 16.7 | 17.1 | 30 | 32,484 |
+
+Each profile used five seconds of active camera motion. Initial renderer-ready
+was 431.7 ms and initial original-kit readiness was 458.8 ms. Heap before / after
+rapid interactions / after 30 seconds idle was 14,684,173 / 21,783,437 /
+15,577,983 bytes. Runtime errors were empty. Three actual profile screenshots
+were visually inspected. The owned loopback server used a disposable database
+and was stopped after testing.
+
+These are browser pacing and bounded heap observations, not GPU timer queries,
+VRAM measurements, leak-free certification, RTX results or continuous actor
+tracking. High-profile render counters include shadow passes. The initial scene
+was Medium before profile switching; separate browser tests verify Low-only
+startup avoids the stadium request. Existing quality defaults remain unchanged.
+
+The probe also exposed a display-timing issue: later quality changes reset the
+asset-ready label using time since the initial activation. The follow-up preserves
+the first successful asset-ready duration within one activation and resets it
+only on explicit style selection or reopening 3D. A browser regression asserts
+that quality changes do not relabel elapsed session time as a fresh load duration.
+The raw probe's initial readiness is valid; later screenshot readiness labels
+precede that correction and must not be interpreted as new cold-load timings.
+
+Reproduce with the existing `npm run measure:graphics` command in `frontend`,
+`PULSE_GRAPHICS_HARDWARE=1`, and a loopback `PULSE_GRAPHICS_URL` serving this build.
+Run `python scripts/asset_contract.py` from the root and `npm run validate:assets`
+from `frontend` to independently check unchanged hashes, geometry and all seven
+Khronos exports. Licensing/release review remains required before publication.
