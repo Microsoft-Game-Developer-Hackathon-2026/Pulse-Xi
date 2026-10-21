@@ -8,6 +8,14 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 
 ## Application functionality
 
+**Branch boundary:** current main (`50f72e2`, inspected 2026-10-21) contains fixture
+replay and the Match Data Hub. Live runtime capabilities below are on open PRs
+[#40](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/40)
+and [#41](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/41).
+Private runtime analysis/3D adapters are a separate follow-up, PR #43. These are
+not merged or certified by this audit. See the shared
+[architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
+
 | Capability | Status and boundary |
 |---|---|
 | Synthetic fixtures | Three built-in seeded matches and validated custom seeds; reproducible on the same supported build |

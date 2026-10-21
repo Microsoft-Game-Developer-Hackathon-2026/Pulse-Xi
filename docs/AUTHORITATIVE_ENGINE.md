@@ -1,4 +1,468 @@
-# Authoritative engine integration
+# Football Sandbox Lab architecture and authoritative engine
+
+## Integration baseline (2026-10-21)
+
+The analysis branch now includes the architecture PR #46 through a normal merge,
+with both status sections retained. Its five additional owner-scoped HTTP analysis
+operations are documented in [LIVE_SANDBOX](LIVE_SANDBOX.md#existing-analysis-integration).
+The original #46 audit below describes its dated branch/test evidence; it does not
+certify a merged main. Trace security #45 and its command-credential follow-up
+retain independent review gates. Combined-stack verification is recorded on #43.
+
+## Issue #2 review scope (2026-10-21)
+
+This is the shared architecture specification, extended rather than duplicated.
+[LIVE_SANDBOX](LIVE_SANDBOX.md) supplies operational examples, [CONTRACT](CONTRACT.md)
+the legacy wire contract, and [DECISIONS](DECISIONS.md) the architectural decisions.
+The blueprint/master prompt express product intentions, not implemented schemas.
+
+| Boundary | Observed head | Availability |
+|---|---|---|
+| main | `50f72e2` | Legacy fixtures/replay, analytics, procedural observer and library schema-2 lifecycle |
+| PR #40 -> main | `224be7c` | Implemented on an open feature branch: pure engine, runtime schema 1, checkpoints/manifests |
+| PR #41 -> engine branch | `f2854ae` | Implemented on an open feature branch: runtime schema 2, Control Room, jobs, observer, ForkCast |
+| PR #43 -> live integration branch | `b715e6a` | Implemented on an open feature branch: private runtime analysis/export/3D adapters; included after normal merge of the architecture baseline; not on main |
+
+Live browser inspection found #40/#41 open with six successful checks each;
+Issues #2-#10 remain open. PR descriptions report respectively 148/171 backend
+and 33/39 browser cases. #43 reports 178/42; its visible adapter diff was inspected,
+but those results were not independently executed here. These historical counts
+do not verify this revision or establish teammate approval. #31/#32/#33 remain
+separate asset/preparation work; #42 is separate analytics work.
+
+This revision is isolated on `feat/issue-2-architecture-alignment` from `f2854ae`:
+the schema-2 architecture requires both #40 and #41. Publication uses a dedicated
+architecture PR with base `feat/live-sandbox-integration`, keeping its six-file
+diff visible without changing #41 or teammate branches. Merge dependencies remain
+#40 then #41, followed by architecture integration and the separately reviewed
+#43. Terminal fetch/authentication now work; remote heads were refreshed and
+confirmed unchanged. Nothing below is claimed merged or approved.
+
+## Component ownership and trust boundaries
+
+Solid components exist in this checkout (#40 + #41 + #43); main contains the legacy
+side. Optional provider code exists, but authenticated hosted inference remains
+unverified. No event broker, tracking service or account service is implemented.
+
+```mermaid
+flowchart TB
+  subgraph Browser[React and TypeScript]
+    Replay[App and fixture Sandbox replay cutoff]
+    Room[RuntimeRoom scenario builder and controls]
+    Pitch[2D discrete event pitch]
+    Three[Lazy procedural 3D replay observer]
+    Local[Local workspace and notes]
+    Replay --> Three
+    Replay --> Local
+    Room --> Pitch
+  end
+  subgraph Server[FastAPI]
+    Legacy[main.py public REST and replay WS]
+    Fixture[simulator.py seeded fictional fixtures]
+    Analytics[Analytics and pass scoring and ProofTrail]
+    API[sandbox/api.py owner authenticated REST and WS]
+    Jobs[control.py bounded durable worker]
+    Store[sandbox/storage.py transaction service]
+    Core[engine.py pure transitions and tactical policies]
+    Adapter[engine.py Match and MatchEvent projection]
+    Verify[manifest.py and experiments.py independent replay]
+    AI[agents.py optional Foundry and Agent Framework]
+    Legacy --> Fixture
+    Legacy --> Analytics
+    Legacy --> AI
+    API --> Store
+    API --> Jobs
+    Store --> Core
+    Jobs --> Store
+    API --> Adapter
+    API --> Verify
+  end
+  Replay --> Legacy
+  Room --> API
+  Legacy <--> Library[(Imported library SQLite schema 2)]
+  Store <--> Runtime[(Separate runtime SQLite schema 2)]
+  Jobs <--> Runtime
+  Adapter -. projection with private UI integration in PR 43 .-> Analytics
+```
+
+`models.py` owns wire validation; `engine.py` owns football invariants, policies,
+clock, capture and restore; `storage.py` owns owner scope, locking, receipts and
+durability; `control.py` owns scheduling/CAS job progress; `experiments.py` owns
+paired plans/comparisons and bundle verification. API handlers own transport/auth.
+The browser owns viewing preferences, evidence selection and pending-operation UI.
+
+## Lifecycle and main sequence
+
+```mermaid
+stateDiagram-v2
+  [*] --> Paused: create session from resolved scenario
+  Paused --> Paused: step below fulltime
+  Paused --> Running: resume command
+  Running --> Running: advance below fulltime
+  Running --> Paused: pause command
+  Paused --> Completed: step reaches duration
+  Running --> Completed: advance reaches duration
+  Paused --> Cancelled: cancel command
+  Running --> Cancelled: cancel command
+  Paused --> Paused: intervene queues tick+1; checkpoint increments revision
+  Running --> Running: intervene queues tick+1; checkpoint increments revision
+  Completed --> Completed: checkpoint only
+  Cancelled --> Cancelled: checkpoint only
+  note right of Paused
+    Restore creates a new runtime with saved lifecycle.
+    It never rewinds the parent. A terminal restore stays
+    terminal. Historical inspection never mutates state.
+  end note
+```
+
+```mermaid
+sequenceDiagram
+  actor Operator
+  participant UI as RuntimeRoom
+  participant API as Authenticated Sandbox API
+  participant DB as Runtime transaction service
+  participant Core as Pure engine
+  participant Worker as Durable driver
+  Operator->>UI: configure fictional scenario and connect
+  UI->>API: POST scenarios (ScenarioConfig, bearer)
+  API->>DB: save owner-scoped content-addressed scenario
+  DB-->>UI: Scenario with resolved defaults and hash
+  UI->>API: POST sessions (CreateSession)
+  API->>DB: create owned session
+  DB->>Core: initial_state
+  DB->>DB: commit state, initial events and original receipt
+  DB-->>UI: MutationResult (tick 0, revision 0, cursor 1)
+  UI->>API: WS observe, bounded token first frame
+  API->>DB: authenticate owner and read committed state
+  API-->>UI: snapshot with complete events
+  UI->>API: POST runs (RunRequest, current revision)
+  API->>DB: commit durable job
+  loop bounded worker passes
+    Worker->>DB: stable command ID plus revision
+    DB->>Core: copy-on-write resume or advance
+    DB->>DB: atomic state, events, receipt and audit
+    DB-->>Worker: original receipt on retry
+    Worker->>DB: CAS job progress in separate commit
+    API-->>UI: delta on committed revision change
+  end
+  UI->>API: cancel run then checkpoint command
+  API->>DB: stop job, pause, store immutable checkpoint
+  UI->>API: restore checkpoint with new operation ID
+  API->>DB: new runtime with full state, prefix and ancestry
+  DB-->>UI: child receipt; parent unchanged
+  UI->>API: POST experiments from paused checkpoint
+  Worker->>DB: restore paired children and execute recorded plans
+  UI->>API: GET comparison and manifest
+  API->>Core: independently replay and recompute comparison
+  API-->>UI: verified descriptive results or explicit failure
+```
+
+Run cancellation, pause and job progress are separate transactions. An executing
+bounded command may finish before acknowledgment. Revision/terminal checks and
+job CAS prevent silently adopting another history. Manual pause makes an active
+run stop on a stale revision; the UI cancels a known active run. Resume alone
+never schedules work. Scenario creation and session creation are separate requests;
+an interrupted pair can leave an unused scenario. No global transaction is promised.
+
+## Authoritative model and version map
+
+These are mappings to code, not extra payloads to implement. Sandbox `Model`
+forbids extras and uses strict types/assignment validation. Pydantic scalar
+constraints require additional `validate_state`, restore hashes, owner checks
+and independent replay. Structural validity alone does not prove authenticity.
+
+| Requested concept | Code authority/version | Validation and relationships |
+|---|---|---|
+| ScenarioConfig | `sandbox.models.ScenarioConfig`, sandbox/1, zone-engine/1 | Seed 0..2147483647; even duration 60..5400; neutral-dry; distinct teams and 22 unique player IDs; 11 players/team; attributes/tactics 0..100; defaults resolved and hashed in Scenario |
+| WorldState | `EngineState`, sandbox/1; no separate class | Full scenario, clock, score, possession/ball, 22 actors, tactics/policy revision, RNG, queue/decision counters, events/interventions; validate_state on load/transition/restore |
+| Actor/tactical state | `ActorState`, `Tactics`, `PendingAction` within EngineState | GK/DF/MF/FW roles follow formation; stamina 0..10000, last action <= tick; no continuous actor positions, substitutions or physics |
+| ClockState | EngineState tick/period/lifecycle + config duration; no separate class | Integer seconds, separate from UTC and browser elapsed time; period 2 starts at duration/2 after halftime event |
+| Intervention | `Intervention` produced by `Command(kind="intervene")` | Current revision/tick, owned valid team/tactic, effective tick+1; old/new value, accepted -> applied. Runtime identity is in audit/envelope, not Intervention fields |
+| Checkpoint | `Snapshot` + `CheckpointView`, sandbox/1 | Full EngineState and digest, stored replay records/ancestry; revision after checkpoint command; API restores owned stored IDs only |
+| Branch | sessions row + manifest `Ancestor[]`; no Branch class | New runtime ID, copied state/events/operation prefix, independent future writes, preserved owner, ancestry depth 32; inherited operation IDs reserved |
+| ExperimentManifest | `ExperimentManifest`, sandbox/1 | Resolved scenario, RNG/engine/schema versions, implementation hash, replay commands and expected hashes, ancestry/interventions/events; unsigned reproducibility evidence |
+| Paired experiment | `control.ExperimentRequest/Experiment`; `ExperimentBundle` forkcast-manifest/1; `Comparison` forkcast/1 | 1..5 pairs, 1..600-second horizon, <=6 distinct tactical changes/arm, immutable parent and exact child end revisions |
+| ObserverFrame | JSON envelopes in `api.observe`; no Pydantic class or standalone wire version | snapshot contains RuntimeView; delta omits state.events and adds from_cursor/events; WebSocket is not covered by OpenAPI |
+| Match | `app.models.Match`, 1.0 | Synthetic true, synthetic-generator source, roster/metadata; base ID/reference constraints weaker than MatchPackage; package/ingest add validation |
+| MatchEvent | `app.models.MatchEvent`, 1.0 | JSON type aliases event_type; sequence >=1, second 0..5400, fixed half boundary 2700; optional actors/coordinates; contextual roster checks outside base model |
+
+Wire, engine, RNG and DB versions are independent. Literal-version models and
+future DB versions fail closed. Core implementation digest binds normalized
+models/engine/manifest source; experiment digest adds control/experiments. A source
+change can invalidate old manifests: preserve matching builds with backups.
+No general manifest converter/down-migration exists. Frontend types are manually
+maintained subsets; they are not authoritative validators.
+
+Adapter IDs are `session_id + "-" + sequence`; match_id=session_id,
+match_second=tick; sequence/period preserved; possession IDs become strings.
+Away x is mirrored into the legacy attacking frame, y unchanged. Synthetic
+source/version defaults remain; UTC is deterministic 2000-01-01 + tick, not
+ingestion time. Qualifiers identify engine/scenario/session/policy revision.
+Only duration 5400 fits v1: others return 422 v1_requires_90_minutes; never
+rescale short scenarios. Core event bytes omit runtime ID; evidence identity is
+`(session_id, sequence)`. Projection never publishes private runtime events into
+the public match library. Existing imports/replay remain on their original paths.
+PR #43 reuses scoring/metrics/evidence/exports behind authenticated adapters;
+its inspected diff rejects future cutoffs and scopes hashes to the captured
+committed boundary, not a rewound cutoff. This integration is not fully tested
+by this audit. Private runtime analysis/3D must not fall back to public APIs.
+
+## State, clock and observer decisions
+
+Committed SQLite EngineState is the live source of truth; pure engine transitions
+alone advance one-second ticks. Revision counts accepted commands (even pause,
+resume/checkpoint); policy_revision counts applied tactics. Sequence is contiguous
+emission order from kickoff=1; event_cursor is its frontier. A page next_cursor
+can trail the frontier. Library revision and imported sequences are independent;
+imports can retain gaps. Tick cannot be inferred from event count or revision.
+
+App playback changes a cutoff over precomputed fixture/imported events. RuntimeRoom
+also filters committed events; `/history` reconstructs read-only state at a cutoff
+<= current tick, possibly splitting a recorded step. Its reconstructed hash/revision
+need not represent a previously committed receipt. Restore forks; neither seek nor
+render timers rewinds or advances live state.
+
+Observer accepts absent Origin or same-server/two hardcoded local Vite origins,
+but always requires authentication. Send exactly `{"token":"<operator token>"}`
+within five seconds and <=4096 characters after acceptance. Credentials are
+rechecked every observation (250ms receive timeout); revocation/owner change
+closes access. Only `ping` is accepted subsequently; no pong contract exists.
+Initial snapshot is complete even with an older reconnect cursor. Revision-change
+deltas start after the last sent cursor, including empty-event deltas. Cursor
+ahead closes 4409, unauthorized closes 4403, forbidden Origin closes 1008.
+No durable observer acknowledgment/backpressure protocol exists.
+
+Frame shapes below are definitions, not standalone JSON payload examples:
+
+```text
+snapshot = {"kind":"snapshot", "view": RuntimeView.model_dump(mode="json")}
+delta = {"kind":"delta", "view": RuntimeView with state.events omitted,
+         "from_cursor": previous event_cursor, "events": EngineEvent[]}
+```
+
+Existing `examples/sandbox/journey.json` has executed REST payloads. RuntimeRoom
+replaces state on snapshot, ignores older revisions and appends only if its local
+cursor equals from_cursor. Gaps/errors switch to full authenticated state polling
+every 1200ms. No automatic WebSocket reconnect loop exists; new connections always
+snapshot. Refresh requires reauthentication; only runtime ID is in sessionStorage.
+Poll/render timers never advance football.
+
+## Full API index and status
+
+All paths below start `/api/sandbox`, require bearer operator auth and conceal
+foreign resources as 404. Success is **200**, including creation. Every row is
+**Implemented on an open feature branch**. The behavioral contracts in the test
+matrix are **Verified by tests** in this audit: 171 backend cases and 39 browser
+cases passed. Generated schemas, success declarations and operator dependencies
+were inspected for all 30 Sandbox HTTP operations; this is not exhaustive testing
+of every input/error permutation. Historical CI above is separate; these are not main endpoints.
+Existing main `/api/matches` and replay WS remain stable and public.
+
+| Branch | Method/path | Request/query -> response | Consumer, concurrency and errors |
+|---|---|---|---|
+| #40 | GET /versions; /presets | none -> VersionInfo; map of ScenarioConfig | Setup, limits/build inspection |
+| #40 | POST /scenarios; GET /scenarios/{id} | ScenarioConfig -> Scenario; none -> Scenario | Builder/JSON import/save; content-addressed, owner scoped; no distinct file import/export routes |
+| #40 | POST /sessions | CreateSession -> MutationResult | Owner+operation identity; identical retry returns original creation boundary |
+| #41 | GET /sessions | none -> SessionSummary[] | Owner's runtime/branch selector |
+| #40 | GET /sessions/{id}/state; /snapshot | none -> RuntimeView; Snapshot | Current committed state/resync |
+| #41 | GET /sessions/{id}/history | at_tick -> HistoricalView | Read-only seek, future=409 tick_ahead |
+| #40 | POST /sessions/{id}/commands | Command -> MutationResult | step/advance/pause/resume/intervene/cancel/checkpoint/trial; expected_revision, intervention also requested_tick |
+| #40 | GET /sessions/{id}/events | cursor 0..20000, limit 1..1000 -> EventPage | Exclusive cursor, ahead=409 cursor_ahead, consistent read snapshot |
+| #40 | GET /sessions/{id}/match-events; /match | cursor/limit; none -> MatchEvent[]; Match | v1 adapter, 5400 only; events has no EventPage envelope |
+| #40 | GET /sessions/{id}/audit | none -> AuditEntry[] | Valid accepted/rejected commands; UTC timestamp separate from clock |
+| #40 | GET /checkpoints/{id} | none -> CheckpointView | Immutable owned checkpoint |
+| #41 | GET /sessions/{id}/checkpoints | none -> CheckpointSummary[] | Picker |
+| #40 | POST /checkpoints/{id}/restore | RestoreRequest -> MutationResult | New child; expected_revision belongs to checkpoint |
+| #40 | GET /sessions/{id}/manifest; POST /verify | none -> ExperimentManifest; ExperimentManifest -> Verification | Download/replay; verified=false remains 200 |
+| #41 | POST/GET /sessions/{id}/runs | RunRequest -> Run; none -> Run[] | Current revision, durable target/rate; repeated creation reconciles current job progress |
+| #41 | GET /runs/{id}; POST /runs/{id}/cancel | no body -> Run | Recover/cancel job and pause runtime |
+| #41 | POST/GET /experiments | ExperimentRequest -> Experiment; none -> Experiment[] | Owned paused checkpoint revision, bounded horizons/trials/changes |
+| #41 | GET /experiments/{id}; POST /experiments/{id}/cancel | no body -> Experiment | Status/cancel children; completed evidence retained |
+| #41 | GET /experiments/{id}/comparison; /manifest | none -> Comparison; ExperimentBundle | Replayed verification and exact terminal child cutoffs |
+| #41 | POST /experiments/verify | ExperimentBundle -> Verification | HTTP body cap 2MB; independent CLI permits 20MB |
+| #41 | WS /sessions/{id}/observe | cursor + token first frame -> snapshot/delta | RuntimeRoom; close codes/handshake above; absent from OpenAPI |
+
+There is no separate branch-create, pause, intervention or checkpoint-create
+route: use restore/command kinds. PR #43 additionally registers authenticated
+session-relative `/analysis`, `/pass-difficulty`, `/passes/{event_id}/difficulty`,
+`/passes/{event_id}/difficulty/evidence`, `/analysis-export`; absent from this
+checkout's OpenAPI. See its actual adapter diff before integrating.
+
+Runtime detail.code errors: 403 unauthorized; 404 not_found; 409 stale revision,
+tick, lifecycle, duplicate intent or cursor conflict; 422 invalid boundary/corrupt
+snapshot; 429 finite capacities; 503 missing auth/database/write failure. Framework
+422 uses located arrays. RequestBoundary independently returns string detail for
+400 ambiguous/nonfinite/deep JSON or 413 bodies >2MB. Shared ErrorResponse
+declarations do not model all these families. Actual TestClient GET `/openapi.json`
+returned OpenAPI 3.1.0 with 73 component schemas and 30 Sandbox HTTP operations.
+All 30 declare 200 and the Authorization header and use require_operator. Some
+schemas have distinct `-Input`/`-Output` names (for example ScenarioConfig and
+EngineState); consumers must follow actual references, not assume unsuffixed names.
+MatchEvent retains the JSON `type` alias; ScenarioConfig input forbids extra fields.
+The header appears optional in OpenAPI because the dependency supplies a default,
+but authorization is mandatory at runtime; denial behavior is tested. Generate
+clients from this actual schema and preserve the documented error-family caveat.
+
+## Persistence, migration and restart boundaries
+
+| Store | Responsibility | Recovery |
+|---|---|---|
+| Library PULSE_DB_PATH, schema 2 | matches/events/package_metadata/match_lifecycle/deleted_matches; public reads, shared import capability | Separate atomic 0->1 and 1->2 migrations; scripts/database-admin.py; restored admin generations rotate |
+| Runtime PULSE_RUNTIME_DB_PATH, schema 2 | scenarios/sessions/commands/runtime_events/checkpoints/audit plus #41 runs/experiments; owner scope | Separate atomic migration steps; app.sandbox.backup; restore preserves runtime/job/receipt identities |
+| Browser storage | Replay workspace/notes and runtime ID only | Origin/profile-local; not credentials, engine state or server backup |
+| Process memory | Regenerable fixture cache, optional bounded TRACES, worker task | Traces/cache lost on restart; accepted runtimes/jobs reload from SQLite |
+
+The two SQLite files share neither transactions, migration versions nor backup
+allowlists/rollback guarantees. Equal resolved paths reject; operators must also
+avoid filesystem aliases/hardlinks. No distributed transaction or automatic
+cross-store publication exists. Each runtime command uses BEGIN IMMEDIATE and
+atomically commits state/events/receipt/audit/optional checkpoint. Valid rejected
+commands record rejection without revision change; invalid schemas never reach
+audit. Interrupted writes roll back together. Event/manifest reads use a SQLite
+snapshot; library export has its own snapshot. WAL promotion retries busy/locked
+faults up to ten seconds; connections also use a ten-second lock timeout.
+
+Job progress commits separately. Crash after an engine commit reuses the stable
+command ID/receipt, then CAS-updates progress, without double ticking. Per-DB
+quotas are not per-operator reservations; capacity can disappear after experiment
+acceptance, producing an explicit partial-job failure. No auto-expiry/cleanup or
+per-owner fairness guarantee exists. Failed migration rolls back its current step;
+schema 1 may remain committed if a later schema-2 step fails, then retries on open.
+Future versions reject. Offline down-migration is not supplied.
+
+Back up each store with its own SQLite backup utility, including committed WAL.
+There is no coordinated cross-store point-in-time restore. Runtime backup checks
+schema/integrity, snapshot validity, replay/event parity and typed job payloads;
+it is not an exhaustive job-consistency or operator-authenticity audit. Restore
+creates NEW files only. Preserve matching source build and external token/owner
+mapping. Stop workers/clients before activating a recovered runtime; discard
+outstanding requests and reload the restored boundary. Older runtime schema-1
+code rejects schema 2: use a pre-upgrade backup for rollback.
+
+## Security and competition alignment
+
+The [official rules](https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md)
+were read on 2026-10-21: synthetic football data, authorized third-party materials,
+functional demonstrations and accessible judging remain release obligations.
+Fictional names/original assets/synthetic labels are required. Do not add unlicensed
+Premier League logos, likenesses, footage, DSTNS code/assets or incompatible AGPL
+imports. Free-text names still require operator provenance review; validators
+cannot establish whether a name is fictional or an asset is licensed.
+
+Inputs, bodies/nesting, rosters/events/commands/jobs/trials are bounded server-side.
+Runtime auth, import capability and Foundry administration are distinct privileges;
+IDs/hashes are not access control. Use distinct provisioned owner IDs/tokens for
+isolated judges. Shared viewer roles, public signup, gateway rate controls, TLS
+deployment and production account provisioning are not implemented. Library reads
+are public. Browser notes are not authenticated evidence.
+
+Hosted workflows remain explicit/admin-gated and outside simulation transitions.
+Deterministic facts do not depend on provider prose. `configured_not_verified`
+health is not authenticated inference; fallback is verified_rule_based_templates.
+No paid calls or provisioning occurred here. Trace GET in this architecture/base
+branch fails open if its admin token is absent. Issue #44 was reproduced and a
+separate main-based [PR #45](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/45) supplies fail-closed reads and regression tests;
+it is not part of this architecture diff and must pass its own review. Do not
+claim a completely protected privileged trace boundary or complete security audit.
+Further review areas: proxy redaction/HTTPS, dependency licensing, validation-error
+echo, filesystem aliases, observer limits/backpressure, shared DB quota exhaustion
+and costly bounded verification. The original architecture head used Vite 7.3.6;
+this analysis branch retains the 7.3.7 correction from #43. Current combined scans
+must be rerun rather than inferred from either historical branch's result.
+Experiments are descriptive model hypotheses,
+not calibrated probabilities, causal validation or real-match predictions.
+
+## Contract test matrix and downstream dependency map
+
+The matrix below was exercised by the passing full suites in this audit. Reuse these
+suites rather than adding a duplicate architecture suite. Engine/runtime file names
+refer to backend/tests/test_authoritative_engine.py and test_runtime_integration.py.
+
+| Acceptance case | Executable evidence |
+|---|---|
+| Match/Event compatibility, IDs/references, analytics parity | Engine test_determinism_to_fulltime_and_legal_events; strengthened alias roundtrip/reference assertions in this revision; data-hub invalid-package tests |
+| Monotonic clock, stable order, same-seed reproducibility | Engine test_clock_and_batching, fulltime determinism, test_committed_golden_and_manifest_examples |
+| Complete continuation, pending actions and RNG | Engine test_exact_checkpoint_continuation, test_intervention_future_only_and_pending_queue_parity, test_corrupt_snapshots |
+| Stale/duplicate commands, authorization, branch/owner isolation | Engine concurrent revision/idempotency, lost-response retry/cursor, API authorization journey, divergent branch tests |
+| Invalid/future/foreign evidence | test_pass_difficulty.py::test_recompute_rejects_tampered_claims_and_future_events; test_fixture_workspace.py::test_generated_replay_proof_is_match_scoped_and_cutoff_checked; manifest/bundle tampering tests |
+| Observer cursor/reconnect/revocation | Runtime test_websocket_snapshot_delta_reconnect_authorization_and_revocation; extended complete reconnect/ahead-cursor assertions in this revision |
+| Migrations, rollback and durable recovery | Engine interruption/concurrent migration/process/backup tests; runtime schema-one receipts, control-migration interruption, schema-two active-job backup tests; library lifecycle migration/backup tests |
+| Real browser workflow plan | frontend/tests/runtime.spec.ts: configure/step/checkpoint/intervene/restore/ForkCast, lost response, stale revision, committed cutoff, keyboard/mobile, auth/refresh; retained replay/data/observer regressions |
+
+Reproduce on runnable Python 3.13/Node 24, using the repository's commands:
+
+```powershell
+cd backend
+python -m pytest tests -q -p no:cacheprovider
+python -m app.sandbox.verify_manifest ../docs/examples/sandbox/experiment.json
+python -m app.sandbox.verify_experiment ../docs/examples/sandbox/forkcast.json
+cd ../frontend
+npm run test:e2e
+cd ..
+git diff --check
+```
+
+Verification recovery (2026-10-21): the previous restricted execution profile
+denied access to Python and esbuild's ancestor-directory lookup. With the updated
+profile the existing Python 3.13.15 .venv works; no environment deletion, system
+installation, dependency change or PowerShell policy change was required. Use
+`npm.cmd` on Windows. On architecture checkpoint b6a420c, full backend pytest
+passed 171 cases (exit 0); both independent verifiers returned verified=true
+(exit 0 each); npm.cmd run test:e2e passed strict TypeScript, production Vite build
+and all 39 Playwright cases (exit 0). No tests were skipped or assertions weakened.
+The publication follow-up changes documentation only, preserving those tested
+source/test/lockfile bytes. pip check passed. OpenAPI inspection passed after
+correcting the audit script's initial assumption about unsuffixed schema names.
+Two upstream TestClient deprecation warnings and the existing optional-renderer
+chunk-size warning remain; they are not test failures or hardware FPS evidence.
+
+Proposed performance budgets to validate, not results/SLAs: 60fps (16.7ms frame)
+on declared observer hardware/profile; p95 committed observer visibility <2s
+with one active run/operator; p95 checkpoint capture <250ms and <2MB for seed-7
+fulltime; p95 history seek <500ms for that 5400-tick history. Existing hard caps
+(300 ticks/command, 60/run update, four run/two experiment jobs/pass, 20000 events)
+are work bounds, not measured throughput. Measure DB/serialization/seek/frame
+times independently; software-rendered browser success is not hardware FPS.
+
+| Downstream issue | Reuse/review dependency |
+|---|---|
+| #3 | ScenarioConfig/defaults/presets in #40, builder in #41; no new scenario schema |
+| #4 | Engine ordering/clock, durable driver, observer recovery in #40/#41 |
+| #5 | Formations/stamina/discrete policies; continuous tracking absent |
+| #6 | Full Snapshot/immutable restore/ancestry; reconcile #32 preparation without duplicate restore |
+| #7 | Effective tick, pending-field exclusion, acceptance audit |
+| #8 | Paired offsets/planner/comparison/exact child cutoffs; reconcile #33 preparation |
+| #9 | Implementation hash/version lifecycle and independent file verifiers |
+| #10 | #41 and #43 auth/retry/conflict/refresh paths, preserving fixture replay |
+| #11/#16, #14/#15 | #43 sparse-event analysis/3D adapters; real hosted inference separately unverified |
+| #21/#22/#23 | TLS/accounts/rates, actual performance evidence, licensing/security review remain release work |
+
+## Mismatch and defect register
+
+| File/boundary | Expected vs actual; impact | Handling/regression evidence |
+|---|---|---|
+| docs/DECISIONS.md | SQLite called future work; generic browser clock conflates replay/runtime | Replace stale ADR with actual separate owners/store/version/restore decisions; existing clock/migration tests |
+| Architecture guides/model names | Issue concepts can imply nonexistent WorldState/ClockState/Branch/ObserverFrame classes | Explicit code mappings, three diagrams/API/status matrix here; no duplicate implementation |
+| README availability | Live branch features can be mistaken for current main | Explicit open-stack boundary based on live GitHub inspection |
+| api.observe / runtime tests | Reconnect test checked revision but not complete replacement history or ahead-cursor behavior | Existing test now asserts event history/frontier and close 4409; passed in the 171-case run |
+| Engine adapter test | Scores/mirrored x checked, but no direct v1 alias roundtrip/every roster reference assertion | Existing fulltime case now checks roundtrip, unique IDs and references; passed for all three seeds |
+| main.py::agent_traces | Privileged read should fail closed; absent admin token bypasses check | [Issue #44](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/44), low severity/P2, introduced d95cbda0; reproduced 200 with sentinel on unset/empty config and exception on malformed credentials; separate [PR #45](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/45) tested on main: 97 backend/33 browser cases, pending review |
+| OpenAPI error declarations | Shared detail.code model omits boundary string/located validation errors; WS unmodeled | Actual OpenAPI inspected; document error families/frame shapes and Input/Output naming; generated-client conformance is not claimed |
+
+Issue #2 remains open pending teammate contract review and integration acceptance.
+Local verification is recorded above; publication and exact-head CI are recorded
+on the architecture PR. Neither tests nor documentation substitute for review.
+
+Independent defect-audit scope: inspected merged fixture/replay contracts,
+library import/lifecycle/migration/backup authorization and tests, sparse-event
+observer boundaries, optional provider gating, and #43's visible authenticated
+analysis adapter diff. No additional defect was established in those inspected
+paths. In particular #43 reuses the engine projection, rejects future cutoffs,
+does not publish private events and distinguishes cutoff from committed hashes.
+This is a limited static finding, not certification of the full #43 diff or a
+complete review of asset/preparation PRs. No issue was created for stylistic
+disagreements. Stale architecture
+documentation is corrected here rather than reported as a duplicate issue.
 
 The follow-up [Live Sandbox guide](LIVE_SANDBOX.md) adds the working Control Room,
 server-driven runs, WebSocket observer, historical seek and verified paired
