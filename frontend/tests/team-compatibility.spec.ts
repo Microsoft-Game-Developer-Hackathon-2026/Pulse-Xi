@@ -1,0 +1,42 @@
+import {expect, test} from '@playwright/test'
+
+test('localized replay preferences preserve analytics and the independent runtime route', async ({page, request}) => {
+  const failures: string[] = []
+  page.on('pageerror', error => failures.push(error.message))
+  await page.goto('/')
+  await page.getByRole('slider',{name:'Seek match time',exact:true}).fill('1200')
+  await expect(page.locator('.control-toolbar')).toContainText('CURRENT')
+  const before = await (await request.get('/api/matches/comeback-1107/control-chaos?at_second=1200&window_seconds=600')).json()
+  await page.getByLabel('Language',{exact:true}).selectOption('es')
+  await expect(page.locator('main')).toHaveAttribute('lang','es')
+  const replayClock = await page.getByRole('slider',{name:'Buscar momento del partido',exact:true}).inputValue()
+  expect(replayClock).toBe('1200')
+  const after = await (await request.get('/api/matches/comeback-1107/control-chaos?at_second=1200&window_seconds=600')).json()
+  expect(after).toEqual(before)
+  const token = 'test-runtime-token-at-least-32-characters'
+  await page.getByRole('link',{name:'ENGINE CONTROL ROOM',exact:true}).click()
+  await expect(page.locator('main')).toHaveAttribute('lang','en')
+  await page.getByLabel('Operator access token').fill(token)
+  await page.getByRole('button',{name:'Connect operator',exact:true}).click()
+  await expect(page.getByRole('button',{name:'Disconnect operator',exact:true})).toBeVisible()
+  await page.getByRole('button',{name:'Create authoritative scenario',exact:true}).click()
+  await expect(page.getByLabel('Authoritative match clock')).toHaveText('00:00')
+  await page.getByRole('button',{name:'Step engine',exact:true}).click()
+  await expect(page.getByLabel('Authoritative match clock')).toHaveText('00:10')
+  await page.getByRole('link',{name:'An\u00e1lisis del partido',exact:true}).click()
+  await expect(page.getByLabel('Idioma',{exact:true})).toHaveValue('es')
+  await expect(page.getByRole('slider',{name:'Buscar momento del partido',exact:true})).toHaveValue('1200')
+  await page.reload()
+  await expect(page.getByLabel('Idioma',{exact:true})).toHaveValue('es')
+  expect(await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}))).not.toContain(token)
+  expect(failures).toEqual([])
+})
+
+test('invalid FanDNA preferences safely fall back without breaking replay', async ({page}) => {
+  await page.addInitScript(() => localStorage.setItem('pulse-xi-fandna-preferences-v1', JSON.stringify({version:99,locale:'unsupported',persona:'admin',favoriteTeamId:'wrong-team',favoritePlayerId:'wrong-player'})))
+  await page.goto('/')
+  await expect(page.getByLabel('Language',{exact:true})).toHaveValue('en')
+  await expect(page.getByLabel('VIEW',{exact:true})).toHaveValue('casual')
+  await expect(page.getByRole('slider',{name:'Seek match time',exact:true})).toBeVisible()
+  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('pulse-xi-fandna-preferences-v1')!).version)).toBe(1)
+})
