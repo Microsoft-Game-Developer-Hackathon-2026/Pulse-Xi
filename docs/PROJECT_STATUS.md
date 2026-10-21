@@ -1,6 +1,10 @@
 # Current project status - 2026-10-21
 
-## Issues #6-#9 acceptance update
+## Release verification (#22-#25)
+
+Starting main `c5a93f46a24fa857318f237f37f9184a4b4d90dc` has successful exact-main CI. The focused release work fixes detached checkpoint metadata acceptance during backup and adds no-store to privileged trace responses, route-wide/CORS regressions, offline browser isolation and a disposable real-HTTP/CLI smoke journey in CI. See [release evidence and remaining gates](RELEASE_READINESS.md) and [submission runbook](SUBMISSION_RUNBOOK.md). Rights/root-license approval, authenticated paid Foundry validation, public deployment, actual video and submission remain unfulfilled; these are not cleared by local green tests. Final PR/main CI evidence belongs to the release PR/issue records.
+
+## Historical Issues #6-#9 acceptance update
 
 Integration baseline: main `c2f8c622d21d3db804e57c9a02e4c09b264f9c4b`
 (PR #61). Its [exact-main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39653135823)
