@@ -80,19 +80,19 @@ async def run_one_workflow(fixture: str, timeout_seconds: int) -> dict:
             run_specialists(match, events, insight),
             timeout=timeout_seconds,
         )
-    except Exception:
+    except Exception as error:
         trace = TRACES[-1] if TRACES and TRACES[-1].get("trace_id") != previous_trace_id else {
             "provider": "microsoft_foundry_agent_framework",
             "provider_status": "error",
             "status": "failed",
-            "error_type": "InvocationFailed",
+            "error_type": type(error).__name__,
             "elapsed_ms": round((time.perf_counter() - started) * 1000, 1),
         }
         trace.setdefault("elapsed_ms", round((time.perf_counter() - started) * 1000, 1))
         if trace.get("status") == "running":
             trace["status"] = "failed"
             trace["provider_status"] = "error"
-            trace["error_type"] = "TimeoutError"
+            trace["error_type"] = type(error).__name__
         report = _safe_report(trace, {}, evidence_hash)
         report["workflow_status"] = "failed"
         return report
