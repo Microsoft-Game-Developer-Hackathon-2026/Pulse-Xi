@@ -7,6 +7,7 @@ import { PassPlayerSummary } from './features/passes/PassInspector'
 import { MatchDataHub } from './features/sandbox/MatchDataHub'
 import { SandboxSetup } from './features/sandbox/SandboxSetup'
 import { EventTimeline } from './features/sandbox/EventTimeline'
+import { replayObserverEvent } from './features/observer/eventSnapshot'
 import { ObserverSwitch } from './features/observer/ObserverSwitch'
 import { AnalysisTools } from './features/sandbox/AnalysisTools'
 import { SandboxProofTrail } from './features/sandbox/ProofTrail'
@@ -14,9 +15,12 @@ import { readWorkspace, deepWorkspace, WORKSPACE_KEY } from './features/sandbox/
 import type { Workspace, Filters } from './features/sandbox/analysisStorage'
 import './features/sandbox/analysis.css'
 import { readReplayEvents } from './features/sandbox/replayApi'
+import { hasLocaleFallback, readFanPreferences, translate, writeFanPreferences } from './fandna'
+import type { Locale, MessageKey, Persona } from './fandna'
 import { RuntimeRoom } from './features/runtime/RuntimeRoom'
 import { hasLocaleFallback, readFanPreferences, translate, writeFanPreferences } from './fandna'
 import type { Locale, MessageKey, Persona } from './fandna'
+
 
 
 const important = new Set(['goal', 'shot', 'turnover', 'recovery', 'halftime', 'fulltime', 'kickoff'])
@@ -241,7 +245,7 @@ export default function App() {
     return () => { document.removeEventListener('keydown', keydown); if (opener?.isConnected) opener.focus() }
   }, [proof?.insight.insight_id])
   const seen = useMemo(() => events.filter(e => e.match_id === matchId && e.match_second <= second), [events, matchId, second])
-  const current = seen.find(event => event.event_id === selectedEventId) ?? [...seen].reverse().find(e => e.start)
+  const current = replayObserverEvent(seen, matchId, second, playing ? '' : selectedEventId, workspace === 'sandbox' ? filters : {team:'all',kind:'all'})
   useEffect(() => {
     if (!match || loadedMatchId !== matchId || storageConflict) return
     const saved: Workspace = { version: 1, matchId, second: Math.floor(second), eventId: current?.event_id ?? '',
@@ -266,7 +270,7 @@ export default function App() {
     window.addEventListener('storage', sync); return () => window.removeEventListener('storage', sync)
   }, [])
   const seekReplay = (time: number) => { proofRequest.current?.abort(); setSecond(time); setSelectedEventId(''); setPlaying(false); setProof(null) }
-  const selectRecorded = (event: Event) => { if (event.match_id !== matchId) return; proofRequest.current?.abort(); setSecond(event.match_second); setPlaying(false); setProof(null); setSelectedEventId(event.event_id) }
+  const selectRecorded = (event: Event) => { if (event.match_id !== matchId) return; setFilters({team:'all',kind:'all'}); proofRequest.current?.abort(); setSecond(event.match_second); setPlaying(false); setProof(null); setSelectedEventId(event.event_id) }
   const highlights = events.filter(e => e.match_id === matchId && e.type === 'goal' && (workspace !== 'sandbox' || e.match_second <= second))
   const feed = [...seen].reverse().filter(e => important.has(e.type)).slice(0, 7)
   const activeCue = showOverlays ? cues.find(cue => second >= cue.start_match_second && second < cue.end_match_second) : undefined
@@ -275,10 +279,11 @@ export default function App() {
   const awayGoals = seen.filter(e => e.type === 'goal' && e.team_id === match?.away.team_id).length
   const step = (direction: number) => {
     proofRequest.current?.abort(); setProof(null)
-    const selectedIndex = events.findIndex(event => event.event_id === selectedEventId && event.match_second === second)
-    const target = selectedIndex >= 0 ? events[selectedIndex + direction] : direction > 0
-      ? events.find(event => event.match_second > second)
-      : events.filter(event => event.match_second < second).at(-1)
+    const stepEvents = workspace === 'sandbox' ? events.filter(event => (filters.team === 'all' || event.team_id === filters.team) && (filters.kind === 'all' || event.type === filters.kind)) : events
+    const selectedIndex = stepEvents.findIndex(event => event.event_id === selectedEventId && event.match_second === second)
+    const target = selectedIndex >= 0 ? stepEvents[selectedIndex + direction] : direction > 0
+      ? stepEvents.find(event => event.match_second > second)
+      : stepEvents.filter(event => event.match_second < second).at(-1)
     if (target) { setSecond(target.match_second); setSelectedEventId(target.event_id) }
     setPlaying(false)
   }

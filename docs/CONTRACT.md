@@ -83,6 +83,12 @@ Offline `scripts/database-admin.py` is a trusted OS-level operation. SQLite back
 
 Whole-database restore rotates dataset generation IDs and deletion nonces in the new file so forms/recovery requests from before restore are stale. Source match IDs, event IDs/order, provenance, revisions, archive flags and deletion times remain intact. The restored physical-file SHA-256 is reported after these administrative changes. Backup validation currently supports only schemas 1/2 and the documented tables; future engine storage migrations must update this allowlist deliberately.
 
+## FanDNA localization and preference boundary
+
+The FanDNA replay controls have typed English, Spanish and Hindi message catalogs. A missing catalog entry falls back to English and the interface announces that fallback. The locale is applied to the main application region for assistive technology. The existing recap API remains a deterministic template over verified goal evidence; localized copy does not alter scores, clocks, insight IDs or supporting event IDs. Persona labels and analyst/broadcaster templates are localized in all three supported locales.
+
+FanDNA preferences use browser-local `pulse-xi-fandna-preferences-v1`, schema version 1. It stores only locale, persona and selected synthetic team/player IDs; invalid or unknown values return to defaults, and favorites are checked against the selected fixture. Storage failure does not block replay. No speech provider, voice cloning, network speech request, or paid Azure Speech feature is enabled; voice requires a separately approved cost and consent design.
+
 ## Owner-scoped runtime analysis
 
 The engine integration branch exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. Default `projection=legacy` retains the 5400-second contract. Explicit `projection=native` returns `runtime-native-analysis/1` for every supported even engine duration (60..5400), with native period validation and unchanged event identity/ticks. It reuses existing event metrics, pass scoring/verification and export writing. All routes reject future cutoffs and conceal other owners; private runtime data never resolves through public `/api/matches`. See [LIVE_SANDBOX](LIVE_SANDBOX.md#native-period-analysis) for schemas, nullable calendar timestamps, unavailable legacy phase and hash scope. Neither dataset lifecycle nor engine serialization is replaced.
