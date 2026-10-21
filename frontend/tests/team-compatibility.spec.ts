@@ -14,13 +14,22 @@ test('localized replay preferences preserve analytics and the independent runtim
   const after = await (await request.get('/api/matches/comeback-1107/control-chaos?at_second=1200&window_seconds=600')).json()
   expect(after).toEqual(before)
   const token = 'test-runtime-token-at-least-32-characters'
+  const headers = {Authorization:`Bearer ${token}`}
+  const config = (await (await request.get('/api/sandbox/presets',{headers})).json()).balanced
+  const scenario = await request.post('/api/sandbox/scenarios',{headers,data:config})
+  expect(scenario.ok()).toBe(true)
+  const existing = await request.post('/api/sandbox/sessions',{headers,data:{operation_id:'team-compat-existing',scenario_id:(await scenario.json()).scenario_id}})
+  expect(existing.ok()).toBe(true)
   await page.getByRole('link',{name:'ENGINE CONTROL ROOM',exact:true}).click()
   await expect(page.locator('main')).toHaveAttribute('lang','en')
   await page.getByLabel('Operator access token').fill(token)
   await page.getByRole('button',{name:'Connect operator',exact:true}).click()
   await expect(page.getByRole('button',{name:'Disconnect operator',exact:true})).toBeVisible()
+  await expect(page.getByLabel('Authoritative match clock')).toBeVisible()
   if (!await page.getByRole('button',{name:'Create authoritative scenario',exact:true}).isVisible()) await page.getByText('Scenario builder',{exact:true}).click()
+  const previous = await page.getByLabel('Runtime / branch').inputValue()
   await page.getByRole('button',{name:'Create authoritative scenario',exact:true}).click()
+  await expect(page.getByLabel('Runtime / branch')).not.toHaveValue(previous)
   await expect(page.getByLabel('Authoritative match clock')).toHaveText('00:00')
   await page.getByRole('button',{name:'Step engine',exact:true}).click()
   await expect(page.getByLabel('Authoritative match clock')).toHaveText('00:10')
