@@ -6,6 +6,7 @@ Main `4d1d11c7deac2a5632ff8d374e362732c2828491` includes approved observer synch
 
 ## Historical implementation and acceptance evidence
 
+
 Verified implementation merge: **`100106ade274bbb7da137c73b22009f929a72e8c`**,
 [PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64).
 [Post-merge main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39625055824)
@@ -75,7 +76,7 @@ Follow-up local verification: **171 backend tests and 39 browser cases passed**,
 - Pass Difficulty (#28), replay Sandbox subset (#29), optional procedural 3D event observer (#30), persistent browser-local analysis, bookmarks and verified exports (#37).
 - Match Data Hub (#38, merged at `9eeeb2d74feb61fa4783ebfeb994f2a2f8044126`): canonical JSON validation/preview, authorized atomic import, searchable library, quality inspection and portable packages.
 
-## Issue #2 architecture audit
+## Issue #2 architecture audit (historical inspection)
 
 Live browser inspection confirms main 50f72e2, open #40 (224be7c) -> main,
 open #41 (f2854ae) -> engine branch, open #43 (b715e6a) -> live integration.
