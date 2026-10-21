@@ -73,7 +73,18 @@ test('configure, step, checkpoint, intervene, fork, compare evidence and indepen
   await page.getByLabel('Saved checkpoint').selectOption(cp)
   await page.getByLabel('Paired trials').fill('2')
   await page.getByLabel('Experiment horizon seconds').fill('60')
+  let interruptedExperiment = ''
+  await page.route('**/api/sandbox/experiments', async route => {
+    if (route.request().method() !== 'POST' || interruptedExperiment) return route.continue()
+    const response = await route.fetch()
+    expect(response.ok()).toBe(true)
+    interruptedExperiment = (await response.json()).experiment_id
+    await expect.poll(async () => (await (await request.get(`/api/sandbox/experiments/${interruptedExperiment}`, {headers})).json()).status, {timeout:15000}).toBe('completed')
+    await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({detail:{code:'interrupted_response'}})})
+  })
   await page.getByRole('button', { name: 'Run paired ForkCast' }).click()
+  await expect(page.getByRole('button',{name:'Retry original operation safely'})).toBeVisible({timeout:20000})
+  await page.getByRole('button',{name:'Retry original operation safely'}).click()
   await expect(page.getByText(/Experiment completed/)).toBeVisible({ timeout: 30000 })
   await expect(page.getByRole('table')).toContainText('home / pressures')
   await expect(page.getByRole('table')).toContainText('away / recoveries')
@@ -89,6 +100,7 @@ test('configure, step, checkpoint, intervene, fork, compare evidence and indepen
   const saved = await download
   const bundle = JSON.parse(await readFile((await saved.path())!, 'utf8'))
   expect(bundle.archive_version).toBe('forkcast-reproduction/1')
+  expect(bundle.manifest.experiment.experiment_id).toBe(interruptedExperiment)
   expect(bundle.provenance.git_revision).toMatch(/^[0-9a-f]{40}$/)
   expect(JSON.stringify(bundle)).not.toContain(token)
   const verified = await request.post('/api/sandbox/experiments/verify', { headers, data: bundle })

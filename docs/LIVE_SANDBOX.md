@@ -398,7 +398,7 @@ or update a note to persist it in this browser.
 
 This supplies the local live Sandbox/Checkpoint/ForkCast product path. It does
 not publish an Azure deployment, provision public accounts, run paid Foundry
-inference, integrate Blender assets awaiting review, make Unreal cinematics or
+inference, supply asset rights/release approval, make Unreal cinematics or
 submit the team video. Those are separate issues/review/service requirements.
 Provisioned operator authentication and deployment gateway rate limits remain
 necessary. The simulation's documented football-model limitations still apply.
@@ -450,7 +450,7 @@ load-sensitive samples are acceptance evidence, not a controlled benchmark or
 deployment guarantee. The canonical engine is unchanged from runtime base
 `fed64f3`; no performance optimization or budget increase was justified.
 
-### Physical Intel Iris Xe verification
+### Physical Intel Iris Xe verification (historical #59 source)
 
 The existing headed graphics probe ran against the production build at
 `c03435772fa03f988b075ee3d382777544c8be23` on Windows 11, Intel Iris Xe driver
@@ -465,7 +465,7 @@ This probe exercised the recorded-fixture observer served by the runtime build,
 not continuous actor simulation or a live-runtime GPU benchmark. It inspected
 all profile screenshots, rapid camera/quality changes, three 2D/3D cycles and
 30 seconds idle. Errors were empty, the lazy renderer loaded once and no GLB
-loaded; #31 remains separate. First renderer-ready was 551.8 ms. Heap before /
+loaded at that historical revision. Current main integrates original assets through #62; rights/release approval remains #23. First renderer-ready was 551.8 ms. Heap before /
 after interactions / after idle: 12,970,464 / 21,673,764 / 13,556,690 bytes.
 These are browser pacing and bounded heap samples, not GPU timer queries, VRAM
 measurements or proof of long-session leak freedom. Keep existing quality defaults.
@@ -676,3 +676,17 @@ offline-verifier assertions are unchanged. This is an explicit heavy-workload
 test budget, not a performance optimization or a production latency guarantee.
 Earlier CI failures at the original 30-second comparison wait remain recorded
 on the PR. The final local full run passed all 64 browser cases after this change.
+
+
+Final integration base is main 3603b4c89f0f0114ca77ab6be05cc50c7a98a75d
+(viewport fix #69), incorporated by normal merge without conflicts. Combined
+local verification passed 293 backend and 66 browser cases. The resource-heavy
+maximum-history case runs after the 65-case normal two-worker regression project;
+all tests still execute, including concurrency tests. This separates CPU-load
+measurement from ordinary journey deadlines rather than relaxing those deadlines.
+A final lost-response regression forces an experiment to complete before its
+original response is lost, retries the same operation, and verifies that the real
+completed comparison/export loads with the original experiment ID. The retry
+also invalidates obsolete recovery reads. The 65-case normal project passed after
+that repair; exact-head full CI is the integration gate. Earlier shared-runner
+failures are preserved in PR70; no performance optimization or latency SLA is claimed.
