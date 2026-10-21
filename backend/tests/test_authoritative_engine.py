@@ -63,8 +63,22 @@ def test_determinism_to_fulltime_and_legal_events(seed):
     assert any(e.type == 'goal' for e in first.events)
     assert first.score == {t: sum(e.type == 'goal' and e.team_id == t for e in first.events) for t in first.score}
     compatible = match_events(first, 'engine-test')
+    from app.models import Match, MatchEvent
     from app.analytics import state_at, metrics_at
     match = match_record(first, 'engine-test')
+    assert Match.model_validate_json(match.model_dump_json()) == match
+    members = {t.team_id: {p.player_id for p in t.players} for t in (match.home, match.away)}
+    assert len({event.event_id for event in compatible}) == len(compatible)
+    for native, event in zip(first.events, compatible):
+        payload = event.model_dump(mode='json', by_alias=True)
+        assert 'type' in payload and 'event_type' not in payload
+        assert MatchEvent.model_validate(payload) == event
+        assert event.event_id == f'engine-test-{native.sequence}'
+        assert event.match_id == match.match_id
+        assert event.match_second == native.tick
+        assert event.team_id is None or event.team_id in members
+        for player_id in (event.actor_id, event.recipient_id):
+            assert player_id is None or player_id in members[event.team_id]
     replay = state_at(match, compatible, 5400)
     metrics = metrics_at(match, compatible, 5400)
     assert replay.score.home == first.score['home'] == metrics.home.goals
@@ -438,7 +452,7 @@ def test_atomic_migration_and_concurrent_cold_start(database, monkeypatch):
             return db.execute('PRAGMA user_version').fetchone()[0]
 
     with ThreadPoolExecutor(max_workers=6) as pool:
-        assert list(pool.map(read, range(6))) == [1] * 6
+        assert list(pool.map(read, range(6))) == [2] * 6
 
 
 def test_concurrent_restore_isolated_and_duplicate_creation(database):

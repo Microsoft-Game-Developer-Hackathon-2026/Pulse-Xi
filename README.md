@@ -4,9 +4,19 @@
 
 **Synthetic football intelligence for fans, analysts and broadcast producers.**
 
-A Microsoft Game Developer Hackathon 2026 project turning fictional football events into deterministic statistics, inspectable tactical explanations, synchronized broadcast cues and personalized recaps. Sandbox Lab currently explores reproducible, precomputed fixtures; it is not an authoritative interactive match engine. All teams, players and events are synthetic. No Premier League feed, club logos, real-player tracking or broadcast footage is used.
+A Microsoft Game Developer Hackathon 2026 project turning fictional football events into deterministic statistics, inspectable tactical explanations, synchronized broadcast cues and personalized recaps. Recorded fixture replay and an authenticated authoritative Control Room support reproducible tactical experiments. All teams, players and events are synthetic. No Premier League feed, club logos, real-player tracking or broadcast footage is used.
 
 ## Application functionality
+
+**Branch boundary:** main at `0beb08d` (inspected 2026-10-21) includes the engine
+foundation #40, trace-read protection #45 and original Blender graphics #62.
+This branch refreshes the proposed live runtime, architecture and private analysis
+integration in [PR #53](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/53).
+Command-credential hardening is already present in this branch's published history;
+[PR #52](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/52)
+must receive its separate security review and integrate first. Live features below
+are not claimed available on main or approved. See the shared
+[architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
 
 | Capability | Status and boundary |
 |---|---|
@@ -15,14 +25,14 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 | Analytics | Event-derived passes, shots, recoveries, pressure activity, networks, player summaries and windowed activity proxies |
 | ProofTrail | Goal/tactical insights with supporting events and deterministic numerical verification |
 | Pass Difficulty | Versioned 0–100 geometry heuristic with inspectable factors and player summaries; not a failure probability; pressure coverage unavailable |
-| Sandbox Lab | Working fixture replay workspace; authoritative backend controls, checkpoints, branches and manifests are available through the authenticated API, pending frontend integration |
+| Sandbox Lab | Fixture replay plus a separate authenticated live Control Room with server-driven runs, tactical interventions, exact checkpoints, isolated branches and verified paired ForkCast experiments |
 | 3D Observer | Lazy procedural pitch/stadium, five cameras, Low/Medium/High profiles, recorded-event evidence and 2D/WebGL fallback |
 | Broadcast/FanDNA | Timed cue JSON/preview and five recap modes; limited English, Hindi and Spanish templates, not full interface translation |
 | Match Data Hub | Searchable source-labelled library, authorized canonical JSON import, no-write preview, factual data-quality inspection, archive/restore/delete controls and checksummed portable match packages |
 | Persistence | SQLite imported-event persistence and idempotent ingest; built-in/custom fixtures regenerate |
 | Microsoft AI | Guarded optional provider code; verified local path uses deterministic fallback, not authenticated model inference |
 
-The [authoritative engine integration guide](docs/AUTHORITATIVE_ENGINE.md) documents real backend controls, exact checkpoint continuation, isolated runtime branches, tactical interventions and independent manifest verification. The existing Sandbox UI still uses fixture replay. **Separate gates:** PR #31's editable Blender/GLB kit awaits Vishwam's asset/security approval; PRs #32/#33 remain separate. Higher-level ForkCast trial/comparison integration, calibrated prediction, public Azure deployment and real multi-agent inference are not supplied by the engine. See the [earlier handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
+The [Live Sandbox guide](docs/LIVE_SANDBOX.md) documents the proposed Control Room at `/#/runtime`: configure, run on the server, pause, intervene, checkpoint, restore, run paired trials and inspect/verify event evidence. Runtime access requires provisioned operator credentials, kept only in page memory. The fixture workspace remains at `/#/sandbox`. Original graphics, licensing notices and fallback behavior from merged #62 are preserved; see its [asset review record](docs/ASSET_SECURITY_RELEASE_REVIEW.md). Other preparation and feature PRs retain separate review gates. Calibrated prediction, public Azure deployment and real multi-agent inference are not supplied by the engine. See the [earlier handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
 
 ## Windows quick start
 
@@ -258,3 +268,7 @@ Synthetic streams are simplified and not calibrated against real football outcom
 Browser regression runs are bounded to two workers to avoid oversubscribing software-rendering contexts on developer laptops; explicit multi-tab and database race tests retain their own concurrency. Deep-link navigation hides stale controls until recorded-source restoration completes. No test retries or suppressed failures are used.
 
 Local startup/test serving uses an explicit Uvicorn loop factory: Windows SelectorEventLoop avoids the observed Proactor socket-shutdown/reset race during request cancellation; Linux keeps Uvicorn auto/uvloop. This is a bounded local server (the Windows selector supports up to 512 sockets), not a high-concurrency public deployment configuration; the backend does not use asyncio subprocess APIs. Errors are not filtered or retried away.
+
+### Authoritative recorded-event analysis
+
+On the engine integration branch, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to existing pass analysis, ProofTrail, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. The current engine projection requires a 5400-second scenario; shortened runs retain native controls. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#existing-analysis-integration) for authenticated routes, cutoff/hash semantics and limitations. These branch features remain subject to the normal stacked PR review; this paragraph does not claim a main-branch merge.

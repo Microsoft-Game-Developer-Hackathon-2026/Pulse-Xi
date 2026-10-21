@@ -29,7 +29,8 @@ function supportsWebGL2() {
   } catch { return false }
 }
 
-export function ObserverSwitch({ match, event, atSecond, scope, children, preferredView, preferredQuality, onViewChange, onQualityChange }: {
+export function ObserverSwitch({ match, event, atSecond, scope, children, preferredView, preferredQuality, onViewChange, onQualityChange, apiBase, load }: {
+  apiBase?: string; load?: <T>(path: string, signal: AbortSignal) => Promise<T>;
   match: Match; event?: Event; atSecond: number; scope?: ObserverScope; children: ReactNode;
   preferredView?: '2d' | '3d'; preferredQuality?: GraphicsQuality; onViewChange?: (view: '2d' | '3d') => void; onQualityChange?: (quality: GraphicsQuality) => void
 }) {
@@ -90,7 +91,7 @@ export function ObserverSwitch({ match, event, atSecond, scope, children, prefer
         <SceneCanvas snapshot={snapshot} reducedMotion={reducedMotion} cameraPreset={camera} resetRevision={revision} quality={quality} fail={fail} report={report} startedAt={started.current} assetStyle={assetStyle} assetStatus={asset.status} reportAsset={reportAsset}/>
       </Suspense></RenderBoundary>
       <p className="observer-notice" data-testid="asset-status" data-status={assetStyle === 'procedural' ? 'procedural' : asset.status} data-surface-size={JSON.stringify(asset.surfaceSize)}>{assetStyle === 'procedural' ? 'Procedural field selected.' : asset.status === 'ready' ? `Original Blender geometry loaded in ${asset.readyMs?.toFixed(1)} ms.` : asset.status === 'fallback' ? 'Original assets unavailable; procedural geometry remains active.' : 'Loading original assets; procedural pitch remains available.'}</p>
-      <EventOverlay match={match} event={event} snapshot={snapshot}/>
+      <EventOverlay match={match} event={event} snapshot={snapshot} apiBase={apiBase} load={load}/>
       <div className="observer-caption" data-testid="observer-snapshot" data-event-id={snapshot.event_id ?? ''}><span>{snapshot.team_name ? `${snapshot.team_name} attacking frame` : 'Recorded event frame'} · {snapshot.event_type ?? 'no event'} · {Math.floor(atSecond / 60)}:{String(Math.floor(atSecond % 60)).padStart(2, '0')}</span><code>{snapshot.event_id ?? 'No visible source event'}</code></div>
       {snapshot.unavailable_reason && <p className="observer-notice">{snapshot.unavailable_reason}</p>}
       <p className="observer-note">{camera === 'free' && 'Free camera: drag to orbit, scroll/pinch to zoom; focus the canvas and use arrow keys to pan. '}Markers show recorded origins and endpoints only. The ball is enlarged for readability; model height is illustrative. Display units are schematic; no player movement, speed, defender location or live ball trajectory is inferred.</p>
