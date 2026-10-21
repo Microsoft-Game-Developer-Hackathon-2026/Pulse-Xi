@@ -16,7 +16,7 @@ record was retained. No other feature branch was absorbed.
 | #8 | Existing bounded paired-trial engine retained. #59 adds independent verification, source navigation and reload recovery. Completed/cancelled checkpoints are inspectable; fulltime/no-future and non-paused sources disable trials honestly. Real metrics/parent isolation/paired reruns/sparse/cancellation tests retained. |
 | #9 | Raw manifests remain compatible. Versioned reproduction wrappers add unsigned export-build Git/Python/OS context; unrecorded original execution environment is explicit. API/CLI accept wrappers and legacy files; bounded reads, schema/version/unknown/duplicate/oversize rejection and named first-divergence tests pass. CI now explicitly runs both committed example CLIs and pip check. |
 
-Local final regression: **292 backend tests passed** (one existing TestClient
+Local final regression: **293 backend tests passed** (one existing TestClient
 httpx deprecation warning), **64 Playwright cases passed** with strict TypeScript
 and production build, both committed CLI verifiers returned verified=true,
 pip check passed, seven assets validated with zero errors/warnings, npm audit

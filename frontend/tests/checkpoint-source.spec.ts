@@ -96,6 +96,8 @@ test('cancelled checkpoint remains inspectable but cannot start an experiment',a
 
 test('large bounded ForkCast downloads verify offline without exceeding the online upload limit',async ({page,request},testInfo)=>{
   test.setTimeout(120000)
+  const limitToken='test-forkcast-limit-token-at-least-32-characters'
+  const headers={Authorization:`Bearer ${limitToken}`}
   const config=(await (await request.get('/api/sandbox/presets',{headers})).json()).balanced
   config.home.tactics.tempo=100;config.away.tactics.tempo=100
   config.home.tactics.pressing=100;config.away.tactics.pressing=100
@@ -110,10 +112,13 @@ test('large bounded ForkCast downloads verify offline without exceeding the onli
   const experiment=await request.post('/api/sandbox/experiments',{headers,data:{operation_id:'large-forkcast',checkpoint_id:saved.checkpoint_id,expected_revision:saved.revision,trials:5,horizon:600,variation:[{team_id:'home',field:'pressing',value:0},{team_id:'home',field:'tempo',value:20}]}})
   expect(experiment.ok()).toBe(true)
   const eid=(await experiment.json()).experiment_id
+  const otherOwner={Authorization:`Bearer ${token}`}
+  expect((await request.get(`/api/sandbox/experiments/${eid}`,{headers:otherOwner})).status()).toBe(404)
+  expect((await (await request.get('/api/sandbox/experiments',{headers:otherOwner})).json()).some((item:{experiment_id:string})=>item.experiment_id===eid)).toBe(false)
   await expect.poll(async()=>(await (await request.get(`/api/sandbox/experiments/${eid}`,{headers})).json()).status,{timeout:90000,intervals:[250,500]}).toBe('completed')
   const parent=await (await request.get(`/api/sandbox/sessions/${sid}/state`,{headers})).json()
   expect(parent.state_hash).toBe(saved.state_hash)
-  await page.goto('/#/runtime');await page.getByLabel('Operator access token').fill(token)
+  await page.goto('/#/runtime');await page.getByLabel('Operator access token').fill(limitToken)
   await page.getByRole('button',{name:'Connect operator',exact:true}).click()
   await page.getByLabel('Runtime / branch').selectOption(sid)
   await expect(page.getByRole('table')).toContainText('home / pressures',{timeout:30000})
@@ -130,7 +135,7 @@ test('large bounded ForkCast downloads verify offline without exceeding the onli
   const bytes=await readFile(file)
   expect(bytes.byteLength).toBeGreaterThan(2_000_000)
   expect(bytes.byteLength).toBeLessThanOrEqual(20_000_000)
-  expect(bytes.toString()).not.toContain(token)
+  expect(bytes.toString()).not.toContain(limitToken)
   const replay=await promisify(execFile)('python',['-m','app.sandbox.verify_experiment',file],{cwd:resolve('../backend'),timeout:30000})
   expect(JSON.parse(replay.stdout).verified).toBe(true)
   expect((await (await request.get(`/api/sandbox/sessions/${sid}/state`,{headers})).json()).state_hash).toBe(saved.state_hash)

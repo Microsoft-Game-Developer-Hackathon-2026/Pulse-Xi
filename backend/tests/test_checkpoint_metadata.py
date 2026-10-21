@@ -112,6 +112,40 @@ def test_checkpoint_metadata_write_failure_rolls_back_everything(client):
     assert storage.mutate('alice', root.session_id, command).revision == 1
 
 
+def test_process_death_before_commit_leaves_no_checkpoint_or_timestamp(database, monkeypatch):
+    root, command = checkpoint()
+    with storage.connect() as db:
+        before = {table: db.execute(f'SELECT * FROM {table}').fetchall() for table in
+                  ('sessions', 'commands', 'checkpoints', 'runtime_events', 'audit', 'checkpoint_metadata')}
+        db.execute('CREATE TRIGGER injected_process_death AFTER INSERT ON checkpoint_metadata BEGIN SELECT crash(); END')
+    program = '''
+import os, sys
+from contextlib import contextmanager
+from app.sandbox import storage
+from app.sandbox.models import Command
+original = storage.connect
+@contextmanager
+def connection():
+    with original() as db:
+        db.create_function('crash', 0, lambda: os._exit(73))
+        yield db
+storage.connect = connection
+storage.utc_now = lambda: '2026-10-21T18:00:00.000001Z'
+storage.mutate('alice', sys.argv[1], Command.model_validate_json(sys.argv[2]))
+'''
+    child = subprocess.run([sys.executable, '-c', program, root.session_id, canonical(command)], capture_output=True, text=True)
+    assert child.returncode == 73 and not child.stderr
+    assert storage.get_runtime('alice', root.session_id).state_hash == root.state_hash
+    with storage.connect() as db:
+        for table, rows in before.items():
+            assert db.execute(f'SELECT * FROM {table}').fetchall() == rows
+        assert db.execute('PRAGMA integrity_check').fetchone()[0] == 'ok'
+        db.execute('DROP TRIGGER injected_process_death')
+    monkeypatch.setattr(storage, 'utc_now', lambda: SECOND)
+    committed = storage.mutate('alice', root.session_id, command)
+    assert storage.get_checkpoint('alice', committed.checkpoint_id).created_at_utc == SECOND
+
+
 @pytest.mark.parametrize('version', [1, 2, 3])
 def test_historical_migration_backup_and_reopen_preserve_records(database, monkeypatch, version):
     root, command = checkpoint()
