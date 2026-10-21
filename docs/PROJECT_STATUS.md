@@ -16,8 +16,8 @@ record was retained. No other feature branch was absorbed.
 | #8 | Existing bounded paired-trial engine retained. #59 adds independent verification, source navigation and reload recovery. Completed/cancelled checkpoints are inspectable; fulltime/no-future and non-paused sources disable trials honestly. Real metrics/parent isolation/paired reruns/sparse/cancellation tests retained. |
 | #9 | Raw manifests remain compatible. Versioned reproduction wrappers add unsigned export-build Git/Python/OS context; unrecorded original execution environment is explicit. API/CLI accept wrappers and legacy files; bounded reads, schema/version/unknown/duplicate/oversize rejection and named first-divergence tests pass. CI now explicitly runs both committed example CLIs and pip check. |
 
-Local final regression: **293 backend tests passed** (one existing TestClient
-httpx deprecation warning), **64 Playwright cases passed** with strict TypeScript
+Combined-main local regression (3603b4c viewport fix included): **293 backend tests passed** (one existing TestClient
+httpx deprecation warning), **66 Playwright cases passed** with strict TypeScript
 and production build, both committed CLI verifiers returned verified=true,
 pip check passed, seven assets validated with zero errors/warnings, npm audit
 reported zero advisories and pip-audit found zero known advisories in the 29-package
@@ -181,3 +181,15 @@ This table records executable implementation, separately from main incorporation
 | #68 | #69 supplies document viewport stability with desktop/mobile tests, actual playback and preserved explicit navigation. | A passive root layout floor also prevents temporary async-panel collapse from invalidating the current viewport; upward scrolling releases reserved space. |
 
 Executable sources: `test_authoritative_engine.py`, `test_runtime_integration.py`, `test_native_analysis.py`, `test_runtime_control.py`, `test_pass_difficulty.py`, `test_asset_contract.py`, and browser checkpoint/runtime/scenario/observer/pass/viewport suites. The unchanged backend tree at combined candidate `636238e` passed 294 cases. Its 76 browser cases passed. The subsequent combined viewport check exposed and fixed transient-panel collapse in #69; the strengthened 78-case run is recorded on the current validation head. Test results belong to their recorded source, not automatically main.
+
+
+## Final acceptance branch verification
+
+The acceptance branch normally merges current main 3603b4c (#69), retaining its
+viewport fix and tests. Local full suites:293 backend/66 browser. After the final
+completed-experiment lost-response repair, strict build and all 65 ordinary
+regression cases pass; the maximum-load case is a dependent resource project,
+retaining its actual event/hash/ownership/offline-replay assertions. Published-head
+CI and merged-main CI remain required, and their actual results belong in PR70.
+No failing shared-runner run is represented as passed; original ordinary test
+budgets remain unchanged. Engine source/hash contracts and dependency locks remain unchanged.

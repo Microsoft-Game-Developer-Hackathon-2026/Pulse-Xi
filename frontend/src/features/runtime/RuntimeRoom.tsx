@@ -333,7 +333,10 @@ export function RuntimeRoom() {
       const result = await post<Receipt & Run & Experiment>(pending.path, pending.body, pending.target)
       if (pending.target === 'session') { setSessions(await request<Session[]>(token, '/sessions')); selectSession(result.session_id) }
       else if (pending.target === 'run') setRun(result)
-      else if (pending.target === 'experiment') setExperiment(result)
+      else if (pending.target === 'experiment') {
+        experimentRecovery.current++; setExperiment(result); setComparison(null); setMetric(null); setProof(null); setProofSource(null)
+        if (result.status === 'completed') setComparison(await request<Comparison>(token, `/experiments/${result.experiment_id}/comparison`))
+      }
       else await refresh()
       setNotice('Original operation reconciled without applying it twice.')
     })}>Retry original operation safely</button>}

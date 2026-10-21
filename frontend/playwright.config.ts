@@ -10,6 +10,12 @@ export default defineConfig({
   // Bound software-rendering concurrency on developer laptops and shared CI.
   // Dedicated multi-tab and SQLite race tests retain their own concurrency.
   workers: 2,
+  // Maximum-history replay is a resource probe, not a concurrent latency SLA.
+  // Keep every functional assertion while giving ordinary journeys their own CPU budget.
+  projects: [
+    { name: 'regression', testIgnore: '**/forkcast-limit.spec.ts' },
+    { name: 'bounded-forkcast', testMatch: '**/forkcast-limit.spec.ts', dependencies: ['regression'], workers: 1 },
+  ],
   use: { baseURL: 'http://127.0.0.1:8765', browserName: 'chromium', launchOptions: { args: ['--enable-unsafe-swiftshader'] } },
   webServer: {
     command: 'python -m uvicorn app.main:app --loop app.local_event_loop:create_loop --app-dir ../backend --host 127.0.0.1 --port 8765',
