@@ -368,4 +368,3 @@ async def observe(websocket: WebSocket, session_id: str, cursor: int = Query(def
 # Existing analysis services consume only authenticated, committed engine events.
 from .analysis import register as register_analysis
 register_analysis(router, require_operator)
-
