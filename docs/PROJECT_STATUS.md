@@ -128,3 +128,20 @@ See [README](../README.md) and [CONTRACT](CONTRACT.md) for limits, permissions, 
 ## Satvik integration reconciliation
 
 Main aefc046 includes runtime, saved scenarios, scenario archives, runtime schema 3 and graphics. Native #57, acceptance #59 and runtime Control vs Chaos #58 remain pending; their latest compatibility branches preserve this main baseline. #52 security behavior is already present through runtime history; its duplicate PR is closed after verifying the three-way merge is a no-op. Separate rights/release approval is not implied by integrated asset files.
+
+
+## Satvik assigned-scope implementation audit (2026-10-21)
+
+This table records executable implementation, separately from main incorporation. Unchecked historical issue lists are not evidence that the features are absent.
+
+| Issue | Implemented product behavior | Remaining implementation boundary |
+|---|---|---|
+| #6 | Main has complete immutable checkpoints/RNG/pending queues, isolated restore, deterministic continuation and history APIs. #59 adds saved-source download, read-only history and full-time controls. | The current CheckpointView has no calendar creation timestamp; UI explicitly labels it unavailable. A durable timestamp requires an engine-owner persistence/API contract outside canonical state/hashes; do not infer it from match tick or browser time. |
+| #8 | Main has real paired trials, interventions, parent isolation, source-derived team/player metrics, cancellation and independent verifier. #59 adds explicit UI verification and source-branch navigation. | No additional consumer algorithm or runner is needed. |
+| #10 | Main has server-clock controls, saved scenarios/archives, tactics and authenticated observation. #57/#58/#59 add native analysis, runtime intelligence, history and recovery acceptance. | Consumer additions are implemented on those feature branches. |
+| #11 | Main has original GLB/procedural scenes, event markers/pass paths, camera/quality controls, synchronized source selection and GPU failure fallback. | Continuous actor tracking is unavailable: engine position frames are not supplied, so the required event-snapshot fallback is used. Physical measurements apply only to the named builds/configurations. |
+| #12 | Editable Blender sources, optimized GLBs, manifest, export scripts, budgets, browser load/fallback and validators are integrated on main. | Rights-holder/license/release decisions remain in #23; technical validation cannot grant those rights. |
+| #27 | Main has the versioned scorer, inspector, filters, player summaries, source verifier, exports and 5,400-second runtime adapter; #57 supplies short native periods. | Pressure is intentionally unavailable in formula v1, rather than inferred from incompatible sparse event frames. No replacement scorer is needed. |
+| #68 | #69 supplies document viewport stability with desktop/mobile tests, actual playback and preserved explicit navigation. | A passive root layout floor also prevents temporary async-panel collapse from invalidating the current viewport; upward scrolling releases reserved space. |
+
+Executable sources: `test_authoritative_engine.py`, `test_runtime_integration.py`, `test_native_analysis.py`, `test_runtime_control.py`, `test_pass_difficulty.py`, `test_asset_contract.py`, and browser checkpoint/runtime/scenario/observer/pass/viewport suites. The unchanged backend tree at combined candidate `636238e` passed 294 cases. Its 76 browser cases passed. The subsequent combined viewport check exposed and fixed transient-panel collapse in #69; the strengthened 78-case run is recorded on the current validation head. Test results belong to their recorded source, not automatically main.
