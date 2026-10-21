@@ -8,13 +8,13 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 
 ## Application functionality
 
-**Branch boundary:** current main (`50f72e2`, inspected 2026-10-21) contains fixture
-replay and the Match Data Hub. Live runtime capabilities below are on open PRs
-[#40](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/40)
-and [#41](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/41).
-Private runtime analysis/3D adapters are a separate follow-up, PR #43. These are
-not merged or certified by this audit. See the shared
-[architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
+**Branch boundary:** main `4d8a01e` (inspected 2026-10-21) contains the
+engine foundation, trace-security correction, recorded replay and Match Data Hub.
+Live runtime/ForkCast and analysis forward integration remains in #53.
+This branch adds checkpoint/history inspection, ForkCast verification/source
+navigation and disconnect recovery in #59. Native-period analysis #57 and runtime
+Control vs Chaos #58 are separate pending integrations, not included here.
+See the shared [architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
 
 | Capability | Status and boundary |
 |---|---|
