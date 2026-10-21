@@ -1,0 +1,1065 @@
+[
+  {
+    "method": "POST",
+    "path": "/api/sandbox/scenarios",
+    "request": {
+      "seed": 7,
+      "duration_seconds": 120
+    },
+    "response": {
+      "scenario_id": "scenario-6c82255c292b24246ad23e90ca5c2a4f87fde926b124ada3c2f0e92e7646ac59",
+      "config_hash": "6c82255c292b24246ad23e90ca5c2a4f87fde926b124ada3c2f0e92e7646ac59",
+      "config": {
+        "engine_version": "zone-engine/1",
+        "schema_version": "sandbox/1",
+        "seed": 7,
+        "duration_seconds": 120,
+        "preset": "balanced",
+        "environment": "neutral-dry",
+        "home": {
+          "team_id": "home",
+          "name": "Northbridge FC",
+          "color": "#3377ff",
+          "players": [
+            {
+              "player_id": "home-1",
+              "name": "Home Player 1",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "home-2",
+              "name": "Home Player 2",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "home-3",
+              "name": "Home Player 3",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "home-4",
+              "name": "Home Player 4",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "home-5",
+              "name": "Home Player 5",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "home-6",
+              "name": "Home Player 6",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "home-7",
+              "name": "Home Player 7",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "home-8",
+              "name": "Home Player 8",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "home-9",
+              "name": "Home Player 9",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "home-10",
+              "name": "Home Player 10",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "home-11",
+              "name": "Home Player 11",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            }
+          ],
+          "tactics": {
+            "formation": "4-3-3",
+            "pressing": 50,
+            "compactness": 50,
+            "directness": 50,
+            "tempo": 50,
+            "risk": 50
+          }
+        },
+        "away": {
+          "team_id": "away",
+          "name": "Harbor Athletic",
+          "color": "#ff7733",
+          "players": [
+            {
+              "player_id": "away-1",
+              "name": "Away Player 1",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "away-2",
+              "name": "Away Player 2",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "away-3",
+              "name": "Away Player 3",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "away-4",
+              "name": "Away Player 4",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "away-5",
+              "name": "Away Player 5",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "away-6",
+              "name": "Away Player 6",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "away-7",
+              "name": "Away Player 7",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "away-8",
+              "name": "Away Player 8",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "away-9",
+              "name": "Away Player 9",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "away-10",
+              "name": "Away Player 10",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            },
+            {
+              "player_id": "away-11",
+              "name": "Away Player 11",
+              "passing": 65,
+              "finishing": 60,
+              "defending": 60
+            }
+          ],
+          "tactics": {
+            "formation": "4-3-3",
+            "pressing": 50,
+            "compactness": 50,
+            "directness": 50,
+            "tempo": 50,
+            "risk": 50
+          }
+        }
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/sandbox/sessions",
+    "request": {
+      "operation_id": "example-create",
+      "scenario_id": "scenario-6c82255c292b24246ad23e90ca5c2a4f87fde926b124ada3c2f0e92e7646ac59"
+    },
+    "response": {
+      "session_id": "runtime-d97f0b90a73f733058f425274e85d4d3444def854653ed1e30ef9b22e4b8cab2",
+      "scenario_id": "scenario-6c82255c292b24246ad23e90ca5c2a4f87fde926b124ada3c2f0e92e7646ac59",
+      "tick": 0,
+      "revision": 0,
+      "event_cursor": 1,
+      "lifecycle": "paused",
+      "state_hash": "d75f7b73d0daffdb5fa64a6997f927f24856c25681413f9e2a2e30e90d9856c3",
+      "event_hash": "9c3bda351d3b6f9f4dc150c4090414dd8507ad4e975f77ad4bed625d6fc33911",
+      "checkpoint_id": null
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/sandbox/sessions/runtime-d97f0b90a73f733058f425274e85d4d3444def854653ed1e30ef9b22e4b8cab2/commands",
+    "request": {
+      "operation_id": "example-step",
+      "expected_revision": 0,
+      "kind": "step",
+      "ticks": 30
+    },
+    "response": {
+      "session_id": "runtime-d97f0b90a73f733058f425274e85d4d3444def854653ed1e30ef9b22e4b8cab2",
+      "scenario_id": "scenario-6c82255c292b24246ad23e90ca5c2a4f87fde926b124ada3c2f0e92e7646ac59",
+      "tick": 30,
+      "revision": 1,
+      "event_cursor": 14,
+      "lifecycle": "paused",
+      "state_hash": "cec9ddea85a265ddc8bf9bc1f9badc3368745fdfe6b791d755b03a6fae0c668f",
+      "event_hash": "0898b0d67302e8f8aff373e6741e5bb5b8fb540afdb9ddfb15b799a9e1aaf267",
+      "checkpoint_id": null
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/sandbox/sessions/runtime-d97f0b90a73f733058f425274e85d4d3444def854653ed1e30ef9b22e4b8cab2/commands",
+    "request": {
+      "operation_id": "example-save",
+      "expected_revision": 1,
+      "kind": "checkpoint"
+    },
+    "response": {
+      "session_id": "runtime-d97f0b90a73f733058f425274e85d4d3444def854653ed1e30ef9b22e4b8cab2",
+      "scenario_id": "scenario-6c82255c292b24246ad23e90ca5c2a4f87fde926b124ada3c2f0e92e7646ac59",
+      "tick": 30,
+      "revision": 2,
+      "event_cursor": 14,
+      "lifecycle": "paused",
+      "state_hash": "ec5448cfc66a419d8630dd3e2a2f06d5ce6099ea722cb83b9c07d9f53c55f8ab",
+      "event_hash": "0898b0d67302e8f8aff373e6741e5bb5b8fb540afdb9ddfb15b799a9e1aaf267",
+      "checkpoint_id": "checkpoint-2cfabc2beba7ffef8d7cb6198628a9e64a91adf34d690b4cac5599550a3527b2"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/sandbox/checkpoints/checkpoint-2cfabc2beba7ffef8d7cb6198628a9e64a91adf34d690b4cac5599550a3527b2",
+    "request": null,
+    "response": {
+      "checkpoint_id": "checkpoint-2cfabc2beba7ffef8d7cb6198628a9e64a91adf34d690b4cac5599550a3527b2",
+      "session_id": "runtime-d97f0b90a73f733058f425274e85d4d3444def854653ed1e30ef9b22e4b8cab2",
+      "scenario_id": "scenario-6c82255c292b24246ad23e90ca5c2a4f87fde926b124ada3c2f0e92e7646ac59",
+      "tick": 30,
+      "revision": 2,
+      "event_cursor": 14,
+      "snapshot": {
+        "engine_version": "zone-engine/1",
+        "schema_version": "sandbox/1",
+        "state": {
+          "engine_version": "zone-engine/1",
+          "schema_version": "sandbox/1",
+          "scenario": {
+            "scenario_id": "scenario-6c82255c292b24246ad23e90ca5c2a4f87fde926b124ada3c2f0e92e7646ac59",
+            "config_hash": "6c82255c292b24246ad23e90ca5c2a4f87fde926b124ada3c2f0e92e7646ac59",
+            "config": {
+              "engine_version": "zone-engine/1",
+              "schema_version": "sandbox/1",
+              "seed": 7,
+              "duration_seconds": 120,
+              "preset": "balanced",
+              "environment": "neutral-dry",
+              "home": {
+                "team_id": "home",
+                "name": "Northbridge FC",
+                "color": "#3377ff",
+                "players": [
+                  {
+                    "player_id": "home-1",
+                    "name": "Home Player 1",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "home-2",
+                    "name": "Home Player 2",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "home-3",
+                    "name": "Home Player 3",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "home-4",
+                    "name": "Home Player 4",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "home-5",
+                    "name": "Home Player 5",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "home-6",
+                    "name": "Home Player 6",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "home-7",
+                    "name": "Home Player 7",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "home-8",
+                    "name": "Home Player 8",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "home-9",
+                    "name": "Home Player 9",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "home-10",
+                    "name": "Home Player 10",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "home-11",
+                    "name": "Home Player 11",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  }
+                ],
+                "tactics": {
+                  "formation": "4-3-3",
+                  "pressing": 50,
+                  "compactness": 50,
+                  "directness": 50,
+                  "tempo": 50,
+                  "risk": 50
+                }
+              },
+              "away": {
+                "team_id": "away",
+                "name": "Harbor Athletic",
+                "color": "#ff7733",
+                "players": [
+                  {
+                    "player_id": "away-1",
+                    "name": "Away Player 1",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "away-2",
+                    "name": "Away Player 2",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "away-3",
+                    "name": "Away Player 3",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "away-4",
+                    "name": "Away Player 4",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "away-5",
+                    "name": "Away Player 5",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "away-6",
+                    "name": "Away Player 6",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "away-7",
+                    "name": "Away Player 7",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "away-8",
+                    "name": "Away Player 8",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "away-9",
+                    "name": "Away Player 9",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "away-10",
+                    "name": "Away Player 10",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  },
+                  {
+                    "player_id": "away-11",
+                    "name": "Away Player 11",
+                    "passing": 65,
+                    "finishing": 60,
+                    "defending": 60
+                  }
+                ],
+                "tactics": {
+                  "formation": "4-3-3",
+                  "pressing": 50,
+                  "compactness": 50,
+                  "directness": 50,
+                  "tempo": 50,
+                  "risk": 50
+                }
+              }
+            }
+          },
+          "tick": 30,
+          "revision": 2,
+          "period": 1,
+          "lifecycle": "paused",
+          "score": {
+            "away": 0,
+            "home": 0
+          },
+          "possession_team_id": "home",
+          "possession_actor_id": "home-3",
+          "possession_id": 3,
+          "ball_x": 63,
+          "ball_y": 43,
+          "actors": [
+            {
+              "player_id": "home-1",
+              "team_id": "home",
+              "role": "GK",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "home-2",
+              "team_id": "home",
+              "role": "DF",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "home-3",
+              "team_id": "home",
+              "role": "DF",
+              "stamina": 9992,
+              "last_action_tick": 29
+            },
+            {
+              "player_id": "home-4",
+              "team_id": "home",
+              "role": "DF",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "home-5",
+              "team_id": "home",
+              "role": "DF",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "home-6",
+              "team_id": "home",
+              "role": "MF",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "home-7",
+              "team_id": "home",
+              "role": "MF",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "home-8",
+              "team_id": "home",
+              "role": "MF",
+              "stamina": 9996,
+              "last_action_tick": 8
+            },
+            {
+              "player_id": "home-9",
+              "team_id": "home",
+              "role": "FW",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "home-10",
+              "team_id": "home",
+              "role": "FW",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "home-11",
+              "team_id": "home",
+              "role": "FW",
+              "stamina": 9996,
+              "last_action_tick": 1
+            },
+            {
+              "player_id": "away-1",
+              "team_id": "away",
+              "role": "GK",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "away-2",
+              "team_id": "away",
+              "role": "DF",
+              "stamina": 9996,
+              "last_action_tick": 29
+            },
+            {
+              "player_id": "away-3",
+              "team_id": "away",
+              "role": "DF",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "away-4",
+              "team_id": "away",
+              "role": "DF",
+              "stamina": 9996,
+              "last_action_tick": 8
+            },
+            {
+              "player_id": "away-5",
+              "team_id": "away",
+              "role": "DF",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "away-6",
+              "team_id": "away",
+              "role": "MF",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "away-7",
+              "team_id": "away",
+              "role": "MF",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "away-8",
+              "team_id": "away",
+              "role": "MF",
+              "stamina": 9996,
+              "last_action_tick": 15
+            },
+            {
+              "player_id": "away-9",
+              "team_id": "away",
+              "role": "FW",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "away-10",
+              "team_id": "away",
+              "role": "FW",
+              "stamina": 10000,
+              "last_action_tick": 0
+            },
+            {
+              "player_id": "away-11",
+              "team_id": "away",
+              "role": "FW",
+              "stamina": 10000,
+              "last_action_tick": 0
+            }
+          ],
+          "tactics": {
+            "away": {
+              "formation": "4-3-3",
+              "pressing": 50,
+              "compactness": 50,
+              "directness": 50,
+              "tempo": 50,
+              "risk": 50
+            },
+            "home": {
+              "formation": "4-3-3",
+              "pressing": 50,
+              "compactness": 50,
+              "directness": 50,
+              "tempo": 50,
+              "risk": 50
+            }
+          },
+          "policy_revision": 0,
+          "rng": {
+            "actor": {
+              "key": "bcf78251f1ef13db61de1c81da43681c213b05a01f0907efd7948a6fad0610e9",
+              "counter": 8
+            },
+            "decision": {
+              "key": "7b4903cb8a37f628a9260870fa3cb20544cbe1fe9972a2043f3161fe81a9da69",
+              "counter": 15
+            },
+            "duel": {
+              "key": "06572a632b6def403c4d929e47ccd0c09317d63aa10e7841fad010a202ad4562",
+              "counter": 10
+            },
+            "finish": {
+              "key": "1ff32814b4e19f55a43a7902718351ddb643d3ad62ba217e1c60072514463e45",
+              "counter": 0
+            }
+          },
+          "pending": [],
+          "next_queue_order": 1,
+          "next_decision_tick": 36,
+          "event_cursor": 14,
+          "events": [
+            {
+              "sequence": 1,
+              "tick": 0,
+              "period": 1,
+              "type": "kickoff",
+              "team_id": "home",
+              "actor_id": "home-11",
+              "recipient_id": null,
+              "outcome": null,
+              "x": 50,
+              "y": 50,
+              "end_x": 50,
+              "end_y": 50,
+              "possession_id": 1,
+              "policy_revision": 0
+            },
+            {
+              "sequence": 2,
+              "tick": 1,
+              "period": 1,
+              "type": "pass",
+              "team_id": "home",
+              "actor_id": "home-11",
+              "recipient_id": "home-2",
+              "outcome": "incomplete",
+              "x": 50,
+              "y": 50,
+              "end_x": 63,
+              "end_y": 61,
+              "possession_id": 1,
+              "policy_revision": 0
+            },
+            {
+              "sequence": 3,
+              "tick": 1,
+              "period": 1,
+              "type": "turnover",
+              "team_id": "home",
+              "actor_id": "home-11",
+              "recipient_id": null,
+              "outcome": "lost_pass",
+              "x": 63,
+              "y": 61,
+              "end_x": 63,
+              "end_y": 61,
+              "possession_id": 1,
+              "policy_revision": 0
+            },
+            {
+              "sequence": 4,
+              "tick": 1,
+              "period": 1,
+              "type": "interception",
+              "team_id": "away",
+              "actor_id": "away-4",
+              "recipient_id": null,
+              "outcome": "won",
+              "x": 63,
+              "y": 61,
+              "end_x": 63,
+              "end_y": 61,
+              "possession_id": 2,
+              "policy_revision": 0
+            },
+            {
+              "sequence": 5,
+              "tick": 1,
+              "period": 1,
+              "type": "recovery",
+              "team_id": "away",
+              "actor_id": "away-4",
+              "recipient_id": null,
+              "outcome": "controlled",
+              "x": 63,
+              "y": 61,
+              "end_x": 63,
+              "end_y": 61,
+              "possession_id": 2,
+              "policy_revision": 0
+            },
+            {
+              "sequence": 6,
+              "tick": 8,
+              "period": 1,
+              "type": "pressure",
+              "team_id": "home",
+              "actor_id": "home-8",
+              "recipient_id": null,
+              "outcome": "attempt",
+              "x": 63,
+              "y": 61,
+              "end_x": 63,
+              "end_y": 61,
+              "possession_id": 2,
+              "policy_revision": 0
+            },
+            {
+              "sequence": 7,
+              "tick": 8,
+              "period": 1,
+              "type": "pass",
+              "team_id": "away",
+              "actor_id": "away-4",
+              "recipient_id": "away-8",
+              "outcome": "complete",
+              "x": 63,
+              "y": 61,
+              "end_x": 55,
+              "end_y": 21,
+              "possession_id": 2,
+              "policy_revision": 0
+            },
+            {
+              "sequence": 8,
+              "tick": 15,
+              "period": 1,
+              "type": "pass",
+              "team_id": "away",
+              "actor_id": "away-8",
+              "recipient_id": "away-11",
+              "outcome": "incomplete",
+              "x": 55,
+              "y": 21,
+              "end_x": 47,
+              "end_y": 26,
+              "possession_id": 2,
+              "policy_revision": 0
+            },
+            {
+              "sequence": 9,
+              "tick": 15,
+              "period": 1,
+              "type": "turnover",
+              "team_id": "away",
+              "actor_id": "away-8",
+              "recipient_id": null,
+              "outcome": "lost_pass",
+              "x": 47,
+              "y": 26,
+              "end_x": 47,
+              "end_y": 26,
+              "possession_id": 2,
+              "policy_revision": 0
+            },
+            {
+              "sequence": 10,
+              "tick": 15,
+              "period": 1,
+              "type": "interception",
+              "team_id": "home",
+              "actor_id": "home-3",
+              "recipient_id": null,
+              "outcome": "won",
+              "x": 47,
+              "y": 26,
+              "end_x": 47,
+              "end_y": 26,
+              "possession_id": 3,
+              "policy_revision": 0
+            },
+            {
+              "sequence": 11,
+              "tick": 15,
+              "period": 1,
+              "type": "recovery",
+              "team_id": "home",
+              "actor_id": "home-3",
+              "recipient_id": null,
+              "outcome": "controlled",
+              "x": 47,
+              "y": 26,
+              "end_x": 47,
+              "end_y": 26,
+              "possession_id": 3,
+              "policy_revision": 0
+            },
+            {
+              "sequence": 12,
+              "tick": 22,
+              "period": 1,
+              "type": "carry",
+              "team_id": "home",
+              "actor_id": "home-3",
+              "recipient_id": null,
+              "outcome": "complete",
+              "x": 47,
+              "y": 26,
+              "end_x": 55,
+              "end_y": 28,
+              "possession_id": 3,
+              "policy_revision": 0
+            },
+            {
+              "sequence": 13,
+              "tick": 29,
+              "period": 1,
+              "type": "pressure",
+              "team_id": "away",
+              "actor_id": "away-2",
+              "recipient_id": null,
+              "outcome": "attempt",
+              "x": 55,
+              "y": 28,
+              "end_x": 55,
+              "end_y": 28,
+              "possession_id": 3,
+              "policy_revision": 0
+            },
+            {
+              "sequence": 14,
+              "tick": 29,
+              "period": 1,
+              "type": "carry",
+              "team_id": "home",
+              "actor_id": "home-3",
+              "recipient_id": null,
+              "outcome": "complete",
+              "x": 55,
+              "y": 28,
+              "end_x": 63,
+              "end_y": 43,
+              "possession_id": 3,
+              "policy_revision": 0
+            }
+          ],
+          "interventions": []
+        },
+        "state_hash": "ec5448cfc66a419d8630dd3e2a2f06d5ce6099ea722cb83b9c07d9f53c55f8ab"
+      }
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/sandbox/checkpoints/checkpoint-2cfabc2beba7ffef8d7cb6198628a9e64a91adf34d690b4cac5599550a3527b2/restore",
+    "request": {
+      "operation_id": "example-fork",
+      "expected_revision": 2
+    },
+    "response": {
+      "session_id": "runtime-245e83c810efea22115d2af0eff1c17555d4a477cd95241482c07a263ff99fed",
+      "scenario_id": "scenario-6c82255c292b24246ad23e90ca5c2a4f87fde926b124ada3c2f0e92e7646ac59",
+      "tick": 30,
+      "revision": 2,
+      "event_cursor": 14,
+      "lifecycle": "paused",
+      "state_hash": "ec5448cfc66a419d8630dd3e2a2f06d5ce6099ea722cb83b9c07d9f53c55f8ab",
+      "event_hash": "0898b0d67302e8f8aff373e6741e5bb5b8fb540afdb9ddfb15b799a9e1aaf267",
+      "checkpoint_id": null
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/sandbox/sessions/runtime-245e83c810efea22115d2af0eff1c17555d4a477cd95241482c07a263ff99fed/commands",
+    "request": {
+      "operation_id": "example-press",
+      "expected_revision": 2,
+      "kind": "intervene",
+      "team_id": "home",
+      "field": "pressing",
+      "value": 100,
+      "requested_tick": 30
+    },
+    "response": {
+      "session_id": "runtime-245e83c810efea22115d2af0eff1c17555d4a477cd95241482c07a263ff99fed",
+      "scenario_id": "scenario-6c82255c292b24246ad23e90ca5c2a4f87fde926b124ada3c2f0e92e7646ac59",
+      "tick": 30,
+      "revision": 3,
+      "event_cursor": 14,
+      "lifecycle": "paused",
+      "state_hash": "d561ea8a66c98c16f316065e0228346f20e475ce9c32f0dfe302d1dca36d7a83",
+      "event_hash": "0898b0d67302e8f8aff373e6741e5bb5b8fb540afdb9ddfb15b799a9e1aaf267",
+      "checkpoint_id": null
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/sandbox/sessions/runtime-245e83c810efea22115d2af0eff1c17555d4a477cd95241482c07a263ff99fed/commands",
+    "request": {
+      "operation_id": "example-finish",
+      "expected_revision": 3,
+      "kind": "step",
+      "ticks": 90
+    },
+    "response": {
+      "session_id": "runtime-245e83c810efea22115d2af0eff1c17555d4a477cd95241482c07a263ff99fed",
+      "scenario_id": "scenario-6c82255c292b24246ad23e90ca5c2a4f87fde926b124ada3c2f0e92e7646ac59",
+      "tick": 120,
+      "revision": 4,
+      "event_cursor": 53,
+      "lifecycle": "completed",
+      "state_hash": "4879c739ec23fe28565cc590cf4e32092895a435bc08649f8bcbc7e079cc7516",
+      "event_hash": "acda2d84f82740d278b33a637da29ec92a80d9d4d5048c92a30a83d129e0af97",
+      "checkpoint_id": null
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/sandbox/sessions/runtime-245e83c810efea22115d2af0eff1c17555d4a477cd95241482c07a263ff99fed/events?cursor=1&limit=3",
+    "request": null,
+    "response": {
+      "session_id": "runtime-245e83c810efea22115d2af0eff1c17555d4a477cd95241482c07a263ff99fed",
+      "tick": 120,
+      "revision": 4,
+      "event_cursor": 53,
+      "next_cursor": 4,
+      "events": [
+        {
+          "sequence": 2,
+          "tick": 1,
+          "period": 1,
+          "type": "pass",
+          "team_id": "home",
+          "actor_id": "home-11",
+          "recipient_id": "home-2",
+          "outcome": "incomplete",
+          "x": 50,
+          "y": 50,
+          "end_x": 63,
+          "end_y": 61,
+          "possession_id": 1,
+          "policy_revision": 0
+        },
+        {
+          "sequence": 3,
+          "tick": 1,
+          "period": 1,
+          "type": "turnover",
+          "team_id": "home",
+          "actor_id": "home-11",
+          "recipient_id": null,
+          "outcome": "lost_pass",
+          "x": 63,
+          "y": 61,
+          "end_x": 63,
+          "end_y": 61,
+          "possession_id": 1,
+          "policy_revision": 0
+        },
+        {
+          "sequence": 4,
+          "tick": 1,
+          "period": 1,
+          "type": "interception",
+          "team_id": "away",
+          "actor_id": "away-4",
+          "recipient_id": null,
+          "outcome": "won",
+          "x": 63,
+          "y": 61,
+          "end_x": 63,
+          "end_y": 61,
+          "possession_id": 2,
+          "policy_revision": 0
+        }
+      ]
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/sandbox/sessions/runtime-245e83c810efea22115d2af0eff1c17555d4a477cd95241482c07a263ff99fed/manifest",
+    "request": null,
+    "response": "<contents of experiment.json>"
+  },
+  {
+    "method": "POST",
+    "path": "/api/sandbox/verify",
+    "request": "<contents of experiment.json>",
+    "response": {
+      "verified": true,
+      "component": null,
+      "operation_index": null,
+      "expected": null,
+      "actual": null
+    }
+  }
+]

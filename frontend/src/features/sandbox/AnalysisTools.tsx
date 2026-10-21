@@ -3,8 +3,9 @@ import type { Event, Match } from '../../types'
 import { BOOKMARK_KEY, bookmarkTransaction, csvCell, download, readBookmarks } from './analysisStorage'
 import type { Bookmark, Filters } from './analysisStorage'
 
-export function AnalysisTools({ match, events, selected, second, filters, panel, setPanel, select }: {
+export function AnalysisTools({ match, events, selected, second, filters, panel, setPanel, select, runtimeExport }: {
   match: Match; events: Event[]; selected?: Event; second: number; filters: Filters; panel: 'bookmarks' | 'exports';
+  runtimeExport?: (query: URLSearchParams, signal: AbortSignal) => Promise<Response>;
   setPanel: (value: 'bookmarks' | 'exports') => void; select: (event: Event) => void
 }) {
   const [initial] = useState(readBookmarks)
@@ -14,7 +15,7 @@ export function AnalysisTools({ match, events, selected, second, filters, panel,
   const [category, setCategory] = useState('filtered'), [format, setFormat] = useState('json')
   const [busy, setBusy] = useState(false), [confirmReset, setConfirmReset] = useState(false)
   const request = useRef<AbortController | null>(null)
-  const mine = bookmarks.filter(b => b.matchId === match.match_id)
+  const mine = bookmarks.filter(b => b.matchId === match.match_id && (b.source === 'runtime') === Boolean(runtimeExport))
   const existing = mine.find(b => b.eventId === selected?.event_id)
   const authoritative = (b: Bookmark) => events.find(e => e.match_id === b.matchId && e.event_id === b.eventId && e.sequence === b.sequence && e.match_second === b.second)
   useEffect(() => { setNote(existing?.note ?? '') }, [selected?.event_id, match.match_id, existing?.note])
@@ -48,16 +49,16 @@ export function AnalysisTools({ match, events, selected, second, filters, panel,
         const refs = mine.filter(b => b.second <= cutoff && authoritative(b)).sort((a,b) => a.sequence-b.sequence)
         const generatedAt = new Date().toISOString()
         const payload = format === 'json' ? JSON.stringify({ schema_version: 'bookmark-export/1', match_id: match.match_id, replay_cutoff: cutoff,
-          generated_at: generatedAt, note_status: 'unverified analyst notes', provenance: { fixture_seed: match.seed, build_revision: null,
+          generated_at: generatedAt, note_status: 'unverified analyst notes', provenance: { fixture_seed: runtimeExport ? null : match.seed, scenario_seed: runtimeExport ? match.seed : null, build_revision: null,
             engine_manifest: null, source_event_ids: refs.map(b => b.eventId), unavailable: ['build revision', 'engine manifest'] }, data: refs }, null, 2) : '\uFEFF' +
           [['schema_version','match_id','replay_cutoff','generated_at','fixture_seed','event_id','sequence','match_second','note','note_status'], ...refs.map(b =>
-            ['bookmark-export/1', b.matchId, cutoff, generatedAt, match.seed, b.eventId, b.sequence, b.second, b.note, 'unverified analyst note'])].map(row => row.map(csvCell).join(',')).join('\r\n')
+            ['bookmark-export/1', b.matchId, cutoff, generatedAt, runtimeExport ? null : match.seed, b.eventId, b.sequence, b.second, b.note, 'unverified analyst note'])].map(row => row.map(csvCell).join(',')).join('\r\n')
         download(new Blob([payload], { type: format === 'json' ? 'application/json;charset=utf-8' : 'text/csv;charset=utf-8' }), filename)
       } else {
         const params = new URLSearchParams({ category: category === 'filtered' ? 'events' : category, format, at_second: String(cutoff) })
         if (category === 'filtered') { if (filters.team !== 'all') params.set('team_id',filters.team); if (filters.kind !== 'all') params.set('event_type', filters.kind) }
         if (category === 'pass' && selected) params.set('event_id',selected.event_id)
-        const response = await fetch(`/api/matches/${encodeURIComponent(match.match_id)}/analysis-export?${params}`, { signal: controller.signal })
+        const response = await (runtimeExport ? runtimeExport(params, controller.signal) : fetch(`/api/matches/${encodeURIComponent(match.match_id)}/analysis-export?${params}`, { signal: controller.signal }))
         if (!response.ok) throw Error(`Export unavailable (${response.status}); narrow the cutoff/filter or retry.`)
         const blob = await response.blob()
         if (!controller.signal.aborted) download(blob,filename)
@@ -72,15 +73,15 @@ export function AnalysisTools({ match, events, selected, second, filters, panel,
     <p>Selected event: <code>{selected?.event_id ?? 'No recorded event at this cutoff'}</code></p>
     <label>Event note <textarea maxLength={500} value={note} onChange={e => setNote(e.target.value)} disabled={!selected} /></label>
     <small>Up to 500 characters. Notes save when you bookmark or update; they are not verified football claims.</small>
-    <button disabled={!selected} onClick={() => { if (selected) update(items => [...items.filter(b => b.matchId !== match.match_id || b.eventId !== selected.event_id),
-      { matchId: match.match_id, eventId: selected.event_id, sequence: selected.sequence, second: selected.match_second, note }]) }}>{existing ? 'Update bookmark note' : 'Bookmark selected event'}</button>
+    <button disabled={!selected} onClick={() => { if (selected) update(items => [...items.filter(b => b.matchId !== match.match_id || b.eventId !== selected.event_id || (b.source === 'runtime') !== Boolean(runtimeExport)),
+      { matchId: match.match_id, eventId: selected.event_id, sequence: selected.sequence, second: selected.match_second, note, ...(runtimeExport ? {source: 'runtime' as const} : {}) }]) }}>{existing ? 'Update bookmark note' : 'Bookmark selected event'}</button>
     <div className="analysis-tabs"><button aria-pressed={panel === 'bookmarks'} onClick={() => setPanel('bookmarks')}>Saved events ({mine.length})</button><button aria-pressed={panel === 'exports'} onClick={() => setPanel('exports')}>Analysis exports</button></div>
     {panel === 'bookmarks' ? <>
       <label>Search bookmarks <input value={search} maxLength={160} onChange={e => setSearch(e.target.value)} /></label>
       <ul aria-label="Saved event bookmarks">{mine.filter(b => `${b.eventId} ${b.note}`.toLowerCase().includes(search.toLowerCase())).map(b => {
         const event = authoritative(b)
         return <li key={b.eventId}><button disabled={!event} onClick={() => { if(event) select(event) }}>Go to {b.eventId} · {Math.floor(b.second/60)}:{String(b.second%60).padStart(2,'0')}</button>
-          <span>{event ? b.note : 'Source event is missing or changed; navigation unavailable.'}</span><button aria-label={`Remove bookmark ${b.eventId}`} onClick={() => update(items => items.filter(item => item.matchId !== b.matchId || item.eventId !== b.eventId))}>Remove</button></li>
+          <span>{event ? b.note : runtimeExport && b.second > second ? `${b.note} - After the current inspection cutoff; inspect a later tick to navigate.` : 'Source event is missing or changed; navigation unavailable.'}</span><button aria-label={`Remove bookmark ${b.eventId}`} onClick={() => update(items => items.filter(item => item.matchId !== b.matchId || item.eventId !== b.eventId || item.source !== b.source))}>Remove</button></li>
       })}</ul>
       {!mine.length && <p>No saved events for this match.</p>}
       <button onClick={() => setConfirmReset(true)}>Reset all bookmarks</button>
@@ -91,7 +92,8 @@ export function AnalysisTools({ match, events, selected, second, filters, panel,
       <button disabled={busy || category === 'pass' && selected?.type !== 'pass'} onClick={() => void exportData()}>{busy ? 'Preparing export…' : 'Download analysis'}</button>
       <p>Cutoff {Math.floor(second)}s. Events and metrics come from the backend; bookmarks and notes stay browser-local. Missing, changed or future bookmark references are excluded. Empty CSVs contain headers only.</p>
     </div>}
-    <label>Analysis deep link <input readOnly value={link} onFocus={e => e.currentTarget.select()}/></label>
+    {!runtimeExport && <label>Analysis deep link <input readOnly value={link} onFocus={e => e.currentTarget.select()}/></label>}
+    {runtimeExport && <p>Runtime bookmarks require operator access to this branch. Notes remain browser-local; no credential is saved.</p>}
     {notice && <p role="status">{notice}</p>}
   </section>
 }
