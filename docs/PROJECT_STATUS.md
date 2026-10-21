@@ -1,12 +1,49 @@
 # Current project status - 2026-10-21
 
-## Current integration boundary
+## Current implementation and acceptance evidence
 
-Observed main is `0beb08de356a32870d1494d534a75642a23322ed`: engine foundation #40, trace authorization #45 and original graphics/assets #62 are included. PRs #41, #46, #43 and #47 were merged into intermediate feature branches; their merged status alone does not establish main availability.
+Starting main for the Issues #2-#5 sprint was `d1d099ebb75cb912003b3bf99b24e4d67111110a`,
+merged #53, with [passing post-merge CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39617299612).
+Runtime, architecture, private analysis, command security and original graphics
+are integrated there. #52 remains open but its code reached main through #53.
+The completion revision adds saved-scenario provenance/library functionality;
+its merge SHA, exact-head CI and issue dispositions are recorded on the completion
+PR and Issues #2-#5. Resolve the latest main with `git fetch origin` and
+`git rev-parse origin/main`; historical branch SHAs below are not current status.
 
-`integration/runtime-platform-main` forwards the published live Sandbox, architecture and runtime analysis implementations through normal merges. Its original published history already contains Foundry command hardening; the separate main-targeted PR #52 remains the required first security integration. Refreshing against main preserves #62's assets, notices, validator, Vite 7.3.7 and graphics fallback tests. The observer conflict retains both asset status and authenticated runtime evidence loading. No additional feature branch (#54-#61) is absorbed. Review and exact-head CI remain required; this branch is not a claim that main has the live features.
+| Issue | Inspected implementation and completion scope | Acceptance evidence |
+|---|---|---|
+| #2 | Existing component/lifecycle/sequence diagrams, clock/RNG/transaction/observer contracts; current API/model/storage map and ADR corrected for integrated code and archive metadata | Model/OpenAPI, v1 reference/replay, authorization, observer reconnect and migration tests; authorized self-review, not an invented teammate approval |
+| #3 | Existing ScenarioConfig, four presets, hash and RNG reused. Add owner library, scenario-archive/1, atomic runtime schema 3 metadata, verified import/export and real builder save/reload | 50 focused scenario-library cases, including fulltime archive->tactic->persisted events->analysis->manifest journey; four real-browser library cases |
+| #4 | Existing integer-clock engine, bounded jobs, event adapter, ordering, state/score invariants, cancellation and persistence retained | Fulltime same-seed/golden/replay tests, terminal-step rejection and stronger foreign-actor/possession snapshot regressions; 20 fulltime benchmark runs |
+| #5 | Existing six tactical policies retained; away controls and full resolved-policy display/effect notes added | Existing paired ten-seed pressure/tempo tests and five-seed other-policy tests; deterministic interventions, manifests and browser workflow |
 
-Before this main refresh, the forward-integration backend run passed **185 tests** and **42 browser cases**. Those historical counts do not verify the refreshed tree. The existing draft-preservation browser regression now also requires original assets to load and the tactical camera to survive a checkpoint while authenticated pass evidence remains available. Fresh results and exact head SHAs belong in PR #53's review record. Issue #2 still requires shared architecture acceptance; Issue #3 is untouched.
+Fresh local verification of the completion revision: **248 backend tests passed**,
+both independent file verifiers returned `verified: true`, strict TypeScript and
+production build plus **55 Playwright/contract cases passed**. Python dependency
+consistency passed; installed Python closure (29 packages) and npm audit reported
+zero known vulnerabilities. See LIVE_SANDBOX for benchmark commands and measured
+local limits. These local results do not imply a merge or CI run; the completion
+PR records remote results separately.
+
+Self-review A checked identity/default resolution, UTC outside deterministic state,
+idempotence/capacity, schema-1/2/3 backup compatibility, write/migration rollback,
+private analysis and test strength. Self-review B checked owner predicates, raw
+JSON ambiguity/size bounds, no-store responses, credential-free archives/bundles
+and operator disconnect. An uncertain mutation could remain in page memory across
+disconnect: clear pending retry and private builder/archive state, with a regression
+that commits through the real backend before simulating a lost response. Browser
+harness selectors/waits were corrected to address actual controls; the duplicate
+creation assertion still requires exactly one POST, excluding the new list GET.
+No assertion was weakened and no test/golden was skipped or rewritten.
+
+Acceptance for this sprint follows the user's explicit self-review/automated-check
+workflow. Other feature branches, public deployment, real hosted inference,
+physical-GPU performance and a complete security audit are not claimed. Remaining
+model constraints: neutral/dry only, sparse coordinates, no substitutions,
+uncalibrated tactical outcomes, and v1 analysis restricted to 5400-second scenarios.
+Archives are unsigned; old/unrecorded creation times remain null. Runtime schema 3
+requires matching pre-upgrade backups for rollback to older binaries.
 
 ## Historical branch verification
 
