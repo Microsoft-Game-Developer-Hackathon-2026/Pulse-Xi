@@ -121,7 +121,11 @@ test('large bounded ForkCast downloads verify offline without exceeding the onli
   await page.goto('/#/runtime');await page.getByLabel('Operator access token').fill(limitToken)
   await page.getByRole('button',{name:'Connect operator',exact:true}).click()
   await page.getByLabel('Runtime / branch').selectOption(sid)
-  await expect(page.getByRole('table')).toContainText('home / pressures',{timeout:30000})
+  try {
+    await expect(page.getByRole('table')).toContainText('home / pressures',{timeout:30000})
+  } catch (reason) {
+    throw new Error(`${String(reason)}; visible API/UI errors: ${JSON.stringify(await page.getByRole('alert').allTextContents())}; selected runtime: ${await page.getByLabel('Runtime / branch').inputValue()}`)
+  }
   const uploads:string[]=[]
   page.on('request',r=>{if(r.url().endsWith('/api/sandbox/experiments/verify'))uploads.push(r.url())})
   await page.getByRole('button',{name:'Verify experiment independently',exact:true}).click()
