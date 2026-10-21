@@ -129,7 +129,7 @@ def test_native_validation_does_not_weaken_legacy_events(database):
     assert client.get(f'/api/sandbox/sessions/{view.session_id}/analysis?at_second=120',headers=HEADERS).status_code==422
 
 
-def test_private_cutoffs_concurrent_reads_and_stale_mutation(database):
+def test_private_cutoffs_concurrent_reads_and_stale_mutation(database, monkeypatch):
     view = advance(create(120),120)
     sid = view.session_id
     for path in ['analysis?at_second=120','pass-difficulty?at_second=120','analysis-export?at_second=120']:
@@ -147,3 +147,6 @@ def test_private_cutoffs_concurrent_reads_and_stale_mutation(database):
     stale=client.post(f'/api/sandbox/sessions/{sid}/commands',headers=HEADERS,json={
         'operation_id':'stale-native','kind':'step','ticks':1,'expected_revision':0})
     assert stale.status_code==409
+    monkeypatch.setenv('PULSE_RUNTIME_TOKENS', json.dumps({'bob':'other-owner-token-at-least-32-characters'}))
+    assert read(sid,'analysis?at_second=120').status_code==403
+    assert read(sid,'analysis-export?at_second=120').status_code==403
