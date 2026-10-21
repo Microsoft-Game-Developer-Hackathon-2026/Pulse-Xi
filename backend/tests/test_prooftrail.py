@@ -113,3 +113,15 @@ def test_prooftrail_conceals_another_owners_branch_and_baseline(runtime_db, monk
         assert client.get(path, params=params, headers={'Authorization': 'Bearer ' + 'b' * 32}).status_code == 404
         params['baseline_session_id'] = other.session_id
         assert client.get(path, params=params, headers={'Authorization': 'Bearer ' + 'a' * 32}).status_code == 404
+
+
+def test_sandbox_http_routes_have_unique_method_and_path():
+    from app.main import app
+    registered = set()
+    for route in app.routes:
+        if not getattr(route, 'path', '').startswith('/api/sandbox/'):
+            continue
+        for method in getattr(route, 'methods', set()):
+            identity = (method, route.path)
+            assert identity not in registered, identity
+            registered.add(identity)
