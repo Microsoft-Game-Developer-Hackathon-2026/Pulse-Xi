@@ -1,6 +1,10 @@
-# Current project status - 2026-10-20
+# Current project status - 2026-10-21
 
-## Authoritative engine branch
+## Main availability and review gates
+
+Main baseline `4d8a01e5e3483f6a4aafb62cd09def6fcfdd3713` includes engine foundation #40 and trace authorization #45. Live runtime #53, native analysis #57, checkpoint/ForkCast acceptance #59 and runtime Control vs Chaos #58 remain unmerged. #52 command security also awaits review. See the [README availability table](../README.md#availability-on-main-and-review-gated-development). Historical branch counts below are retained as historical evidence, not current main totals.
+
+## Authoritative engine foundation (now on main)
 
 The dedicated engine change adds real scenario configuration, deterministic bounded transitions, durable sessions, revision/idempotency controls, complete checkpoint capture/restore, isolated branches, effective-tick tactics and replayable manifests. See [the actual API and evidence](AUTHORITATIVE_ENGINE.md). Branch verification: 148 backend tests (54 engine cases plus 94 existing) and all 33 browser regression cases pass; strict TypeScript/production build passes. These are branch results, not evidence of a merge or teammate approval. Existing Sandbox UI integration, higher-level ForkCast orchestration/comparison and shared contract review remain open. The asset and preparation PRs are untouched.
 
