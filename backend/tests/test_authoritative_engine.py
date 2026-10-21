@@ -99,8 +99,11 @@ def test_clock_and_batching():
     with pytest.raises(EngineError, match='advance_requires_resume'):
         apply_command(s, command(s, 'advance'))
     s = until(s, 120)
-    with pytest.raises(EngineError, match='terminal_session'):
-        apply_command(s, command(s, 'resume'))
+    for kind in ('resume', 'step', 'advance'):
+        with pytest.raises(EngineError, match='terminal_session'):
+            apply_command(s, command(s, kind))
+    saved_at_fulltime = apply_command(s, command(s, 'checkpoint'))
+    assert saved_at_fulltime.tick == s.tick and saved_at_fulltime.events == s.events
     one = until(make_state(duration=120), 120)
     many = make_state(duration=120)
     while many.tick < 120:
@@ -170,7 +173,7 @@ def test_invalid_tactics(field, value):
         command(make_state(), 'intervene', team_id='home', field=field, value=value, requested_tick=0)
 
 
-@pytest.mark.parametrize('change', ['missing_rng', 'missing_queue', 'missing_stream', 'queue', 'hash', 'version', 'score', 'role'])
+@pytest.mark.parametrize('change', ['missing_rng', 'missing_queue', 'missing_stream', 'queue', 'hash', 'version', 'score', 'role', 'actor_reference', 'possession_reference'])
 def test_corrupt_snapshots(change):
     s = apply_command(make_state(), command(make_state(), 'intervene', team_id='home', field='tempo', value=90, requested_tick=0))
     data = json.loads(canonical(capture_state(s)))
@@ -190,6 +193,12 @@ def test_corrupt_snapshots(change):
         data['state_hash'] = digest(data['state'])
     elif change == 'role':
         data['state']['actors'][0]['role'] = 'FW'
+        data['state_hash'] = digest(data['state'])
+    elif change == 'actor_reference':
+        data['state']['events'][0]['actor_id'] = 'away-1'
+        data['state_hash'] = digest(data['state'])
+    elif change == 'possession_reference':
+        data['state']['possession_actor_id'] = 'not-in-the-roster'
         data['state_hash'] = digest(data['state'])
     else:
         data['engine_version'] = 'future/9'
@@ -452,7 +461,7 @@ def test_atomic_migration_and_concurrent_cold_start(database, monkeypatch):
             return db.execute('PRAGMA user_version').fetchone()[0]
 
     with ThreadPoolExecutor(max_workers=6) as pool:
-        assert list(pool.map(read, range(6))) == [2] * 6
+        assert list(pool.map(read, range(6))) == [3] * 6
 
 
 def test_concurrent_restore_isolated_and_duplicate_creation(database):
