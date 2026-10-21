@@ -14,12 +14,13 @@ export function UnavailableBookmarks() {
       const absent=new Set<string>()
       // At most 200 references, one sequential request per distinct match. An
       // omission from the library does not prove a generated match is missing.
-      for(const id of new Set(saved.items.map(b=>b.matchId))) {
+      // Private runtime sources require operator access in the live Control Room.
+      for(const id of new Set(saved.items.filter(b=>b.source!=='runtime').map(b=>b.matchId))) {
         const response=await fetch(`/api/matches/${encodeURIComponent(id)}`,{signal:controller.signal})
         if(response.status===404)absent.add(id)
         else if(!response.ok)throw new Error('Source availability could not be verified. Notes were retained; retry when the server is available.')
       }
-      if(!controller.signal.aborted){setMissing(saved.items.filter(b=>absent.has(b.matchId)));setNotice('Source check complete. Nothing was removed. Recover missing matches using their saved canonical packages.')}
+      if(!controller.signal.aborted){setMissing(saved.items.filter(b=>b.source!=='runtime'&&absent.has(b.matchId)));setNotice('Source check complete. Nothing was removed. Recover missing matches using their saved canonical packages.')}
     } catch(e) {if(!controller.signal.aborted)setNotice(e instanceof Error?e.message:'Source check failed')}
     finally {if(!controller.signal.aborted)setBusy(false)}
   }
@@ -28,9 +29,9 @@ export function UnavailableBookmarks() {
     const selected=confirm
     await bookmarkTransaction(()=>{
       const latest=readBookmarks();if(latest.notice){setNotice(latest.notice);return}
-      const current=latest.items.find(b=>b.matchId===selected.matchId&&b.eventId===selected.eventId)
+      const current=latest.items.find(b=>b.matchId===selected.matchId&&b.eventId===selected.eventId&&b.source===selected.source)
       if(current && (current.note!==selected.note||current.sequence!==selected.sequence||current.second!==selected.second)){setNotice('The note changed in another tab. Recheck before removing it.');return}
-      try{localStorage.setItem(BOOKMARK_KEY,JSON.stringify({version:1,items:latest.items.filter(b=>b.matchId!==selected.matchId||b.eventId!==selected.eventId)}));window.dispatchEvent(new Event('pulse-xi-bookmarks-changed'));setMissing(items=>items.filter(b=>b.matchId!==selected.matchId||b.eventId!==selected.eventId));setNotice('Selected browser-local reference and note removed by confirmation.')}
+      try{localStorage.setItem(BOOKMARK_KEY,JSON.stringify({version:1,items:latest.items.filter(b=>b.matchId!==selected.matchId||b.eventId!==selected.eventId||b.source!==selected.source)}));window.dispatchEvent(new Event('pulse-xi-bookmarks-changed'));setMissing(items=>items.filter(b=>b.matchId!==selected.matchId||b.eventId!==selected.eventId||b.source!==selected.source));setNotice('Selected browser-local reference and note removed by confirmation.')}
       catch{setNotice('Browser storage unavailable. The note was not removed.')}
     }).catch(()=>setNotice('Bookmark lock unavailable. The note was retained.'))
     setConfirm(null)
