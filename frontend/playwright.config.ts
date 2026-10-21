@@ -16,6 +16,7 @@ export default defineConfig({
     url: 'http://127.0.0.1:8765/health',
     // Each run owns both databases and authorizes only its test importer/operator.
     env: { PULSE_ENABLE_LOCAL_DATA_ADMIN: '1', PULSE_IMPORT_TOKEN: 'test-import-token-at-least-32-characters', PULSE_RUNTIME_TOKEN: 'test-runtime-token-at-least-32-characters', PULSE_RUNTIME_TOKENS: '', PULSE_RUNTIME_DRIVER: '1', PULSE_DB_PATH: join(testDirectory, 'events.sqlite'), PULSE_RUNTIME_DB_PATH: join(testDirectory, 'runtime.sqlite') },
+
     reuseExistingServer: false,
     timeout: 30000,
   },

@@ -1,6 +1,6 @@
 # Event contract v1.0
 
-The new authenticated, durable sandbox runtime has a separate [authoritative engine contract](AUTHORITATIVE_ENGINE.md). It preserves this legacy replay/import contract and uses a separate runtime database.
+The new authenticated, durable sandbox runtime has a separate [authoritative engine contract](AUTHORITATIVE_ENGINE.md). Its verified branch comparisons use the [Sandbox ProofTrail v1 contract](PROOFTRAIL.md). It preserves this legacy replay/import contract and uses a separate runtime database.
 
 Pass difficulty is a separate versioned read-only contract; see [formula, API and limitations](PASS_DIFFICULTY.md). It preserves the event and existing metrics contracts.
 
