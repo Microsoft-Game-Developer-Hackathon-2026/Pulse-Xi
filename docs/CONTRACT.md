@@ -1,5 +1,7 @@
 # Event contract v1.0
 
+The new authenticated, durable sandbox runtime has a separate [authoritative engine contract](AUTHORITATIVE_ENGINE.md). It preserves this legacy replay/import contract and uses a separate runtime database.
+
 Pass difficulty is a separate versioned read-only contract; see [formula, API and limitations](PASS_DIFFICULTY.md). It preserves the event and existing metrics contracts.
 
 The authoritative schema is `backend/app/models.py`; FastAPI serves machine-readable OpenAPI at `/openapi.json`. Every event has a stable `event_id`, a `match_id`, a delivery `sequence`, a logical `match_second`, `period`, `source_type`, `schema_version`, and a UTC generation timestamp. Coordinates are normalized to 0–100 from the attacking team's point of view. Team/player references must belong to the fixture.

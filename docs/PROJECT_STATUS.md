@@ -1,4 +1,8 @@
-# Current project status - 2026-10-18
+# Current project status - 2026-10-20
+
+## Authoritative engine branch
+
+The dedicated engine change adds real scenario configuration, deterministic bounded transitions, durable sessions, revision/idempotency controls, complete checkpoint capture/restore, isolated branches, effective-tick tactics and replayable manifests. See [the actual API and evidence](AUTHORITATIVE_ENGINE.md). Branch verification: 148 backend tests (54 engine cases plus 94 existing) and all 33 browser regression cases pass; strict TypeScript/production build passes. These are branch results, not evidence of a merge or teammate approval. Existing Sandbox UI integration, higher-level ForkCast orchestration/comparison and shared contract review remain open. The asset and preparation PRs are untouched.
 
 ## Integrated product
 
@@ -10,7 +14,7 @@
 
 PR #39 extends #38 with local-only authorized archive/restore/delete, stale-confirmation protection, deletion tombstones, checksummed package recovery, schema-2 migration and trusted offline SQLite backup. Its exact merge state is available on [PR #39](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/39). Satvik explicitly waived the previous Vishwam review gate for #38/#39; no independent human approval is claimed. Normal repository checks remain required.
 
-Current local combined verification: 94 backend tests and 33 mixed browser/contract cases, including real FastAPI/SQLite import, replay, pass analysis, bookmarks, archive/restore, deletion and recovery. Strict TypeScript and production build passed. Final integrated-main results are recorded on the PR after merge; branch results alone do not certify main.
+The earlier lifecycle integration verified 94 backend tests and 33 mixed browser/contract cases, including real FastAPI/SQLite import, replay, pass analysis, bookmarks, archive/restore, deletion and recovery. Strict TypeScript and production build passed. Final integrated-main results are recorded on the PR after merge; branch results alone do not certify main.
 
 See [README](../README.md) and [CONTRACT](CONTRACT.md) for limits, permissions, migrations, packages and backup commands. Browser notes are local references, packages are datasets, and neither is an engine checkpoint. These are public-read synthetic datasets; a shared administrative token is not multi-user ownership isolation.
 
