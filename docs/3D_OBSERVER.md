@@ -35,3 +35,9 @@ Actual headless Chromium/SwiftShader test on Windows 11, Intel64 Family 6 Model 
 Run `npm run test:e2e` in frontend. Tests cover coordinate boundaries, wrong IDs/match, missing positions, future leakage, lazy loading, camera/keyboard operations, quality selection, replay sync, context loss and no-WebGL mobile fallback. CI explicitly enables Chromium's software renderer for repeatable WebGL coverage; that launch flag is test-only.
 
 CI exposed a lifecycle gap when quality switching replaced the canvas before renderer effects attached. Context-loss recovery now captures the event on the stable observer container, including that replacement interval. The existing fast context-loss assertion is retained; no retry or timeout increase conceals the race.
+
+## Recorded-event synchronization (#66)
+
+The replay observer follows the current cutoff and timeline team/type filters. Playback releases a pinned event; seek/step/explicit selection preserve the actual source identity. An unlocated latest event clears prior geometry instead of showing a stale older point.
+
+The source actor is shown only at a valid recorded start. A completed pass may show its identified recipient at the recorded endpoint; this is an event sample, not tracking. For passes, carries and shots, **Recorded ball sample** switches discretely between start and end (falling back to start when no endpoint exists). Other event types do not infer ball position. There is no invented travel duration, intermediate position, speed or continuous motion. Missing positions remain unavailable; 2D/WebGL fallback and demand rendering remain supported. Renderer diagnostics include the actual rendered marker world positions for synchronization checks.
