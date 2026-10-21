@@ -128,6 +128,29 @@ test('missing GLB assets fall back to a working procedural 3D pitch', async ({ p
   await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status', 'procedural')
 })
 
+test('corrupt GLB bytes recover without losing recorded source identity',async ({page})=>{
+  const failures:string[]=[];page.on('pageerror',error=>failures.push(error.message))
+  await page.route('**/assets/field-*.glb',route=>route.fulfill({status:200,contentType:'model/gltf-binary',body:Buffer.from('invalid glTF container')}))
+  await page.goto('/#/sandbox')
+  await page.getByRole('slider',{name:'Seek match time'}).fill('3500')
+  await page.getByRole('button',{name:'3D observer',exact:true}).click()
+  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status','fallback')
+  await expect(page.getByTestId('observer-canvas').locator('canvas')).toBeVisible()
+  const source=await page.getByTestId('observer-snapshot').getAttribute('data-event-id')
+  expect(source).toBeTruthy()
+  await page.getByLabel('SCENE STYLE').selectOption('procedural')
+  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status','procedural')
+  await expect(page.getByTestId('observer-snapshot')).toHaveAttribute('data-event-id',source!)
+  await page.getByRole('button',{name:'2D pitch',exact:true}).click()
+  await expect(page.getByRole('img',{name:/^Pitch position/})).toBeVisible()
+  await page.unroute('**/assets/field-*.glb')
+  await page.getByRole('button',{name:'3D observer',exact:true}).click()
+  await page.getByLabel('SCENE STYLE').selectOption('original')
+  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status','ready')
+  await expect(page.getByTestId('observer-snapshot')).toHaveAttribute('data-event-id',source!)
+  expect(failures).toEqual([])
+})
+
 test('slow asset loading leaves a usable pitch and does not block returning to 2D', async ({ page }) => {
   let release: () => void = () => {}
   const gate = new Promise<void>(resolve => { release = resolve })
