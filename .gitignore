@@ -12,3 +12,5 @@ coverage/
 *.tsbuildinfo
 test-results/
 pytest-cache-files-*/
+
+.local-backups/

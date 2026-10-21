@@ -4,16 +4,17 @@ import os
 import secrets
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
-from fastapi import FastAPI, Header, HTTPException, Query, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
 from .analytics import metrics_at, state_at, tactics_at
 from .agents import TRACES, configured, run_specialists
 from .evidence import insights_for, overlays_for, recap_for
-from .models import Match, MatchEvent
+from .models import EventType, Match, MatchEvent
 from .pass_difficulty import (
     PassDifficulty, PassDifficultyEvidence, PassDifficultyPage, PlayerDifficultyResponse,
     player_summary, score_pass, verify_pass_difficulty,
@@ -21,11 +22,18 @@ from .pass_difficulty import (
 from .simulator import FIXTURES, generate
 from .storage import StorageConflict, imported_match, imported_matches, ingest
 from .security import LocalStaticFiles, RequestBoundary
+from .data_hub import MatchPackage, package_bytes, package_conflict, quality, require_import_token
+from .storage import ingest_package, imported_snapshot
+from .library_lifecycle import (LifecycleAction, change_lifecycle, deletion_record, library_entries,
+                                local_admin_enabled, require_local_admin)
+from .exports import AnalysisExport, analysis_export
+from .sandbox.api import router as sandbox_router
 
 app = FastAPI(title="PULSE XI API", version="0.1.0")
+app.include_router(sandbox_router)
 app.add_middleware(RequestBoundary)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-                   allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
+                   allow_methods=["GET", "POST"], allow_headers=["Content-Type", "Authorization", "X-Pulse-Deletion-ID"])
 DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 if (DIST / "assets").is_dir():
     app.mount("/assets", LocalStaticFiles(directory=DIST / "assets"), name="assets")
@@ -79,6 +87,16 @@ def health():
             "narrative_provider": "configured_not_verified" if configured() else "not_configured"}
 
 
+@app.get('/api/matches/{match_id}/analysis-export', responses={200: {'description': 'Bounded analysis download', 'content': {
+    'application/json': {'schema': AnalysisExport.model_json_schema()}, 'text/csv': {'schema': {'type': 'string'}}}}})
+def export_analysis(match_id: str, at_second: int = Query(ge=0),
+                    category: Literal['events', 'pass', 'metrics'] = 'events',
+                    format: Literal['json', 'csv'] = 'json', team_id: str | None = Query(default=None, max_length=160),
+                    event_type: EventType | None = None, event_id: str | None = Query(default=None, max_length=160)):
+    match, events = get_match(match_id)
+    return analysis_export(match, events, at_second, category, format, team_id, event_type, event_id)
+
+
 @app.get("/api/matches")
 def list_matches():
     return [stored(name)[0] for name in FIXTURES] + imported_matches()
@@ -89,7 +107,7 @@ def create_match(request: GenerateRequest):
     return stored("custom", request.seed)[0]
 
 
-@app.post("/api/matches/ingest")
+@app.post("/api/matches/ingest", dependencies=[Depends(require_import_token)])
 def ingest_match(request: IngestRequest):
     """Idempotent, out-of-order tolerant ingestion of compatible synthetic events."""
     match = request.match
@@ -112,6 +130,79 @@ def ingest_match(request: IngestRequest):
         raise HTTPException(409, str(error)) from error
     except ValueError as error:
         raise HTTPException(422, str(error)) from error
+
+
+@app.get("/api/data-hub")
+def match_library(request: Request):
+    generated = [stored(name) for name in FIXTURES]
+    return {"import_enabled": len(os.getenv("PULSE_IMPORT_TOKEN", "")) >= 32,
+            "local_admin_enabled": local_admin_enabled(request),
+            "limits": {"bytes": 2_000_000, "events": 1000, "imported_matches": 100},
+            "matches": [{"match": match, "origin": "built-in", "quality": quality(match, events), "provenance":None, "lifecycle":None}
+                        for match, events in generated] + library_entries()}
+
+
+def check_package_identity(package: MatchPackage):
+    if package.match.match_id.startswith("custom-") or any(package.match.match_id == f"{name}-{seed}" for name, (seed, _, _) in FIXTURES.items()):
+        raise HTTPException(409, "reserved generated match ID; use a distinct imported match ID")
+
+
+@app.post("/api/data-hub/preview", dependencies=[Depends(require_import_token)])
+def preview_package(package: MatchPackage):
+    check_package_identity(package)
+    try:
+        status = package_conflict(package)
+    except StorageConflict as error:
+        raise HTTPException(409, str(error)) from error
+    deleted = deletion_record(package.match.match_id)
+    return {"match": package.match, "quality": quality(package.match, package.events), "status": "deleted" if deleted else status,
+            "deletion_id": deleted['deletion_id'] if deleted else None,
+            "warnings": ["Imported metadata is user-supplied, not independently authenticated.",
+                         "Only the supplied recorded interval is available; this is not an engine checkpoint."]}
+
+
+@app.post("/api/data-hub/import", dependencies=[Depends(require_import_token)])
+def import_package(package: MatchPackage):
+    check_package_identity(package)
+    try:
+        return ingest_package(package.match, sorted(package.events, key=lambda e: e.sequence), package.provenance)
+    except StorageConflict as error:
+        raise HTTPException(409, str(error)) from error
+
+
+@app.post('/api/data-hub/recover', dependencies=[Depends(require_local_admin)])
+def recover_package(package: MatchPackage, x_pulse_deletion_id: str = Header(pattern=r'^[0-9a-f]{32}$')):
+    check_package_identity(package)
+    try:
+        return ingest_package(package.match, sorted(package.events, key=lambda e:e.sequence), package.provenance, x_pulse_deletion_id)
+    except StorageConflict as error:
+        raise HTTPException(409,str(error)) from error
+
+
+@app.post('/api/data-hub/matches/{match_id}/lifecycle', dependencies=[Depends(require_local_admin)])
+def manage_imported_match(match_id: str, request: LifecycleAction):
+    try:
+        return change_lifecycle(match_id, request)
+    except KeyError as error:
+        raise HTTPException(404,'imported match not found; generated fixtures cannot be modified') from error
+    except StorageConflict as error:
+        raise HTTPException(409,str(error)) from error
+    except ValueError as error:
+        raise HTTPException(422,str(error)) from error
+
+
+@app.get("/api/matches/{match_id}/package")
+def export_match_package(match_id: str):
+    snapshot = imported_snapshot(match_id)
+    match, events, provenance = snapshot if snapshot else (*get_match(match_id),None)
+    from pydantic import ValidationError
+    try:
+        content = package_bytes(match, events, provenance)
+    except (ValidationError, ValueError) as error:
+        raise HTTPException(422, "Stored data is incompatible with the complete package schema; use analysis exports to inspect it") from error
+    return Response(content, media_type="application/json",
+                    headers={"Content-Disposition": 'attachment; filename="pulse-xi-match-package.json"',
+                             "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
 
 
 @app.get("/api/matches/{match_id}", response_model=Match)
@@ -260,7 +351,9 @@ def explain_insight(insight_id: str):
 @app.get("/api/agent-traces")
 def agent_traces(x_admin_token: str | None = Header(default=None)):
     expected = os.getenv("PULSE_FOUNDRY_ADMIN_TOKEN", "")
-    if expected and (not x_admin_token or not secrets.compare_digest(expected, x_admin_token)):
+    if not expected:
+        raise HTTPException(503, "trace administration is not configured")
+    if not x_admin_token or not secrets.compare_digest(expected.encode('utf-8'), x_admin_token.encode('utf-8')):
         raise HTTPException(403, "admin token required")
     return TRACES
 

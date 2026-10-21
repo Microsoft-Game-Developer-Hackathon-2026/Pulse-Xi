@@ -7,6 +7,39 @@ from app.main import app
 from app.security import LocalStaticFiles, RequestBoundary
 
 
+@pytest.mark.parametrize('configured_token', [None, ''])
+def test_trace_reads_fail_closed_without_admin(monkeypatch, configured_token):
+    from app import main
+    if configured_token is None:
+        monkeypatch.delenv('PULSE_FOUNDRY_ADMIN_TOKEN', raising=False)
+    else:
+        monkeypatch.setenv('PULSE_FOUNDRY_ADMIN_TOKEN', configured_token)
+    monkeypatch.setattr(main, 'TRACES', [{'trace_id': 'synthetic-audit-sentinel'}])
+    with TestClient(app) as client:
+        response = client.get('/api/agent-traces')
+    assert response.status_code == 503
+    assert 'synthetic-audit-sentinel' not in response.text
+
+
+def test_trace_reads_require_current_admin_and_hide_retained_records(monkeypatch):
+    from app import main
+    token = 'test-only-foundry-admin-token'
+    records = [{'trace_id': 'synthetic-audit-sentinel'}]
+    monkeypatch.setenv('PULSE_FOUNDRY_ADMIN_TOKEN', token)
+    monkeypatch.setattr(main, 'TRACES', records)
+    with TestClient(app) as client:
+        for headers in ({}, {'X-Admin-Token': 'incorrect'}, {'X-Admin-Token': b'\xff'}):
+            response = client.get('/api/agent-traces', headers=headers)
+            assert response.status_code == 403
+            assert 'synthetic-audit-sentinel' not in response.text
+        response = client.get('/api/agent-traces', headers={'X-Admin-Token': token})
+        assert response.status_code == 200 and response.json() == records
+        monkeypatch.delenv('PULSE_FOUNDRY_ADMIN_TOKEN')
+        response = client.get('/api/agent-traces', headers={'X-Admin-Token': token})
+        assert response.status_code == 503
+        assert 'synthetic-audit-sentinel' not in response.text
+
+
 @pytest.mark.parametrize('path', [r'\\untrusted.invalid\share\file', r'C:\secret', r'\??\UNC\host\share'])
 def test_windows_paths_rejected_before_filesystem_io(tmp_path, monkeypatch, path):
     static = LocalStaticFiles(directory=tmp_path)
