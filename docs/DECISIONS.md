@@ -40,4 +40,4 @@ The blueprint/master prompt express intentions rather than current contracts.
    Provisioned owner tokens protect runtimes; library reads remain public. Public
    accounts/viewer roles/gateway rate limits are release work. Deterministic facts
    precede optional Foundry opinion; provider configuration never proves inference.
-   Trace GET's fail-open default remains a separately tracked defect.
+   The combined validation branch includes #45's fail-closed trace read and #47's byte-safe command authorization; original security review remains required.

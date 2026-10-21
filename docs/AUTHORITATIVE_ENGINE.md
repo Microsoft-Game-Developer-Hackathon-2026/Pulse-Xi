@@ -359,11 +359,12 @@ are public. Browser notes are not authenticated evidence.
 Hosted workflows remain explicit/admin-gated and outside simulation transitions.
 Deterministic facts do not depend on provider prose. `configured_not_verified`
 health is not authenticated inference; fallback is verified_rule_based_templates.
-No paid calls or provisioning occurred here. Trace GET in this architecture/base
-branch fails open if its admin token is absent. Issue #44 was reproduced and a
-separate main-based [PR #45](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/45) supplies fail-closed reads and regression tests;
-it is not part of this architecture diff and must pass its own review. Do not
-claim a completely protected privileged trace boundary or complete security audit.
+No paid calls or provisioning occurred here. The original architecture head had
+a fail-open trace read, corrected by #45. This combined validation checkout includes
+#45 plus #47's byte-safe privileged command check: missing/empty trace configuration
+returns 503; wrong/malformed credentials return 403; removal revokes retained-record
+access. Original PRs retain their own review gates. No public deployment or complete
+security certification is claimed.
 Further review areas: proxy redaction/HTTPS, dependency licensing, validation-error
 echo, filesystem aliases, observer limits/backpressure, shared DB quota exhaustion
 and costly bounded verification. The original architecture head used Vite 7.3.6;

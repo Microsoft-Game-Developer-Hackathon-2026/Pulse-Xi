@@ -1,5 +1,46 @@
 # Current project status - 2026-10-21
 
+## Combined validation only - 2026-10-21
+
+`integration/engine-platform-validation` combines main 50f72e2 with #45, #40,
+#41, #46, #43 and the focused #47 security follow-up using normal merge commits.
+It is not a merge proposal or substitute for the original reviews. Main remains
+unchanged. The only original-stack conflict was PROJECT_STATUS: both architecture
+and analysis sections were preserved. #43 now explicitly targets #46 after adopting
+that baseline; its review remains focused on analysis and the documentation resolution.
+
+Final executable tree: 185 backend tests passed (102.27s), 42 browser/contract
+cases passed (1.2m), strict TypeScript and production build passed. Both file-only
+manifest/experiment verifiers returned verified=true. OpenAPI inspection found
+35 unique Sandbox HTTP operations with operator dependencies and response declarations.
+The suite uses isolated library/runtime databases and exercises real checkpoint/RNG
+continuation, paired trials, mutation retries, owner denial, migration/backup recovery,
+recorded-event analysis, bookmarks, exports, reconnect and 2D/3D fallback.
+
+The command-auth follow-up reproduced HTTP 500 / TypeError for malformed non-ASCII
+credentials before byte-safe comparison. Four regressions now cover rejection,
+authorized dispatch and immediate revocation; provider execution is replaced only
+at the test boundary. No hosted model call was made. PR #47 also pins four compatible
+Python dependency security fixes. The declared requirements resolver and the actual
+installed 28-package project closure were scanned separately; the installed scan
+initially found seven advisory records in four older packages and now finds zero.
+Current npm audit also reports zero. pip check passed. These scans are dated evidence,
+not a guarantee against future advisories or a public deployment/security certification.
+
+PR #42 remains separate: non-mutating merge-tree compatibility inspection found no
+textual conflicts and its additions preserve existing metric/evidence signatures.
+Its feature/security review and any private runtime adapter remain Mahir-owned.
+PRs #32/#33 contain obsolete proposed checkpoint/comparison schemas and isolated
+fixture display preparation; the real state, restore, progress, cancellation,
+comparison and verifier APIs now supersede those contracts. A generic comparison
+presentation may be reusable, but no essential engine capability requires merging
+these old proposals. Recommend closing superseded preparation PRs only after owner
+authorization; no PR was closed and asset review #31 remains independent.
+
+Required incorporation order after genuine reviews: #45 -> #47 (security), then
+#40 -> #41 -> #46 -> #43. No human approval, main merge or deployment is claimed.
+Re-run the complete suite on the actual final main if those PRs are approved/merged.
+
 ## Issue #2 architecture audit
 
 Live browser inspection confirms main 50f72e2, open #40 (224be7c) -> main,
