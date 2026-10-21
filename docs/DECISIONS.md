@@ -1,8 +1,9 @@
 # Architecture decisions
 
-Status: proposed for Issue #2 shared review. Main `0beb08d` includes the engine
-foundation, trace-read protection and original graphics; live runtime/analysis
-integration remains proposed in #53, after separate security integration #52.
+Status: implementation-aligned. Main `d1d099e` integrated #53, including runtime,
+architecture, analysis and command hardening. The Issues #2-#5 completion revision
+adds a scenario archive/metadata layer; its acceptance uses the expressly authorized
+self-review plus reproducible automated checks, without claiming teammate approval.
 [AUTHORITATIVE_ENGINE](AUTHORITATIVE_ENGINE.md) is the shared
 specification/model/API/test map; [LIVE_SANDBOX](LIVE_SANDBOX.md) supplies examples.
 The blueprint/master prompt express intentions rather than current contracts.
@@ -25,15 +26,15 @@ The blueprint/master prompt express intentions rather than current contracts.
    defaults/nulls defines engine hashes; audit UTC is excluded. Identical supported
    build/inputs reproduce. Different command batching can alter state revisions/
    hashes while preserving gameplay. Cross-platform parity needs actual evidence.
-5. **Separate persistence domains.** Library/runtime schema 2 are different files,
+5. **Separate persistence domains.** Library schema 2 and runtime schema 3 are different files,
    transactions, migrations, backup allowlists and rollback paths. Atomic commands
    include state/events/receipt/audit/checkpoint. Job progress commits separately
    and recovers with stable command IDs/CAS. Future versions reject; rollback uses
    matching pre-upgrade backups/builds, not down-migrations.
 6. **Reuse v1 by projection.** Match/MatchEvent remain 1.0. Adapter preserves
    sequence/IDs and mirrors away x; only 5400-second scenarios fit fixed halftime.
-   Private runtime events never silently enter the public library. PR #43's
-   authenticated analytics integration has a separate review/testing gate.
+   Private runtime events never silently enter the public library. Authenticated
+   analytics integration reached main through #53; short scenarios keep the adapter limit.
 7. **Honest observation.** Snapshot replaces state, delta requires cursor agreement,
    gaps recover through authenticated polling/reconnect snapshot. Actor roles/
    stamina and sparse ball/event endpoints exist; continuous tracking/speeds do
@@ -43,4 +44,11 @@ The blueprint/master prompt express intentions rather than current contracts.
    accounts/viewer roles/gateway rate limits are release work. Deterministic facts
    precede optional Foundry opinion; provider configuration never proves inference.
    Trace GET's fail-open default was corrected on main by #45. Command credential
-   hardening retains the separate #52 security review and integration gate.
+   hardening is present on main through #53, even though #52 remains open.
+
+9. **Provenance outside simulation state.** ScenarioConfig/Scenario/core hashes
+   remain unchanged. Runtime schema 3 adds owner-scoped scenario_metadata only;
+   pre-upgrade creation times stay unknown. scenario-archive/1 embeds the existing
+   Scenario plus explicit RNG provenance and creation UTC. Import rebuilds identity;
+   the first stored record wins on identical imports. Timestamps are unsigned
+   provenance, never an input to transitions or a proof of authorship.

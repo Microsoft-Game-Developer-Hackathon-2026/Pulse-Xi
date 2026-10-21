@@ -8,14 +8,13 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 
 ## Application functionality
 
-**Branch boundary:** main at `0beb08d` (inspected 2026-10-21) includes the engine
-foundation #40, trace-read protection #45 and original Blender graphics #62.
-This branch refreshes the proposed live runtime, architecture and private analysis
-integration in [PR #53](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/53).
-Command-credential hardening is already present in this branch's published history;
-[PR #52](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/52)
-must receive its separate security review and integrate first. Live features below
-are not claimed available on main or approved. See the shared
+**Integrated baseline:** main `d1d099e` includes #53's live runtime, architecture,
+private analysis and command-credential hardening, alongside original graphics #62.
+PR #52 remains open, but its code is present through #53; its separate PR state
+does not mean the fix is absent. This revision completes owner-scoped saved-scenario
+listing, versioned archives and creation provenance without changing engine hashes.
+See the [scenario library contract](docs/LIVE_SANDBOX.md#saved-scenario-library-and-archives)
+and shared
 [architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
 
 | Capability | Status and boundary |
@@ -26,7 +25,7 @@ are not claimed available on main or approved. See the shared
 | ProofTrail | Goal/tactical insights with supporting events and deterministic numerical verification |
 | Pass Difficulty | Versioned 0–100 geometry heuristic with inspectable factors and player summaries; not a failure probability; pressure coverage unavailable |
 | Sandbox Lab | Fixture replay plus a separate authenticated live Control Room with server-driven runs, tactical interventions, exact checkpoints, isolated branches and verified paired ForkCast experiments |
-| 3D Observer | Lazy procedural pitch/stadium, five cameras, Low/Medium/High profiles, recorded-event evidence and 2D/WebGL fallback |
+| 3D Observer | Lazy original Blender kit with procedural fallback, five cameras, Low/Medium/High profiles, recorded-event evidence and 2D/WebGL fallback |
 | Broadcast/FanDNA | Timed cue JSON/preview and five recap modes; limited English, Hindi and Spanish templates, not full interface translation |
 | Match Data Hub | Searchable source-labelled library, authorized canonical JSON import, no-write preview, factual data-quality inspection, archive/restore/delete controls and checksummed portable match packages |
 | Persistence | SQLite imported-event persistence and idempotent ingest; built-in/custom fixtures regenerate |
@@ -271,4 +270,4 @@ Local startup/test serving uses an explicit Uvicorn loop factory: Windows Select
 
 ### Authoritative recorded-event analysis
 
-On the engine integration branch, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to existing pass analysis, ProofTrail, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. The current engine projection requires a 5400-second scenario; shortened runs retain native controls. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#existing-analysis-integration) for authenticated routes, cutoff/hash semantics and limitations. These branch features remain subject to the normal stacked PR review; this paragraph does not claim a main-branch merge.
+In the integrated runtime, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to existing pass analysis, ProofTrail, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. The current engine projection requires a 5400-second scenario; shortened runs retain native controls. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#existing-analysis-integration) for authenticated routes, cutoff/hash semantics and limitations. The base runtime/analysis integration reached main through #53; native-period analysis and other open feature PRs are not implied.
