@@ -51,7 +51,7 @@ test('FanDNA changes the actual recap focus at the replay time', async ({ page }
 
 test('FanDNA localizes controls, persists valid preferences, and announces recap updates', async ({ page }) => {
   await page.goto('/')
-  await page.getByLabel('LANGUAGE').selectOption('es')
+  await page.getByLabel('Language').selectOption('es')
   await expect(page.getByRole('link', { name: 'Análisis del partido' })).toBeVisible()
   await page.getByLabel('Vista').selectOption('favorite_team')
   await expect(page.getByLabel('Seguir equipo')).toBeVisible()
