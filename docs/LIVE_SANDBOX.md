@@ -1,6 +1,6 @@
 # Live Sandbox, checkpoints and ForkCast
 
-Main `d1d099e` integrated the real Control Room at
+Main integrated the real Control Room through #53; #64 completed saved scenarios at
 `/#/runtime` and implements the remaining server progression, observer and paired
 experiment contracts. Other feature PRs retain their own scope and review boundaries.
 Existing fixture replay remains at
@@ -137,7 +137,7 @@ ownership, observer, migrations/recovery). `test_scenario_library.py` adds archi
 roundtrip into a fresh DB, key-order/hash/RNG isolation, version/roster/tampering
 rejection, owner lists/capacity, atomic metadata writes/migrations and backup tests.
 `frontend/tests/scenario-library.spec.ts` exercises real save/list/reload, all four
-presets, file import/export, errors and equal event hashes from two fresh sessions.
+presets, file import/export, errors, disconnect isolation, mobile/keyboard use and equal event hashes from two fresh sessions.
 No golden fixture was rewritten.
 
 Run backend pytest, both file verifiers and pip check as documented below. Frontend
