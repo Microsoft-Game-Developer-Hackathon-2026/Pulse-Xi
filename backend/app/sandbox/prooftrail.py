@@ -44,6 +44,8 @@ class SandboxInsight(BaseModel):
     baseline_session_id: str
     checkpoint_id: str
     intervention: Intervention
+    branch_before_window: BranchWindow
+    baseline_before_window: BranchWindow
     branch_window: BranchWindow
     baseline_window: BranchWindow
     metric_deltas_by_team: dict[str, TeamDelta]
@@ -88,6 +90,7 @@ def build_sandbox_insight(
     baseline_manifest: ExperimentManifest,
     intervention_id: str,
     at_tick: int,
+    checkpoint_tick: int,
 ) -> SandboxInsight:
     """Recompute both manifests, prove checkpoint ancestry, then compare equal windows."""
     if branch.session_id == baseline.session_id:
@@ -116,7 +119,7 @@ def build_sandbox_insight(
     if intervention is None or intervention.result not in ('accepted', 'applied'):
         raise EngineError('intervention_not_found', 404)
     effective = intervention.effective_tick
-    if effective <= ancestry_revision_tick(branch_manifest, ancestry.checkpoint_id):
+    if effective <= checkpoint_tick:
         raise EngineError('intervention_not_after_checkpoint', 422)
     if not (effective < at_tick <= branch.tick and at_tick <= baseline.tick):
         raise EngineError('invalid_comparison_window', 422)
@@ -145,6 +148,10 @@ def build_sandbox_insight(
         scenario_id=branch.scenario_id, branch_session_id=branch.session_id,
         baseline_session_id=baseline.session_id, checkpoint_id=ancestry.checkpoint_id,
         intervention=intervention,
+        branch_before_window=BranchWindow(start_tick=before_start, end_tick=effective,
+            metrics_by_team=before_branch, evidence_event_ids=[f'{branch.session_id}-{item}' for item in before_branch_ids]),
+        baseline_before_window=BranchWindow(start_tick=before_start, end_tick=effective,
+            metrics_by_team=before_baseline, evidence_event_ids=[f'{baseline.session_id}-{item}' for item in before_baseline_ids]),
         branch_window=BranchWindow(start_tick=effective, end_tick=at_tick,
             metrics_by_team=after_branch, evidence_event_ids=[f'{branch.session_id}-{item}' for item in after_branch_ids]),
         baseline_window=BranchWindow(start_tick=effective, end_tick=at_tick,
@@ -154,16 +161,3 @@ def build_sandbox_insight(
         interpretation='single-run synthetic engine comparison; association only, not a real-world causal prediction',
         uncertainty='one deterministic trajectory per branch; statistical uncertainty is not estimated',
     )
-
-
-def ancestry_revision_tick(manifest: ExperimentManifest, checkpoint_id: str) -> int:
-    """Return the checkpoint tick from the replay record that proves its snapshot."""
-    for record in manifest.operations:
-        if record.command.kind == 'checkpoint' and 'checkpoint-' + digest([manifest.session_id, record.command.operation_id]) == checkpoint_id:
-            # The operation hash is verified by verify_manifest. The checkpoint's tick is
-            # the state after this operation and is available from the source session prefix.
-            # A checkpoint command does not advance the authoritative clock, so infer it
-            # from the preceding deterministic event frontier only when exact runtime tick
-            # is supplied by the branch's intervention chronology.
-            return record.command.requested_tick or 0
-    return 0
