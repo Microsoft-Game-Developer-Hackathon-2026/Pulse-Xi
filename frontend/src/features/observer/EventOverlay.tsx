@@ -27,10 +27,12 @@ export function EventOverlay({ match, event, snapshot, apiBase, load = read }: {
   }, [key, visible?.event_id, visible?.match_second, match.match_id, apiBase, load])
   if (!visible) return null
   const actor = [match.home, match.away].flatMap(team => team.players).find(player => player.player_id === visible.actor_id)
+  const recipient = [match.home, match.away].flatMap(team => team.players).find(player => player.player_id === snapshot.recipient_id)
   const packet = key && result?.key === key ? result.packet : null
   const point = (value: typeof visible.start) => value ? `${value.x.toFixed(1)}, ${value.y.toFixed(1)}` : 'unavailable'
   return <section className="observer-event-card" aria-label="Selected 3D event evidence" style={{ borderLeftColor: snapshot.color }}>
     <div><small>RECORDED EVENT / {Math.floor(visible.match_second / 60)}:{String(visible.match_second % 60).padStart(2, '0')}</small><strong>{visible.type.toUpperCase()} · {actor?.name ?? snapshot.team_name ?? 'Match official'}</strong><span>{visible.outcome ?? 'Outcome unavailable'} · start ({point(visible.start)}) → end ({point(snapshot.target ? visible.end : null)}) · normalized units</span></div>
+    {snapshot.recipient_position && <span>Recorded completed-pass recipient: {recipient?.name}. White ring marks the selected recorded ball sample.</span>}
     {key && <div data-testid="observer-pass-difficulty" data-event-id={visible.event_id}><small>HEURISTIC PASS DIFFICULTY</small><strong>{packet ? packet.score === null ? 'Unavailable' : `${packet.score}/100` : failedKey === key ? 'Unavailable' : 'Loading…'}</strong><span>Not a failure probability.</span>{packet && !apiBase && <a href={`/api/matches/${encodeURIComponent(match.match_id)}/passes/${encodeURIComponent(visible.event_id)}/difficulty/evidence?at_second=${visible.match_second}`} target="_blank" rel="noreferrer">Inspect verified evidence ↗</a>}</div>}
   </section>
 }
