@@ -14,9 +14,14 @@ export function useStableViewport() {
     reserveViewport()
     window.addEventListener('scroll', reserveViewport, { passive: true })
     window.addEventListener('resize', reserveViewport)
+    // Native scrolling can precede its queued scroll event. Reserve synchronously
+    // before React processes an interaction that can collapse asynchronous panels.
+    const interactions = ['input', 'change', 'click'] as const
+    for (const event of interactions) document.addEventListener(event, reserveViewport, true)
     return () => {
       window.removeEventListener('scroll', reserveViewport)
       window.removeEventListener('resize', reserveViewport)
+      for (const event of interactions) document.removeEventListener(event, reserveViewport, true)
       root.style.minHeight = previous
     }
   }, [])
