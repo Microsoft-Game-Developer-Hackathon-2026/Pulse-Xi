@@ -44,6 +44,7 @@ export function ObserverSwitch({ match, event, atSecond, scope, children, prefer
   const [metrics, setMetrics] = useState<RendererMetrics | null>(null)
   const [assetStyle, setAssetStyle] = useState<'original' | 'procedural'>('original')
   const [asset, setAsset] = useState<AssetStatus>({ status: 'loading' })
+  const assetActivation = useRef(0)
   const started = useRef(0)
   const container = useRef<HTMLElement>(null)
   const snapshot = useMemo(() => eventSnapshot(match, event, atSecond, scope),
@@ -58,11 +59,16 @@ export function ObserverSwitch({ match, event, atSecond, scope, children, prefer
     return () => element?.removeEventListener('webglcontextlost', lost, true)
   }, [fail])
   const report = useCallback((value: RendererMetrics) => setMetrics(prior => ({ ...value, readyMs: prior?.readyMs ?? value.readyMs })), [])
-  const reportAsset = useCallback((value: AssetStatus) => setAsset(prior => ({ ...value, readyMs: prior.readyMs ?? (value.status === 'ready' ? performance.now() - started.current : undefined) })), [])
+  const reportAsset = useCallback((value: AssetStatus) => {
+    const changed = assetActivation.current !== started.current
+    assetActivation.current = started.current
+    setAsset(prior => ({ ...value, readyMs: (changed ? undefined : prior.readyMs) ??
+      (value.status === 'ready' ? performance.now() - started.current : undefined) }))
+  }, [])
   const enable = () => {
     setFailure('')
     if (!supportsWebGL2()) { setFailure('WebGL2 is unavailable. The recorded 2D pitch remains active.'); onViewChange?.('2d'); return }
-    started.current = performance.now(); setMetrics(null); setAsset({ status:'loading' }); setOpen(true); onViewChange?.('3d')
+    started.current = performance.now(); setMetrics(null); setOpen(true); onViewChange?.('3d')
   }
   useEffect(() => { if (preferredQuality) setQuality(preferredQuality) }, [preferredQuality])
   useEffect(() => { if (preferredView === '3d' && !open) enable(); else if (preferredView === '2d') setOpen(false) }, [preferredView])
