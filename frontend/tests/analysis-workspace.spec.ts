@@ -112,6 +112,7 @@ test('saved view and quality restore, seek excludes future export and failed exp
   await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('pulse-xi-workspace-v1')??'{}').view)).toBe('3d')
   await page.goto('/#/sandbox');await page.reload()
   await expect(page.getByLabel('3D QUALITY')).toHaveValue('low')
+  await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status','ready')
   await expect(page.getByTestId('observer-snapshot')).toHaveAttribute('data-event-id',pass.event_id)
   await page.getByRole('button',{name:'2D pitch',exact:true}).click()
   await page.getByRole('slider',{name:'Seek match time'}).fill('0')

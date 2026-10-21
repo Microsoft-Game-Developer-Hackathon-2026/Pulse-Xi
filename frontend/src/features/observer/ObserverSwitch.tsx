@@ -5,6 +5,7 @@ import { eventSnapshot } from './eventSnapshot'
 import { EventOverlay } from './EventOverlay'
 import type { ObserverScope } from './eventSnapshot'
 import type { RendererMetrics } from './SceneCanvas'
+import type { AssetStatus } from './AssetKit'
 import { graphicsProfiles } from './graphicsProfiles'
 import type { CameraPreset, GraphicsQuality } from './graphicsProfiles'
 import './observer.css'
@@ -40,6 +41,9 @@ export function ObserverSwitch({ match, event, atSecond, scope, children, prefer
     window.matchMedia('(prefers-reduced-motion: reduce), (max-width: 700px)').matches ? 'low' : 'standard')
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const [metrics, setMetrics] = useState<RendererMetrics | null>(null)
+  const [assetStyle, setAssetStyle] = useState<'original' | 'procedural'>('original')
+  const [asset, setAsset] = useState<AssetStatus>({ status: 'loading' })
+  const assetActivation = useRef(0)
   const started = useRef(0)
   const container = useRef<HTMLElement>(null)
   const snapshot = useMemo(() => eventSnapshot(match, event, atSecond, scope),
@@ -54,6 +58,12 @@ export function ObserverSwitch({ match, event, atSecond, scope, children, prefer
     return () => element?.removeEventListener('webglcontextlost', lost, true)
   }, [fail])
   const report = useCallback((value: RendererMetrics) => setMetrics(prior => ({ ...value, readyMs: prior?.readyMs ?? value.readyMs })), [])
+  const reportAsset = useCallback((value: AssetStatus) => {
+    const changed = assetActivation.current !== started.current
+    assetActivation.current = started.current
+    setAsset(prior => ({ ...value, readyMs: (changed ? undefined : prior.readyMs) ??
+      (value.status === 'ready' ? performance.now() - started.current : undefined) }))
+  }, [])
   const enable = () => {
     setFailure('')
     if (!supportsWebGL2()) { setFailure('WebGL2 is unavailable. The recorded 2D pitch remains active.'); onViewChange?.('2d'); return }
@@ -67,6 +77,7 @@ export function ObserverSwitch({ match, event, atSecond, scope, children, prefer
     {failure && <p className="observer-notice" role="status">{failure}</p>}
     {!open ? children : <>
       <div className="observer-controls" aria-label="3D camera controls">
+        <label>SCENE STYLE <select value={assetStyle} onChange={event => { setAssetStyle(event.target.value as 'original' | 'procedural'); setAsset({ status: 'loading' }); started.current = performance.now() }}><option value="original">Original Blender kit</option><option value="procedural">Procedural fallback</option></select></label>
         <button aria-pressed={camera === 'broadcast'} onClick={() => setCamera('broadcast')}>Broadcast camera</button>
         <button aria-pressed={camera === 'tactical'} onClick={() => setCamera('tactical')}>Top-down camera</button>
         <button aria-pressed={camera === 'isometric'} onClick={() => setCamera('isometric')}>Isometric camera</button>
@@ -76,8 +87,9 @@ export function ObserverSwitch({ match, event, atSecond, scope, children, prefer
         <label>3D QUALITY <select value={quality} onChange={event => { setQuality(event.target.value as GraphicsQuality); onQualityChange?.(event.target.value as GraphicsQuality) }}>{Object.entries(graphicsProfiles).map(([id, profile]) => <option key={id} value={id}>{profile.label}</option>)}</select></label>
       </div>
       <RenderBoundary key={revision} fail={fail}><Suspense fallback={<><p className="observer-notice" role="status">Loading optional 3D renderer…</p>{children}</>}>
-        <SceneCanvas snapshot={snapshot} reducedMotion={reducedMotion} cameraPreset={camera} resetRevision={revision} quality={quality} fail={fail} report={report} startedAt={started.current}/>
+        <SceneCanvas snapshot={snapshot} reducedMotion={reducedMotion} cameraPreset={camera} resetRevision={revision} quality={quality} fail={fail} report={report} startedAt={started.current} assetStyle={assetStyle} assetStatus={asset.status} reportAsset={reportAsset}/>
       </Suspense></RenderBoundary>
+      <p className="observer-notice" data-testid="asset-status" data-status={assetStyle === 'procedural' ? 'procedural' : asset.status} data-surface-size={JSON.stringify(asset.surfaceSize)}>{assetStyle === 'procedural' ? 'Procedural field selected.' : asset.status === 'ready' ? `Original Blender geometry loaded in ${asset.readyMs?.toFixed(1)} ms.` : asset.status === 'fallback' ? 'Original assets unavailable; procedural geometry remains active.' : 'Loading original assets; procedural pitch remains available.'}</p>
       <EventOverlay match={match} event={event} snapshot={snapshot}/>
       <div className="observer-caption" data-testid="observer-snapshot" data-event-id={snapshot.event_id ?? ''}><span>{snapshot.team_name ? `${snapshot.team_name} attacking frame` : 'Recorded event frame'} · {snapshot.event_type ?? 'no event'} · {Math.floor(atSecond / 60)}:{String(Math.floor(atSecond % 60)).padStart(2, '0')}</span><code>{snapshot.event_id ?? 'No visible source event'}</code></div>
       {snapshot.unavailable_reason && <p className="observer-notice">{snapshot.unavailable_reason}</p>}
