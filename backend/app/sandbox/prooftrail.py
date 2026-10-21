@@ -143,6 +143,8 @@ def build_sandbox_insight(
             for name in fields
         })
 
+    if len(before_branch_ids) + len(after_branch_ids) + len(before_baseline_ids) + len(after_baseline_ids) > 4000:
+        raise EngineError('proof_evidence_limit', 422)
     manifest_hash = digest({'branch': branch_manifest, 'baseline': baseline_manifest})
     return SandboxInsight(
         scenario_id=branch.scenario_id, branch_session_id=branch.session_id,
