@@ -156,3 +156,28 @@ def test_private_cutoffs_concurrent_reads_and_stale_mutation(database, monkeypat
     monkeypatch.setenv('PULSE_RUNTIME_TOKENS', json.dumps({'bob':'other-owner-token-at-least-32-characters'}))
     assert read(sid,'analysis?at_second=120').status_code==403
     assert read(sid,'analysis-export?at_second=120').status_code==403
+
+
+@pytest.mark.parametrize('duration', [60,120,300,600,1800,2700,5400])
+def test_saved_archive_native_analysis_preserves_source(database, duration):
+    saved = client.post('/api/sandbox/scenarios', headers=HEADERS, json={'seed':17,'duration_seconds':duration})
+    assert saved.status_code == 200
+    scenario = saved.json()
+    sid = scenario['scenario_id']
+    path = f'/api/sandbox/scenarios/{sid}/archive'
+    original = client.get(path, headers=HEADERS).json()
+    imported = client.post('/api/sandbox/scenarios/import', headers=HEADERS, json=original)
+    assert imported.status_code == 200, imported.text
+    assert client.get(path,headers=HEADERS).json() == original
+    assert sid in [s['scenario_id'] for s in client.get('/api/sandbox/scenarios',headers=HEADERS).json()]
+    view = storage.create_session('alice',f'archive-native-{duration}',sid)
+    view = advance(view,duration)
+    response = client.get(f'/api/sandbox/sessions/{view.session_id}/analysis', params={'projection':'native','at_second':duration//2},headers=HEADERS)
+    assert response.status_code == 200,response.text
+    packet = response.json()
+    assert packet['scenario_id'] == sid
+    assert packet['clock']['halftime_tick'] == duration//2
+    assert all(e['match_second'] <= duration//2 for e in packet['events'])
+    assert all(e['event_id'].startswith(view.session_id+'-') for e in packet['events'])
+    assert client.get(path,headers=HEADERS).json() == original
+    assert storage.get_runtime('alice',view.session_id).state.scenario.config_hash == scenario['config_hash']
