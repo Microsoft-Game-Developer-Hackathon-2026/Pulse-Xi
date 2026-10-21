@@ -75,8 +75,14 @@ test('complete native windows expose real turning point sources and recover afte
   await page.getByRole('button',{name:'3D observer',exact:true}).click()
   await expect(page.getByTestId('observer-snapshot')).toHaveAttribute('data-event-id',id)
   await page.getByRole('button',{name:'2D pitch',exact:true}).click()
-  await page.route('**/control-chaos?**',route=>route.fulfill({status:503,body:'unavailable'}),{times:1})
+  // Source navigation can leave the preceding 300-second request in flight.
+  // Fail only the requested window, so that request cannot consume the fault.
+  const targetWindow = (url: URL) => url.pathname === `/api/sandbox/sessions/${sid}/control-chaos`
+    && url.searchParams.get('window_seconds') === '600'
+  await page.route(targetWindow,route=>route.fulfill({status:503,body:'unavailable'}),{times:1})
+  const failedWindow = page.waitForResponse(response => targetWindow(new URL(response.url())) && response.status() === 503)
   await panel.getByLabel('Control vs Chaos window').selectOption('600')
+  await failedWindow
   await expect(panel.getByRole('alert')).toContainText('503')
   await panel.getByRole('button',{name:'Retry Control vs Chaos'}).click()
   await expect(panel.getByRole('alert')).toHaveCount(0)
