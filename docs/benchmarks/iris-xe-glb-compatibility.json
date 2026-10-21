@@ -1,0 +1,93 @@
+{
+  "mode": "Headed physical GPU, five-second active orbit; requestAnimationFrame pacing, not GPU timer queries",
+  "commit": "42feb9ea146b392590475ba27116c0a99533b331",
+  "browser": "156.0.8078.4",
+  "viewport": {
+    "width": 1366,
+    "height": 768
+  },
+  "dpr": 1.0000000149011612,
+  "assetReadiness": "Original Blender geometry loaded in 458.8 ms.",
+  "gpu": {
+    "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x0000A7A1) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "vendor": "WebKit"
+  },
+  "profiles": [
+    {
+      "quality": "low",
+      "metrics": "13 draw calls \u00c2\u00b7 5324 triangles \u00c2\u00b7 22 geometries \u00c2\u00b7 1 textures \u00c2\u00b7 first ready 431.7 ms \u00c2\u00b7 frames in 500 ms sample: 30",
+      "heapBytes": 27528633,
+      "activeCamera": {
+        "durationMs": 5008.600000011921,
+        "frames": 299,
+        "fps": 59.697320608411204,
+        "medianFrameMs": 16.699999999999818,
+        "p95FrameMs": 17.099999999999454
+      }
+    },
+    {
+      "quality": "standard",
+      "metrics": "21 draw calls \u00c2\u00b7 18820 triangles \u00c2\u00b7 21 geometries \u00c2\u00b7 2 textures \u00c2\u00b7 first ready 431.7 ms \u00c2\u00b7 frames in 500 ms sample: 0",
+      "heapBytes": 18223493,
+      "activeCamera": {
+        "durationMs": 5005.500000011922,
+        "frames": 299,
+        "fps": 59.73429227835139,
+        "medianFrameMs": 16.69999999999891,
+        "p95FrameMs": 17
+      }
+    },
+    {
+      "quality": "high",
+      "metrics": "30 draw calls \u00c2\u00b7 32484 triangles \u00c2\u00b7 21 geometries \u00c2\u00b7 4 textures \u00c2\u00b7 first ready 431.7 ms \u00c2\u00b7 frames in 500 ms sample: 1",
+      "heapBytes": 17580375,
+      "activeCamera": {
+        "durationMs": 5004.000000023843,
+        "frames": 300,
+        "fps": 59.952038369018894,
+        "medianFrameMs": 16.700000000000728,
+        "p95FrameMs": 17.099999999998545
+      }
+    }
+  ],
+  "requests": {
+    "http://127.0.0.1:8770/assets/SceneCanvas-CdXSxIXY.js": 1,
+    "http://127.0.0.1:8770/assets/field-BUli6m92.glb": 1,
+    "http://127.0.0.1:8770/assets/ball-Co6hkrAX.glb": 1,
+    "http://127.0.0.1:8770/assets/player-marker-Be0iM_eU.glb": 1,
+    "http://127.0.0.1:8770/assets/stadium-C9KVc8zU.glb": 1
+  },
+  "interactionHeap": {
+    "before": 14684173,
+    "after": 21783437,
+    "afterThirtySecondIdle": 15577983,
+    "note": "No forced GC; bounded samples do not establish a leak or its absence."
+  },
+  "finalMetrics": "20 draw calls \u00c2\u00b7 18796 triangles \u00c2\u00b7 20 geometries \u00c2\u00b7 4 textures \u00c2\u00b7 first ready 3995.4 ms \u00c2\u00b7 frames in 500 ms sample: 1",
+  "errors": [],
+  "asset_manifest_sha256": "5339ea3a2d76d159fbf6a9c66e1909fb347d6118252e6bc099c3973663075144",
+  "active_asset_hashes": [
+    {
+      "name": "field-v2",
+      "sha256": "fe8cccc093a6e605290cc661e6e1f29033f84826e83334a0213d1083259d8591",
+      "bytes": 224368
+    },
+    {
+      "name": "stadium-v2",
+      "sha256": "0c7891b7da5ebbcf839e1e3974ad71e32011936e8badb284bcefbec361807f31",
+      "bytes": 714308
+    },
+    {
+      "name": "ball-v2",
+      "sha256": "260909418e1f655506c158540dbefd9f88cc6c7a64e97dfaf830bfaa1fe01996",
+      "bytes": 30736
+    },
+    {
+      "name": "player-marker-v2",
+      "sha256": "697b42348e6373973b3e25c012d7f96e6b705aa197e463bc4f739898c6c24cf2",
+      "bytes": 19672
+    }
+  ],
+  "driver_version": "32.0.101.7088",
+  "os": "Windows 11 10.0.26300"
+}
