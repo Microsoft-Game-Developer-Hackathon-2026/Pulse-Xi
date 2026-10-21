@@ -86,34 +86,7 @@ Whole-database restore rotates dataset generation IDs and deletion nonces in the
 ## Owner-scoped runtime analysis
 
 The engine integration branch exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. Default `projection=legacy` retains the 5400-second contract. Explicit `projection=native` returns `runtime-native-analysis/1` for every supported even engine duration (60..5400), with native period validation and unchanged event identity/ticks. It reuses existing event metrics, pass scoring/verification and export writing. All routes reject future cutoffs and conceal other owners; private runtime data never resolves through public `/api/matches`. See [LIVE_SANDBOX](LIVE_SANDBOX.md#native-period-analysis) for schemas, nullable calendar timestamps, unavailable legacy phase and hash scope. Neither dataset lifecycle nor engine serialization is replaced.
-## Authenticated runtime Control vs Chaos
 
-`GET /api/sandbox/sessions/{session_id}/control-chaos?at_second=N&window_seconds=300`
-requires the existing runtime operator Bearer credential and owner-scoped session.
-Supported windows are 300, 600 and 900 seconds. Negative/future cutoffs and
-unsupported windows return 422; foreign or missing sessions are concealed by 404.
-Successful responses use `Cache-Control: no-store` and schema
-`runtime-control-chaos/1`. No public match lookup or simulation mutation occurs.
-
-The response includes session/branch/scenario IDs, revision, captured authoritative
-tick/cursor, duration and native halftime, inspection cutoff, and state/event
-hashes. `hash_scope` explicitly identifies the captured runtime boundary rather
-than a rewound state at the cutoff. One runtime read supplies that entire boundary.
-`analysis` is the unchanged `control-chaos/1` packet calculated by
-`control_chaos_at` with `control-chaos-formulas/1`; every turning point passes the
-existing independent verifier before delivery. Native event IDs remain
-`session_id-sequence`, including on restored branches.
-
-`current_window_complete` means cutoff >= window duration;
-`comparison_available` means two complete adjacent windows exist. Existing
-interval semantics `(start,end]` are retained, including exclusion of tick-zero
-events. Short sessions expose current observed counts without invented prior
-history, continuous possession or tracking. Runtime datasets stay private and
-separate from imported-match storage.
-
-Runtime Control vs Chaos accepts `projection=native` only (default native for existing clients). Other values return 422; the response identifies `projection: "native"`. The Control Room always sends it explicitly, including 5,400-second sessions. Native projection retains original timestamps and halftime; formulas are unchanged.
-
-The integrated runtime exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. They reuse existing calculations over a committed engine-owned v1 projection, reject future cutoffs and conceal other owners. Private runtime datasets are not resolved through public `/api/matches` routes. Current compatibility is 5400-second scenarios only. See [LIVE_SANDBOX](LIVE_SANDBOX.md#existing-analysis-integration) for every route, local bookmark namespace, export limits and runtime-boundary hash scope. Neither dataset lifecycle nor engine state serialization is replaced.
 
 ## Saved scenarios (runtime schema 3)
 

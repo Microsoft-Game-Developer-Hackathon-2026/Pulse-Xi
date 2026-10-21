@@ -278,21 +278,6 @@ Local startup/test serving uses an explicit Uvicorn loop factory: Windows Select
 
 ### Authoritative recorded-event analysis
 
-On the engine integration branch, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to pass analysis, source evidence, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. Short scenarios use the versioned native projection: actual duration, halftime at `duration_seconds // 2`, unchanged event ticks/periods, event counts, pass geometry/evidence and exports. Goal/activity ProofTrail rules retain their event-derived definitions; legacy match-state phase and continuous tracking remain unavailable. Standard 5400-second analysis retains its legacy behavior. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#native-period-analysis) for contracts and limitations. These branch features remain subject to PR review; this paragraph does not claim a main-branch merge.
-## Authenticated runtime Control vs Chaos
+On this native-analysis branch above merged runtime main aefc046, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to pass analysis, source evidence, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. Short scenarios use the versioned native projection: actual duration, halftime at `duration_seconds // 2`, unchanged event ticks/periods, event counts, pass geometry/evidence and exports. Goal/activity ProofTrail rules retain their event-derived definitions; legacy match-state phase and continuous tracking remain unavailable. Standard 5400-second analysis retains its legacy behavior. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#native-period-analysis) for contracts and limitations. Native analysis remains subject to #57 review; the base runtime and saved-scenario library are already on main.
 
-The authoritative Control Room's recorded-event analysis includes a collapsible
-Control vs Chaos panel. It reuses the recorded-match `control-chaos-formulas/1`
-calculations with native engine seconds, scoped event identities and owner-only
-runtime access. Five-, ten- and fifteen-minute windows are supported. Short
-sessions show partial-window observations; adjacent-window comparisons require
-two complete equal windows. Observed possession IDs do not measure possession
-time, and activity changes are descriptive rather than causal.
-
-Source buttons select actual recorded runtime events in the existing inspector
-and 2D/3D observer. Credentials remain in memory. This dependent implementation
-requires the runtime/native analysis and recorded Control vs Chaos workstreams;
-its presence on a feature branch does not establish integration into `main`.
-
-In the integrated runtime, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to existing pass analysis, ProofTrail, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. The current engine projection requires a 5400-second scenario; shortened runs retain native controls. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#existing-analysis-integration) for authenticated routes, cutoff/hash semantics and limitations. The base runtime/analysis integration reached main through #53; native-period analysis and other open feature PRs are not implied.
 
