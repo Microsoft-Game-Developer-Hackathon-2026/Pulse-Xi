@@ -5,7 +5,7 @@ import secrets
 import sqlite3
 import asyncio
 
-from fastapi import APIRouter, Depends, Header, Query, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, Header, Query, Response, WebSocket, WebSocketDisconnect
 from starlette.concurrency import run_in_threadpool
 from fastapi.routing import APIRoute
 from fastapi.responses import JSONResponse
@@ -22,6 +22,7 @@ from ..models import Match, MatchEvent
 from .control import (Run, RunRequest, Experiment, ExperimentRequest, create_run, create_experiment,
                       cancel_run, cancel_experiment, read, list_runs, list_experiments)
 from .experiments import Comparison, ExperimentBundle, comparison, bundle, verify_bundle
+from .scenario_archive import ScenarioArchive, ScenarioSummary
 
 
 class SessionSummary(Model):
@@ -127,6 +128,31 @@ def get_presets(owner: str = Depends(require_operator)):
 @router.post('/scenarios', response_model=Scenario)
 def create_scenario(config: ScenarioConfig, owner: str = Depends(require_operator)):
     return storage.save_scenario(owner, build_scenario(config))
+
+
+def private_scenario_response(response: Response):
+    response.headers['Cache-Control'] = 'no-store'
+
+
+@router.get('/scenarios', response_model=list[ScenarioSummary], dependencies=[Depends(private_scenario_response)])
+def scenarios(owner: str = Depends(require_operator)):
+    """At most 100 owned scenario summaries, ordered by content-derived ID."""
+    return storage.list_scenarios(owner)
+
+
+@router.post('/scenarios/import', response_model=ScenarioArchive, dependencies=[Depends(private_scenario_response)],
+             responses={400: {'description': 'Ambiguous, nonfinite or excessively nested JSON'},
+                        413: {'description': 'Request body exceeds 2,000,000 bytes'}})
+def import_scenario(request: ScenarioArchive | ScenarioConfig, owner: str = Depends(require_operator)):
+    if isinstance(request, ScenarioConfig):
+        scenario = storage.save_scenario(owner, build_scenario(request))
+        return storage.get_scenario_archive(owner, scenario.scenario_id)
+    return storage.import_scenario(owner, request)
+
+
+@router.get('/scenarios/{scenario_id}/archive', response_model=ScenarioArchive, dependencies=[Depends(private_scenario_response)])
+def scenario_archive(scenario_id: str, owner: str = Depends(require_operator)):
+    return storage.get_scenario_archive(owner, scenario_id)
 
 
 @router.get('/scenarios/{scenario_id}', response_model=Scenario)
