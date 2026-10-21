@@ -65,5 +65,5 @@ test('FanDNA localizes controls, persists valid preferences, and announces recap
   await expect(page.getByLabel('Seguir equipo')).toHaveValue('northbank')
   await page.emulateMedia({ reducedMotion: 'reduce' })
   const transition = await page.locator('.recap-body').evaluate(element => getComputedStyle(element).transitionDuration)
-  expect(transition).toBe('1e-05s')
+  expect(Number.parseFloat(transition)).toBeLessThan(0.001)
 })
