@@ -10,13 +10,25 @@ component/lifecycle/sequence diagrams, model/API ownership/status, store/rollbac
 boundaries, mismatch register and test matrix. [Decisions](DECISIONS.md) replaces
 stale clock/storage statements. No new engine implementation was introduced.
 
-This revision is local, pending verification/publication/review. Python's base
-interpreter execution was denied, blocking pytest and both independent verifiers.
-npm.cmd run test:e2e passed TypeScript then failed Vite configuration resolution
-because esbuild could not read an ancestor directory; browser tests never started.
-Direct TypeScript build passed. New compatibility/observer assertions require a
-successful rerun. Terminal GitHub access is blocked; no push/merge/approval is
-claimed. Historical results below do not re-certify this revision.
+Verification recovered after the restricted execution profile changed: the
+existing Python 3.13.15 .venv and npm.cmd work without dependency or security-policy
+changes. Architecture checkpoint b6a420c passed **171 backend cases**, both
+independent file verifiers, strict TypeScript/production build and **39 Playwright
+cases**. All commands exited 0; no skipped tests. Actual OpenAPI 3.1.0 inspection
+covered 73 schemas and all 30 Sandbox HTTP operations/operator dependencies.
+The publication follow-up changes documentation only. GitHub fetch/auth work.
+Architecture publication uses a narrow PR from feat/issue-2-architecture-alignment
+to feat/live-sandbox-integration, preserving #40/#41/#43 and normal review gates.
+Issue #2 remains open; no merge or teammate approval is claimed.
+
+Issue #44 was reproduced with local synthetic trace records: unset/empty admin
+configuration returned 200, and a malformed credential raised an exception. A
+separate main-based [PR #45](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/45) on fix/44-agent-trace-authorization passed 97 backend and
+33 browser cases; those are separate results, not added to the architecture count.
+Review/integration of that fix is required before exposing privileged traces.
+npm audit reports one high-severity Vite finding on the older lockfile; #43 already
+contains its upgrade. This task preserves dependency versions. Upstream TestClient
+deprecations and the existing optional-renderer chunk warning remain.
 
 ## Authoritative engine branch
 
