@@ -361,7 +361,7 @@ async def agent_run(insight_id: str, x_admin_token: str | None = Header(default=
     if not configured():
         raise HTTPException(503, "Foundry workflow is not configured; verified rule-based narratives remain available")
     expected = os.getenv("PULSE_FOUNDRY_ADMIN_TOKEN", "")
-    if not expected or not x_admin_token or not secrets.compare_digest(expected, x_admin_token):
+    if not expected or not x_admin_token or not secrets.compare_digest(expected.encode('utf-8'), x_admin_token.encode('utf-8')):
         raise HTTPException(403, "admin token required")
     for match, events in [stored(name) for name in FIXTURES] + [imported_match(item.match_id) for item in imported_matches()]:
         insight = next((item for item in insights_for(match, events) if item.insight_id == insight_id), None)
