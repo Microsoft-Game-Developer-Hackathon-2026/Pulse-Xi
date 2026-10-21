@@ -304,4 +304,3 @@ HTTP timings. Backend/browser tests were also running on the laptop, so these
 load-sensitive samples are acceptance evidence, not a controlled benchmark or
 deployment guarantee. The canonical engine is unchanged from runtime base
 `fed64f3`; no performance optimization or budget increase was justified.
-
