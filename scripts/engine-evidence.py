@@ -18,17 +18,19 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.sandbox.engine import apply_command, build_scenario, canonical, capture_state, digest, initial_state, restore_state
 from app.sandbox.models import Command, ScenarioConfig
+from app.sandbox.control import tick_experiment, read as read_job
 
 
 def main():
     output = ROOT / 'docs' / 'examples' / 'sandbox'
     output.mkdir(parents=True, exist_ok=True)
     transcript = []
-    previous = {key: os.environ.get(key) for key in ('PULSE_RUNTIME_TOKEN', 'PULSE_RUNTIME_TOKENS', 'PULSE_RUNTIME_DB_PATH')}
+    previous = {key: os.environ.get(key) for key in ('PULSE_RUNTIME_TOKEN', 'PULSE_RUNTIME_TOKENS', 'PULSE_RUNTIME_DB_PATH', 'PULSE_RUNTIME_DRIVER')}
     try:
         with tempfile.TemporaryDirectory(prefix='pulse-engine-evidence-') as directory:
             os.environ['PULSE_RUNTIME_TOKEN'] = 'temporary-test-operator-token-32-characters'
             os.environ.pop('PULSE_RUNTIME_TOKENS', None)
+            os.environ['PULSE_RUNTIME_DRIVER'] = '0'
             os.environ['PULSE_RUNTIME_DB_PATH'] = str(Path(directory) / 'runtime.sqlite')
             with TestClient(app) as client:
                 def request(method, path, body=None):
@@ -59,6 +61,18 @@ def main():
                 transcript[-1]['request'] = '<contents of experiment.json>'
                 transcript[-2]['response'] = '<contents of experiment.json>'
                 (output / 'journey.json').write_text(json.dumps(transcript, indent=2) + '\n', encoding='utf-8')
+                experiment = request('POST', '/api/sandbox/experiments', {'operation_id': 'example-experiment',
+                    'checkpoint_id': root['checkpoint_id'], 'expected_revision': 2, 'trials': 2, 'horizon': 60,
+                    'baseline': [], 'variation': [{'team_id': 'home', 'field': 'pressing', 'value': 100}]})
+                for _ in range(100):
+                    tick_experiment('operator', experiment['experiment_id'])
+                    if read_job('experiments', 'operator', experiment['experiment_id'])[1].status == 'completed':
+                        break
+                comparison = request('GET', '/api/sandbox/experiments/' + experiment['experiment_id'] + '/comparison')
+                bundle = request('GET', '/api/sandbox/experiments/' + experiment['experiment_id'] + '/manifest')
+                assert request('POST', '/api/sandbox/experiments/verify', bundle)['verified']
+                (output / 'forkcast.json').write_text(canonical(bundle) + '\n', encoding='utf-8')
+                (output / 'comparison.json').write_text(canonical(comparison) + '\n', encoding='utf-8')
     finally:
         for key, value in previous.items():
             if value is None:

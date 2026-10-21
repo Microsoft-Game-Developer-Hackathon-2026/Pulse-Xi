@@ -2,6 +2,7 @@
 import asyncio
 import os
 import secrets
+from contextlib import asynccontextmanager
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
@@ -28,8 +29,22 @@ from .library_lifecycle import (LifecycleAction, change_lifecycle, deletion_reco
                                 local_admin_enabled, require_local_admin)
 from .exports import AnalysisExport, analysis_export
 from .sandbox.api import router as sandbox_router
+from .sandbox.control import driver as sandbox_driver
 
-app = FastAPI(title="PULSE XI API", version="0.1.0")
+@asynccontextmanager
+async def lifespan(app):
+    stop = asyncio.Event()
+    enabled = os.getenv('PULSE_RUNTIME_DRIVER', '1') != '0' and bool(os.getenv('PULSE_RUNTIME_TOKEN') or os.getenv('PULSE_RUNTIME_TOKENS'))
+    task = asyncio.create_task(sandbox_driver(stop)) if enabled else None
+    try:
+        yield
+    finally:
+        stop.set()
+        if task:
+            await task
+
+
+app = FastAPI(title="PULSE XI API", version="0.1.0", lifespan=lifespan)
 app.include_router(sandbox_router)
 app.add_middleware(RequestBoundary)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
@@ -363,7 +378,7 @@ async def agent_run(insight_id: str, x_admin_token: str | None = Header(default=
     if not configured():
         raise HTTPException(503, "Foundry workflow is not configured; verified rule-based narratives remain available")
     expected = os.getenv("PULSE_FOUNDRY_ADMIN_TOKEN", "")
-    if not expected or not x_admin_token or not secrets.compare_digest(expected, x_admin_token):
+    if not expected or not x_admin_token or not secrets.compare_digest(expected.encode('utf-8'), x_admin_token.encode('utf-8')):
         raise HTTPException(403, "admin token required")
     for match, events in [stored(name) for name in FIXTURES] + [imported_match(item.match_id) for item in imported_matches()]:
         insight = next((item for item in insights_for(match, events) if item.insight_id == insight_id), None)

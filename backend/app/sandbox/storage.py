@@ -1,4 +1,4 @@
-"""Dedicated runtime DB, schema 1. Never migrate or reinterpret the data-hub DB.
+"""Dedicated runtime DB, schema 2. Never migrate or reinterpret the data-hub DB.
 
 Every command, appended events, checkpoint and acknowledgment commits together.
 BEGIN IMMEDIATE serializes workers/processes; Python memory is never the authority.
@@ -30,6 +30,13 @@ DDL = (
        payload TEXT NOT NULL, PRIMARY KEY(session_id,fingerprint))''',
 )
 
+CONTROL_DDL = (
+    '''CREATE TABLE runs (id TEXT PRIMARY KEY, owner TEXT NOT NULL, fingerprint TEXT NOT NULL,
+       session_id TEXT NOT NULL REFERENCES sessions(id), generation INTEGER NOT NULL, payload TEXT NOT NULL)''',
+    '''CREATE TABLE experiments (id TEXT PRIMARY KEY, owner TEXT NOT NULL, fingerprint TEXT NOT NULL,
+       generation INTEGER NOT NULL, payload TEXT NOT NULL)''',
+)
+
 
 def runtime_database_path() -> Path:
     path = Path(os.getenv('PULSE_RUNTIME_DB_PATH', str(database_path().with_name('pulse_runtime.sqlite'))))
@@ -53,7 +60,14 @@ def connect():
                     db.execute(statement)
                 db.execute('PRAGMA user_version=1')
             db.commit()
-        if db.execute('PRAGMA user_version').fetchone()[0] != 1:
+        if db.execute('PRAGMA user_version').fetchone()[0] == 1:
+            db.execute('BEGIN IMMEDIATE')
+            if db.execute('PRAGMA user_version').fetchone()[0] == 1:
+                for statement in CONTROL_DDL:
+                    db.execute(statement)
+                db.execute('PRAGMA user_version=2')
+            db.commit()
+        if db.execute('PRAGMA user_version').fetchone()[0] != 2:
             raise RuntimeError('unsupported runtime database version')
         with db:
             yield db
@@ -171,7 +185,10 @@ def mutate(owner: str, session_id: str, command: Command) -> MutationResult:
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
         state, prefix, ancestry = load(db, owner, session_id)
-        fingerprint = digest(command)
+        # Preserve retry fingerprints for schema-1 commands written before the
+        # optional paired-trial field existed.
+        fingerprint = digest({k: v for k, v in command.model_dump(mode='json').items()
+                              if k != 'trial_index' or v is not None})
         existing = db.execute('SELECT fingerprint,ack FROM commands WHERE session_id=? AND operation_id=?',
                               (session_id, command.operation_id)).fetchone()
         if existing:
@@ -244,3 +261,66 @@ def manifest(owner: str, session_id: str) -> ExperimentManifest:
         return ExperimentManifest(session_id=session_id, scenario=state.scenario, ancestry=ancestry, implementation_hash=implementation_hash(),
             operations=records(db, session_id, prefix), interventions=state.interventions,
             event_hashes=[digest(e) for e in state.events], state_hash=digest(state), event_hash=digest(state.events))
+
+
+def list_checkpoints(owner: str, session_id: str) -> list[dict]:
+    with connect() as db:
+        load(db, owner, session_id)
+        result = []
+        for cid, payload in db.execute('SELECT id,payload FROM checkpoints WHERE session_id=? AND owner=? ORDER BY rowid', (session_id, owner)):
+            snapshot = Snapshot.model_validate_json(payload)
+            s = snapshot.state
+            result.append({'checkpoint_id': cid, 'session_id': session_id, 'scenario_id': s.scenario.scenario_id,
+                           'tick': s.tick, 'revision': s.revision, 'event_cursor': s.event_cursor, 'state_hash': snapshot.state_hash})
+        return result
+
+
+def list_sessions(owner: str) -> list[dict]:
+    with connect() as db:
+        return [{'session_id': sid, 'scenario_id': scenario, 'tick': tick, 'revision': revision,
+                 'event_cursor': cursor, 'lifecycle': lifecycle} for sid, scenario, tick, revision, cursor, lifecycle in db.execute(
+            "SELECT id,json_extract(payload,'$.scenario.scenario_id'),json_extract(payload,'$.tick'),"
+            "json_extract(payload,'$.revision'),json_extract(payload,'$.event_cursor'),json_extract(payload,'$.lifecycle') "
+            'FROM sessions WHERE owner=? ORDER BY rowid DESC', (owner,))]
+
+
+def manifest_at(owner: str, session_id: str, revision: int) -> ExperimentManifest:
+    """Reconstruct an immutable committed boundary, even if a branch progressed."""
+    current = manifest(owner, session_id)
+    if revision < 0 or revision > len(current.operations):
+        raise EngineError('revision_not_found', 404)
+    operations = current.operations[:revision]
+    state = initial_state(current.scenario)
+    for record in operations:
+        state = apply_command(state, record.command)
+        if digest(state) != record.state_hash or digest(state.events) != record.event_hash:
+            raise EngineError('history_diverged', 422)
+    return ExperimentManifest(session_id=session_id, scenario=state.scenario, implementation_hash=implementation_hash(),
+        ancestry=[a for a in current.ancestry if a.revision <= revision], operations=operations,
+        interventions=state.interventions, event_hashes=[digest(e) for e in state.events],
+        state_hash=digest(state), event_hash=digest(state.events))
+
+
+def history_at(owner: str, session_id: str, at_tick: int) -> dict:
+    """Read-only seek: nearest owned checkpoint, then actual inputs up to cutoff."""
+    with connect() as db:
+        db.execute('BEGIN')
+        source, prefix, _ = load(db, owner, session_id)
+        if not 0 <= at_tick <= source.tick:
+            raise EngineError('tick_ahead', 409)
+        history = records(db, session_id, prefix)
+        saved = [Snapshot.model_validate_json(r[0]) for r in db.execute(
+            'SELECT payload FROM checkpoints WHERE owner=? AND session_id=?', (owner, session_id))]
+    eligible = [s for s in saved if s.state.tick <= at_tick]
+    nearest = max(eligible, key=lambda s: (s.state.tick, s.state.revision)) if eligible else None
+    state = restore_state(nearest) if nearest else initial_state(source.scenario)
+    for record in history[state.revision:]:
+        command = Command.model_validate(record['command'])
+        if command.kind in ('step', 'advance') and state.tick + command.ticks > at_tick:
+            remaining = at_tick - state.tick
+            if remaining:
+                state = apply_command(state, command.model_copy(update={'ticks': remaining}))
+            break
+        state = apply_command(state, command)
+    return {'session_id': session_id, 'source_revision': source.revision, 'at_tick': at_tick,
+            'read_only': True, 'snapshot': capture_state(state)}
