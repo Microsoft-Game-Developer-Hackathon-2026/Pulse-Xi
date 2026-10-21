@@ -110,13 +110,18 @@ export function AssetKit({ snapshot, lowPower, quality = 'standard', report, mod
   useDisposeMaterials(surface)
   useDisposeMaterials(tinted)
   useEffect(() => { report({ status: lowPower || stadiumReady ? 'ready' : 'loading', surfaceSize }) }, [report, surfaceSize, lowPower, stadiumReady])
+  const recipient = useMemo(() => cloneTeamMarker(player.scene, snapshot.color), [player, snapshot.color])
+  useDisposeMaterials(recipient)
   return <group>
     <primitive object={surface} dispose={null}/>
     {paintOutlines.map((geometry, index) => <lineSegments key={index} geometry={geometry} dispose={null} position={[0, .03, 0]}><lineBasicMaterial color="#dcebd5"/></lineSegments>)}
     {!lowPower && models.stadium && <StadiumKit model={models.stadium} quality={quality} ready={markStadiumReady}/>}
-    {snapshot.origin && <group position={[snapshot.origin[0], .06, snapshot.origin[2]]}>
+    {snapshot.origin && snapshot.actor_id && <group name="recorded-actor" position={[snapshot.origin[0], .06, snapshot.origin[2]]}>
       {!lowPower && snapshot.actor_id ? <primitive object={tinted} dispose={null}/> : <mesh position={[0, .8, 0]}><sphereGeometry args={[1.1, 12, 8]}/><meshStandardMaterial color={snapshot.color}/></mesh>}
     </group>}
-    {snapshot.target && <group position={snapshot.target} scale={2.7}><primitive object={ball.scene} dispose={null}/></group>}
+    {snapshot.recipient_position && <group name="recorded-recipient" position={[snapshot.recipient_position[0], .06, snapshot.recipient_position[2]]}>
+      {lowPower ? <mesh position={[0,.8,0]}><sphereGeometry args={[1.1,12,8]}/><meshStandardMaterial color={snapshot.color}/></mesh> : <primitive object={recipient} dispose={null}/>}
+    </group>}
+    {snapshot.ball && <group name="recorded-ball" position={snapshot.ball} scale={2.7}><primitive object={ball.scene} dispose={null}/></group>}
   </group>
 }
