@@ -16,6 +16,7 @@ from .models import EngineState, ExperimentManifest, Scenario
 from .storage import records
 from .control import Run, Experiment
 from .scenario_archive import ScenarioArchive
+from .checkpoint_metadata import CheckpointMetadata
 
 TABLES = {'scenarios', 'sessions', 'commands', 'runtime_events', 'checkpoints', 'audit'}
 
@@ -23,10 +24,10 @@ TABLES = {'scenarios', 'sessions', 'commands', 'runtime_events', 'checkpoints', 
 def validate_database(db: sqlite3.Connection) -> dict:
     db.execute('PRAGMA trusted_schema=OFF')
     version = db.execute('PRAGMA user_version').fetchone()[0]
-    if version not in (1, 2, 3):
+    if version not in (1, 2, 3, 4):
         raise ValueError('unsupported runtime backup schema')
     objects = db.execute("SELECT type,name FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'").fetchall()
-    allowed = TABLES | ({'runs', 'experiments'} if version >= 2 else set()) | ({'scenario_metadata'} if version >= 3 else set())
+    allowed = TABLES | ({'runs', 'experiments'} if version >= 2 else set()) | ({'scenario_metadata'} if version >= 3 else set()) | ({'checkpoint_metadata'} if version >= 4 else set())
     if ({name for kind, name in objects if kind == 'table'} != allowed
             or any(kind in ('trigger', 'view') for kind, name in objects)):
         raise ValueError('unexpected runtime backup schema objects')
@@ -55,6 +56,11 @@ def validate_database(db: sqlite3.Connection) -> dict:
             raise ValueError('runtime backup event mismatch')
     for payload, in db.execute('SELECT payload FROM checkpoints'):
         restore_state(json.loads(payload))
+    if version >= 4:
+        if db.execute('SELECT COUNT(*) FROM checkpoint_metadata').fetchone()[0] != db.execute('SELECT COUNT(*) FROM checkpoints').fetchone()[0]:
+            raise ValueError('runtime backup checkpoint metadata mismatch')
+        for created, in db.execute('SELECT created_at_utc FROM checkpoint_metadata'):
+            CheckpointMetadata(created_at_utc=created)
     if version >= 3:
         if db.execute('SELECT COUNT(*) FROM scenario_metadata').fetchone()[0] != db.execute('SELECT COUNT(*) FROM scenarios').fetchone()[0]:
             raise ValueError('runtime backup scenario metadata mismatch')

@@ -3,6 +3,7 @@ import argparse
 import json
 import os
 import platform
+import secrets
 import sys
 import tempfile
 import tracemalloc
@@ -80,6 +81,41 @@ with tempfile.TemporaryDirectory(prefix='pulse-runtime-benchmark-') as directory
             assert verify_bundle(bundle(owner,experiment.experiment_id)).verified
             assert storage.get_runtime(owner,root.session_id).state_hash == root.state_hash
         experiments.append({'trials':trials,'horizon':120,'execution_with_tracemalloc':summary(samples),'maximum_traced_python_bytes':max(peaks)})
+    # Exercise real HTTP validation/auth/serialization in-process, without a port.
+    from fastapi.testclient import TestClient
+    from app.main import app
+    token = secrets.token_urlsafe(32)
+    os.environ['PULSE_RUNTIME_TOKENS'] = json.dumps({owner: token})
+    headers = {'Authorization': 'Bearer ' + token}
+    current = storage.create_session(owner, 'control-benchmark', scenario.scenario_id)
+    for index in range(9):
+        current = storage.mutate(owner, current.session_id, Command(operation_id=f'control-advance-{index}',
+            expected_revision=current.revision, kind='step', ticks=300))
+    route = f'/api/sandbox/sessions/{current.session_id}'
+    acknowledgments, applications, verifications = [], [], []
+    with TestClient(app) as client:
+        for index in range(20):
+            response, elapsed = timed(lambda: client.post(route+'/commands', headers=headers, json={
+                'operation_id': f'press-{index}', 'expected_revision': current.revision, 'kind': 'intervene',
+                'requested_tick': current.tick, 'team_id': 'home', 'field': 'pressing', 'value': 100 if index % 2 == 0 else 0}))
+            assert response.status_code == 200, response.text
+            acknowledgments.append(elapsed)
+            revision = response.json()['revision']
+            response, elapsed = timed(lambda: client.post(route+'/commands', headers=headers, json={
+                'operation_id': f'control-tick-{index}', 'expected_revision': revision, 'kind': 'step', 'ticks': 1}))
+            assert response.status_code == 200, response.text
+            applications.append(elapsed)
+            current = storage.get_runtime(owner, current.session_id)
+            assert current.state.interventions[-1].result == 'applied'
+            assert current.state.interventions[-1].effective_tick == current.tick
+        manifest = client.get(route+'/manifest', headers=headers).json()
+        for _ in range(5):
+            response, elapsed = timed(lambda: client.post('/api/sandbox/verify', headers=headers, json=manifest))
+            assert response.status_code == 200 and response.json()['verified'], response.text
+            verifications.append(elapsed)
+    controls = {'method': 'warm TestClient HTTP including auth/validation/serialization; seed7; ticks2700-2720; no network latency guarantee',
+                'intervention_ack': summary(acknowledgments), 'next_tick_request': summary(applications),
+                'manifest_verify': summary(verifications), 'manifest_bytes': len(canonical(manifest).encode('ascii'))}
     print(json.dumps({'python':platform.python_version(),'os':platform.platform(),'processor':platform.processor(),
         'method':'isolated temporary SQLite; in-process storage calls; warm process; not HTTP or deployment latency. Experiment timings include tracemalloc instrumentation; traced allocations are not process RSS.',
-        'checkpoints':checkpoints,'read_only_history_5399':summary(history),'experiments':experiments},indent=2))
+        'controls':controls,'checkpoints':checkpoints,'read_only_history_5399':summary(history),'experiments':experiments},indent=2))
