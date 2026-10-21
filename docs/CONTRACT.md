@@ -99,3 +99,7 @@ record. New private responses use Cache-Control: no-store. See
 [LIVE_SANDBOX](LIVE_SANDBOX.md#saved-scenario-library-and-archives) for schema,
 identity verification, idempotence, errors, migration and rollback details.
 
+
+## Authenticated runtime Control vs Chaos
+
+GET `/api/sandbox/sessions/{id}/control-chaos?at_second=T&window_seconds=300&projection=native` reuses `control-chaos-formulas/1` over one owner-scoped captured native view. Only `projection=native` is accepted (default for older clients); other values return 422. Response `runtime-control-chaos/1` identifies projection, session/branch/scenario, revision, actual duration/halftime, captured tick/cursor/hash scope, window completeness and genuine source evidence. The frontend sends and validates native explicitly for all durations. Private responses use no-store, future cutoffs return 422 and other owners remain concealed. Partial histories never imply two complete windows.
