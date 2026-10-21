@@ -92,3 +92,27 @@ The engine integration branch exposes `runtime-analysis/1` and authenticated pas
 The FanDNA replay controls have typed English, Spanish and Hindi message catalogs. A missing catalog entry falls back to English and the interface announces that fallback. The locale is applied to the main application region for assistive technology. The existing recap API remains a deterministic template over verified goal evidence; localized copy does not alter scores, clocks, insight IDs or supporting event IDs. Persona labels and analyst/broadcaster templates are localized in all three supported locales.
 
 FanDNA preferences use browser-local `pulse-xi-fandna-preferences-v1`, schema version 1. It stores only locale, persona and selected synthetic team/player IDs; invalid or unknown values return to defaults, and favorites are checked against the selected fixture. Storage failure does not block replay. No speech provider, voice cloning, network speech request, or paid Azure Speech feature is enabled; voice requires a separately approved cost and consent design.
+## Authenticated runtime Control vs Chaos
+
+`GET /api/sandbox/sessions/{session_id}/control-chaos?at_second=N&window_seconds=300`
+requires the existing runtime operator Bearer credential and owner-scoped session.
+Supported windows are 300, 600 and 900 seconds. Negative/future cutoffs and
+unsupported windows return 422; foreign or missing sessions are concealed by 404.
+Successful responses use `Cache-Control: no-store` and schema
+`runtime-control-chaos/1`. No public match lookup or simulation mutation occurs.
+
+The response includes session/branch/scenario IDs, revision, captured authoritative
+tick/cursor, duration and native halftime, inspection cutoff, and state/event
+hashes. `hash_scope` explicitly identifies the captured runtime boundary rather
+than a rewound state at the cutoff. One runtime read supplies that entire boundary.
+`analysis` is the unchanged `control-chaos/1` packet calculated by
+`control_chaos_at` with `control-chaos-formulas/1`; every turning point passes the
+existing independent verifier before delivery. Native event IDs remain
+`session_id-sequence`, including on restored branches.
+
+`current_window_complete` means cutoff >= window duration;
+`comparison_available` means two complete adjacent windows exist. Existing
+interval semantics `(start,end]` are retained, including exclusion of tick-zero
+events. Short sessions expose current observed counts without invented prior
+history, continuous possession or tracking. Runtime datasets stay private and
+separate from imported-match storage.

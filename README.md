@@ -8,12 +8,12 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 
 ## Application functionality
 
-**Branch boundary:** current main (`50f72e2`, inspected 2026-10-21) contains fixture
-replay and the Match Data Hub. Live runtime capabilities below are on open PRs
-[#40](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/40)
-and [#41](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/41).
-Private runtime analysis/3D adapters are a separate follow-up, PR #43. These are
-not merged or certified by this audit. See the shared
+**Branch boundary:** main `4d8a01e` (inspected 2026-10-21) contains the
+engine foundation and trace-security correction alongside recorded replay and
+Match Data Hub. Live runtime/ForkCast and analysis forward integration remains
+in #53; native-period analysis is #57. This dependent Control vs Chaos branch
+combines #57 and the recorded algorithms from #42 for integration testing, not
+as evidence of approval or incorporation into main. See the shared
 [architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
 
 | Capability | Status and boundary |
@@ -268,3 +268,17 @@ Local startup/test serving uses an explicit Uvicorn loop factory: Windows Select
 ### Authoritative recorded-event analysis
 
 On the engine integration branch, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to pass analysis, source evidence, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. Short scenarios use the versioned native projection: actual duration, halftime at `duration_seconds // 2`, unchanged event ticks/periods, event counts, pass geometry/evidence and exports. Goal/activity ProofTrail rules retain their event-derived definitions; legacy match-state phase and continuous tracking remain unavailable. Standard 5400-second analysis retains its legacy behavior. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#native-period-analysis) for contracts and limitations. These branch features remain subject to PR review; this paragraph does not claim a main-branch merge.
+## Authenticated runtime Control vs Chaos
+
+The authoritative Control Room's recorded-event analysis includes a collapsible
+Control vs Chaos panel. It reuses the recorded-match `control-chaos-formulas/1`
+calculations with native engine seconds, scoped event identities and owner-only
+runtime access. Five-, ten- and fifteen-minute windows are supported. Short
+sessions show partial-window observations; adjacent-window comparisons require
+two complete equal windows. Observed possession IDs do not measure possession
+time, and activity changes are descriptive rather than causal.
+
+Source buttons select actual recorded runtime events in the existing inspector
+and 2D/3D observer. Credentials remain in memory. This dependent implementation
+requires the runtime/native analysis and recorded Control vs Chaos workstreams;
+its presence on a feature branch does not establish integration into `main`.

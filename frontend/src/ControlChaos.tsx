@@ -44,33 +44,38 @@ function coverage(metric: ControlMetric) {
   return `${metric.eligible_event_count} supporting/eligible events`
 }
 
-export function ControlChaosPanel({ match, atSecond, events, selectEvent }: {
+export function ControlChaosPanel({ match, atSecond, events, selectEvent, load, requestKey = "recorded" }: {
+  load?: (path: string, signal: AbortSignal) => Promise<ControlChaos>
+  requestKey?: string
   match: Match
   atSecond: number
   events: Event[]
   selectEvent: (event: Event) => void
 }) {
   const [windowSeconds, setWindowSeconds] = useState<300 | 600 | 900>(300)
-  const [data, setData] = useState<ControlChaos | null>(null)
+  const [data, setData] = useState<{value: ControlChaos; key: string} | null>(null)
   const [selected, setSelected] = useState<ControlTurningPoint | null>(null)
   const [error, setError] = useState('')
+  const [retry, setRetry] = useState(0)
   const second = Math.floor(atSecond)
+  const boundaryKey = `${requestKey}:${match.match_id}:${second}:${windowSeconds}`
 
   useEffect(() => {
+    setData(null); setSelected(null); setError('')
     const controller = new AbortController()
     const timer = window.setTimeout(() => {
       const params = new URLSearchParams({
         at_second: String(second),
         window_seconds: String(windowSeconds),
       })
-      fetch(`/api/matches/${encodeURIComponent(match.match_id)}/control-chaos?${params}`, { signal: controller.signal })
+      const pending = load ? load(params.toString(), controller.signal) : fetch(`/api/matches/${encodeURIComponent(match.match_id)}/control-chaos?${params}`, { signal: controller.signal })
         .then(response => {
           if (!response.ok) throw new Error(`Control vs Chaos request failed (${response.status})`)
           return response.json() as Promise<ControlChaos>
         })
-        .then(value => {
+      pending.then(value => {
           if (!controller.signal.aborted) {
-            setData(value)
+            setData({value, key: boundaryKey})
             setError('')
             setSelected(current => value.interpretation.turning_points.find(
               point => point.evidence_id === current?.evidence_id,
@@ -82,11 +87,12 @@ export function ControlChaosPanel({ match, atSecond, events, selectEvent }: {
         })
     }, 160)
     return () => { controller.abort(); window.clearTimeout(timer) }
-  }, [match.match_id, second, windowSeconds])
+  }, [match.match_id, second, windowSeconds, load, boundaryKey, retry])
 
-  const visible = data?.match_id === match.match_id && data.at_second === second
-    && data.window.start_second === Math.max(0, second - windowSeconds)
-    && data.formula_version === 'control-chaos-formulas/1' ? data : null
+  const packet = data?.key === boundaryKey ? data.value : null
+  const visible = packet?.match_id === match.match_id && packet.at_second === second
+    && packet.window.start_second === Math.max(0, second - windowSeconds)
+    && packet.formula_version === 'control-chaos-formulas/1' ? packet : null
   const activityDelta = (teamId: string) => visible?.deltas?.[teamId]?.['attacking_activity.activity_index']
   const maxActivity = Math.max(1, ...[match.home.team_id, match.away.team_id].flatMap(teamId => {
     const delta = activityDelta(teamId)
@@ -122,9 +128,10 @@ export function ControlChaosPanel({ match, atSecond, events, selectEvent }: {
         ? `PREVIOUS ${clock(visible.previous_window.start_second)}–${clock(visible.previous_window.end_second)}`
         : 'PREVIOUS WINDOW UNAVAILABLE · NEED TWO COMPLETE WINDOWS'}</span>
     </div>
-    {error && <p className="control-error" role="alert">{error}</p>}
+    {error && <p className="control-error" role="alert">{error} <button onClick={() => setRetry(n => n + 1)}>Retry Control vs Chaos</button></p>}
     {!visible && !error && <p className="control-empty" role="status">Calculating event windows at the selected replay time…</p>}
     {visible && <>
+      <p role="status">{second < windowSeconds ? "Partial current window: observed events only; no complete-window comparison." : "Complete current window."}</p>
       <div className="control-definitions">
         <p>Observed possession IDs are not possession time. Progression is completed, located horizontal movement in normalized pitch units. Pressure, recoveries, turnovers, shots and activity points stay separate.</p>
         <details>
