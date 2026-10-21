@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { clock, download, newId, request, root, RuntimeError } from './api'
-import type { Audit, Checkpoint, Comparison, Config, Evidence, Experiment, Metric, NativeEvent, Receipt, Run, Session, Tactics, View } from './api'
+import { clock, download, importScenario, newId, request, root, RuntimeError } from './api'
+import type { Audit, Checkpoint, Comparison, Config, Evidence, Experiment, Metric, NativeEvent, Receipt, Run, Scenario, ScenarioArchive, ScenarioSummary, Session, Tactics, View } from './api'
 import './runtime.css'
 import { RuntimeAnalysis } from './RuntimeAnalysis'
 
@@ -23,6 +23,9 @@ export function RuntimeRoom() {
   const [presets, setPresets] = useState<Record<string, Config>>({})
   const [config, setConfig] = useState<Config | null>(null)
   const [configJson, setConfigJson] = useState('')
+  const [savedScenarios, setSavedScenarios] = useState<ScenarioSummary[]>([])
+  const [savedScenarioId, setSavedScenarioId] = useState('')
+  const [archive, setArchive] = useState<ScenarioArchive | null>(null)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [transport, setTransport] = useState('Connecting')
@@ -186,8 +189,9 @@ export function RuntimeRoom() {
     event.preventDefault()
     await perform(async () => {
       await request(credential, '/versions')
-      const [items, scenarios] = await Promise.all([request<Session[]>(credential, '/sessions'), request<Record<string, Config>>(credential, '/presets')])
+      const [items, scenarios, savedScenarios] = await Promise.all([request<Session[]>(credential, '/sessions'), request<Record<string, Config>>(credential, '/presets'), request<ScenarioSummary[]>(credential, '/scenarios')])
       setToken(credential); setCredential(''); setPresets(scenarios); setConfig(scenarios.balanced); setSessions(items)
+      setSavedScenarios(savedScenarios); setSavedScenarioId(''); setArchive(null); setConfigJson('')
       let saved = ''; try { saved = sessionStorage.getItem('pulse-runtime-session') ?? '' } catch { /* Optional. */ }
       const selected = items.find(s => s.session_id === saved) ?? items[0]
       if (selected) selectSession(selected.session_id)
@@ -199,6 +203,18 @@ export function RuntimeRoom() {
     if (!view) return
     await post<Receipt>(`/sessions/${view.session_id}/commands`, { operation_id: newId(), expected_revision: view.revision, kind, ...extra }, 'command')
     await refresh()
+  }
+
+  async function loadScenario(id: string) {
+    const saved = await request<ScenarioArchive>(token, `/scenarios/${id}/archive`)
+    setArchive(saved); setSavedScenarioId(id); setConfig(structuredClone(saved.scenario.config))
+    setSavedScenarios(await request<ScenarioSummary[]>(token, '/scenarios'))
+  }
+
+  async function saveScenario() {
+    const saved = await post<Scenario>('/scenarios', config)
+    await loadScenario(saved.scenario_id)
+    return saved
   }
 
   const state = view?.state
@@ -222,9 +238,9 @@ export function RuntimeRoom() {
   return <section className="runtime-room" aria-label="Authoritative Control Room">
     <div className="runtime-heading"><div><span className="section-index">AUTHORITATIVE SANDBOX / ENGINE CONTROL ROOM</span><h2>Change the tactics.<br/><em>Test the consequences.</em></h2><p>Fictional football. One server clock. Every branch can be replayed and verified.</p></div><a href="#/sandbox">Open recorded fixture workspace</a></div>
     {!token ? <form className="panel runtime-auth" onSubmit={connect} aria-busy={busy}><h3>Operator access</h3><p>Use your provisioned runtime operator token. It is never saved in browser storage or included in exports.</p><label>Operator access token<input type="password" autoComplete="off" value={credential} onChange={e => setCredential(e.target.value)} required minLength={32} disabled={busy}/></label><button disabled={busy}>{busy ? 'Connecting…' : 'Connect operator'}</button></form> : <>
-      <div className="runtime-toolbar"><span>{transport}</span><button disabled={busy} onClick={() => void perform(() => refresh())}>Refresh authoritative state</button><button disabled={busy} onClick={() => { epoch.current++; setToken(''); setCredential(''); setView(null); setSessionId(''); sessionRef.current = ''; setNotice('Disconnected. Accepted server runs continue until paused, completed or cancelled.'); }}>Disconnect operator</button></div>
+      <div className="runtime-toolbar"><span>{transport}</span><button disabled={busy} onClick={() => void perform(() => refresh())}>Refresh authoritative state</button><button disabled={busy} onClick={() => { epoch.current++; setToken(''); setCredential(''); setView(null); setSessionId(''); sessionRef.current = ''; setSavedScenarios([]); setSavedScenarioId(''); setArchive(null); setConfig(null); setConfigJson(''); retry.current = null; setRetryAvailable(false); setNotice('Disconnected. Accepted server runs continue until paused, completed or cancelled.'); }}>Disconnect operator</button></div>
       <details className="panel runtime-setup" open={!view}><summary>Scenario builder</summary>{config && <form onSubmit={event => { event.preventDefault(); void perform(async () => {
-        const scenario = await post<{ scenario_id: string }>('/scenarios', config)
+        const scenario = await saveScenario()
         const created = await post<Receipt>('/sessions', { operation_id: newId(), scenario_id: scenario.scenario_id }, 'session')
         setSessions(await request<Session[]>(token, '/sessions')); selectSession(created.session_id); setNotice('A new paused engine session is ready at kickoff.')
       }) }} aria-busy={busy}><div className="runtime-form-grid">
@@ -235,13 +251,23 @@ export function RuntimeRoom() {
         <label>Away team name<input required maxLength={80} value={config.away.name} disabled={busy} onChange={e => setConfig({ ...config, away: { ...config.away, name: e.target.value } })}/></label>
         <label>Initial home formation<select value={config.home.tactics.formation} disabled={busy} onChange={e => setConfig({ ...config, home: { ...config.home, tactics: { ...config.home.tactics, formation: e.target.value as Tactics['formation'] } } })}>{formations.map(f => <option key={f}>{f}</option>)}</select></label>
         {fields.map(f => <label key={f}>Initial home {f}<input type="number" min={0} max={100} required disabled={busy} value={config.home.tactics[f]} onChange={e => setConfig({ ...config, home: { ...config.home, tactics: { ...config.home.tactics, [f]: e.target.valueAsNumber } } })}/></label>)}
-      </div><button disabled={busy}>Create authoritative scenario</button><button type="button" disabled={busy} onClick={() => download(config, 'pulse-scenario.json')}>Download scenario JSON</button>
+        <label>Initial away formation<select value={config.away.tactics.formation} disabled={busy} onChange={e => setConfig({ ...config, away: { ...config.away, tactics: { ...config.away.tactics, formation: e.target.value as Tactics['formation'] } } })}>{formations.map(f => <option key={f}>{f}</option>)}</select></label>
+        {fields.map(f => <label key={f}>Initial away {f}<input type="number" min={0} max={100} required disabled={busy} value={config.away.tactics[f]} onChange={e => setConfig({ ...config, away: { ...config.away, tactics: { ...config.away.tactics, [f]: e.target.valueAsNumber } } })}/></label>)}
+      </div><p>Only neutral/dry conditions are modeled. Tempo controls decision spacing; server progression rate controls execution, not football outcomes. All names must describe fictional teams and players.</p>
+      <button disabled={busy}>Create authoritative scenario</button>
+      <button type="button" disabled={busy} onClick={() => void perform(async () => { await saveScenario(); setNotice('Scenario saved without creating a runtime session.') })}>Save scenario</button>
+      <label>Saved scenario<select value={savedScenarioId} disabled={busy} onChange={e => setSavedScenarioId(e.target.value)}><option value="">Select a saved scenario</option>{savedScenarios.map(s => <option key={s.scenario_id} value={s.scenario_id}>{s.preset} · seed {s.seed} · {s.scenario_id.slice(-12)}</option>)}</select></label>
+      <button type="button" disabled={busy || !savedScenarioId} onClick={() => void perform(async () => { await loadScenario(savedScenarioId); setNotice('Saved scenario loaded into the builder.') })}>Load saved scenario</button>
+      <button type="button" disabled={busy || !archive} onClick={() => void perform(async () => {
+        if (!archive) return
+        const saved = await request<ScenarioArchive>(token, `/scenarios/${archive.scenario.scenario_id}/archive`)
+        download(saved, 'pulse-scenario.json')
+      })}>Download scenario JSON</button>
+      {archive && <section aria-label="Saved scenario provenance"><p>Export uses this saved record; save edited builder values before exporting them.</p><dl><dt>Scenario ID</dt><dd>{archive.scenario.scenario_id}</dd><dt>Configuration hash</dt><dd>{archive.scenario.config_hash}</dd><dt>Preset / seed</dt><dd>{archive.scenario.config.preset} / {archive.scenario.config.seed}</dd><dt>Creation UTC</dt><dd>{archive.created_at_utc ?? 'Unknown (timestamp not recorded)'}</dd><dt>Engine / schema</dt><dd>{archive.scenario.config.engine_version} / {archive.scenario.config.schema_version}</dd><dt>RNG</dt><dd>{archive.rng_algorithm} · {archive.rng_streams.join(', ')} · {archive.rng_derivation}</dd></dl><details><summary>Resolved saved configuration</summary><pre>{JSON.stringify(archive.scenario.config, null, 2)}</pre></details></section>}
       <details><summary>Custom rosters and JSON import</summary><p>Edit a complete scenario to configure each fictional player's passing, finishing and defending. The server validates all rosters and values.</p><textarea aria-label="Scenario configuration JSON" value={configJson} onChange={e => setConfigJson(e.target.value)} rows={6}/><button type="button" disabled={busy} onClick={() => void perform(async () => {
-        if (configJson.length > 2000000) throw new Error('Scenario exceeds 2 MB.')
-        const parsed: unknown = JSON.parse(configJson)
-        const resolved = await post<{ config: Config }>('/scenarios', parsed)
-        setConfig(resolved.config); setNotice('Scenario validated and saved. Create a session to run it.')
-      })}>Validate and load scenario JSON</button></details></form>}</details>
+        const saved = await importScenario(token, configJson)
+        await loadScenario(saved.scenario.scenario_id); setNotice('Scenario validated and saved. Create a session to run it.')
+      })}>Validate and load scenario JSON</button><button type="button" disabled={busy} onClick={() => setConfigJson(JSON.stringify(config, null, 2))}>Copy builder into JSON editor</button><label>Import scenario file<input type="file" accept=".json,application/json" disabled={busy} onChange={event => { const file = event.target.files?.[0]; if (file) void perform(async () => { if (file.size > 2_000_000) throw new Error('Scenario exceeds 2 MB.'); setConfigJson(await file.text()); setNotice('File loaded. Validate and load scenario JSON to save it.') }); event.target.value = '' }}/></label></details></form>}</details>
       <label className="runtime-session">Runtime / branch<select value={sessionId} disabled={busy} onChange={e => selectSession(e.target.value)}><option value="">Select a runtime</option>{sessions.map(s => <option key={s.session_id} value={s.session_id}>{s.session_id.slice(-12)} · {clock(s.tick)} · {s.lifecycle}</option>)}</select></label>
       {view && state ? <>
         <section className="panel runtime-score" aria-label="Authoritative match state"><strong>{state.scenario.config.home.name}</strong><div><span className="runtime-status">{state.lifecycle.toUpperCase()}</span><b>{state.score[state.scenario.config.home.team_id]} : {state.score[state.scenario.config.away.team_id]}</b><output aria-label="Authoritative match clock">{clock(view.tick)}</output><small>Revision {view.revision} · Event cursor {view.event_cursor}</small></div><strong>{state.scenario.config.away.name}</strong></section>
@@ -262,7 +288,7 @@ export function RuntimeRoom() {
             <label>Tactical field<select value={field} onChange={e => { setField(e.target.value); setValue(e.target.value === 'formation' ? '3-5-2' : '100') }}>{['formation', ...fields].map(f => <option key={f}>{f}</option>)}</select></label>
             <label>New tactical value{field === 'formation' ? <select value={value} onChange={e => setValue(e.target.value)}>{formations.map(f => <option key={f}>{f}</option>)}</select> : <input type="number" min={0} max={100} required value={value} onChange={e => setValue(e.target.value)}/>}</label>
             <button disabled={busy || !paused}>Apply future tactic</button><p>Pause before editing. Accepted changes take effect at the next engine tick.</p>
-          </form><div className="runtime-policies">{Object.entries(state.tactics).map(([id, t]) => <p key={id}><b>{id}</b> · {t.formation} · press {t.pressing} · tempo {t.tempo} · risk {t.risk}</p>)}</div>{state.pending.filter(p => p.kind === 'tactic').map((p, i) => <p key={i} role="status">Pending {p.field} = {p.value} at {clock(p.tick)}</p>)}</section>
+          </form><p>Formation assigns roles and selection weights. Pressing controls pressure attempts; compactness reduces opposing pass completion. Directness increases forward gains; tempo shortens decision intervals; risk raises shot selection and reduces pass completion. These are synthetic thresholds, not football predictions. Substitutions are not implemented.</p><div className="runtime-policies">{Object.entries(state.tactics).map(([id, t]) => <p key={id}><b>{id}</b> · {t.formation} · press {t.pressing} · compact {t.compactness} · direct {t.directness} · tempo {t.tempo} · risk {t.risk}</p>)}</div>{state.pending.filter(p => p.kind === 'tactic').map((p, i) => <p key={i} role="status">Pending {p.field} = {p.value} at {clock(p.tick)}</p>)}</section>
           <section className="panel runtime-checkpoints"><h3>Exact checkpoints</h3><button disabled={busy || !paused} onClick={() => void perform(() => send('checkpoint'))}>Save exact checkpoint</button><label>Saved checkpoint<select value={checkpointId} onChange={e => setCheckpointId(e.target.value)}><option value="">Select checkpoint</option>{checkpoints.map(c => <option key={c.checkpoint_id} value={c.checkpoint_id}>{clock(c.tick)} · revision {c.revision}</option>)}</select></label><button disabled={busy || !checkpoint || running} onClick={() => void perform(async () => {
             if (!checkpoint) return
             const branch = await post<Receipt>(`/checkpoints/${checkpoint.checkpoint_id}/restore`, { operation_id: newId(), expected_revision: checkpoint.revision }, 'session')
