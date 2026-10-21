@@ -8,6 +8,7 @@ import { SandboxSetup } from './features/sandbox/SandboxSetup'
 import { EventTimeline } from './features/sandbox/EventTimeline'
 import { ObserverSwitch } from './features/observer/ObserverSwitch'
 import { AnalysisTools } from './features/sandbox/AnalysisTools'
+import { SandboxProofTrail } from './features/sandbox/ProofTrail'
 import { readWorkspace, deepWorkspace, WORKSPACE_KEY } from './features/sandbox/analysisStorage'
 import type { Workspace, Filters } from './features/sandbox/analysisStorage'
 import './features/sandbox/analysis.css'
@@ -285,7 +286,7 @@ export default function App() {
       }}>Confirm reset workspace</button><button onClick={() => setResetWorkspacePending(false)}>Cancel workspace reset</button></span>}{storageConflict && <><button onClick={() => location.reload()}>Reload saved workspace</button><button onClick={() => { setStorageConflict(false); setWorkspaceNotice('This tab will save its current analysis workspace.') }}>Keep this tab</button></>}</div>}
       {workspace === 'data' && <MatchDataHub open={value => { generated(value); window.location.hash = '/sandbox' }}/> }
       <div hidden={workspace === 'data'}>
-      {workspace === 'sandbox' && match && <SandboxSetup match={match} onGenerated={generated}/>}
+      {workspace === 'sandbox' && match && <><SandboxSetup match={match} onGenerated={generated}/><SandboxProofTrail/></>}
       {!match || loadedMatchId !== matchId ? <div className="loading" role="status">Loading recorded events and saved workspace…</div> : <>
         <div className="topbar"><div><span className="section-index">01 / LIVE MATCH INTELLIGENCE</span><h2>{match.title}</h2></div><label className="match-select">SELECT MATCH <select value={matchId} onChange={e => setMatchId(e.target.value)}>{matches.map(m => <option key={m.match_id} value={m.match_id}>{m.title}</option>)}</select></label></div>
         <section className="scoreboard"><div className="team home"><span className="team-mark" style={{background: match.home.color}}>{match.home.name.slice(0, 2).toUpperCase()}</span><div><span className="team-label">HOME</span><strong>{match.home.name}</strong></div></div><div className="score-center"><div className="match-phase"><span className="live-dot"/> {second >= match.duration_seconds ? 'END OF REPLAY' : second === 0 ? 'READY TO REPLAY' : 'REPLAY IN PROGRESS'}</div><div className="score"><span>{homeGoals}</span><b>:</b><span>{awayGoals}</span></div><div className="match-clock">{clock(second)} <span>/ {clock(match.duration_seconds)}</span></div></div><div className="team away"><div><span className="team-label">AWAY</span><strong>{match.away.name}</strong></div><span className="team-mark" style={{background: match.away.color}}>{match.away.name.slice(0, 2).toUpperCase()}</span></div></section>
