@@ -33,6 +33,7 @@ test('sandbox ProofTrail renders verified branch metrics and source citations', 
 
   await expect(page.getByText('✓ VERIFIED')).toBeVisible()
   await expect(page.getByText(/association only, not a real-world causal prediction/)).toBeVisible()
+  await page.locator('.prooftrail-window').nth(2).getByText('Evidence events (1)').click()
   await expect(page.getByText('runtime-branch-8')).toBeVisible()
   await expect(page.getByText('Verified manifest pair')).toBeVisible()
 })
