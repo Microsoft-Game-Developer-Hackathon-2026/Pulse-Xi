@@ -3,6 +3,7 @@ import {clock, download, request} from './api'
 import type {Checkpoint, State} from './api'
 
 type SavedCheckpoint = {
+  created_at_utc: string | null
   checkpoint_id: string; session_id: string; scenario_id: string; tick: number; revision: number; event_cursor: number
   snapshot: {engine_version: string; schema_version: string; state_hash: string;
     state: State & {possession_team_id: string; possession_actor_id: string; actors: unknown[]; rng: Record<string,{counter:number}>}}
@@ -35,7 +36,8 @@ export function CheckpointInspector({token, checkpoint}: {token: string; checkpo
         <p>Saved score: {Object.entries(data.snapshot.state.score).map(([team,score])=>`${team} ${score}`).join(' / ')}.</p>
         <p>Possession: {data.snapshot.state.possession_team_id} / {data.snapshot.state.possession_actor_id}. Actors: {data.snapshot.state.actors.length}. Pending actions: {data.snapshot.state.pending.length}.</p>
         <dl>{Object.entries(data.snapshot.state.rng).map(([stream,state])=><div key={stream}><dt>{stream} RNG counter</dt><dd>{state.counter}</dd></div>)}</dl>
-        <p>Inspection reads the original saved state and does not rewind or mutate the current runtime. Calendar creation time is unavailable in this contract.</p>
+        <p>Inspection reads the original saved state and does not rewind or mutate the current runtime.</p>
+        <p>Original creation UTC: {data.created_at_utc ? <time dateTime={data.created_at_utc}>{data.created_at_utc}</time> : 'unavailable (historical record)'}.</p>
         <button onClick={()=>download(data,'pulse-checkpoint-source.json')}>Download saved checkpoint source</button>
       </>}
     </section>}
