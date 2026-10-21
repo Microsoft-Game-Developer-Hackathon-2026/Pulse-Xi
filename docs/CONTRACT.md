@@ -110,3 +110,5 @@ interval semantics `(start,end]` are retained, including exclusion of tick-zero
 events. Short sessions expose current observed counts without invented prior
 history, continuous possession or tracking. Runtime datasets stay private and
 separate from imported-match storage.
+
+Runtime Control vs Chaos accepts `projection=native` only (default native for existing clients). Other values return 422; the response identifies `projection: "native"`. The Control Room always sends it explicitly, including 5,400-second sessions. Native projection retains original timestamps and halftime; formulas are unchanged.
