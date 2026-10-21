@@ -1,0 +1,98 @@
+import { test, expect } from '@playwright/test'
+import { readFile } from 'node:fs/promises'
+
+const token = 'test-runtime-token-at-least-32-characters'
+const headers = {Authorization: `Bearer ${token}`}
+
+test('real runtime analysis preserves source, evidence, bookmarks, exports and 3D', async ({page, request}, info) => {
+  test.setTimeout(60000)
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message))
+  const config = (await (await request.get('/api/sandbox/presets', {headers})).json()).balanced
+  config.seed = 177; config.duration_seconds = 5400
+  const scenario = await (await request.post('/api/sandbox/scenarios', {headers, data: config})).json()
+  const session = await (await request.post('/api/sandbox/sessions', {headers, data: {operation_id:'analysis-browser-create',scenario_id:scenario.scenario_id}})).json()
+  const sid = session.session_id
+  expect((await request.post(`/api/sandbox/sessions/${sid}/commands`, {headers, data:{operation_id:'analysis-browser-step',expected_revision:0,kind:'step',ticks:120}})).ok()).toBe(true)
+  const source = await (await request.get(`/api/sandbox/sessions/${sid}/analysis?at_second=120`, {headers})).json()
+  const pass = source.events.find((e:{type:string;team_id:string}) => e.type==='pass' && e.team_id===config.home.team_id)
+  expect(pass).toBeTruthy()
+  const publicReads: string[] = []
+  page.on('request', req => {if(req.url().includes(`/api/matches/${sid}`)) publicReads.push(req.url())})
+  async function reconnect() {
+    await page.goto('/#/runtime'); await page.getByLabel('Operator access token').fill(token)
+    await page.getByRole('button',{name:'Connect operator'}).click()
+    await page.getByLabel('Runtime / branch').selectOption(sid)
+    await expect(page.getByLabel('Authoritative match clock')).toHaveText('02:00')
+    await page.getByText('Recorded-event analysis, bookmarks and 3D',{exact:true}).click()
+    await expect(page.getByRole('table',{name:'Recorded-event statistics through inspection cutoff'})).toBeVisible()
+  }
+  await reconnect()
+  await page.locator('.runtime-events button').filter({hasText:new RegExp(`^#${pass.sequence} `)}).click()
+  await expect(page.getByTestId('pass-inspector')).toHaveAttribute('data-event-id',pass.event_id)
+  await page.getByText('Inspect calculation and source evidence',{exact:true}).click()
+  const evidenceDownload = page.waitForEvent('download')
+  await page.getByRole('button',{name:'Download authenticated pass evidence'}).click()
+  const evidence = JSON.parse(await readFile(await (await evidenceDownload).path() as string,'utf8'))
+  expect(evidence.verified).toBe(true); expect(evidence.source_events).toEqual([pass])
+  await page.getByRole('region',{name:'Authoritative Control Room'}).getByLabel('Event note',{exact:true}).fill('Runtime source note')
+  await page.getByRole('button',{name:'Bookmark selected event',exact:true}).click()
+  await expect.poll(()=>page.evaluate(()=>JSON.parse(localStorage.getItem('pulse-xi-bookmarks-v1')??'{}').items?.length)).toBe(1)
+  await page.getByRole('button',{name:'Analysis exports',exact:true}).click()
+  await page.getByRole('region',{name:'Authoritative Control Room'}).getByLabel('Export category').selectOption('pass')
+  const packetDownload = page.waitForEvent('download'); await page.getByRole('button',{name:'Download analysis',exact:true}).click()
+  const packet = JSON.parse(await readFile(await (await packetDownload).path() as string,'utf8'))
+  expect(packet.data).toEqual([evidence.claim]); expect(packet.provenance.runtime.session_id).toBe(sid)
+  expect(JSON.stringify(packet)).not.toContain(token)
+  await page.getByRole('button',{name:'3D observer',exact:true}).click()
+  await expect(page.getByTestId('observer-snapshot')).toHaveAttribute('data-event-id',pass.event_id)
+  await expect(page.getByTestId('observer-pass-difficulty')).toContainText(`${evidence.claim.score}/100`)
+  await page.getByRole('button',{name:'Top-down camera',exact:true}).click()
+  await page.getByRole('button',{name:'2D pitch',exact:true}).click()
+  await page.getByRole('link',{name:'MATCH DATA HUB',exact:true}).click()
+  await page.getByRole('button',{name:'Check saved sources',exact:true}).click()
+  await expect(page.getByRole('region',{name:'Unavailable bookmark recovery'})).toContainText('Source check complete')
+  expect(publicReads).toEqual([])
+  await page.goto('/#/runtime')
+  await page.reload(); await expect(page.getByLabel('Operator access token')).toBeVisible()
+  expect(await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}))).not.toContain(token)
+  await reconnect()
+  await page.getByRole('button',{name:new RegExp(`^Go to ${pass.event_id}`)}).click()
+  await expect(page.getByTestId('pass-inspector')).toHaveAttribute('data-event-id',pass.event_id)
+  await page.getByRole('slider',{name:'Inspect committed match time'}).fill('0')
+  await expect(page.getByTestId('pass-inspector')).toHaveCount(0)
+  await expect(page.getByText(/After the current inspection cutoff/)).toBeVisible()
+  await page.setViewportSize({width:390,height:844})
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true)
+  await page.screenshot({path:info.outputPath('runtime-analysis-mobile.png'),fullPage:true})
+  expect(publicReads).toEqual([]); expect(errors).toEqual([])
+})
+
+test('short scenarios disclose the existing adapter limit without disabling native controls', async ({page}) => {
+  await page.goto('/#/runtime'); await page.getByLabel('Operator access token').fill(token)
+  await page.getByRole('button',{name:'Connect operator'}).click()
+  await expect(page.getByRole('button',{name:'Disconnect operator'})).toBeVisible()
+  if (await page.getByLabel('Runtime / branch').inputValue()) await expect(page.getByLabel('Authoritative match clock')).toBeVisible()
+  if (!await page.getByLabel('Duration seconds',{exact:true}).isVisible()) await page.getByText('Scenario builder',{exact:true}).click()
+  await page.getByLabel('Duration seconds',{exact:true}).fill('300')
+  await page.getByRole('button',{name:'Create authoritative scenario'}).click()
+  await expect(page.getByLabel('Authoritative match clock')).toHaveText('00:00')
+  await page.getByText('Recorded-event analysis, bookmarks and 3D',{exact:true}).click()
+  await expect(page.getByText(/existing analysis adapter requires a 5400-second scenario/)).toBeVisible()
+  await expect(page.getByRole('button',{name:'Step engine',exact:true})).toBeEnabled()
+})
+
+test('authenticated analysis recovers from a failed read using the real backend', async ({page, request}) => {
+  const config = (await (await request.get('/api/sandbox/presets',{headers})).json()).balanced
+  const scenario = await (await request.post('/api/sandbox/scenarios',{headers,data:config})).json()
+  const session = await (await request.post('/api/sandbox/sessions',{headers,data:{operation_id:'analysis-recovery-create',scenario_id:scenario.scenario_id}})).json()
+  await page.goto('/#/runtime'); await page.getByLabel('Operator access token').fill(token)
+  await page.getByRole('button',{name:'Connect operator'}).click()
+  await page.getByLabel('Runtime / branch').selectOption(session.session_id)
+  await expect(page.getByLabel('Authoritative match clock')).toHaveText('00:00')
+  await page.route('**/analysis?*', route => route.fulfill({status:503,json:{detail:'temporary failure'}}), {times:1})
+  await page.getByText('Recorded-event analysis, bookmarks and 3D',{exact:true}).click()
+  await expect(page.getByRole('alert')).toContainText('503')
+  await page.getByRole('button',{name:'Retry runtime analysis'}).click()
+  await expect(page.getByRole('table',{name:'Recorded-event statistics through inspection cutoff'})).toContainText(config.home.name)
+  await expect(page.getByRole('alert')).toHaveCount(0)
+})

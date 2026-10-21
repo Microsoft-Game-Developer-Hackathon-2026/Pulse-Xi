@@ -1,4 +1,4 @@
-# Current project status - 2026-10-20
+# Current project status - 2026-10-21
 
 ## Authoritative engine branch
 
@@ -28,3 +28,7 @@ See [README](../README.md) and [CONTRACT](CONTRACT.md) for limits, permissions, 
 - Vishwam retains broader release/deployment responsibilities. Optional RTX/Unreal work #34 does not block the recorded-event product.
 
 [The independent handoff](SATVIK_INDEPENDENT_HANDOFF.md) records the earlier feature integration and hardware evidence; its dated test counts are historical, not current totals.
+
+## Satvik analysis integration branch
+
+`feat/authoritative-analysis-integration` is stacked on Diyan's PR #41. It connects the existing scorer/evidence, event-derived metrics, local bookmarks, exports and optional 3D to owner-scoped committed runtime events. Short scenarios disclose the current adapter limit. It fixes redundant runtime selection clearing the authoritative view, distinguishes private bookmark sources, and updates the Vite development tool to 7.3.7 for the reported launch-editor advisories. No engine transition, snapshot schema, manifest algorithm or pending PR #31-#33 is replaced. Verification and review state are recorded on its focused PR; no merge or independent approval is assumed.
