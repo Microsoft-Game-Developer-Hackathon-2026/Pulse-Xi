@@ -68,3 +68,15 @@ Whole-database restore rotates dataset generation IDs and deletion nonces in the
 ## Owner-scoped runtime analysis
 
 The engine integration branch exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. Default `projection=legacy` retains the 5400-second contract. Explicit `projection=native` returns `runtime-native-analysis/1` for every supported even engine duration (60..5400), with native period validation and unchanged event identity/ticks. It reuses existing event metrics, pass scoring/verification and export writing. All routes reject future cutoffs and conceal other owners; private runtime data never resolves through public `/api/matches`. See [LIVE_SANDBOX](LIVE_SANDBOX.md#native-period-analysis) for schemas, nullable calendar timestamps, unavailable legacy phase and hash scope. Neither dataset lifecycle nor engine serialization is replaced.
+
+## Saved scenarios (runtime schema 3)
+
+The scenario library remains separate from imported-match storage (library schema 2).
+Authenticated GET `/api/sandbox/scenarios` returns at most 100 owned summaries,
+ordered by scenario ID. Existing create/read/preset payloads remain compatible.
+POST `/api/sandbox/scenarios/import` accepts strict raw ScenarioConfig or
+scenario-archive/1; GET `/api/sandbox/scenarios/{id}/archive` exports the persisted
+record. New private responses use Cache-Control: no-store. See
+[LIVE_SANDBOX](LIVE_SANDBOX.md#saved-scenario-library-and-archives) for schema,
+identity verification, idempotence, errors, migration and rollback details.
+
