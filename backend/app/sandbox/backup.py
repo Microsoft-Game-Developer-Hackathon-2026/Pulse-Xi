@@ -14,16 +14,20 @@ from .engine import EngineError, canonical, digest, restore_state, implementatio
 from .manifest import verify_manifest
 from .models import EngineState, ExperimentManifest, Scenario
 from .storage import records
+from .control import Run, Experiment
+from .scenario_archive import ScenarioArchive
 
 TABLES = {'scenarios', 'sessions', 'commands', 'runtime_events', 'checkpoints', 'audit'}
 
 
 def validate_database(db: sqlite3.Connection) -> dict:
     db.execute('PRAGMA trusted_schema=OFF')
-    if db.execute('PRAGMA user_version').fetchone()[0] != 1:
+    version = db.execute('PRAGMA user_version').fetchone()[0]
+    if version not in (1, 2, 3):
         raise ValueError('unsupported runtime backup schema')
     objects = db.execute("SELECT type,name FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'").fetchall()
-    if ({name for kind, name in objects if kind == 'table'} != TABLES
+    allowed = TABLES | ({'runs', 'experiments'} if version >= 2 else set()) | ({'scenario_metadata'} if version >= 3 else set())
+    if ({name for kind, name in objects if kind == 'table'} != allowed
             or any(kind in ('trigger', 'view') for kind, name in objects)):
         raise ValueError('unexpected runtime backup schema objects')
     if db.execute('PRAGMA integrity_check').fetchall() != [('ok',)] or db.execute('PRAGMA foreign_key_check').fetchone():
@@ -51,7 +55,19 @@ def validate_database(db: sqlite3.Connection) -> dict:
             raise ValueError('runtime backup event mismatch')
     for payload, in db.execute('SELECT payload FROM checkpoints'):
         restore_state(json.loads(payload))
-    return {'schema_version': 1, 'sessions': db.execute('SELECT COUNT(*) FROM sessions').fetchone()[0]}
+    if version >= 3:
+        if db.execute('SELECT COUNT(*) FROM scenario_metadata').fetchone()[0] != db.execute('SELECT COUNT(*) FROM scenarios').fetchone()[0]:
+            raise ValueError('runtime backup scenario metadata mismatch')
+        for payload, created in db.execute('''SELECT s.payload,m.created_at_utc FROM scenarios s
+            JOIN scenario_metadata m ON s.owner=m.owner AND s.id=m.id'''):
+            ScenarioArchive(scenario=Scenario.model_validate_json(payload), created_at_utc=created)
+    if version >= 2:
+        for table, model, limit in [('runs', Run, 100), ('experiments', Experiment, 10)]:
+            if db.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0] > limit:
+                raise ValueError('runtime control backup exceeds capacity')
+            for payload, in db.execute(f'SELECT payload FROM {table}'):
+                model.model_validate_json(payload)
+    return {'schema_version': version, 'sessions': db.execute('SELECT COUNT(*) FROM sessions').fetchone()[0]}
 
 
 def copy_database(source: Path, destination: Path, expected_sha256: str | None = None) -> dict:
