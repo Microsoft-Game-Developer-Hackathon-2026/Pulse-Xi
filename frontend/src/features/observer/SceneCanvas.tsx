@@ -11,7 +11,7 @@ import { createGrassTexture } from './grassTexture'
 import { graphicsProfiles } from './graphicsProfiles'
 import type { CameraPreset, GraphicsQuality } from './graphicsProfiles'
 
-export type RendererMetrics = { quality: GraphicsQuality; eventId: string | null; calls: number; triangles: number; geometries: number; textures: number; readyMs: number; framesInSample: number | null }
+export type RendererMetrics = { quality: GraphicsQuality; eventId: string | null; calls: number; triangles: number; geometries: number; textures: number; readyMs: number; framesInSample: number | null; ballPosition: number[] | null; actorPosition: number[] | null; recipientPosition: number[] | null }
 type Props = {
   snapshot: EventSnapshot; cameraPreset: CameraPreset; resetRevision: number
   assetStyle: 'original' | 'procedural'; assetStatus: AssetStatus['status']; reportAsset: (value: AssetStatus) => void
@@ -82,8 +82,10 @@ function EventMarkers({ snapshot, spheres = true }: { snapshot: EventSnapshot; s
   ]) : null, [snapshot.origin, snapshot.target])
   useEffect(() => () => path?.dispose(), [path])
   return <group>
-    {spheres && snapshot.origin && <mesh position={snapshot.origin}><sphereGeometry args={[1.1, 16, 10]}/><meshStandardMaterial color={snapshot.color} emissive={snapshot.color} emissiveIntensity={.2}/></mesh>}
-    {spheres && snapshot.target && <mesh position={snapshot.target}><sphereGeometry args={[.65, 12, 8]}/><meshStandardMaterial color="#f4f2db"/></mesh>}
+    {spheres && snapshot.actor_id && snapshot.origin && <mesh name="recorded-actor" position={snapshot.origin}><sphereGeometry args={[1.1, 16, 10]}/><meshStandardMaterial color={snapshot.color} emissive={snapshot.color} emissiveIntensity={.2}/></mesh>}
+    {spheres && snapshot.recipient_position && <mesh name="recorded-recipient" position={snapshot.recipient_position}><sphereGeometry args={[1.1,16,10]}/><meshStandardMaterial color={snapshot.color}/></mesh>}
+    {spheres && snapshot.ball && <mesh name="recorded-ball" position={snapshot.ball}><sphereGeometry args={[.65, 12, 8]}/><meshStandardMaterial color="#f4f2db"/></mesh>}
+    {snapshot.ball && <mesh position={[snapshot.ball[0], .14, snapshot.ball[2]]} rotation={[-Math.PI/2,0,0]}><ringGeometry args={[.95,1.3,32]}/><meshBasicMaterial color="#ffffff" toneMapped={false}/></mesh>}
     {snapshot.origin && <mesh position={[snapshot.origin[0], .12, snapshot.origin[2]]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[1.8, 2.15, 40]}/><meshBasicMaterial color={snapshot.color} toneMapped={false}/></mesh>}
     {snapshot.target && arrow && <mesh position={arrow.position} quaternion={arrow.rotation}><coneGeometry args={[.8, 2.1, 12]}/><meshBasicMaterial color={snapshot.color} toneMapped={false}/></mesh>}
     {path && <lineSegments geometry={path}><lineBasicMaterial color={snapshot.color}/></lineSegments>}
@@ -91,13 +93,14 @@ function EventMarkers({ snapshot, spheres = true }: { snapshot: EventSnapshot; s
 }
 
 function Probe({ snapshot, cameraPreset, quality, report, startedAt, assetStatus }: Props) {
-  const { gl, invalidate } = useThree()
+  const { gl, scene, invalidate } = useThree()
   useEffect(() => {
     let second = 0
     let timer = 0
     invalidate()
     const first = requestAnimationFrame(() => { second = requestAnimationFrame(() => {
-      const metrics = { quality, eventId: snapshot.event_id, calls: gl.info.render.calls, triangles: gl.info.render.triangles,
+      const position = (name: string) => scene.getObjectByName(name)?.getWorldPosition(new Vector3()).toArray() ?? null
+      const metrics = { ballPosition: position('recorded-ball'), actorPosition: position('recorded-actor'), recipientPosition: position('recorded-recipient'), quality, eventId: snapshot.event_id, calls: gl.info.render.calls, triangles: gl.info.render.triangles,
         geometries: gl.info.memory.geometries, textures: gl.info.memory.textures,
         readyMs: performance.now() - startedAt, framesInSample: null }
       report(metrics)
@@ -105,7 +108,7 @@ function Probe({ snapshot, cameraPreset, quality, report, startedAt, assetStatus
       timer = window.setTimeout(() => report({ ...metrics, framesInSample: gl.info.render.frame - before }), 500)
     }) })
     return () => { cancelAnimationFrame(first); cancelAnimationFrame(second); window.clearTimeout(timer) }
-  }, [snapshot.event_id, cameraPreset, quality, assetStatus, gl, invalidate, report, startedAt])
+  }, [snapshot.event_id, snapshot.ball, cameraPreset, quality, assetStatus, gl, scene, invalidate, report, startedAt])
   return null
 }
 
