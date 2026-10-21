@@ -28,7 +28,8 @@ function supportsWebGL2() {
   } catch { return false }
 }
 
-export function ObserverSwitch({ match, event, atSecond, scope, children, preferredView, preferredQuality, onViewChange, onQualityChange }: {
+export function ObserverSwitch({ match, event, atSecond, scope, children, preferredView, preferredQuality, onViewChange, onQualityChange, apiBase, load }: {
+  apiBase?: string; load?: <T>(path: string, signal: AbortSignal) => Promise<T>;
   match: Match; event?: Event; atSecond: number; scope?: ObserverScope; children: ReactNode;
   preferredView?: '2d' | '3d'; preferredQuality?: GraphicsQuality; onViewChange?: (view: '2d' | '3d') => void; onQualityChange?: (quality: GraphicsQuality) => void
 }) {
@@ -78,7 +79,7 @@ export function ObserverSwitch({ match, event, atSecond, scope, children, prefer
       <RenderBoundary key={revision} fail={fail}><Suspense fallback={<><p className="observer-notice" role="status">Loading optional 3D renderer…</p>{children}</>}>
         <SceneCanvas snapshot={snapshot} reducedMotion={reducedMotion} cameraPreset={camera} resetRevision={revision} quality={quality} fail={fail} report={report} startedAt={started.current}/>
       </Suspense></RenderBoundary>
-      <EventOverlay match={match} event={event} snapshot={snapshot}/>
+      <EventOverlay match={match} event={event} snapshot={snapshot} apiBase={apiBase} load={load}/>
       <div className="observer-caption" data-testid="observer-snapshot" data-event-id={snapshot.event_id ?? ''}><span>{snapshot.team_name ? `${snapshot.team_name} attacking frame` : 'Recorded event frame'} · {snapshot.event_type ?? 'no event'} · {Math.floor(atSecond / 60)}:{String(Math.floor(atSecond % 60)).padStart(2, '0')}</span><code>{snapshot.event_id ?? 'No visible source event'}</code></div>
       {snapshot.unavailable_reason && <p className="observer-notice">{snapshot.unavailable_reason}</p>}
       <p className="observer-note">{camera === 'free' && 'Free camera: drag to orbit, scroll/pinch to zoom; focus the canvas and use arrow keys to pan. '}Markers show recorded origins and endpoints only. The ball is enlarged for readability; model height is illustrative. Display units are schematic; no player movement, speed, defender location or live ball trajectory is inferred.</p>

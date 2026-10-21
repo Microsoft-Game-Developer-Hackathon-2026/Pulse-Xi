@@ -38,8 +38,7 @@ configuration returned 200, and a malformed credential raised an exception. A
 separate main-based [PR #45](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/45) on fix/44-agent-trace-authorization passed 97 backend and
 33 browser cases; those are separate results, not added to the architecture count.
 Review/integration of that fix is required before exposing privileged traces.
-npm audit reports one high-severity Vite finding on the older lockfile; #43 already
-contains its upgrade. This task preserves dependency versions. Upstream TestClient
+The original architecture head used the older Vite lockfile. This analysis integration retains #43's Vite 7.3.7 upgrade; its current scan is reported separately from historical architecture results. Upstream TestClient
 deprecations and the existing optional-renderer chunk warning remain.
 
 ## Lifecycle integration
@@ -58,3 +57,7 @@ See [README](../README.md) and [CONTRACT](CONTRACT.md) for limits, permissions, 
 - Vishwam retains broader release/deployment responsibilities. Optional RTX/Unreal work #34 does not block the recorded-event product.
 
 [The independent handoff](SATVIK_INDEPENDENT_HANDOFF.md) records the earlier feature integration and hardware evidence; its dated test counts are historical, not current totals.
+
+## Satvik analysis integration branch
+
+`feat/authoritative-analysis-integration` is stacked on Diyan's PR #41. It connects the existing scorer/evidence, event-derived metrics, local bookmarks, exports and optional 3D to owner-scoped committed runtime events. Short scenarios disclose the current adapter limit. It fixes redundant runtime selection clearing the authoritative view, distinguishes private bookmark sources, and updates the Vite development tool to 7.3.7 for the reported launch-editor advisories. No engine transition, snapshot schema, manifest algorithm or pending PR #31-#33 is replaced. Verification and review state are recorded on its focused PR; no merge or independent approval is assumed.
