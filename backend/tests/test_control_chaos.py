@@ -209,3 +209,20 @@ def test_turning_point_relative_threshold_is_enforced(fixture_data):
     exact = control_chaos_at(match, [*previous, *current, ninth_shot], 600, 300)
     point = exact.interpretation.turning_points[0]
     assert (point.previous_value, point.current_value, point.difference) == (18, 27, 9)
+
+def test_rapid_transition_targets_are_not_double_counted(fixture_data):
+    match, fixture_events = fixture_data
+    template = fixture_events[0]
+    home = match.home.team_id
+    events = [
+        make_event(match, template, "recovery-a", 100, 1, home, EventType.recovery,
+                   possession_id="shared-possession"),
+        make_event(match, template, "recovery-b", 110, 2, home, EventType.recovery,
+                   possession_id="shared-possession"),
+        make_event(match, template, "single-shot", 120, 3, home, EventType.shot,
+                   possession_id="shared-possession"),
+    ]
+
+    result = control_chaos_at(match, events, 200, 300).teams[home].disruption["rapid_transitions"]
+    assert result.value == 1
+    assert set(result.supporting_event_ids) == {"recovery-a", "single-shot"}
