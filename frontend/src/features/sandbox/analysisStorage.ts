@@ -4,7 +4,7 @@ export const eventKinds = ['all', 'kickoff', 'pass', 'carry', 'shot', 'goal', 's
 export type Filters = { team: string; kind: string }
 export type Workspace = { version: 1; matchId: string; second: number; eventId: string; sequence: number | null;
   eventSecond: number | null; speed: number; filters: Filters; view: '2d' | '3d'; quality: 'low' | 'standard' | 'high'; panel: 'bookmarks' | 'exports' }
-export type Bookmark = { matchId: string; eventId: string; sequence: number; second: number; note: string }
+export type Bookmark = { source?: 'runtime'; matchId: string; eventId: string; sequence: number; second: number; note: string }
 export function bookmarkTransaction(action: () => void): Promise<void> {
   return navigator.locks ? navigator.locks.request(BOOKMARK_KEY, action) : Promise.resolve().then(action)
 }
@@ -41,8 +41,8 @@ export function readBookmarks(): { items: Bookmark[]; notice: string } {
     const keys = new Set<string>()
     for (const b of value.items) {
       if (!b || !id(b.matchId) || !b.matchId || !id(b.eventId) || !b.eventId || !integer(b.sequence) || !integer(b.second) ||
-          typeof b.note !== 'string' || b.note.length > 500 || keys.has(JSON.stringify([b.matchId, b.eventId]))) throw Error()
-      keys.add(JSON.stringify([b.matchId, b.eventId]))
+          (b.source !== undefined && b.source !== 'runtime') || typeof b.note !== 'string' || b.note.length > 500 || keys.has(JSON.stringify([b.source ?? 'match', b.matchId, b.eventId]))) throw Error()
+      keys.add(JSON.stringify([b.source ?? 'match', b.matchId, b.eventId]))
     }
     return { items: value.items, notice: '' }
   } catch { return { items: [], notice: 'Saved bookmarks are corrupt, incompatible or over the storage limit. Reset bookmarks to recover.' } }

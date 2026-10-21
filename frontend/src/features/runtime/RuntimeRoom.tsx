@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { clock, download, newId, request, root, RuntimeError } from './api'
 import type { Audit, Checkpoint, Comparison, Config, Evidence, Experiment, Metric, NativeEvent, Receipt, Run, Session, Tactics, View } from './api'
 import './runtime.css'
+import { RuntimeAnalysis } from './RuntimeAnalysis'
 
 const fields = ['pressing', 'compactness', 'directness', 'tempo', 'risk'] as const
 const formations = ['4-3-3', '4-4-2', '3-5-2'] as const
@@ -77,6 +78,9 @@ export function RuntimeRoom() {
   }
 
   function selectSession(sid: string) {
+    // A redundant selection must not clear the view: the session-keyed effect
+    // would not rerun, leaving the current authoritative runtime invisible.
+    if (sid === sessionRef.current) return
     sessionRef.current = sid; setSessionId(sid); setView(null); setRun(null); setCutoff(null); setSelectedSequence(null); setAudit([]); setCheckpoints([]); setCheckpointId('')
     try { sessionStorage.setItem('pulse-runtime-session', sid) } catch { /* Optional identity only, never credentials. */ }
   }
@@ -266,6 +270,7 @@ export function RuntimeRoom() {
           })}>Restore as new branch</button><p>Checkpoint state includes every RNG counter and pending action.</p></section>
           <section className="panel runtime-audit"><h3>Operator audit</h3><ol>{audit.slice(-12).map((a, i) => <li key={i}>{a.command.kind} · {a.result} · revision {a.revision}{a.intervention ? ` · ${a.intervention.field}: ${a.intervention.previous_value} → ${a.intervention.new_value} · effective ${clock(a.intervention.effective_tick)}` : ''}{a.code ? ` · ${a.code}` : ''}</li>)}</ol></section>
         </div></div>
+        <RuntimeAnalysis key={view.session_id} token={token} view={view} cutoff={inspectionTick} sequence={selected?.sequence} select={(sequence, tick) => { setSelectedSequence(sequence); if (tick !== undefined) setCutoff(tick) }}/>
         <section className="panel runtime-manifest"><h3>Reproducibility</h3><p>State hash <code>{view.state_hash}</code></p><button disabled={busy} onClick={() => void perform(async () => download(await request(token, `/sessions/${sessionId}/manifest`), 'pulse-runtime-manifest.json'))}>Download runtime manifest</button><button disabled={busy} onClick={() => void perform(async () => {
           const manifest = await request(token, `/sessions/${sessionId}/manifest`)
           const result = await request<{ verified: boolean; component: string | null }>(token, '/verify', manifest)
