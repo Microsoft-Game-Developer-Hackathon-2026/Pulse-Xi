@@ -63,6 +63,7 @@ def test_api_and_websocket():
 
 
 def test_idempotent_out_of_order_ingest(tmp_path, monkeypatch):
+    monkeypatch.setenv("PULSE_IMPORT_TOKEN", "test-import-token-at-least-32-characters")
     monkeypatch.setenv("PULSE_DB_PATH", str(tmp_path / "matches.sqlite"))
     match, events = generate("custom", 809)
     match = match.model_copy(update={"match_id": "imported-fixture"})
@@ -71,15 +72,15 @@ def test_idempotent_out_of_order_ingest(tmp_path, monkeypatch):
     client = TestClient(app)
     payload = {"match": match.model_dump(mode="json"),
                "events": [e.model_dump(mode="json", by_alias=True) for e in reversed(sample)]}
-    response = client.post("/api/matches/ingest", json=payload)
+    response = client.post("/api/matches/ingest", headers={"Authorization": "Bearer test-import-token-at-least-32-characters"}, json=payload)
     assert response.status_code == 200, response.text
     assert response.json()["inserted"] == 8
-    assert client.post("/api/matches/ingest", json=payload).json()["inserted"] == 0
+    assert client.post("/api/matches/ingest", headers={"Authorization": "Bearer test-import-token-at-least-32-characters"}, json=payload).json()["inserted"] == 0
     stored_events = client.get("/api/matches/imported-fixture/events").json()
     assert [e["match_second"] for e in stored_events] == sorted(e["match_second"] for e in stored_events)
     assert [e["sequence"] for e in stored_events] == list(range(1, 9))
     payload["events"][0]["outcome"] = "corrupted"
-    assert client.post("/api/matches/ingest", json=payload).status_code == 409
+    assert client.post("/api/matches/ingest", headers={"Authorization": "Bearer test-import-token-at-least-32-characters"}, json=payload).status_code == 409
     from app.storage import imported_match
     recovered = imported_match(match.match_id)
     assert recovered is not None
@@ -169,4 +170,4 @@ def test_agent_auditor_and_unconfigured_guard():
     client = TestClient(app)
     response = client.post(f"/api/insights/{insight.insight_id}/agent-run")
     assert response.status_code == 503
-    assert client.get("/api/agent-traces").json() == []
+    assert client.get("/api/agent-traces").status_code == 503

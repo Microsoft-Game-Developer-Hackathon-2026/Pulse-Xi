@@ -1,0 +1,113 @@
+import { test, expect } from '@playwright/test'
+import { readFile } from 'node:fs/promises'
+
+const token = 'test-import-token-at-least-32-characters'
+
+test('real package preview, SQLite import, replay, bookmark recovery and verified exports', async ({page, request}, testInfo) => {
+  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message))
+  const packet = await (await request.get('/api/matches/comeback-1107/package')).json()
+  packet.schema_version='pulse-xi-match-package/1'; delete packet.integrity // This test authors a distinct dataset, not an unchanged backup.
+  const id = `browser-research-match-${testInfo.repeatEachIndex}`
+  const traffic: string[] = []
+  const relevant = (url:string) => url.includes(`/api/matches/${id}/`) && /metrics|tactics|pass-difficulty|recap/.test(url)
+  page.on('request',r=>{if(relevant(r.url()))traffic.push(`${Date.now()} start ${r.url()}`)})
+  page.on('response',r=>{if(relevant(r.url()))traffic.push(`${Date.now()} response ${r.status()} ${r.url()}`)})
+  page.on('requestfailed',r=>{if(relevant(r.url()))traffic.push(`${Date.now()} failed ${r.failure()?.errorText} ${r.url()}`)})
+  packet.match.match_id = id; packet.match.title = `Research import ${testInfo.repeatEachIndex}`
+  for (const event of packet.events) event.match_id = id
+  packet.provenance.source = 'Locally repackaged synthetic fixture'
+  const source = packet.events.find((e: {type: string; match_second: number}) => e.type === 'pass' && e.match_second > 500)
+  await page.goto('/#/data')
+  await expect(page.getByRole('heading',{name:'Match Data Hub',exact:true})).toBeVisible()
+  await page.getByLabel('Import token',{exact:true}).fill('wrong-token')
+  await page.getByLabel('Canonical match JSON').setInputFiles({name:'research.json', mimeType:'application/json', buffer:Buffer.from(JSON.stringify(packet))})
+  await page.getByRole('button',{name:'Validate and preview',exact:true}).click()
+  await expect(page.getByRole('alert')).toContainText('Import authorization required')
+  await page.getByLabel('Import token',{exact:true}).fill(token)
+  await page.getByRole('button',{name:'Validate and preview',exact:true}).click()
+  const preview = page.getByLabel('Import preview')
+  await expect(preview).toContainText('New match. Preview has not written any data.')
+  expect((await request.get(`/api/matches/${id}`)).status()).toBe(404)
+  await page.getByRole('button',{name:'Confirm import',exact:true}).click()
+  await expect(page.getByRole('status').filter({hasText:'Import stored:'})).toBeVisible()
+  const actual = await (await request.get(`/api/matches/${id}/events?limit=1000`)).json()
+  expect(actual).toEqual(packet.events)
+  await page.getByLabel('Match origin').selectOption('imported')
+  await page.getByLabel('Search matches').fill(packet.match.title)
+  const card = page.getByRole('article').filter({has:page.getByRole('heading',{name:packet.match.title,exact:true})})
+  await card.getByText('Inspect metadata and data quality',{exact:true}).click()
+  await expect(card).toContainText('Locally repackaged synthetic fixture')
+  await card.getByRole('button',{name:'Open for analysis',exact:true}).click()
+  await expect(page.getByLabel('SELECT MATCH')).toHaveValue(id)
+  await page.goto(`/#/sandbox?match=${id}&at=${source.match_second}&event=${source.event_id}`)
+  await expect(page.getByRole('slider',{name:'Seek match time'})).toHaveValue(String(source.match_second))
+  try { await expect(page.getByTestId('pass-inspector')).toHaveAttribute('data-event-id',source.event_id) }
+  catch(e) { console.log(traffic.join('\n')); throw e }
+  await page.getByRole('button',{name:'3D observer',exact:true}).click()
+  await expect(page.getByTestId('observer-canvas').locator('canvas')).toBeVisible()
+  await expect(page.getByTestId('observer-snapshot')).toHaveAttribute('data-event-id',source.event_id)
+  await page.getByRole('button',{name:'2D pitch',exact:true}).click()
+  await page.getByLabel('Event note',{exact:true}).fill('Research note')
+  await page.getByRole('button',{name:'Bookmark selected event',exact:true}).click()
+  // Bookmark writes acquire a browser Web Lock. Do not reload before that
+  // asynchronous operation commits; the workspace was already saved earlier.
+  await expect(page.getByRole('list',{name:'Saved event bookmarks'})).toContainText('Research note')
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('pulse-xi-bookmarks-v1') ?? '{}').items?.some((b: {note: string}) => b.note === 'Research note'))).toBe(true)
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('pulse-xi-workspace-v1') ?? '{}').eventId)).toBe(source.event_id)
+  await page.reload()
+  await expect(page.getByTestId('pass-inspector')).toHaveAttribute('data-event-id',source.event_id)
+  await expect(page.getByRole('list',{name:'Saved event bookmarks'})).toContainText('Research note')
+  await page.getByRole('button',{name:'Analysis exports',exact:true}).click()
+  await page.getByLabel('Export category').selectOption('pass')
+  const download = page.waitForEvent('download'); await page.getByRole('button',{name:'Download analysis',exact:true}).click()
+  const exported = JSON.parse(await readFile(await (await download).path() as string,'utf8'))
+  const authoritative = await (await request.get(`/api/matches/${id}/passes/${source.event_id}/difficulty?at_second=${source.match_second}`)).json()
+  expect(exported.data).toEqual([authoritative]); expect(exported.match_id).toBe(id)
+  await page.getByRole('link',{name:'MATCH DATA HUB',exact:true}).click()
+  await expect(page.getByLabel('Import token',{exact:true})).toHaveValue('')
+  const imported = page.getByRole('article').filter({has:page.getByRole('heading',{name:packet.match.title,exact:true})})
+  const packageDownload = page.waitForEvent('download'); await imported.getByRole('button',{name:'Download complete package'}).click()
+  const portable = JSON.parse(await readFile(await (await packageDownload).path() as string,'utf8'))
+  expect(portable.events).toEqual(actual); expect(portable.match).toEqual(packet.match)
+  await page.setViewportSize({width:1366,height:768})
+  await page.screenshot({path:testInfo.outputPath('match-data-hub-desktop.png'), fullPage:true})
+  await page.setViewportSize({width:360,height:800})
+  await page.screenshot({path:testInfo.outputPath('match-data-hub-mobile.png'),fullPage:true})
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  expect(errors).toEqual([])
+})
+
+test('invalid files, schema errors, idempotent reimport and unavailable coordinates are honest', async ({page, request}) => {
+  const packet = await (await request.get('/api/matches/high-press-2209/package')).json()
+  packet.schema_version='pulse-xi-match-package/1'; delete packet.integrity
+  packet.match.match_id = 'browser-short-match'; packet.match.duration_seconds = 60
+  packet.events = packet.events.filter((e: {match_second: number}) => e.match_second <= 60)
+  for (const e of packet.events) {e.match_id = packet.match.match_id; e.start = null; e.end = null}
+  await page.goto('/#/data')
+  const input = page.getByLabel('Canonical match JSON')
+  await input.setInputFiles({name:'analysis.json',mimeType:'application/json',buffer:Buffer.from('{"schema_version":"analysis-export/1"}')})
+  await expect(page.getByRole('alert')).toContainText('Analysis exports are not complete')
+  await input.setInputFiles({name:'huge.json',mimeType:'application/json',buffer:Buffer.alloc(2_000_001,32)})
+  await expect(page.getByRole('alert')).toContainText('2 MB')
+  await page.getByLabel('Import token',{exact:true}).fill(token)
+  const invalid = structuredClone(packet); invalid.events[0].match_id = 'wrong'
+  await input.setInputFiles({name:'invalid.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(invalid))})
+  await page.getByRole('button',{name:'Validate and preview',exact:true}).click()
+  await expect(page.getByRole('alert')).toContainText('wrong match identity')
+  await input.setInputFiles({name:'short.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(packet))})
+  await page.getByRole('button',{name:'Validate and preview',exact:true}).click()
+  await expect(page.getByLabel('Import preview')).toContainText('Missing start / end coordinates')
+  await page.getByRole('button',{name:'Confirm import',exact:true}).click()
+  await expect(page.getByRole('status').filter({hasText:'Import stored:'})).toBeVisible()
+  await page.getByRole('button',{name:'Validate and preview',exact:true}).click()
+  await expect(page.getByLabel('Import preview')).toContainText('Identical dataset already stored')
+  await page.getByRole('button',{name:'Cancel import',exact:true}).press('Enter')
+  await expect(page.getByLabel('Import preview')).toHaveCount(0)
+  const card = page.getByRole('article').filter({hasText:'browser-short-match'})
+  await card.getByRole('button',{name:'Open for analysis',exact:true}).click()
+  await expect(page.getByRole('slider',{name:'Seek match time'})).toHaveAttribute('max','60')
+  await page.getByRole('slider',{name:'Seek match time'}).fill('60')
+  await page.getByRole('button',{name:'Play',exact:true}).click()
+  await expect(page.getByRole('button',{name:'Play',exact:true})).toBeVisible()
+  await expect(page.getByRole('slider',{name:'Seek match time'})).toHaveValue('60')
+})

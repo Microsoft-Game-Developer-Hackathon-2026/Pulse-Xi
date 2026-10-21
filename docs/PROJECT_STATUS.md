@@ -1,30 +1,28 @@
-# Current project status — 2026-10-17
+# Current project status - 2026-10-20
 
-Authoritative integration summary: [Satvik handoff](SATVIK_INDEPENDENT_HANDOFF.md). Historical phase/quality reports describe their dated builds, not today's complete feature set.
+## Authoritative engine branch
 
-## Integrated on main
+The dedicated engine change adds real scenario configuration, deterministic bounded transitions, durable sessions, revision/idempotency controls, complete checkpoint capture/restore, isolated branches, effective-tick tactics and replayable manifests. See [the actual API and evidence](AUTHORITATIVE_ENGINE.md). Branch verification: 148 backend tests (54 engine cases plus 94 existing) and all 33 browser regression cases pass; strict TypeScript/production build passes. These are branch results, not evidence of a merge or teammate approval. Existing Sandbox UI integration, higher-level ForkCast orchestration/comparison and shared contract review remain open. The asset and preparation PRs are untouched.
 
-- Seeded fictional fixtures, validated custom seeds, replay REST/WebSocket APIs, deterministic event analytics and durable SQLite imported-event ingest.
-- Evidence-backed goal/tactical insights, synchronized cue JSON and studio preview; five audience recap modes with limited English/Hindi/Spanish templates.
-- PR #28: versioned pass-difficulty geometry heuristic, verified factors, replay cutoff and player summaries. Pressure remains unavailable, and scores are not calibrated probabilities.
-- PR #29: useful fixture Sandbox Lab with seed setup, replay/event exploration, cancellation/retry, keyboard access and saved custom-match recovery. This is only the independent subset of #10.
-- PR #30: lazy procedural 3D event observer, five camera modes, three quality profiles, real event/pass evidence and 2D/WebGL recovery. No continuous tracking is inferred.
+## Integrated product
 
-Feature integration main commit: `79d1211`; a separate documentation PR updates this status/README. Main was previously `888a2a9`.
+- Seeded synthetic fixtures, REST/WebSocket replay, event-derived analytics and SQLite persistence.
+- Pass Difficulty (#28), replay Sandbox subset (#29), optional procedural 3D event observer (#30), persistent browser-local analysis, bookmarks and verified exports (#37).
+- Match Data Hub (#38, merged at `9eeeb2d74feb61fa4783ebfeb994f2a2f8044126`): canonical JSON validation/preview, authorized atomic import, searchable library, quality inspection and portable packages.
 
-## Verified but not merged
+## Lifecycle integration
 
-- PR #31 original Blender sources/GLBs, validation, provenance and physical GPU probe: awaiting Vishwam's #23 release/security approval. No approval is assumed.
-- PR #32 checkpoint metadata proposal and tests: draft, inherits #31; no snapshot persistence or exact continuation.
-- PR #33 isolated comparison DTO/UI/tests: draft, inherits #31/#32; no production experiment runner or fake branch API.
+PR #39 extends #38 with local-only authorized archive/restore/delete, stale-confirmation protection, deletion tombstones, checksummed package recovery, schema-2 migration and trusted offline SQLite backup. Its exact merge state is available on [PR #39](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/39). Satvik explicitly waived the previous Vishwam review gate for #38/#39; no independent human approval is claimed. Normal repository checks remain required.
 
-## External dependencies and remaining scope
+The earlier lifecycle integration verified 94 backend tests and 33 mixed browser/contract cases, including real FastAPI/SQLite import, replay, pass analysis, bookmarks, archive/restore, deletion and recovery. Strict TypeScript and production build passed. Final integrated-main results are recorded on the PR after merge; branch results alone do not certify main.
 
-- Diyan #2–#5/#7/#9: actual authoritative scenario/state/clock, complete RNG/pending queue, intervention semantics and canonical manifests. These block real checkpoints, live tactical controls and ForkCast.
-- Mahir: branch-scoped evidence/AI integration; Foundry remains guarded and authenticated inference unverified. No billable calls made.
-- Vishwam: formal release/security/provenance review, Azure/cost approval, submission workflow and broader accessibility/release validation.
-- Optional #34: Diyan's RTX/Unreal cinematics and cross-hardware validation. It cannot block core engine development.
+See [README](../README.md) and [CONTRACT](CONTRACT.md) for limits, permissions, migrations, packages and backup commands. Browser notes are local references, packages are datasets, and neither is an engine checkpoint. These are public-read synthetic datasets; a shared administrative token is not multi-user ownership isolation.
 
-## Verification boundaries
+## Separate gates and dependencies
 
-Fresh combined pre-merge stack: 34 backend tests, 32 mixed application/API/browser/contract cases and five isolated comparison cases passed; strict builds and seven Khronos asset checks passed. Final main has fewer tests because asset/preparation work is excluded; see handoff for final measured results. Physical Iris Xe hardware was identified and tested separately from CI SwiftShader. No public deployment, real experiment run, calibrated football prediction or successful hosted inference is claimed.
+- #31 Blender assets retains its separate release/provenance review; #32/#33 preparation remains stacked separately. This data integration does not merge those branches.
+- Diyan #2-#5/#7/#9 owns authoritative clock/state, complete RNG/pending queues, interventions, checkpoint continuation and experiment manifests. No competing engine or fabricated tracking is introduced.
+- Mahir owns downstream evidence/AI integration. Hosted inference is guarded and unverified; no billable calls are required.
+- Vishwam retains broader release/deployment responsibilities. Optional RTX/Unreal work #34 does not block the recorded-event product.
+
+[The independent handoff](SATVIK_INDEPENDENT_HANDOFF.md) records the earlier feature integration and hardware evidence; its dated test counts are historical, not current totals.
