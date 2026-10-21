@@ -4,6 +4,7 @@ import type { Audit, Checkpoint, Comparison, Config, Evidence, Experiment, Metri
 import './runtime.css'
 import { RuntimeAnalysis } from './RuntimeAnalysis'
 import { CheckpointInspector } from './CheckpointInspector'
+import { HistoricalStateInspector } from './HistoricalStateInspector'
 
 const fields = ['pressing', 'compactness', 'directness', 'tempo', 'risk'] as const
 const formations = ['4-3-3', '4-4-2', '3-5-2'] as const
@@ -258,7 +259,7 @@ export function RuntimeRoom() {
         <div className="runtime-columns"><section className="panel runtime-observer"><h3>Committed event observer</h3><p>Inspecting {clock(inspectionTick)} · discrete action coordinates, no continuous player tracking.</p><input type="range" aria-label="Inspect committed match time" min={0} max={view.tick} value={inspectionTick} onChange={e => { setCutoff(Number(e.target.value)); setSelectedSequence(null) }}/><button disabled={busy} onClick={() => { setCutoff(null); setSelectedSequence(null) }}>Follow authoritative clock</button>
           <svg viewBox="0 0 100 64" role="img" aria-label={selected ? `Committed ${selected.type} at ${clock(selected.tick)}` : 'Committed event pitch'}><rect x="2" y="2" width="96" height="60" fill="#103b37" stroke="#a7d7c4"/><path d="M50 2V62M2 18H18V46H2M98 18H82V46H98" fill="none" stroke="#a7d7c4"/><circle cx="50" cy="32" r="10" fill="none" stroke="#a7d7c4"/>{selected && <><path d={`M${2 + selected.x * .96} ${2 + selected.y * .6} L${2 + selected.end_x * .96} ${2 + selected.end_y * .6}`} stroke="#66e5df" strokeWidth="1" strokeDasharray="2 1"/><circle cx={2 + selected.x * .96} cy={2 + selected.y * .6} r="1.5" fill="#fff"/></>}</svg>
           {selected && <p data-testid="selected-runtime-event">#{selected.sequence} · {clock(selected.tick)} · {selected.type} · {selected.outcome ?? 'match boundary'} · {selected.actor_id ?? 'official'}</p>}
-          <ol className="runtime-events" aria-label="Committed event timeline">{seen.slice(-100).map(e => <li key={e.sequence}><button aria-pressed={selected?.sequence === e.sequence} onClick={() => setSelectedSequence(e.sequence)}>#{e.sequence} · {clock(e.tick)} · {e.type} · {e.team_id ?? 'match'}</button></li>)}</ol><p>Showing the latest 100 events at or before the inspection cutoff.</p>
+          <ol className="runtime-events" aria-label="Committed event timeline">{seen.slice(-100).map(e => <li key={e.sequence}><button aria-pressed={selected?.sequence === e.sequence} onClick={() => setSelectedSequence(e.sequence)}>#{e.sequence} · {clock(e.tick)} · {e.type} · {e.team_id ?? 'match'}</button></li>)}</ol><p>Showing the latest 100 events at or before the inspection cutoff.</p><HistoricalStateInspector key={`${token}:${view.session_id}`} token={token} view={view} tick={inspectionTick}/>
         </section><div>
           <section className="panel runtime-tactics"><h3>Tactical intervention</h3><form onSubmit={e => { e.preventDefault(); void perform(() => send('intervene', { requested_tick: view.tick, team_id: team, field, value: field === 'formation' ? value : Number(value) })) }}>
             <label>Intervention team<select value={team} onChange={e => setTeam(e.target.value)}>{[state.scenario.config.home, state.scenario.config.away].map(t => <option key={t.team_id} value={t.team_id}>{t.name}</option>)}</select></label>

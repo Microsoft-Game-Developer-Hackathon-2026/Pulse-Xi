@@ -378,3 +378,11 @@ the explicit idempotent retry. Disconnect clears that private retry body and
 comparison/evidence state; reconnect reads the actual owned runtime again.
 Disconnect does not undo or cancel committed server work. New commands then
 use the refreshed revision rather than replaying a previous operator's request.
+
+The committed observer also offers "Inspect historical engine state". It calls
+`GET /sessions/{id}/history?at_tick=N` with the operator credential, presenting
+its read-only snapshot, native period, historical state hash and captured source
+revision. Replay is performed by the server using its owned checkpoint and
+command history. The frontend neither synthesizes states nor rewinds the live
+runtime. Cutoff/session/credential changes cancel obsolete requests; the original
+response can be downloaded as source evidence, not as a new checkpoint format.

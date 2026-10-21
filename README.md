@@ -9,12 +9,13 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 ## Application functionality
 
 **Branch boundary:** main `4d8a01e` (inspected 2026-10-21) contains the
-engine foundation and trace-security correction alongside recorded replay and
-Match Data Hub. Live runtime/ForkCast and analysis forward integration remains
-in #53; native-period analysis is #57. This dependent Control vs Chaos branch
-combines #57 and the recorded algorithms from #42 for integration testing, not
-as evidence of approval or incorporation into main. See the shared
+engine foundation, trace-security correction, recorded replay and Match Data Hub.
+This validation branch combines pending runtime #53, native analysis #57,
+Control vs Chaos #42/#58, acceptance controls #59 and teammate compatibility
+work (#48/#51/#54). Their presence here demonstrates a test combination, not
+review acceptance or main integration. See the shared
 [architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
+
 
 | Capability | Status and boundary |
 |---|---|

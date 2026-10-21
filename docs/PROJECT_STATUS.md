@@ -1,5 +1,31 @@
 # Current project status - 2026-10-21
 
+
+## Current Satvik acceptance boundary (2026-10-21)
+
+Verified main is `4d8a01e`; live runtime consumers are forward-integration #53,
+not established as main by older PRs merged into intermediate branches.
+
+| Assigned issue | Implemented boundary | Remaining acceptance gate |
+|---|---|---|
+| #6 Checkpoints | Canonical save/isolated restore/parity in engine; #59 adds original snapshot and server-replayed historical state inspection, terminal checkpoints and measurements | Diyan runtime/consumer review and integration |
+| #8 ForkCast | Real paired trials, comparisons and provenance; #59 adds explicit independent verification and cited source-branch navigation | Diyan/Mahir review and integration |
+| #10 Control Room | Actual operator APIs, refresh/retry and analysis; #59 fixes retained private retry state after disconnect | #53/#59 review and integration |
+| #11 Observer | Recorded snapshots, lazy scene/cameras/profiles/fallback; physical Iris Xe probe recorded in #59 | Runtime consumer review; continuous actor frames unavailable, never inferred |
+| #12 Blender | Seven GLBs pass unchanged manifest/hash/geometry contract; Blender 5.2.2 temporary export/reimport passes | #31 rights-holder provenance/licensing/release approval remains required |
+| #27 Pass Difficulty | Existing versioned formula, verifier, factors/player summaries/exports; runtime #53 and native #57 adapters tested | Native/runtime integration reviews |
+
+#57 and #58 are implemented and exact-head CI verified, with required reviews
+pending. #54 is the separately reviewed ProofTrail request-isolation correction
+for #51. Validation branches may combine #42/#48/#51/#54 for testing; they are
+not substitutes for review or main integration. #32/#33 remain historical
+preparation work; implemented engine contracts supersede those proposals and
+must not be overwritten by them. No issue is closed by this status update.
+
+The measurements and reproduction commands in [LIVE_SANDBOX](LIVE_SANDBOX.md)
+include bounded local checkpoint/ForkCast and physical Intel Iris Xe evidence.
+Earlier reports below describe their recorded revisions and remain historical.
+
 ## Current integration boundary
 
 Observed main is `4d8a01e5e3483f6a4aafb62cd09def6fcfdd3713`: engine foundation #40 and trace authorization #45 are included. PRs #41, #46, #43 and #47 were merged into intermediate feature branches; their merged status alone does not establish main availability.
@@ -24,7 +50,7 @@ Follow-up local verification: **171 backend tests and 39 browser cases passed**,
 - Pass Difficulty (#28), replay Sandbox subset (#29), optional procedural 3D event observer (#30), persistent browser-local analysis, bookmarks and verified exports (#37).
 - Match Data Hub (#38, merged at `9eeeb2d74feb61fa4783ebfeb994f2a2f8044126`): canonical JSON validation/preview, authorized atomic import, searchable library, quality inspection and portable packages.
 
-## Issue #2 architecture audit
+## Issue #2 architecture audit (historical inspection)
 
 Live browser inspection confirms main 50f72e2, open #40 (224be7c) -> main,
 open #41 (f2854ae) -> engine branch, open #43 (b715e6a) -> live integration.
