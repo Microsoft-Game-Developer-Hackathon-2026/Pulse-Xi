@@ -143,7 +143,7 @@ def _execute(ctx: ToolContext, role: str, name: str, raw_args: dict) -> dict:
             end = request.window_start + request.window_seconds
             if end > request.at_second or end > ctx.match.duration_seconds:
                 raise ToolFailure("invalid_window")
-            source_events = window_events(ctx.events, request.window_start - 1, end)
+            source_events = window_events(ctx.events, request.window_start, end)
             calculated = metrics_at(ctx.match, source_events, end)
             payload = {
                 "formula_version": METRICS_FORMULA_VERSION,
