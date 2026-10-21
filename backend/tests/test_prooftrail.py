@@ -100,3 +100,15 @@ def test_prooftrail_rejects_future_or_invalid_windows(runtime_db):
             storage.manifest('alice', baseline.session_id),
             'press-change', 121, checkpoint.tick,
         )
+
+
+def test_prooftrail_conceals_another_owners_branch_and_baseline(runtime_db, monkeypatch):
+    monkeypatch.setenv('PULSE_RUNTIME_TOKENS', '{"alice":"' + 'a' * 32 + '","bob":"' + 'b' * 32 + '"}')
+    baseline, branch, _ = divergent_pair()
+    other = create(owner='bob', operation_id='bob-root')
+    with TestClient(app) as client:
+        path = f'/api/sandbox/sessions/{branch.session_id}/prooftrail'
+        params = {'baseline_session_id': baseline.session_id, 'intervention_id': 'press-change', 'at_tick': 120}
+        assert client.get(path, params=params, headers={'Authorization': 'Bearer ' + 'b' * 32}).status_code == 404
+        params['baseline_session_id'] = other.session_id
+        assert client.get(path, params=params, headers={'Authorization': 'Bearer ' + 'a' * 32}).status_code == 404

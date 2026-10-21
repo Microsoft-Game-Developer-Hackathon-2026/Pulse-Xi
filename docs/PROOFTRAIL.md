@@ -4,6 +4,12 @@ The authenticated authoritative sandbox runtime already records immutable checkp
 
 ## Endpoint
 
+The browser comparison form holds credentials only in memory. Clear, changes to
+any comparison field (including credentials), and unmount cancel pending requests.
+Existing results are invalidated on edits; late success or failure responses cannot
+replace the cleared or edited state. A new explicit comparison can be submitted
+after cancellation. This does not revoke server credentials or undo server work.
+
 `GET /api/sandbox/sessions/{branch_session_id}/prooftrail?baseline_session_id={session_id}&intervention_id={operation_id}&at_tick={tick}`
 
 The endpoint uses the existing sandbox bearer-token authentication. Both sessions and the referenced checkpoint must belong to the authenticated operator; cross-owner identities remain concealed as 404. A caller cannot submit metric values or evidence IDs.

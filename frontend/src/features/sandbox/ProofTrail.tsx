@@ -45,6 +45,14 @@ export function SandboxProofTrail() {
   const request = useRef<AbortController | null>(null)
   useEffect(() => () => request.current?.abort(), [])
 
+  function invalidate() {
+    request.current?.abort()
+    request.current = null
+    setPending(false)
+    setResult(null)
+    setError('')
+  }
+
   async function compare(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     request.current?.abort()
@@ -74,14 +82,14 @@ export function SandboxProofTrail() {
 
   return <section className="prooftrail-studio" aria-labelledby="prooftrail-title">
     <div className="prooftrail-heading"><div><span className="section-index">SANDBOX LAB / BRANCH EVIDENCE</span><h2 id="prooftrail-title">ProofTrail comparison</h2><p>Compare an operator-owned checkpoint branch with its baseline. Both manifests are independently replay-verified.</p></div></div>
-    <form className="prooftrail-form" onSubmit={compare} aria-busy={pending}>
+    <form className="prooftrail-form" onSubmit={compare} onChange={invalidate} aria-busy={pending}>
       <label>Operator bearer token<input type="password" autoComplete="off" value={token} onChange={event => setToken(event.target.value)} required aria-describedby="prooftrail-token-help"/></label>
       <p id="prooftrail-token-help">Sent only to this server for this request; it is held in page memory and is not saved to browser storage.</p>
       <label>Baseline session ID<input value={baseline} onChange={event => setBaseline(event.target.value)} required autoComplete="off"/></label>
       <label>Branch session ID<input value={branch} onChange={event => setBranch(event.target.value)} required autoComplete="off"/></label>
       <label>Intervention operation ID<input value={intervention} onChange={event => setIntervention(event.target.value)} required autoComplete="off"/></label>
       <label>Compare through tick<input type="number" min="1" max="5400" step="1" value={atTick} onChange={event => setAtTick(event.target.value)} required/></label>
-      <div className="prooftrail-actions"><button type="submit" disabled={pending}>{pending ? 'Verifying…' : 'Verify and compare'}</button><button type="button" className="prooftrail-clear" onClick={() => { request.current?.abort(); request.current = null; setPending(false); setToken(''); setBaseline(''); setBranch(''); setIntervention(''); setResult(null); setError('') }}>Clear</button></div>
+      <div className="prooftrail-actions"><button type="submit" disabled={pending}>{pending ? 'Verifying…' : 'Verify and compare'}</button><button type="button" className="prooftrail-clear" onClick={() => { invalidate(); setToken(''); setBaseline(''); setBranch(''); setIntervention('') }}>Clear</button></div>
     </form>
     {error && <p className="prooftrail-error" role="alert">{error}</p>}
     {result && <div className="prooftrail-result" aria-live="polite">
