@@ -160,7 +160,10 @@ test('unauthorized operator stays signed out and duplicate pending creation is d
   const gate = new Promise<void>(resolve => { release = resolve })
   let calls = 0
   const previous = await page.getByLabel('Runtime / branch').inputValue()
-  await page.route('**/api/sandbox/scenarios', async route => { calls++; await gate; await route.continue() })
+  await page.route('**/api/sandbox/scenarios', async route => {
+    if (route.request().method() === 'POST') { calls++; await gate }
+    await route.continue()
+  })
   await page.getByRole('button', { name: 'Create authoritative scenario' }).click()
   await expect(page.getByRole('button', { name: 'Create authoritative scenario' })).toBeDisabled()
   release()
