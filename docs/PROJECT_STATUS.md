@@ -2,7 +2,9 @@
 
 ## Authoritative engine branch
 
-The dedicated engine change adds real scenario configuration, deterministic bounded transitions, durable sessions, revision/idempotency controls, complete checkpoint capture/restore, isolated branches, effective-tick tactics and replayable manifests. See [the actual API and evidence](AUTHORITATIVE_ENGINE.md). Branch verification: 148 backend tests (54 engine cases plus 94 existing) and all 33 browser regression cases pass; strict TypeScript/production build passes. These are branch results, not evidence of a merge or teammate approval. Existing Sandbox UI integration, higher-level ForkCast orchestration/comparison and shared contract review remain open. The asset and preparation PRs are untouched.
+The engine foundation PR #40 adds scenario configuration, deterministic bounded transitions, durable sessions, revision/idempotency controls, complete checkpoint capture/restore, isolated branches, effective-tick tactics and replayable manifests. Its follow-up implements the live Control Room, durable server runs, authenticated snapshot/delta observer, historical seek and verified paired ForkCast with source-event drilldown and file-only experiment verification. See [the actual workflow and contracts](LIVE_SANDBOX.md). Foundation verification was 148 backend tests and 33 browser cases; the follow-up adds integration/recovery/concurrency/backup and browser workflow tests. These are branch results, not evidence of a merge or teammate approval. Shared contract review remains open. The asset and preparation PRs are untouched.
+
+Follow-up local verification: **171 backend tests and 39 browser cases passed**, including all previous regressions; strict TypeScript/production build and both independent file-only verifiers passed. The run/experiment tests use actual transitions and SQLite, including multi-worker retries, process recovery, cancellation, historical boundaries and paired comparison verification. GitHub CI results are recorded on the follow-up PR.
 
 ## Integrated product
 
