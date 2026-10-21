@@ -236,7 +236,17 @@ def test_websocket_snapshot_delta_reconnect_authorization_and_revocation(monkeyp
         monkeypatch.setenv('PULSE_RUNTIME_TOKENS', json.dumps({'alice': TOKEN}))
         with client.websocket_connect(path + '?cursor=1') as socket:
             socket.send_json({'token': TOKEN})
-            assert socket.receive_json()['view']['revision'] == 1
+            recovered = socket.receive_json()
+            committed = storage.get_runtime('alice', root.session_id)
+            assert recovered['kind'] == 'snapshot'
+            assert recovered['view']['revision'] == 1
+            assert recovered['view']['event_cursor'] == committed.event_cursor
+            assert recovered['view']['state']['events'] == [e.model_dump(mode='json') for e in committed.state.events]
+        with client.websocket_connect(path + f'?cursor={committed.event_cursor + 1}') as socket:
+            socket.send_json({'token': TOKEN})
+            with pytest.raises(WebSocketDisconnect) as error:
+                socket.receive_json()
+            assert error.value.code == 4409
         with client.websocket_connect(path) as socket:
             socket.send_json({'token': 'wrong'})
             with pytest.raises(WebSocketDisconnect) as error: socket.receive_json()
