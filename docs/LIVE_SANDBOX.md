@@ -638,8 +638,21 @@ verification. TestClient includes auth/validation/serialization but no remote
 network round trip. These are bounded local samples, not release SLAs or physics
 accuracy measurements.
 
-The final local regression passed 292 backend tests and 63 real browser cases
+The final local regression passed 292 backend tests and 64 real browser cases
 with strict TypeScript/build. Both original example CLIs pass without regenerating
 fixtures; pip check and dependency audits pass. One existing TestClient deprecation
 and the existing large lazy-renderer chunk advisory remain visible. See
 PROJECT_STATUS and the integration PR for exact-head CI and acceptance evidence.
+
+
+A maximum-workload check used seed 7, both teams tempo/pressing 100, a paused
+tick-4800 checkpoint (3,576 source events), five pairs and a 600-second horizon.
+Its 3,495,540-byte reproduction archive exceeded the unchanged 2 MB HTTP boundary
+(413), and the independent offline CLI verified it successfully. The creation/run/
+export portion measured 25.164 seconds locally, excluding the source warmup and
+offline verifier; this is one sample, not a budget guarantee. The real browser
+regression repeats that bounded experiment, proves the parent hash is unchanged,
+checks that no oversized verification upload is attempted, downloads the archive
+and runs the CLI successfully. The UI explains the offline command and explicitly
+states that browser verification has not completed. The 20 MB offline cap is
+preserved; the HTTP safety limit is not raised.

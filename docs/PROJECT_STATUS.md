@@ -17,7 +17,7 @@ record was retained. No other feature branch was absorbed.
 | #9 | Raw manifests remain compatible. Versioned reproduction wrappers add unsigned export-build Git/Python/OS context; unrecorded original execution environment is explicit. API/CLI accept wrappers and legacy files; bounded reads, schema/version/unknown/duplicate/oversize rejection and named first-divergence tests pass. CI now explicitly runs both committed example CLIs and pip check. |
 
 Local final regression: **292 backend tests passed** (one existing TestClient
-httpx deprecation warning), **63 Playwright cases passed** with strict TypeScript
+httpx deprecation warning), **64 Playwright cases passed** with strict TypeScript
 and production build, both committed CLI verifiers returned verified=true,
 pip check passed, seven assets validated with zero errors/warnings, npm audit
 reported zero advisories and pip-audit found zero known advisories in the 29-package
@@ -28,7 +28,8 @@ Self-review A checked deterministic boundaries, atomic migration/receipt recover
 branch isolation and compatibility. B checked owner concealment, export trust,
 private caching, bounded JSON/file reads and credential handling. Corrections:
 private exports use no-store; cancelled source checkpoints cannot appear eligible
-for ForkCast; CLI reads are capped themselves; unrelated enclosing Git roots are
+for ForkCast; archives above the online upload limit direct users to the verified
+offline path; CLI reads are capped themselves; unrelated enclosing Git roots are
 not misattributed. Hash-sensitive models/engine/manifest/control/experiments,
 committed golden/example artifacts, dependencies and original assets are unchanged.
 
