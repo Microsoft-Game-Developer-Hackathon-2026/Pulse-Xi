@@ -85,4 +85,3 @@ scenario-archive/1; GET `/api/sandbox/scenarios/{id}/archive` exports the persis
 record. New private responses use Cache-Control: no-store. See
 [LIVE_SANDBOX](LIVE_SANDBOX.md#saved-scenario-library-and-archives) for schema,
 identity verification, idempotence, errors, migration and rollback details.
-
