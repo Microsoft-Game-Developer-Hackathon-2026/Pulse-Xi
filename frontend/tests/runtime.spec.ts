@@ -133,6 +133,26 @@ test('stale revision and interrupted response reconcile without double-applying 
   await expect(page.getByLabel('Authoritative match clock')).toHaveText('00:11')
 })
 
+test('disconnect clears private pending operation state and reconnect reads committed truth',async ({page,request})=>{
+  const sid=await create(page,120)
+  await page.getByLabel('Step seconds').fill('10')
+  await page.route(`**/api/sandbox/sessions/${sid}/commands`,async route=>{
+    const response=await route.fetch(); expect(response.ok()).toBe(true)
+    await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({detail:{code:'interrupted_response'}})})
+  },{times:1})
+  await page.getByRole('button',{name:'Step engine',exact:true}).click()
+  await expect(page.getByRole('button',{name:'Retry original operation safely'})).toBeVisible()
+  await page.getByRole('button',{name:'Disconnect operator',exact:true}).click()
+  await page.getByLabel('Operator access token').fill(token)
+  await page.getByRole('button',{name:'Connect operator',exact:true}).click()
+  await expect(page.getByLabel('Authoritative match clock')).toHaveText('00:10')
+  await expect(page.getByRole('button',{name:'Retry original operation safely'})).toHaveCount(0)
+  await page.getByRole('button',{name:'Step engine',exact:true}).click()
+  await expect(page.getByLabel('Authoritative match clock')).toHaveText('00:20')
+  const state=await (await request.get(`/api/sandbox/sessions/${sid}/state`,{headers})).json()
+  expect(state.revision).toBe(2)
+})
+
 test('mobile and keyboard controls inspect committed history without future events', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
