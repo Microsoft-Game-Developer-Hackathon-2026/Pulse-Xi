@@ -7,9 +7,16 @@ for (const width of [1280, 390]) {
     const seek = page.getByRole('slider', { name: 'Seek match time' })
     await seek.fill('1000')
     await expect(page.locator('.recap-body')).not.toContainText('Loading')
-    // Exercise near the document end, including temporary analytics loading collapse.
-    await page.locator('.studio').scrollIntoViewIfNeeded()
-    const initial = await page.evaluate(() => window.scrollY)
+    // Scroll and update in one task, before the browser delivers its queued scroll
+    // event. Async panel collapse must not invalidate the occupied viewport.
+    const initial = await seek.evaluate(element => {
+      document.querySelector('.studio')!.scrollIntoView({ block: 'start' })
+      const before = window.scrollY
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(element, '3500')
+      element.dispatchEvent(new Event('input', { bubbles: true }))
+      element.dispatchEvent(new Event('change', { bubbles: true }))
+      return before
+    })
     expect(initial).toBeGreaterThan(500)
     // Change the real React replay control without Playwright scrolling it into view.
     // This exercises the same state and backend analytics as playback.
