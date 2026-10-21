@@ -35,7 +35,7 @@ The verifier rejects fabricated or stale claims at source: callers cannot provid
 
 ## Limits and security
 
-The endpoint inherits existing runtime limits (20,000 events per session, 32 checkpoint ancestors, bounded request bodies), owner scoping, and transactionally persisted source history. It does not expose other sessions, hidden branches, token values, or local paths. A future narrative explainer must consume this verified packet and undergo separate claim verification; no model or provider is invoked here.
+The endpoint inherits existing runtime limits (20,000 events per session, 32 checkpoint ancestors, bounded request bodies), owner scoping, and transactionally persisted source history. The response is capped at 4,000 cited metric events across the four context/comparison windows; larger windows return an actionable 422 and should be narrowed. It does not expose other sessions, hidden branches, token values, or local paths. A future narrative explainer must consume this verified packet and undergo separate claim verification; no model or provider is invoked here.
 
 ## Verification coverage
 
