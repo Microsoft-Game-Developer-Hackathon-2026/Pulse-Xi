@@ -8,7 +8,7 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 
 ## Availability and review status (2026-10-21)
 
-Main baseline `aefc046ccb4b54ad10f16575a57fa76f820a5051` includes live runtime #53, saved scenarios/archives and runtime schema 3 (#64/#65), plus original graphics #62. #52 remains open but its credential hardening and dependency constraints are present through #53; do not merge the older standalone branch over the runtime lifespan.
+Main baseline `4d1d11c7deac2a5632ff8d374e362732c2828491` includes #67 recorded-event observer synchronization, live runtime #53, saved scenarios/archives and runtime schema 3 (#64/#65), plus original graphics #62. #52 remains open but its credential hardening and dependency constraints are present through #53; do not merge the older standalone branch over the runtime lifespan.
 
 Native analysis #57, checkpoint/history/ForkCast acceptance additions #59 and runtime Control vs Chaos #58 remain under review. Recorded Control vs Chaos #42, FanDNA expansion #48 and branch ProofTrail #51 with request-isolation fix #54 are separate review-gated work. Draft agent tools #55, cost-gated Foundry validation #56 and Broadcast Studio proposal #50 are not shipped. Assets are technically integrated; manifest release approval and rights-holder decisions remain separate. Main's current runtime analysis projection supports 5,400-second scenarios; native engine controls already support shorter scenarios.
 
