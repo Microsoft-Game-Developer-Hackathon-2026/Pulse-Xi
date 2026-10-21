@@ -74,6 +74,7 @@ def test_prooftrail_api_is_owner_scoped_and_rejects_unrelated_baseline(runtime_d
             headers=headers,
         )
         assert response.status_code == 200, response.text
+        assert response.headers.get("cache-control") == "no-store"
         assert response.json()['verification_result'] == 'verified'
         assert client.get(
             f'/api/sandbox/sessions/{branch.session_id}/prooftrail',
