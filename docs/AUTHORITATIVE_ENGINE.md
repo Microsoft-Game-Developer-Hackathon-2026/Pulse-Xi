@@ -22,10 +22,12 @@ do not verify this revision or establish teammate approval. #31/#32/#33 remain
 separate asset/preparation work; #42 is separate analytics work.
 
 This revision is isolated on `feat/issue-2-architecture-alignment` from `f2854ae`:
-the schema-2 architecture requires both #40 and #41. Intended integration is into
-#41 after verification, preserving its base and avoiding duplicate implementation
-PRs. Terminal fetch/push cannot reach GitHub; browser inspection supplies live
-status, not refreshed remote-tracking refs. Nothing below is claimed merged.
+the schema-2 architecture requires both #40 and #41. Publication uses a dedicated
+architecture PR with base `feat/live-sandbox-integration`, keeping its six-file
+diff visible without changing #41 or teammate branches. Merge dependencies remain
+#40 then #41, followed by architecture integration and the separately reviewed
+#43. Terminal fetch/authentication now work; remote heads were refreshed and
+confirmed unchanged. Nothing below is claimed merged or approved.
 
 ## Component ownership and trust boundaries
 
@@ -240,8 +242,11 @@ Poll/render timers never advance football.
 
 All paths below start `/api/sandbox`, require bearer operator auth and conceal
 foreign resources as 404. Success is **200**, including creation. Every row is
-**Implemented on an open feature branch** and **Not yet verified** by execution
-in this audit. Historical CI is recorded above; these are not main endpoints.
+**Implemented on an open feature branch**. The behavioral contracts in the test
+matrix are **Verified by tests** in this audit: 171 backend cases and 39 browser
+cases passed. Generated schemas, success declarations and operator dependencies
+were inspected for all 30 Sandbox HTTP operations; this is not exhaustive testing
+of every input/error permutation. Historical CI above is separate; these are not main endpoints.
 Existing main `/api/matches` and replay WS remain stable and public.
 
 | Branch | Method/path | Request/query -> response | Consumer, concurrency and errors |
@@ -279,9 +284,15 @@ tick, lifecycle, duplicate intent or cursor conflict; 422 invalid boundary/corru
 snapshot; 429 finite capacities; 503 missing auth/database/write failure. Framework
 422 uses located arrays. RequestBoundary independently returns string detail for
 400 ambiguous/nonfinite/deep JSON or 413 bodies >2MB. Shared ErrorResponse
-declarations do not model all these families. Generate `/openapi.json` from the
-exact app before generating clients; Python execution was blocked here, so fresh
-OpenAPI inspection remains a verification gate. No generated schema was fabricated.
+declarations do not model all these families. Actual TestClient GET `/openapi.json`
+returned OpenAPI 3.1.0 with 73 component schemas and 30 Sandbox HTTP operations.
+All 30 declare 200 and the Authorization header and use require_operator. Some
+schemas have distinct `-Input`/`-Output` names (for example ScenarioConfig and
+EngineState); consumers must follow actual references, not assume unsuffixed names.
+MatchEvent retains the JSON `type` alias; ScenarioConfig input forbids extra fields.
+The header appears optional in OpenAPI because the dependency supplies a default,
+but authorization is mandatory at runtime; denial behavior is tested. Generate
+clients from this actual schema and preserve the documented error-family caveat.
 
 ## Persistence, migration and restart boundaries
 
@@ -339,17 +350,23 @@ are public. Browser notes are not authenticated evidence.
 Hosted workflows remain explicit/admin-gated and outside simulation transitions.
 Deterministic facts do not depend on provider prose. `configured_not_verified`
 health is not authenticated inference; fallback is verified_rule_based_templates.
-No paid calls or provisioning occurred here. Trace GET currently fails open if its
-admin token is absent; the register below records this existing defect. Do not
+No paid calls or provisioning occurred here. Trace GET in this architecture/base
+branch fails open if its admin token is absent. Issue #44 was reproduced and a
+separate main-based [PR #45](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/45) supplies fail-closed reads and regression tests;
+it is not part of this architecture diff and must pass its own review. Do not
 claim a completely protected privileged trace boundary or complete security audit.
 Further review areas: proxy redaction/HTTPS, dependency licensing, validation-error
 echo, filesystem aliases, observer limits/backpressure, shared DB quota exhaustion
-and costly bounded verification. Experiments are descriptive model hypotheses,
+and costly bounded verification. `npm audit --json` exits 1 with one high-severity
+Vite finding on this branch's 7.3.6 lockfile (launch-editor advisories). PR #43
+already upgrades to 7.3.7; dependency remediation remains a separate integration
+gate, not a fabricated zero-vulnerability claim or a reason to change this lockfile.
+Experiments are descriptive model hypotheses,
 not calibrated probabilities, causal validation or real-match predictions.
 
 ## Contract test matrix and downstream dependency map
 
-Covered below means existing assertions were inspected, not newly run. Reuse these
+The matrix below was exercised by the passing full suites in this audit. Reuse these
 suites rather than adding a duplicate architecture suite. Engine/runtime file names
 refer to backend/tests/test_authoritative_engine.py and test_runtime_integration.py.
 
@@ -377,13 +394,19 @@ cd ..
 git diff --check
 ```
 
-This audit: .venv could not start because access to its base interpreter was
-denied; pytest and both verifiers did not run. npm.ps1 was blocked by PowerShell
-policy. `npm.cmd run test:e2e` passed TypeScript then Vite/esbuild failed reading
-a denied ancestor directory while resolving vite.config.ts; browser cases never
-started. Direct `node node_modules/typescript/bin/tsc -b` passed. No assertions
-were skipped/weakened. Final-revision backend/build/browser/verifier execution is
-required before push/integration acceptance; historical CI is not a substitute.
+Verification recovery (2026-10-21): the previous restricted execution profile
+denied access to Python and esbuild's ancestor-directory lookup. With the updated
+profile the existing Python 3.13.15 .venv works; no environment deletion, system
+installation, dependency change or PowerShell policy change was required. Use
+`npm.cmd` on Windows. On architecture checkpoint b6a420c, full backend pytest
+passed 171 cases (exit 0); both independent verifiers returned verified=true
+(exit 0 each); npm.cmd run test:e2e passed strict TypeScript, production Vite build
+and all 39 Playwright cases (exit 0). No tests were skipped or assertions weakened.
+The publication follow-up changes documentation only, preserving those tested
+source/test/lockfile bytes. pip check passed. OpenAPI inspection passed after
+correcting the audit script's initial assumption about unsuffixed schema names.
+Two upstream TestClient deprecation warnings and the existing optional-renderer
+chunk-size warning remain; they are not test failures or hardware FPS evidence.
 
 Proposed performance budgets to validate, not results/SLAs: 60fps (16.7ms frame)
 on declared observer hardware/profile; p95 committed observer visibility <2s
@@ -413,14 +436,14 @@ times independently; software-rendered browser success is not hardware FPS.
 | docs/DECISIONS.md | SQLite called future work; generic browser clock conflates replay/runtime | Replace stale ADR with actual separate owners/store/version/restore decisions; existing clock/migration tests |
 | Architecture guides/model names | Issue concepts can imply nonexistent WorldState/ClockState/Branch/ObserverFrame classes | Explicit code mappings, three diagrams/API/status matrix here; no duplicate implementation |
 | README availability | Live branch features can be mistaken for current main | Explicit open-stack boundary based on live GitHub inspection |
-| api.observe / runtime tests | Reconnect test checks revision but not complete replacement history or ahead-cursor behavior | Extend existing test to assert event history/frontier and close 4409; execution blocked |
-| Engine adapter test | Scores/mirrored x checked, but no direct v1 alias roundtrip/every roster reference assertion | Extend existing fulltime case for roundtrip, unique IDs and references; execution blocked |
-| main.py::agent_traces | Privileged read should fail closed; absent admin token bypasses check | [Issue #44](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/44), low severity/P2, existing defect from d95cbda0 on main and #40/#41; static evidence, HTTP execution blocked; separate owner fix/tests required |
-| OpenAPI error declarations | Shared detail.code model omits boundary string/located validation errors; WS unmodeled | Document actual error families/frame shapes; fresh generated OpenAPI/client conformance remains verification gate |
+| api.observe / runtime tests | Reconnect test checked revision but not complete replacement history or ahead-cursor behavior | Existing test now asserts event history/frontier and close 4409; passed in the 171-case run |
+| Engine adapter test | Scores/mirrored x checked, but no direct v1 alias roundtrip/every roster reference assertion | Existing fulltime case now checks roundtrip, unique IDs and references; passed for all three seeds |
+| main.py::agent_traces | Privileged read should fail closed; absent admin token bypasses check | [Issue #44](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/44), low severity/P2, introduced d95cbda0; reproduced 200 with sentinel on unset/empty config and exception on malformed credentials; separate [PR #45](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/45) tested on main: 97 backend/33 browser cases, pending review |
+| OpenAPI error declarations | Shared detail.code model omits boundary string/located validation errors; WS unmodeled | Actual OpenAPI inspected; document error families/frame shapes and Input/Output naming; generated-client conformance is not claimed |
 
-Issue #2 remains pending successful final-revision verification, publication,
-teammate contract review and integration acceptance. Documentation alone cannot
-close the issue.
+Issue #2 remains open pending teammate contract review and integration acceptance.
+Local verification is recorded above; publication and exact-head CI are recorded
+on the architecture PR. Neither tests nor documentation substitute for review.
 
 Independent defect-audit scope: inspected merged fixture/replay contracts,
 library import/lifecycle/migration/backup authorization and tests, sparse-event
@@ -429,8 +452,8 @@ analysis adapter diff. No additional defect was established in those inspected
 paths. In particular #43 reuses the engine projection, rejects future cutoffs,
 does not publish private events and distinguishes cutoff from committed hashes.
 This is a limited static finding, not certification of the full #43 diff or a
-complete review of asset/preparation PRs. Browser/build/backend execution limits
-above remain. No issue was created for stylistic disagreements. Stale architecture
+complete review of asset/preparation PRs. No issue was created for stylistic
+disagreements. Stale architecture
 documentation is corrected here rather than reported as a duplicate issue.
 
 The follow-up [Live Sandbox guide](LIVE_SANDBOX.md) adds the working Control Room,
