@@ -223,6 +223,21 @@ print(canonical(storage.get_checkpoint('alice', receipt.checkpoint_id)))
     assert json.loads(process.stdout) == original.model_dump(mode='json')
 
 
+def test_backup_rejects_detached_checkpoint_metadata(database):
+    root, command = checkpoint()
+    saved = storage.mutate('alice', root.session_id, command)
+    # SQLite permits NULL in a non-integer PRIMARY KEY, and NULL bypasses FKs.
+    # A corrupt offline store can retain equal row counts but lose the join
+    # that owner-authorized checkpoint reads require.
+    with sqlite3.connect(storage.runtime_database_path()) as db:
+        db.execute('UPDATE checkpoint_metadata SET id=NULL WHERE id=?', (saved.checkpoint_id,))
+        assert not db.execute('PRAGMA foreign_key_check').fetchall()
+    destination = database / 'must-not-be-created.sqlite'
+    with pytest.raises(ValueError, match='checkpoint metadata mismatch'):
+        copy_database(storage.runtime_database_path(), destination)
+    assert not destination.exists()
+
+
 def test_calendar_metadata_does_not_change_continuation_or_experiment_hashes(database, monkeypatch):
     outputs = []
     for index, timestamp in enumerate([FIRST, SECOND]):
