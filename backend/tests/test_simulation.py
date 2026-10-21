@@ -170,4 +170,4 @@ def test_agent_auditor_and_unconfigured_guard():
     client = TestClient(app)
     response = client.post(f"/api/insights/{insight.insight_id}/agent-run")
     assert response.status_code == 503
-    assert client.get("/api/agent-traces").json() == []
+    assert client.get("/api/agent-traces").status_code == 503

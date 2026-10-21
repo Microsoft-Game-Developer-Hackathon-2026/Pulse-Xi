@@ -1,5 +1,7 @@
 # Event contract v1.0
 
+The new authenticated, durable sandbox runtime has a separate [authoritative engine contract](AUTHORITATIVE_ENGINE.md). It preserves this legacy replay/import contract and uses a separate runtime database.
+
 Pass difficulty is a separate versioned read-only contract; see [formula, API and limitations](PASS_DIFFICULTY.md). It preserves the event and existing metrics contracts.
 
 The authoritative schema is `backend/app/models.py`; FastAPI serves machine-readable OpenAPI at `/openapi.json`. Every event has a stable `event_id`, a `match_id`, a delivery `sequence`, a logical `match_second`, `period`, `source_type`, `schema_version`, and a UTC generation timestamp. Coordinates are normalized to 0–100 from the attacking team's point of view. Team/player references must belong to the fixture.
@@ -68,3 +70,19 @@ Whole-database restore rotates dataset generation IDs and deletion nonces in the
 The FanDNA replay controls have typed English, Spanish and Hindi message catalogs. A missing catalog entry falls back to English and the interface announces that fallback. The locale is applied to the main application region for assistive technology. The existing recap API remains a deterministic template over verified goal evidence; localized copy does not alter scores, clocks, insight IDs or supporting event IDs. Persona labels and analyst/broadcaster templates are localized in all three supported locales.
 
 FanDNA preferences use browser-local `pulse-xi-fandna-preferences-v1`, schema version 1. It stores only locale, persona and selected synthetic team/player IDs; invalid or unknown values return to defaults, and favorites are checked against the selected fixture. Storage failure does not block replay. No speech provider, voice cloning, network speech request, or paid Azure Speech feature is enabled; voice requires a separately approved cost and consent design.
+
+## Owner-scoped runtime analysis
+
+The integrated runtime exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. They reuse existing calculations over a committed engine-owned v1 projection, reject future cutoffs and conceal other owners. Private runtime datasets are not resolved through public `/api/matches` routes. Current compatibility is 5400-second scenarios only. See [LIVE_SANDBOX](LIVE_SANDBOX.md#existing-analysis-integration) for every route, local bookmark namespace, export limits and runtime-boundary hash scope. Neither dataset lifecycle nor engine state serialization is replaced.
+
+## Saved scenarios (runtime schema 3)
+
+The scenario library remains separate from imported-match storage (library schema 2).
+Authenticated GET `/api/sandbox/scenarios` returns at most 100 owned summaries,
+ordered by scenario ID. Existing create/read/preset payloads remain compatible.
+POST `/api/sandbox/scenarios/import` accepts strict raw ScenarioConfig or
+scenario-archive/1; GET `/api/sandbox/scenarios/{id}/archive` exports the persisted
+record. New private responses use Cache-Control: no-store. See
+[LIVE_SANDBOX](LIVE_SANDBOX.md#saved-scenario-library-and-archives) for schema,
+identity verification, idempotence, errors, migration and rollback details.
+
