@@ -57,7 +57,9 @@ def validate_database(db: sqlite3.Connection) -> dict:
     for payload, in db.execute('SELECT payload FROM checkpoints'):
         restore_state(json.loads(payload))
     if version >= 4:
-        if db.execute('SELECT COUNT(*) FROM checkpoint_metadata').fetchone()[0] != db.execute('SELECT COUNT(*) FROM checkpoints').fetchone()[0]:
+        count = db.execute('SELECT COUNT(*) FROM checkpoints').fetchone()[0]
+        if (db.execute('SELECT COUNT(*) FROM checkpoint_metadata').fetchone()[0] != count
+                or db.execute('SELECT COUNT(*) FROM checkpoints c JOIN checkpoint_metadata m ON c.id=m.id').fetchone()[0] != count):
             raise ValueError('runtime backup checkpoint metadata mismatch')
         for created, in db.execute('SELECT created_at_utc FROM checkpoint_metadata'):
             CheckpointMetadata(created_at_utc=created)
