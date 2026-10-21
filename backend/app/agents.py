@@ -33,8 +33,10 @@ def audit_model_packet(packet: dict, insight: Insight, match: Match, events: lis
     if not isinstance(packet["headline"], str) or not isinstance(packet["commentary"], str):
         return False
     if (not isinstance(packet["event_ids"], list) or not packet["event_ids"]
-            or len(packet["event_ids"]) > 20 or len(set(packet["event_ids"])) != len(packet["event_ids"])
-            or any(not isinstance(event_id, str) for event_id in packet["event_ids"]):
+            or len(packet["event_ids"]) > 20
+            or any(not isinstance(event_id, str) for event_id in packet["event_ids"])):
+        return False
+    if len(set(packet["event_ids"])) != len(packet["event_ids"]):
         return False
     if not set(packet["event_ids"]).issubset(insight.supporting_event_ids):
         return False
@@ -50,10 +52,6 @@ async def run_specialists(match: Match, events: list[MatchEvent], insight: Insig
     if not configured():
         raise RuntimeError("Foundry is not enabled/configured")
     # Lazy imports keep local deterministic operation dependency-free.
-    from agent_framework.foundry import FoundryChatClient
-    from agent_framework.orchestrations import SequentialBuilder
-    from azure.identity import AzureCliCredential
-
     started = time.perf_counter()
     run_id = str(uuid4())
     trace = {
@@ -76,6 +74,10 @@ async def run_specialists(match: Match, events: list[MatchEvent], insight: Insig
     TRACES[:] = TRACES[-50:]
     ctx = ToolContext(match=match, events=events, insight=insight, trace=trace)
     try:
+        from agent_framework.foundry import FoundryChatClient
+        from agent_framework.orchestrations import SequentialBuilder
+        from azure.identity import AzureCliCredential
+
         client = FoundryChatClient(project_endpoint=os.environ["FOUNDRY_PROJECT_ENDPOINT"],
                                    model=os.environ["FOUNDRY_MODEL"], credential=AzureCliCredential())
         analyst = client.as_agent(name="TacticalAnalyst", instructions=(
@@ -106,10 +108,11 @@ async def run_specialists(match: Match, events: list[MatchEvent], insight: Insig
         packet = json.loads(raw)
         trace["stages"] = [
             {"role": "TacticalAnalyst", "kind": "foundry_agent", "status": "completed",
-             "tool_names": sorted(name for name in ctx.called_tools if name in
-                                  {"get_match_metrics", "find_key_moments", "get_evidence_for_insight"})},
+             "tool_names": sorted({call["tool_name"] for call in trace["tool_calls"]
+                                  if call["role"] == "TacticalAnalyst"})},
             {"role": "StoryEditor", "kind": "foundry_agent", "status": "completed",
-             "tool_names": sorted(name for name in ctx.called_tools if name == "get_evidence_for_insight")},
+             "tool_names": sorted({call["tool_name"] for call in trace["tool_calls"]
+                                  if call["role"] == "StoryEditor"})},
         ]
         if not audit_model_packet(packet, insight, match, events):
             trace["stages"].append({"role": "EvidenceAuditor", "kind": "deterministic_gate", "status": "rejected"})
