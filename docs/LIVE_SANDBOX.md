@@ -175,6 +175,47 @@ the conservative 2 MB HTTP verification limit; use the independent CLI in that
 case. Executed examples include forkcast.json and comparison.json, regenerated
 by `python scripts/engine-evidence.py` using actual engine/API/worker execution.
 
+## Existing analysis integration
+
+The Control Room's **Recorded-event analysis, bookmarks and 3D** section reuses
+the existing pass heuristic, deterministic ProofTrail rules, statistics, browser
+bookmarks, CSV/JSON exports and lazy observer. All new reads remain under
+`/api/sandbox/sessions/{id}` and require the same owner-scoped Bearer credential:
+
+- `GET /analysis?at_second=N`: one committed runtime boundary, projected events,
+  cutoff statistics and existing verified insights (`runtime-analysis/1`).
+- `GET /pass-difficulty?at_second=N&cursor=0&limit=200`: existing versioned scorer.
+- `GET /passes/{event_id}/difficulty` and `/difficulty/evidence`: selected pass
+  and independently reconstructed source evidence, with the same cutoff query.
+- `GET /analysis-export?at_second=N&category=events|pass|metrics&format=json|csv`:
+  existing bounded export service; optional event/team/type filters are unchanged.
+
+Cutoffs after the committed engine tick are rejected (422); wrong-owner identities
+remain concealed (404). Reads do not step the engine or copy private runtime data
+into the public match library. Analysis responses are no-store. The engine's
+current v1 projection supports **5400-second scenarios only**. Shortened scenarios
+keep their native controls/checkpoints/ForkCast; this panel explicitly reports
+unavailability rather than rescaling timestamps or periods.
+
+The projection preserves engine-generated event identities and each team's
+attacking coordinate frame. The observer shows discrete event coordinates only.
+Pressure remains excluded from the unchanged pass heuristic; engine positions do
+not automatically establish the coverage required by that formula.
+
+Exports include actual scenario/session identity, revision, engine version, cursor,
+seed and boundary hashes. These hashes identify the captured authoritative runtime,
+which may be later than the inspection cutoff; they are not hashes of a rewound
+state or a substitute for the separately downloaded manifest. CSV receives the
+same runtime metadata and existing formula-injection escaping. Existing size limits
+still reject oversized exports instead of truncating them.
+
+Bookmarks retain only local references and unverified notes, with an additive
+`source: runtime` namespace. They require operator reauthentication after refresh;
+no token is saved. Runtime and public-match notes cannot overwrite one another
+when identifiers coincide. The public Data Hub checker skips private references;
+an event beyond the inspection cutoff is not declared deleted. No private runtime
+deep link or public note synchronization is claimed.
+
 ## Migration, backup and validation
 
 Runtime schema 1 migrates atomically to schema 2, adding runs and experiments.

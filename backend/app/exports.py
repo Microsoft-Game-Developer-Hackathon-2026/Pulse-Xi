@@ -40,7 +40,7 @@ def safe_cell(value: Any) -> Any:
 
 
 def analysis_export(match: Match, events: list[MatchEvent], cutoff: int, category: Literal['events', 'pass', 'metrics'],
-                    format: Literal['json', 'csv'], team_id: str | None, event_type: str | None, event_id: str | None) -> Response:
+                    format: Literal['json', 'csv'], team_id: str | None, event_type: str | None, event_id: str | None, *, runtime_provenance: dict[str, Any] | None = None) -> Response:
     if cutoff > match.duration_seconds:
         raise HTTPException(422, 'cutoff exceeds match duration')
     if team_id and team_id not in (match.home.team_id, match.away.team_id):
@@ -82,6 +82,11 @@ def analysis_export(match: Match, events: list[MatchEvent], cutoff: int, categor
         provenance={'fixture_seed': match.seed, 'build_revision': os.getenv('PULSE_BUILD_REVISION') or None,
                     'fixture_generator_version': None, 'engine_manifest': None, 'source_event_ids': supporting_ids, 'event_units': 'normalized pitch coordinates, not metres',
                     'unavailable': ['fixture generator version', 'authoritative engine manifest', 'build revision unless configured']}, data=data)
+    if runtime_provenance is not None:
+        envelope.provenance['runtime'] = runtime_provenance
+        envelope.provenance['fixture_seed'] = None
+        envelope.provenance['scenario_seed'] = match.seed
+        envelope.provenance['unavailable'] = ['fixture generator version', 'embedded engine manifest; download separately']
     filename = re.sub(r'[^A-Za-z0-9_-]', '_', match.match_id)[:80] + f'-{category}-{cutoff}.{format}'
     if format == 'json':
         content = envelope.model_dump_json(indent=2)
@@ -90,10 +95,12 @@ def analysis_export(match: Match, events: list[MatchEvent], cutoff: int, categor
         output = io.StringIO(newline='')
         metadata = ['export_schema', 'export_match_id', 'replay_cutoff', 'generated_at', 'fixture_seed', 'build_revision', 'coordinate_units']
         writer = csv.writer(output)
-        writer.writerow(metadata + fields)
+        runtime_columns = list(runtime_provenance) if runtime_provenance is not None else []
+        writer.writerow(metadata + ['runtime_' + key for key in runtime_columns] + fields)
         for row in data:
             writer.writerow([safe_cell(v) for v in [envelope.schema_version, match.match_id, cutoff, envelope.generated_at,
-                match.seed, envelope.provenance['build_revision'], envelope.provenance['event_units']] + [row.get(f) for f in fields]])
+                envelope.provenance['fixture_seed'], envelope.provenance['build_revision'], envelope.provenance['event_units']] +
+                ([runtime_provenance[key] for key in runtime_columns] if runtime_provenance else []) + [row.get(f) for f in fields]])
         content = '\ufeff' + output.getvalue()
         media_type = 'text/csv'
     if len(content.encode('utf-8')) > 8_000_000:
