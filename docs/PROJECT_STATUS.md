@@ -1,5 +1,17 @@
 # Current project status - 2026-10-21
 
+## Authoritative engine branch
+
+The engine foundation PR #40 adds scenario configuration, deterministic bounded transitions, durable sessions, revision/idempotency controls, complete checkpoint capture/restore, isolated branches, effective-tick tactics and replayable manifests. Its follow-up implements the live Control Room, durable server runs, authenticated snapshot/delta observer, historical seek and verified paired ForkCast with source-event drilldown and file-only experiment verification. See [the actual workflow and contracts](LIVE_SANDBOX.md). Foundation verification was 148 backend tests and 33 browser cases; the follow-up adds integration/recovery/concurrency/backup and browser workflow tests. These are branch results, not evidence of a merge or teammate approval. Shared contract review remains open. The asset and preparation PRs are untouched.
+
+Follow-up local verification: **171 backend tests and 39 browser cases passed**, including all previous regressions; strict TypeScript/production build and both independent file-only verifiers passed. The run/experiment tests use actual transitions and SQLite, including multi-worker retries, process recovery, cancellation, historical boundaries and paired comparison verification. GitHub CI results are recorded on the follow-up PR.
+
+## Integrated product
+
+- Seeded synthetic fixtures, REST/WebSocket replay, event-derived analytics and SQLite persistence.
+- Pass Difficulty (#28), replay Sandbox subset (#29), optional procedural 3D event observer (#30), persistent browser-local analysis, bookmarks and verified exports (#37).
+- Match Data Hub (#38, merged at `9eeeb2d74feb61fa4783ebfeb994f2a2f8044126`): canonical JSON validation/preview, authorized atomic import, searchable library, quality inspection and portable packages.
+
 ## Issue #2 architecture audit
 
 Live browser inspection confirms main 50f72e2, open #40 (224be7c) -> main,
@@ -28,18 +40,6 @@ separate main-based [PR #45](https://github.com/Microsoft-Game-Developer-Hackath
 Review/integration of that fix is required before exposing privileged traces.
 The original architecture head used the older Vite lockfile. This analysis integration retains #43's Vite 7.3.7 upgrade; its current scan is reported separately from historical architecture results. Upstream TestClient
 deprecations and the existing optional-renderer chunk warning remain.
-
-## Authoritative engine branch
-
-The engine foundation PR #40 adds scenario configuration, deterministic bounded transitions, durable sessions, revision/idempotency controls, complete checkpoint capture/restore, isolated branches, effective-tick tactics and replayable manifests. Its follow-up implements the live Control Room, durable server runs, authenticated snapshot/delta observer, historical seek and verified paired ForkCast with source-event drilldown and file-only experiment verification. See [the actual workflow and contracts](LIVE_SANDBOX.md). Foundation verification was 148 backend tests and 33 browser cases; the follow-up adds integration/recovery/concurrency/backup and browser workflow tests. These are branch results, not evidence of a merge or teammate approval. Shared contract review remains open. The asset and preparation PRs are untouched.
-
-Follow-up local verification: **171 backend tests and 39 browser cases passed**, including all previous regressions; strict TypeScript/production build and both independent file-only verifiers passed. The run/experiment tests use actual transitions and SQLite, including multi-worker retries, process recovery, cancellation, historical boundaries and paired comparison verification. GitHub CI results are recorded on the follow-up PR.
-
-## Integrated product
-
-- Seeded synthetic fixtures, REST/WebSocket replay, event-derived analytics and SQLite persistence.
-- Pass Difficulty (#28), replay Sandbox subset (#29), optional procedural 3D event observer (#30), persistent browser-local analysis, bookmarks and verified exports (#37).
-- Match Data Hub (#38, merged at `9eeeb2d74feb61fa4783ebfeb994f2a2f8044126`): canonical JSON validation/preview, authorized atomic import, searchable library, quality inspection and portable packages.
 
 ## Lifecycle integration
 
