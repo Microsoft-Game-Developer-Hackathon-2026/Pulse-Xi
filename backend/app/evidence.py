@@ -194,9 +194,17 @@ def recap_for(match: Match, events: list[MatchEvent], locale: str = "en", person
         team = match.home if goal.team_id == match.home.team_id else match.away
         score = {claim.metric: claim.value for claim in insight.factual_claims}
         if persona == "analyst":
-            text = f"{team.name} {verbs[locale]} · {goal.match_second // 60}' · {score['score_home']}–{score['score_away']} · {len(insight.supporting_event_ids)} source events"
+            text = {
+                "en": f"{team.name} scored · {goal.match_second // 60}' · {score['score_home']}–{score['score_away']} · {len(insight.supporting_event_ids)} source events",
+                "es": f"{team.name} marcó · {goal.match_second // 60}' · {score['score_home']}–{score['score_away']} · {len(insight.supporting_event_ids)} eventos de origen",
+                "hi": f"{team.name} ने गोल किया · {goal.match_second // 60}' · {score['score_home']}–{score['score_away']} · {len(insight.supporting_event_ids)} स्रोत इवेंट",
+            }[locale]
         elif persona == "broadcaster":
-            text = f"{goal.match_second // 60}' | {team.name.upper()} {verbs[locale].upper()} | {score['score_home']}–{score['score_away']}"
+            text = {
+                "en": f"{goal.match_second // 60}' | {team.name.upper()} SCORED | {score['score_home']}–{score['score_away']}",
+                "es": f"{goal.match_second // 60}' | {team.name.upper()} MARCÓ | {score['score_home']}–{score['score_away']}",
+                "hi": f"{goal.match_second // 60}' | {team.name.upper()} ने गोल किया | {score['score_home']}–{score['score_away']}",
+            }[locale]
         else:
             text = {
                 "en": f"{team.name} scored at {goal.match_second // 60}'! {score['score_home']}–{score['score_away']}",
