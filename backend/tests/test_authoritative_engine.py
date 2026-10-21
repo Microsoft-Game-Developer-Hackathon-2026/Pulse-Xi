@@ -63,8 +63,22 @@ def test_determinism_to_fulltime_and_legal_events(seed):
     assert any(e.type == 'goal' for e in first.events)
     assert first.score == {t: sum(e.type == 'goal' and e.team_id == t for e in first.events) for t in first.score}
     compatible = match_events(first, 'engine-test')
+    from app.models import Match, MatchEvent
     from app.analytics import state_at, metrics_at
     match = match_record(first, 'engine-test')
+    assert Match.model_validate_json(match.model_dump_json()) == match
+    members = {t.team_id: {p.player_id for p in t.players} for t in (match.home, match.away)}
+    assert len({event.event_id for event in compatible}) == len(compatible)
+    for native, event in zip(first.events, compatible):
+        payload = event.model_dump(mode='json', by_alias=True)
+        assert 'type' in payload and 'event_type' not in payload
+        assert MatchEvent.model_validate(payload) == event
+        assert event.event_id == f'engine-test-{native.sequence}'
+        assert event.match_id == match.match_id
+        assert event.match_second == native.tick
+        assert event.team_id is None or event.team_id in members
+        for player_id in (event.actor_id, event.recipient_id):
+            assert player_id is None or player_id in members[event.team_id]
     replay = state_at(match, compatible, 5400)
     metrics = metrics_at(match, compatible, 5400)
     assert replay.score.home == first.score['home'] == metrics.home.goals
@@ -85,8 +99,11 @@ def test_clock_and_batching():
     with pytest.raises(EngineError, match='advance_requires_resume'):
         apply_command(s, command(s, 'advance'))
     s = until(s, 120)
-    with pytest.raises(EngineError, match='terminal_session'):
-        apply_command(s, command(s, 'resume'))
+    for kind in ('resume', 'step', 'advance'):
+        with pytest.raises(EngineError, match='terminal_session'):
+            apply_command(s, command(s, kind))
+    saved_at_fulltime = apply_command(s, command(s, 'checkpoint'))
+    assert saved_at_fulltime.tick == s.tick and saved_at_fulltime.events == s.events
     one = until(make_state(duration=120), 120)
     many = make_state(duration=120)
     while many.tick < 120:
@@ -156,7 +173,7 @@ def test_invalid_tactics(field, value):
         command(make_state(), 'intervene', team_id='home', field=field, value=value, requested_tick=0)
 
 
-@pytest.mark.parametrize('change', ['missing_rng', 'missing_queue', 'missing_stream', 'queue', 'hash', 'version', 'score', 'role'])
+@pytest.mark.parametrize('change', ['missing_rng', 'missing_queue', 'missing_stream', 'queue', 'hash', 'version', 'score', 'role', 'actor_reference', 'possession_reference'])
 def test_corrupt_snapshots(change):
     s = apply_command(make_state(), command(make_state(), 'intervene', team_id='home', field='tempo', value=90, requested_tick=0))
     data = json.loads(canonical(capture_state(s)))
@@ -176,6 +193,12 @@ def test_corrupt_snapshots(change):
         data['state_hash'] = digest(data['state'])
     elif change == 'role':
         data['state']['actors'][0]['role'] = 'FW'
+        data['state_hash'] = digest(data['state'])
+    elif change == 'actor_reference':
+        data['state']['events'][0]['actor_id'] = 'away-1'
+        data['state_hash'] = digest(data['state'])
+    elif change == 'possession_reference':
+        data['state']['possession_actor_id'] = 'not-in-the-roster'
         data['state_hash'] = digest(data['state'])
     else:
         data['engine_version'] = 'future/9'
@@ -438,7 +461,7 @@ def test_atomic_migration_and_concurrent_cold_start(database, monkeypatch):
             return db.execute('PRAGMA user_version').fetchone()[0]
 
     with ThreadPoolExecutor(max_workers=6) as pool:
-        assert list(pool.map(read, range(6))) == [1] * 6
+        assert list(pool.map(read, range(6))) == [3] * 6
 
 
 def test_concurrent_restore_isolated_and_duplicate_creation(database):
