@@ -259,7 +259,7 @@ def test_supported_runtime_migrations_preserve_records(client, database, version
     path = storage.runtime_database_path()
     if version == 0:
         with storage.connect() as db:
-            assert db.execute('PRAGMA user_version').fetchone()[0] == 3
+            assert db.execute('PRAGMA user_version').fetchone()[0] == 4
         return
     scenario = create(client)
     receipt = storage.create_session('alice', 'migration', scenario['scenario_id'])
@@ -268,13 +268,13 @@ def test_supported_runtime_migrations_preserve_records(client, database, version
     experiment = control.create_experiment('alice', control.ExperimentRequest(operation_id='migration-exp', checkpoint_id=receipt.checkpoint_id, expected_revision=1, horizon=30))
     with sqlite3.connect(path) as db:
         before = {t: db.execute(f'SELECT * FROM {t}').fetchall() for t in ('scenarios','sessions','commands','runtime_events','checkpoints','audit','runs','experiments')}
-        db.execute('DROP TABLE scenario_metadata')
+        db.execute('DROP TABLE checkpoint_metadata'); db.execute('DROP TABLE scenario_metadata')
         if version == 1:
             db.execute('DROP TABLE runs'); db.execute('DROP TABLE experiments')
         db.execute(f'PRAGMA user_version={version}')
     assert storage.get_runtime('alice', receipt.session_id).state_hash == receipt.state_hash
     with storage.connect() as db:
-        assert db.execute('PRAGMA user_version').fetchone()[0] == 3
+        assert db.execute('PRAGMA user_version').fetchone()[0] == 4
         for table, rows in before.items():
             if version == 1 and table in ('runs', 'experiments'): continue
             assert db.execute(f'SELECT * FROM {table}').fetchall() == rows
@@ -288,7 +288,7 @@ def test_metadata_migration_failure_rolls_back(client, monkeypatch):
     scenario = create(client)
     path = storage.runtime_database_path()
     with sqlite3.connect(path) as db:
-        db.execute('DROP TABLE scenario_metadata'); db.execute('PRAGMA user_version=2')
+        db.execute('DROP TABLE checkpoint_metadata'); db.execute('DROP TABLE scenario_metadata'); db.execute('PRAGMA user_version=2')
     original = storage.SCENARIO_METADATA_DDL
     monkeypatch.setattr(storage, 'SCENARIO_METADATA_DDL', original[:1] + ('INVALID SQL',))
     with pytest.raises(sqlite3.OperationalError):
@@ -344,7 +344,7 @@ def test_archive_backup_and_imported_database_separation(client, database, monke
     data = archive(client, scenario)
     target = database / 'backup.sqlite'
     result = copy_database(storage.runtime_database_path(), target)
-    assert result['schema_version'] == 3
+    assert result['schema_version'] == 4
     monkeypatch.setenv('PULSE_RUNTIME_DB_PATH', str(target))
     assert archive(client, scenario) == data
     with library_connect() as db:
@@ -359,7 +359,7 @@ def test_legacy_runtime_backups_open_and_upgrade(client, database, monkeypatch, 
     scenario = create(client)
     path = storage.runtime_database_path()
     with sqlite3.connect(path) as db:
-        db.execute('DROP TABLE scenario_metadata')
+        db.execute('DROP TABLE checkpoint_metadata'); db.execute('DROP TABLE scenario_metadata')
         if version == 1:
             db.execute('DROP TABLE runs'); db.execute('DROP TABLE experiments')
         db.execute(f'PRAGMA user_version={version}')
@@ -369,4 +369,4 @@ def test_legacy_runtime_backups_open_and_upgrade(client, database, monkeypatch, 
     monkeypatch.setenv('PULSE_RUNTIME_DB_PATH', str(recovered))
     assert storage.get_scenario_archive('alice', scenario['scenario_id']).created_at_utc is None
     with storage.connect() as db:
-        assert db.execute('PRAGMA user_version').fetchone()[0] == 3
+        assert db.execute('PRAGMA user_version').fetchone()[0] == 4
