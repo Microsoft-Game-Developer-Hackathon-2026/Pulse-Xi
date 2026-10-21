@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from . import storage
 from .engine import EngineError, build_scenario, capture_state, match_events, match_record, presets, implementation_hash
 from .manifest import verify_manifest
+from .prooftrail import SandboxInsight, build_sandbox_insight
 from .models import (AuditEntry, CheckpointView, Command, CreateSession, EventPage, ExperimentManifest,
                      MutationResult, RestoreRequest, RuntimeView, Scenario, ScenarioConfig, Snapshot,
                      Verification, ErrorResponse, ENGINE_VERSION, SCHEMA_VERSION, RNG_ALGORITHM)
@@ -149,3 +150,23 @@ def manifest(session_id: str, owner: str = Depends(require_operator)):
 @router.post('/verify', response_model=Verification)
 def verify(manifest: ExperimentManifest, owner: str = Depends(require_operator)):
     return verify_manifest(manifest)
+
+
+@router.get('/sessions/{branch_session_id}/prooftrail', response_model=SandboxInsight)
+def prooftrail(branch_session_id: str, baseline_session_id: str = Query(min_length=1, max_length=100),
+               intervention_id: str = Query(min_length=1, max_length=80),
+               at_tick: int = Query(ge=0, le=5400), owner: str = Depends(require_operator)):
+    """Compare one verified checkpoint descendant with its baseline for the same owner."""
+    branch = storage.get_runtime(owner, branch_session_id)
+    baseline = storage.get_runtime(owner, baseline_session_id)
+    branch_manifest = storage.manifest(owner, branch_session_id)
+    baseline_manifest = storage.manifest(owner, baseline_session_id)
+    ancestor = next((item for item in branch_manifest.ancestry
+                     if item.session_id == baseline_session_id), None)
+    if ancestor is None:
+        raise EngineError('baseline_not_ancestor', 422)
+    checkpoint = storage.get_checkpoint(owner, ancestor.checkpoint_id)
+    if checkpoint.session_id != baseline_session_id or checkpoint.snapshot.state_hash != ancestor.snapshot_hash:
+        raise EngineError('checkpoint_mismatch', 409)
+    return build_sandbox_insight(branch, baseline, branch_manifest, baseline_manifest,
+                                 intervention_id, at_tick, checkpoint.tick)
