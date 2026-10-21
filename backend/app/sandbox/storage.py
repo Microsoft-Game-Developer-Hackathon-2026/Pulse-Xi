@@ -1,4 +1,4 @@
-"""Dedicated runtime DB, schema 2. Never migrate or reinterpret the data-hub DB.
+"""Dedicated runtime DB, schema 3. Never migrate or reinterpret the data-hub DB.
 
 Every command, appended events, checkpoint and acknowledgment commits together.
 BEGIN IMMEDIATE serializes workers/processes; Python memory is never the authority.
@@ -14,6 +14,7 @@ from .engine import (EngineError, apply_command, canonical, capture_state, diges
                      restore_state, validate_state, implementation_hash)
 from .models import (Ancestor, AuditEntry, CheckpointView, Command, EngineState, EventPage,
                      ExperimentManifest, MutationResult, ReplayRecord, RuntimeView, Scenario, Snapshot)
+from .scenario_archive import ScenarioArchive, ScenarioSummary, utc_now, validate_identity
 
 DDL = (
     'CREATE TABLE scenarios (owner TEXT NOT NULL, id TEXT NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(owner,id))',
@@ -35,6 +36,12 @@ CONTROL_DDL = (
        session_id TEXT NOT NULL REFERENCES sessions(id), generation INTEGER NOT NULL, payload TEXT NOT NULL)''',
     '''CREATE TABLE experiments (id TEXT PRIMARY KEY, owner TEXT NOT NULL, fingerprint TEXT NOT NULL,
        generation INTEGER NOT NULL, payload TEXT NOT NULL)''',
+)
+
+SCENARIO_METADATA_DDL = (
+    '''CREATE TABLE scenario_metadata (owner TEXT NOT NULL, id TEXT NOT NULL, created_at_utc TEXT,
+       PRIMARY KEY(owner,id), FOREIGN KEY(owner,id) REFERENCES scenarios(owner,id))''',
+    'INSERT INTO scenario_metadata(owner,id,created_at_utc) SELECT owner,id,NULL FROM scenarios',
 )
 
 
@@ -67,7 +74,14 @@ def connect():
                     db.execute(statement)
                 db.execute('PRAGMA user_version=2')
             db.commit()
-        if db.execute('PRAGMA user_version').fetchone()[0] != 2:
+        if db.execute('PRAGMA user_version').fetchone()[0] == 2:
+            db.execute('BEGIN IMMEDIATE')
+            if db.execute('PRAGMA user_version').fetchone()[0] == 2:
+                for statement in SCENARIO_METADATA_DDL:
+                    db.execute(statement)
+                db.execute('PRAGMA user_version=3')
+            db.commit()
+        if db.execute('PRAGMA user_version').fetchone()[0] != 3:
             raise RuntimeError('unsupported runtime database version')
         with db:
             yield db
@@ -96,6 +110,11 @@ def ack(state, session_id, checkpoint_id=None):
 
 
 def save_scenario(owner: str, scenario: Scenario) -> Scenario:
+    return _save_scenario(owner, ScenarioArchive(scenario=scenario, created_at_utc=utc_now()))
+
+
+def _save_scenario(owner: str, archive: ScenarioArchive) -> Scenario:
+    scenario = validate_identity(archive)
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
         existing = db.execute('SELECT payload FROM scenarios WHERE owner=? AND id=?', (owner, scenario.scenario_id)).fetchone()
@@ -106,7 +125,37 @@ def save_scenario(owner: str, scenario: Scenario) -> Scenario:
         if db.execute('SELECT COUNT(*) FROM scenarios').fetchone()[0] >= 100:
             raise EngineError('scenario_limit', 429)
         db.execute('INSERT INTO scenarios VALUES (?,?,?)', (owner, scenario.scenario_id, canonical(scenario)))
+        db.execute('INSERT INTO scenario_metadata VALUES (?,?,?)', (owner, scenario.scenario_id, archive.created_at_utc))
     return scenario
+
+
+def get_scenario_archive(owner: str, scenario_id: str) -> ScenarioArchive:
+    with connect() as db:
+        row = db.execute('''SELECT s.payload,m.created_at_utc FROM scenarios s JOIN scenario_metadata m
+            ON s.owner=m.owner AND s.id=m.id WHERE s.owner=? AND s.id=?''', (owner, scenario_id)).fetchone()
+        if row is None:
+            raise EngineError('not_found', 404)
+        result = ScenarioArchive(scenario=Scenario.model_validate_json(row[0]), created_at_utc=row[1])
+        validate_identity(result)
+        return result
+
+
+def import_scenario(owner: str, archive: ScenarioArchive) -> ScenarioArchive:
+    scenario = _save_scenario(owner, archive)
+    # Identical imports retain the first stored creation metadata.
+    return get_scenario_archive(owner, scenario.scenario_id)
+
+
+def list_scenarios(owner: str) -> list[ScenarioSummary]:
+    with connect() as db:
+        rows = db.execute('''SELECT s.payload,m.created_at_utc FROM scenarios s JOIN scenario_metadata m
+            ON s.owner=m.owner AND s.id=m.id WHERE s.owner=? ORDER BY s.id LIMIT 100''', (owner,)).fetchall()
+        result = []
+        for payload, created in rows:
+            scenario = Scenario.model_validate_json(payload)
+            result.append(ScenarioSummary(scenario_id=scenario.scenario_id, config_hash=scenario.config_hash,
+                seed=scenario.config.seed, preset=scenario.config.preset, created_at_utc=created))
+        return result
 
 
 def get_scenario(owner: str, scenario_id: str) -> Scenario:

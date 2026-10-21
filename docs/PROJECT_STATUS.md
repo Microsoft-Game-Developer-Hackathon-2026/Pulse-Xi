@@ -3,14 +3,13 @@
 
 ## Current Satvik acceptance boundary (2026-10-21)
 
-Verified main is `4d8a01e`; live runtime consumers are forward-integration #53,
-not established as main by older PRs merged into intermediate branches.
+Verified main `aefc046` includes runtime #53 and saved scenarios #64/#65. The #59 additions below remain review-gated.
 
 | Assigned issue | Implemented boundary | Remaining acceptance gate |
 |---|---|---|
 | #6 Checkpoints | Canonical save/isolated restore/parity in engine; #59 adds original snapshot and server-replayed historical state inspection, terminal checkpoints and measurements | Diyan runtime/consumer review and integration |
 | #8 ForkCast | Real paired trials, comparisons and provenance; #59 adds explicit independent verification and cited source-branch navigation | Diyan/Mahir review and integration |
-| #10 Control Room | Actual operator APIs, refresh/retry and analysis; #59 fixes retained private retry state after disconnect | #53/#59 review and integration |
+| #10 Control Room | Actual operator APIs, refresh/retry and analysis; #59 fixes retained private retry state after disconnect | #59 review and integration |
 | #11 Observer | Recorded snapshots, lazy scene/cameras/profiles/fallback; physical Iris Xe probe recorded in #59 | Runtime consumer review; continuous actor frames unavailable, never inferred |
 | #12 Blender | Seven GLBs pass unchanged manifest/hash/geometry contract; Blender 5.2.2 temporary export/reimport passes | #31 rights-holder provenance/licensing/release approval remains required |
 | #27 Pass Difficulty | Existing versioned formula, verifier, factors/player summaries/exports; runtime #53 and native #57 adapters tested | Native/runtime integration reviews |
@@ -28,11 +27,61 @@ Earlier reports below describe their recorded revisions and remain historical.
 
 ## Current integration boundary
 
-Observed main is `4d8a01e5e3483f6a4aafb62cd09def6fcfdd3713`: engine foundation #40 and trace authorization #45 are included. PRs #41, #46, #43 and #47 were merged into intermediate feature branches; their merged status alone does not establish main availability.
+## Current implementation and acceptance evidence
 
-`integration/runtime-platform-main` forwards the published live Sandbox, architecture and runtime analysis implementations through normal merges, retaining Foundry command hardening from the separate main-targeted PR #52. It preserves the Vite 7.3.7 correction. No asset/preparation or independent teammate feature branch is absorbed. Review and exact-head CI remain required; this validation branch is not a claim that main has these features.
 
-The forward-integration backend run passed **185 tests**. Both file-only verifiers returned `verified: true`; strict TypeScript/build and the baseline **42 browser cases** passed. A new real-browser regression reproduced unsaved analyst notes being erased by checkpoint revision refreshes. The analysis controls now stay mounted while stale content is hidden, preserving drafts and observer preferences without showing an obsolete boundary. Final browser/CI results belong to the forward-integration PR.
+Verified implementation merge: **`100106ade274bbb7da137c73b22009f929a72e8c`**,
+[PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64).
+[Post-merge main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39625055824)
+passed 248 backend and 55 browser cases, production build and asset validation.
+A separate clean worktree at this merge reran 248 backend tests and both verifiers.
+The verification handoff adds one mobile/keyboard library case: its full local
+frontend run passed **56 cases**. The screenshot was visually inspected; resolved
+rosters/hash/provenance wrap within the 390px viewport. This handoff changes docs
+and tests only; the application implementation remains the verified #64 tree.
+
+Starting main for the Issues #2-#5 sprint was `d1d099ebb75cb912003b3bf99b24e4d67111110a`,
+merged #53, with [passing post-merge CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39617299612).
+Runtime, architecture, private analysis, command security and original graphics
+are integrated there. #52 remains open but its code reached main through #53.
+The completion revision adds saved-scenario provenance/library functionality;
+its merge SHA, exact-head CI and issue dispositions are recorded on the completion
+PR and Issues #2-#5. Resolve the latest main with `git fetch origin` and
+`git rev-parse origin/main`; historical branch SHAs below are not current status.
+
+| Issue | Inspected implementation and completion scope | Acceptance evidence |
+|---|---|---|
+| #2 | Existing component/lifecycle/sequence diagrams, clock/RNG/transaction/observer contracts; current API/model/storage map and ADR corrected for integrated code and archive metadata | Model/OpenAPI, v1 reference/replay, authorization, observer reconnect and migration tests; authorized self-review, not an invented teammate approval |
+| #3 | Existing ScenarioConfig, four presets, hash and RNG reused. Add owner library, scenario-archive/1, atomic runtime schema 3 metadata, verified import/export and real builder save/reload | 50 focused scenario-library cases, including fulltime archive->tactic->persisted events->analysis->manifest journey; five real-browser library cases (including mobile/keyboard handoff) |
+| #4 | Existing integer-clock engine, bounded jobs, event adapter, ordering, state/score invariants, cancellation and persistence retained | Fulltime same-seed/golden/replay tests, terminal-step rejection and stronger foreign-actor/possession snapshot regressions; 20 fulltime benchmark runs |
+| #5 | Existing six tactical policies retained; away controls and full resolved-policy display/effect notes added | Existing paired ten-seed pressure/tempo tests and five-seed other-policy tests; deterministic interventions, manifests and browser workflow |
+
+Fresh local verification of the completion revision: **248 backend tests passed**,
+both independent file verifiers returned `verified: true`, strict TypeScript and
+production build plus **55 Playwright/contract cases passed**. Python dependency
+consistency passed; installed Python closure (29 packages) and npm audit reported
+zero known vulnerabilities. See LIVE_SANDBOX for benchmark commands and measured
+local limits. These local results do not imply a merge or CI run; the completion
+PR records remote results separately.
+
+Self-review A checked identity/default resolution, UTC outside deterministic state,
+idempotence/capacity, schema-1/2/3 backup compatibility, write/migration rollback,
+private analysis and test strength. Self-review B checked owner predicates, raw
+JSON ambiguity/size bounds, no-store responses, credential-free archives/bundles
+and operator disconnect. An uncertain mutation could remain in page memory across
+disconnect: clear pending retry and private builder/archive state, with a regression
+that commits through the real backend before simulating a lost response. Browser
+harness selectors/waits were corrected to address actual controls; the duplicate
+creation assertion still requires exactly one POST, excluding the new list GET.
+No assertion was weakened and no test/golden was skipped or rewritten.
+
+Acceptance for this sprint follows the user's explicit self-review/automated-check
+workflow. Other feature branches, public deployment, real hosted inference,
+physical-GPU performance and a complete security audit are not claimed. Remaining
+model constraints: neutral/dry only, sparse coordinates, no substitutions,
+uncalibrated tactical outcomes, and v1 analysis restricted to 5400-second scenarios.
+Archives are unsigned; old/unrecorded creation times remain null. Runtime schema 3
+requires matching pre-upgrade backups for rollback to older binaries.
 
 ## Historical branch verification
 
