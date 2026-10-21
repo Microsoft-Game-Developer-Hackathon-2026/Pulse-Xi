@@ -2,11 +2,11 @@
 
 ## Current integration boundary
 
-Observed main is `4d8a01e5e3483f6a4aafb62cd09def6fcfdd3713`: engine foundation #40 and trace authorization #45 are included. PRs #41, #46, #43 and #47 were merged into intermediate feature branches; their merged status alone does not establish main availability.
+Observed main is `0beb08de356a32870d1494d534a75642a23322ed`: engine foundation #40, trace authorization #45 and original graphics/assets #62 are included. PRs #41, #46, #43 and #47 were merged into intermediate feature branches; their merged status alone does not establish main availability.
 
-`integration/runtime-platform-main` forwards the published live Sandbox, architecture and runtime analysis implementations through normal merges, retaining Foundry command hardening from the separate main-targeted PR #52. It preserves the Vite 7.3.7 correction. No asset/preparation or independent teammate feature branch is absorbed. Review and exact-head CI remain required; this validation branch is not a claim that main has these features.
+`integration/runtime-platform-main` forwards the published live Sandbox, architecture and runtime analysis implementations through normal merges. Its original published history already contains Foundry command hardening; the separate main-targeted PR #52 remains the required first security integration. Refreshing against main preserves #62's assets, notices, validator, Vite 7.3.7 and graphics fallback tests. The observer conflict retains both asset status and authenticated runtime evidence loading. No additional feature branch (#54-#61) is absorbed. Review and exact-head CI remain required; this branch is not a claim that main has the live features.
 
-The forward-integration backend run passed **185 tests**. Both file-only verifiers returned `verified: true`; strict TypeScript/build and the baseline **42 browser cases** passed. A new real-browser regression reproduced unsaved analyst notes being erased by checkpoint revision refreshes. The analysis controls now stay mounted while stale content is hidden, preserving drafts and observer preferences without showing an obsolete boundary. Final browser/CI results belong to the forward-integration PR.
+Before this main refresh, the forward-integration backend run passed **185 tests** and **42 browser cases**. Those historical counts do not verify the refreshed tree. The existing draft-preservation browser regression now also requires original assets to load and the tactical camera to survive a checkpoint while authenticated pass evidence remains available. Fresh results and exact head SHAs belong in PR #53's review record. Issue #2 still requires shared architecture acceptance; Issue #3 is untouched.
 
 ## Historical branch verification
 

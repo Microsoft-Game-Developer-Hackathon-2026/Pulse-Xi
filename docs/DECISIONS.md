@@ -1,7 +1,9 @@
 # Architecture decisions
 
-Status: proposed for Issue #2 shared review, aligned to #40/#41. Main remains the
-legacy product. [AUTHORITATIVE_ENGINE](AUTHORITATIVE_ENGINE.md) is the shared
+Status: proposed for Issue #2 shared review. Main `0beb08d` includes the engine
+foundation, trace-read protection and original graphics; live runtime/analysis
+integration remains proposed in #53, after separate security integration #52.
+[AUTHORITATIVE_ENGINE](AUTHORITATIVE_ENGINE.md) is the shared
 specification/model/API/test map; [LIVE_SANDBOX](LIVE_SANDBOX.md) supplies examples.
 The blueprint/master prompt express intentions rather than current contracts.
 
@@ -40,4 +42,5 @@ The blueprint/master prompt express intentions rather than current contracts.
    Provisioned owner tokens protect runtimes; library reads remain public. Public
    accounts/viewer roles/gateway rate limits are release work. Deterministic facts
    precede optional Foundry opinion; provider configuration never proves inference.
-   Trace GET's fail-open default remains a separately tracked defect.
+   Trace GET's fail-open default was corrected on main by #45. Command credential
+   hardening retains the separate #52 security review and integration gate.
