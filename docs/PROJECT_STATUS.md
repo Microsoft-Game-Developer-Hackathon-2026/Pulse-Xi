@@ -1,6 +1,10 @@
 # Current project status - 2026-10-21
 
-## Current implementation and acceptance evidence
+## Current repository state
+
+Main `4d1d11c7deac2a5632ff8d374e362732c2828491` includes approved observer synchronization #67. [Exact-main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39643934520) passed 248 backend and 59 browser tests plus strict TypeScript/build. #52/#31 are closed as implementation duplicates; #32/#33 as superseded proposals; #63 as an obsolete validation PR. Branches are preserved. Asset rights/release review remains open in #23. Native #57, acceptance #59, runtime Control vs Chaos #58 and separate teammate feature PRs remain review-gated. Combined validation is not main.
+
+## Historical implementation and acceptance evidence
 
 Verified implementation merge: **`100106ade274bbb7da137c73b22009f929a72e8c`**,
 [PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64).
@@ -15,7 +19,7 @@ and tests only; the application implementation remains the verified #64 tree.
 Starting main for the Issues #2-#5 sprint was `d1d099ebb75cb912003b3bf99b24e4d67111110a`,
 merged #53, with [passing post-merge CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39617299612).
 Runtime, architecture, private analysis, command security and original graphics
-are integrated there. #52 remains open but its code reached main through #53.
+are integrated there. #52 security code reached main through #53; its duplicate PR is now closed.
 The completion revision adds saved-scenario provenance/library functionality;
 its merge SHA, exact-head CI and issue dispositions are recorded on the completion
 PR and Issues #2-#5. Resolve the latest main with `git fetch origin` and
@@ -123,4 +127,4 @@ See [README](../README.md) and [CONTRACT](CONTRACT.md) for limits, permissions, 
 
 ## Satvik integration reconciliation
 
-Main aefc046 includes runtime, saved scenarios, scenario archives, runtime schema 3 and graphics. Native #57, acceptance #59 and runtime Control vs Chaos #58 remain pending; their latest compatibility branches preserve this main baseline. #52 security behavior is already present through runtime history; a standalone merge must not remove server progression. Separate rights/release approval is not implied by integrated asset files.
+Main aefc046 includes runtime, saved scenarios, scenario archives, runtime schema 3 and graphics. Native #57, acceptance #59 and runtime Control vs Chaos #58 remain pending; their latest compatibility branches preserve this main baseline. #52 security behavior is already present through runtime history; its duplicate PR is closed after verifying the three-way merge is a no-op. Separate rights/release approval is not implied by integrated asset files.

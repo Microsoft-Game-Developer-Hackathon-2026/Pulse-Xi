@@ -8,16 +8,15 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 
 ## Availability and review status (2026-10-21)
 
-Main baseline `4d1d11c7deac2a5632ff8d374e362732c2828491` includes #67 recorded-event observer synchronization, live runtime #53, saved scenarios/archives and runtime schema 3 (#64/#65), plus original graphics #62. #52 remains open but its credential hardening and dependency constraints are present through #53; do not merge the older standalone branch over the runtime lifespan.
+Main baseline `4d1d11c7deac2a5632ff8d374e362732c2828491` includes #67 recorded-event observer synchronization, live runtime #53, saved scenarios/archives and runtime schema 3 (#64/#65), plus original graphics #62. #52 is closed as superseded: its credential hardening and dependency constraints already reached main through #53. A verified three-way merge adds no changes.
 
 Native analysis #57, checkpoint/history/ForkCast acceptance additions #59 and runtime Control vs Chaos #58 remain under review. Recorded Control vs Chaos #42, FanDNA expansion #48 and branch ProofTrail #51 with request-isolation fix #54 are separate review-gated work. Draft agent tools #55, cost-gated Foundry validation #56 and Broadcast Studio proposal #50 are not shipped. Assets are technically integrated; manifest release approval and rights-holder decisions remain separate. Main's current runtime analysis projection supports 5,400-second scenarios; native engine controls already support shorter scenarios.
 
 ## Application functionality
 
-**Integrated baseline:** main `100106a` includes #64's saved-scenario library and #53's live runtime, architecture,
+**Integrated baseline:** main `4d1d11c` includes #64's saved-scenario library and #53's live runtime, architecture,
 private analysis and command-credential hardening, alongside original graphics #62.
-PR #52 remains open, but its code is present through #53; its separate PR state
-does not mean the fix is absent. The [completion PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64) integrated owner-scoped saved-scenario
+PR #52 is closed as superseded because its security code is already present through #53. The [completion PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64) integrated owner-scoped saved-scenario
 listing, versioned archives and creation provenance without changing engine hashes.
 See the [scenario library contract](docs/LIVE_SANDBOX.md#saved-scenario-library-and-archives)
 and shared
@@ -259,13 +258,15 @@ npm run test:e2e
 
 `build` includes strict TypeScript. Playwright starts a real FastAPI server on port 8765; avoid an unrelated process using that port. CI uses software rendering for reproducibility, not physical GPU performance evidence. Final counts and measured limitations are in the handoff.
 
-Asset validation (`python scripts/asset_contract.py`, `npm run validate:assets`) and `npm run test:contracts` belong to unmerged #31/#33 respectively; **they are not available on this main baseline**.
+Asset validation is available on main: run `python scripts/asset_contract.py` from the repository root and `npm run validate:assets` from `frontend`. Historical preparation PRs #32/#33 are closed as superseded by the authoritative checkpoint/ForkCast implementation; their proposal schemas are not current APIs.
 
 ## Graphics pipeline and provenance
 
-Main's observer is procedural and independently usable. Blender 5.2.2 authored an original editable source/GLB pipeline on PR #31, including manifest hashes, export tools and Khronos checks. Main also includes a renderer probe that supports procedural and asset-enabled scenes. It remains unmerged pending release review. Unreal #34 is optional offline authoring; neither tool is a browser runtime requirement. No mandatory CUDA, RTX, Pixel Streaming or cloud GPU is introduced.
+Main includes original editable Blender sources, exported GLBs, manifest hashes, export tools and Khronos validation through graphics PR #62. The observer supports an asset-enabled scene and procedural fallback; Blender is optional for authoring, not required to run the web application. The renderer probe supports both configurations. Unreal #34 remains optional offline authoring. No mandatory CUDA, RTX, Pixel Streaming or cloud GPU is introduced.
 
-The handoff records separate physical Iris Xe and software-renderer evidence; neither certifies RTX performance. Asset licenses and provenance are in PR #31's `assets/LICENSE.md` and `assets/manifest.json`, not yet main. No asset release approval is implied; third-party package licenses remain applicable.
+Duplicate implementation PR #31 is closed because its contents are already integrated. This does **not** grant rights or release approval: [security/legal/licensing issue #23](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/23) remains open, and the manifest approval status is unchanged. See [asset licenses](assets/LICENSE.md) and the [manifest](assets/manifest.json).
+
+Physical Iris Xe and software-renderer evidence are separate; neither certifies RTX performance. The earlier physical procedural-scene probe did not load the GLB kit and does not establish asset-loaded hardware performance. Recorded event positions remain sparse snapshots, not continuous tracking.
 
 ### Repeat physical-GPU measurement
 
@@ -307,7 +308,7 @@ Use focused branches/PRs with reproducible evidence. Do not push directly to mai
 | Port 8000 occupied | Stop its known owner or use another manual uvicorn port; do not terminate unknown processes |
 | Startup exits | Fix the first dependency/build error; startup stops on failures |
 | Blank/failed 3D | Return to 2D, try Low, check WebGL2/hardware acceleration; replay remains independent |
-| Blender not found | Main does not require Blender; authors on #31 can set `PULSE_BLENDER_PATH` |
+| Blender not found | Main does not require Blender; asset authors can set `PULSE_BLENDER_PATH` |
 | Missing asset/contract command | Utilities remain on the unmerged branches, not this main baseline |
 
 ### Limitations
