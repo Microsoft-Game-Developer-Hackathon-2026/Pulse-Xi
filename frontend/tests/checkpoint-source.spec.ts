@@ -95,7 +95,7 @@ test('cancelled checkpoint remains inspectable but cannot start an experiment',a
 })
 
 test('large bounded ForkCast downloads verify offline without exceeding the online upload limit',async ({page,request},testInfo)=>{
-  test.setTimeout(120000)
+  test.setTimeout(240000)
   const limitToken='test-forkcast-limit-token-at-least-32-characters'
   const headers={Authorization:`Bearer ${limitToken}`}
   const config=(await (await request.get('/api/sandbox/presets',{headers})).json()).balanced
@@ -122,14 +122,14 @@ test('large bounded ForkCast downloads verify offline without exceeding the onli
   await page.getByRole('button',{name:'Connect operator',exact:true}).click()
   await page.getByLabel('Runtime / branch').selectOption(sid)
   try {
-    await expect(page.getByRole('table')).toContainText('home / pressures',{timeout:30000})
+    await expect(page.getByRole('table')).toContainText('home / pressures',{timeout:90000})
   } catch (reason) {
     throw new Error(`${String(reason)}; visible API/UI errors: ${JSON.stringify(await page.getByRole('alert').allTextContents())}; selected runtime: ${await page.getByLabel('Runtime / branch').inputValue()}`)
   }
   const uploads:string[]=[]
   page.on('request',r=>{if(r.url().endsWith('/api/sandbox/experiments/verify'))uploads.push(r.url())})
   await page.getByRole('button',{name:'Verify experiment independently',exact:true}).click()
-  await expect(page.locator('.runtime-notice')).toContainText('exceeds the 2 MB online verification limit',{timeout:30000})
+  await expect(page.locator('.runtime-notice')).toContainText('exceeds the 2 MB online verification limit',{timeout:90000})
   await expect(page.locator('.runtime-notice')).toContainText('Verification has not been completed in this browser.')
   expect(uploads).toEqual([])
   const pending=page.waitForEvent('download')

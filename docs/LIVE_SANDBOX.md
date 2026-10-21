@@ -664,4 +664,15 @@ state change; integrity_check passes and the next successful retry records its
 own original creation UTC. The maximum-workload browser fixture uses a separate
 provisioned test operator, with explicit foreign-owner 404/list checks. It does
 not share saved runtimes with ordinary browser journeys; the two-worker suite,
-functional assertions, upload limit and timeouts are unchanged.
+functional assertions and upload limit are unchanged. Ordinary test timeouts remain unchanged.
+
+
+The maximum-load comparison read can exceed 30 seconds on shared CI hardware.
+The UI now shows that stored trial histories/metrics are being reproduced and
+suppresses obsolete recovery responses after a newer experiment is accepted.
+The stress case has a distinct bounded 240-second whole-journey budget and
+90-second comparison/download-preparation waits; its event/hash/ownership/size/
+offline-verifier assertions are unchanged. This is an explicit heavy-workload
+test budget, not a performance optimization or a production latency guarantee.
+Earlier CI failures at the original 30-second comparison wait remain recorded
+on the PR. The final local full run passed all 64 browser cases after this change.
