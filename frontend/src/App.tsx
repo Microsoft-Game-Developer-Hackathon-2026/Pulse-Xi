@@ -18,8 +18,6 @@ import { readReplayEvents } from './features/sandbox/replayApi'
 import { hasLocaleFallback, readFanPreferences, translate, writeFanPreferences } from './fandna'
 import type { Locale, MessageKey, Persona } from './fandna'
 import { RuntimeRoom } from './features/runtime/RuntimeRoom'
-import { hasLocaleFallback, readFanPreferences, translate, writeFanPreferences } from './fandna'
-import type { Locale, MessageKey, Persona } from './fandna'
 
 
 
