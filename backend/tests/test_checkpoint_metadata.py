@@ -44,6 +44,7 @@ def test_receipt_retry_lost_response_and_owner_private_metadata(client, monkeypa
     monkeypatch.setattr(storage, 'utc_now', lambda: FIRST)
     # Commit succeeds even if the caller loses the first response.
     first = storage.mutate('alice', root.session_id, command)
+    storage.mutate('alice', root.session_id, Command(operation_id='later', expected_revision=1, kind='step', ticks=10))
     monkeypatch.setattr(storage, 'utc_now', lambda: SECOND)
     retry = client.post(route, headers=HEADERS, json=command.model_dump(mode='json'))
     assert retry.status_code == 200
