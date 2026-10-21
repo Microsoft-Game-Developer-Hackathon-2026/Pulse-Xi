@@ -14,6 +14,8 @@ test('local schemas reject unsafe or oversized records and protect CSV cells', (
     }
     const b={matchId:'m',eventId:'e',sequence:1,second:12,note:'note'}
     raw=JSON.stringify({version:1,items:[b]});expect(readBookmarks().items).toHaveLength(1)
+    raw=JSON.stringify({version:1,items:[b,{...b,source:'runtime'}]});expect(readBookmarks().items).toHaveLength(2)
+    raw=JSON.stringify({version:1,items:[{...b,source:'untrusted'}]});expect(readBookmarks().notice).not.toBe('')
     for(const bad of [{version:1,items:[b,b]},{version:1,items:[{...b,note:'x'.repeat(501)}]},{version:1,items:Array(201).fill(b)}]){
       raw=JSON.stringify(bad);expect(readBookmarks().items).toHaveLength(0);expect(readBookmarks().notice).not.toBe('')
     }
