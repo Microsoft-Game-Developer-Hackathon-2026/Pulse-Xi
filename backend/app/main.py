@@ -27,8 +27,10 @@ from .storage import ingest_package, imported_snapshot
 from .library_lifecycle import (LifecycleAction, change_lifecycle, deletion_record, library_entries,
                                 local_admin_enabled, require_local_admin)
 from .exports import AnalysisExport, analysis_export
+from .sandbox.api import router as sandbox_router
 
 app = FastAPI(title="PULSE XI API", version="0.1.0")
+app.include_router(sandbox_router)
 app.add_middleware(RequestBoundary)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
                    allow_methods=["GET", "POST"], allow_headers=["Content-Type", "Authorization", "X-Pulse-Deletion-ID"])

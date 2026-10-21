@@ -46,7 +46,7 @@ class RequestBoundary:
             if not message.get('more_body', False):
                 break
         body = b''.join(chunks)
-        if path in ('/api/data-hub/preview', '/api/data-hub/import', '/api/data-hub/recover', '/api/matches/ingest') or path.startswith('/api/data-hub/matches/') and path.endswith('/lifecycle'):
+        if path.startswith('/api/sandbox/') or path in ('/api/data-hub/preview', '/api/data-hub/import', '/api/data-hub/recover', '/api/matches/ingest') or path.startswith('/api/data-hub/matches/') and path.endswith('/lifecycle'):
             def unique_object(pairs):
                 result = {}
                 for key, value in pairs:

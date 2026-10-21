@@ -1,0 +1,13 @@
+{
+  "seed": 7,
+  "duration_seconds": 5400,
+  "command_ticks": 300,
+  "commands": 18,
+  "state_hash": "a0e8fbaee742c55009005bfe36b46d637b753877d396a92606f6f21ff2ff57bd",
+  "event_hash": "7c229503ce9ec90f67a748b92b052c4f783535bc50d2ac50d80ae64985fa536f",
+  "events": 1819,
+  "score": {
+    "home": 5,
+    "away": 2
+  }
+}
