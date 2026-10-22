@@ -4,6 +4,10 @@ The new authenticated, durable sandbox runtime has a separate [authoritative eng
 
 Pass difficulty is a separate versioned read-only contract; see [formula, API and limitations](PASS_DIFFICULTY.md). It preserves the event and existing metrics contracts.
 
+## Fan Lens (fan-lens/1)
+
+`GET /api/matches/{match_id}/fan-lens?at_second=N&metric_id=...&threshold_id=...&team_id=...&player_id=...` returns deterministic, read-only event-derived totals and completed-window alerts. Metric IDs are `pressure_events`, `completed_passes`, `recoveries`, `shots`, `final_third_entries`, and `forward_progression`; definitions and bounded `few`/`some`/`many` thresholds are registered in `backend/app/fan_lens.py`. Alerts use the interval `(start, end]`, emit only after each 300-second window is complete at the requested replay clock, and include exact source event IDs and `fan-lens-windows/1`. Player scope includes only events whose `actor_id` matches; recipient following is not inferred. Forward progression and final-third entries use completed, located passes/carries and normalized x coordinates. Unsupported IDs or mismatched team/player scope return 422; an unknown match returns 404. Preferences are local to the browser; this endpoint does not persist them or create browser notifications. Branch-scoped alerts await branch contracts.
+
 ## Control vs Chaos (control-chaos/1)
 
 `GET /api/matches/{match_id}/control-chaos?at_second=N&window_seconds=300|600|900` is a read-only, fixture/imported-match comparison. Its OpenAPI response example is illustrative only and does not describe any fixture. The response is `control-chaos/1`, uses `control-chaos-formulas/1`, and does not change `/metrics` or `/tactics`. Unknown matches return 404; a clock past the match duration, negative clock or unsupported window returns 422; a source stream above 20,000 events returns 413. No `scenario_id` or `branch_id` is accepted before branch contracts exist.
