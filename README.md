@@ -326,7 +326,7 @@ Local startup/test serving uses an explicit Uvicorn loop factory: Windows Select
 
 On this native-analysis branch above merged runtime/schema-4 main 175b7ce, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to pass analysis, source evidence, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. Short scenarios use the versioned native projection: actual duration, halftime at `duration_seconds // 2`, unchanged event ticks/periods, event counts, pass geometry/evidence and exports. Goal/activity ProofTrail rules retain their event-derived definitions; legacy match-state phase and continuous tracking remain unavailable. Standard 5400-second analysis retains its legacy behavior. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#native-period-analysis) for contracts and limitations. Native analysis remains subject to #57 review; the base runtime and saved-scenario library are already on main.
 
-Frontend visual materials and layout invariants: [Precision Glass design system](docs/UI_DESIGN_SYSTEM.md).
+Frontend visual materials and layout invariants: [Atelier design system](docs/UI_DESIGN_SYSTEM.md).
 
 ## Release verification and submission
 
