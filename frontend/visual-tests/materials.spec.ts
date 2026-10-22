@@ -15,7 +15,7 @@ for(const width of [1440,390]) test(`materials and real routes work at ${width}p
       await expect(page.locator('.score')).toContainText('0:2')
     }
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2)).toBe(true)
-    expect(await page.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--px-bg-base').trim())).toBe('#090d14')
+    expect(await page.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--px-bg-base').trim())).toBe('#101012')
     await page.screenshot({path:info.outputPath(`${route}.png`),animations:'disabled'})
   }
   await page.emulateMedia({reducedMotion:'reduce'})
