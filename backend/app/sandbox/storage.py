@@ -1,4 +1,4 @@
-"""Dedicated runtime DB, schema 1. Never migrate or reinterpret the data-hub DB.
+"""Dedicated runtime DB, schema 4. Never migrate or reinterpret the data-hub DB.
 
 Every command, appended events, checkpoint and acknowledgment commits together.
 BEGIN IMMEDIATE serializes workers/processes; Python memory is never the authority.
@@ -12,8 +12,10 @@ from pathlib import Path
 from ..storage import database_path, enable_wal
 from .engine import (EngineError, apply_command, canonical, capture_state, digest, initial_state,
                      restore_state, validate_state, implementation_hash)
-from .models import (Ancestor, AuditEntry, CheckpointView, Command, EngineState, EventPage,
+from .models import (Ancestor, AuditEntry, Command, EngineState, EventPage,
                      ExperimentManifest, MutationResult, ReplayRecord, RuntimeView, Scenario, Snapshot)
+from .checkpoint_metadata import StoredCheckpoint
+from .scenario_archive import ScenarioArchive, ScenarioSummary, utc_now, validate_identity
 
 DDL = (
     'CREATE TABLE scenarios (owner TEXT NOT NULL, id TEXT NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(owner,id))',
@@ -28,6 +30,25 @@ DDL = (
        owner TEXT NOT NULL, payload TEXT NOT NULL, records TEXT NOT NULL, ancestry TEXT NOT NULL)''',
     '''CREATE TABLE audit (session_id TEXT NOT NULL REFERENCES sessions(id), fingerprint TEXT NOT NULL,
        payload TEXT NOT NULL, PRIMARY KEY(session_id,fingerprint))''',
+)
+
+CONTROL_DDL = (
+    '''CREATE TABLE runs (id TEXT PRIMARY KEY, owner TEXT NOT NULL, fingerprint TEXT NOT NULL,
+       session_id TEXT NOT NULL REFERENCES sessions(id), generation INTEGER NOT NULL, payload TEXT NOT NULL)''',
+    '''CREATE TABLE experiments (id TEXT PRIMARY KEY, owner TEXT NOT NULL, fingerprint TEXT NOT NULL,
+       generation INTEGER NOT NULL, payload TEXT NOT NULL)''',
+)
+
+SCENARIO_METADATA_DDL = (
+    '''CREATE TABLE scenario_metadata (owner TEXT NOT NULL, id TEXT NOT NULL, created_at_utc TEXT,
+       PRIMARY KEY(owner,id), FOREIGN KEY(owner,id) REFERENCES scenarios(owner,id))''',
+    'INSERT INTO scenario_metadata(owner,id,created_at_utc) SELECT owner,id,NULL FROM scenarios',
+)
+
+
+CHECKPOINT_METADATA_DDL = (
+    'CREATE TABLE checkpoint_metadata (id TEXT PRIMARY KEY REFERENCES checkpoints(id), created_at_utc TEXT)',
+    'INSERT INTO checkpoint_metadata(id,created_at_utc) SELECT id,NULL FROM checkpoints',
 )
 
 
@@ -53,7 +74,28 @@ def connect():
                     db.execute(statement)
                 db.execute('PRAGMA user_version=1')
             db.commit()
-        if db.execute('PRAGMA user_version').fetchone()[0] != 1:
+        if db.execute('PRAGMA user_version').fetchone()[0] == 1:
+            db.execute('BEGIN IMMEDIATE')
+            if db.execute('PRAGMA user_version').fetchone()[0] == 1:
+                for statement in CONTROL_DDL:
+                    db.execute(statement)
+                db.execute('PRAGMA user_version=2')
+            db.commit()
+        if db.execute('PRAGMA user_version').fetchone()[0] == 2:
+            db.execute('BEGIN IMMEDIATE')
+            if db.execute('PRAGMA user_version').fetchone()[0] == 2:
+                for statement in SCENARIO_METADATA_DDL:
+                    db.execute(statement)
+                db.execute('PRAGMA user_version=3')
+            db.commit()
+        if db.execute('PRAGMA user_version').fetchone()[0] == 3:
+            db.execute('BEGIN IMMEDIATE')
+            if db.execute('PRAGMA user_version').fetchone()[0] == 3:
+                for statement in CHECKPOINT_METADATA_DDL:
+                    db.execute(statement)
+                db.execute('PRAGMA user_version=4')
+            db.commit()
+        if db.execute('PRAGMA user_version').fetchone()[0] != 4:
             raise RuntimeError('unsupported runtime database version')
         with db:
             yield db
@@ -82,6 +124,11 @@ def ack(state, session_id, checkpoint_id=None):
 
 
 def save_scenario(owner: str, scenario: Scenario) -> Scenario:
+    return _save_scenario(owner, ScenarioArchive(scenario=scenario, created_at_utc=utc_now()))
+
+
+def _save_scenario(owner: str, archive: ScenarioArchive) -> Scenario:
+    scenario = validate_identity(archive)
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
         existing = db.execute('SELECT payload FROM scenarios WHERE owner=? AND id=?', (owner, scenario.scenario_id)).fetchone()
@@ -92,7 +139,37 @@ def save_scenario(owner: str, scenario: Scenario) -> Scenario:
         if db.execute('SELECT COUNT(*) FROM scenarios').fetchone()[0] >= 100:
             raise EngineError('scenario_limit', 429)
         db.execute('INSERT INTO scenarios VALUES (?,?,?)', (owner, scenario.scenario_id, canonical(scenario)))
+        db.execute('INSERT INTO scenario_metadata VALUES (?,?,?)', (owner, scenario.scenario_id, archive.created_at_utc))
     return scenario
+
+
+def get_scenario_archive(owner: str, scenario_id: str) -> ScenarioArchive:
+    with connect() as db:
+        row = db.execute('''SELECT s.payload,m.created_at_utc FROM scenarios s JOIN scenario_metadata m
+            ON s.owner=m.owner AND s.id=m.id WHERE s.owner=? AND s.id=?''', (owner, scenario_id)).fetchone()
+        if row is None:
+            raise EngineError('not_found', 404)
+        result = ScenarioArchive(scenario=Scenario.model_validate_json(row[0]), created_at_utc=row[1])
+        validate_identity(result)
+        return result
+
+
+def import_scenario(owner: str, archive: ScenarioArchive) -> ScenarioArchive:
+    scenario = _save_scenario(owner, archive)
+    # Identical imports retain the first stored creation metadata.
+    return get_scenario_archive(owner, scenario.scenario_id)
+
+
+def list_scenarios(owner: str) -> list[ScenarioSummary]:
+    with connect() as db:
+        rows = db.execute('''SELECT s.payload,m.created_at_utc FROM scenarios s JOIN scenario_metadata m
+            ON s.owner=m.owner AND s.id=m.id WHERE s.owner=? ORDER BY s.id LIMIT 100''', (owner,)).fetchall()
+        result = []
+        for payload, created in rows:
+            scenario = Scenario.model_validate_json(payload)
+            result.append(ScenarioSummary(scenario_id=scenario.scenario_id, config_hash=scenario.config_hash,
+                seed=scenario.config.seed, preset=scenario.config.preset, created_at_utc=created))
+        return result
 
 
 def get_scenario(owner: str, scenario_id: str) -> Scenario:
@@ -171,7 +248,10 @@ def mutate(owner: str, session_id: str, command: Command) -> MutationResult:
     with connect() as db:
         db.execute('BEGIN IMMEDIATE')
         state, prefix, ancestry = load(db, owner, session_id)
-        fingerprint = digest(command)
+        # Preserve retry fingerprints for schema-1 commands written before the
+        # optional paired-trial field existed.
+        fingerprint = digest({k: v for k, v in command.model_dump(mode='json').items()
+                              if k != 'trial_index' or v is not None})
         existing = db.execute('SELECT fingerprint,ack FROM commands WHERE session_id=? AND operation_id=?',
                               (session_id, command.operation_id)).fetchone()
         if existing:
@@ -209,6 +289,7 @@ def mutate(owner: str, session_id: str, command: Command) -> MutationResult:
                 db.execute('INSERT INTO checkpoints VALUES (?,?,?,?,?,?)',
                     (checkpoint_id, session_id, owner, canonical(capture_state(updated)),
                      canonical(records(db, session_id, prefix)), canonical(ancestry)))
+                db.execute('INSERT INTO checkpoint_metadata VALUES (?,?)', (checkpoint_id, utc_now()))
             entry = AuditEntry(session_id=session_id, scenario_id=state.scenario.scenario_id, command=command,
                 result='accepted', tick=updated.tick, revision=updated.revision, event_cursor=updated.event_cursor,
                 intervention=updated.interventions[-1] if command.kind == 'intervene' else None)
@@ -218,15 +299,15 @@ def mutate(owner: str, session_id: str, command: Command) -> MutationResult:
     return result
 
 
-def get_checkpoint(owner: str, checkpoint_id: str) -> CheckpointView:
+def get_checkpoint(owner: str, checkpoint_id: str) -> StoredCheckpoint:
     with connect() as db:
-        row = db.execute('SELECT session_id,payload FROM checkpoints WHERE id=? AND owner=?', (checkpoint_id, owner)).fetchone()
+        row = db.execute('SELECT c.session_id,c.payload,m.created_at_utc FROM checkpoints c JOIN checkpoint_metadata m ON c.id=m.id WHERE c.id=? AND c.owner=?', (checkpoint_id, owner)).fetchone()
         if row is None:
             raise EngineError('not_found', 404)
         payload = json.loads(row[1])
         state = restore_state(payload)
         snapshot = Snapshot.model_validate(payload)
-        return CheckpointView(checkpoint_id=checkpoint_id, session_id=row[0], scenario_id=state.scenario.scenario_id,
+        return StoredCheckpoint(created_at_utc=row[2], checkpoint_id=checkpoint_id, session_id=row[0], scenario_id=state.scenario.scenario_id,
                               tick=state.tick, revision=state.revision, event_cursor=state.event_cursor, snapshot=snapshot)
 
 
@@ -244,3 +325,67 @@ def manifest(owner: str, session_id: str) -> ExperimentManifest:
         return ExperimentManifest(session_id=session_id, scenario=state.scenario, ancestry=ancestry, implementation_hash=implementation_hash(),
             operations=records(db, session_id, prefix), interventions=state.interventions,
             event_hashes=[digest(e) for e in state.events], state_hash=digest(state), event_hash=digest(state.events))
+
+
+def list_checkpoints(owner: str, session_id: str) -> list[dict]:
+    with connect() as db:
+        load(db, owner, session_id)
+        result = []
+        for cid, payload, created in db.execute('SELECT c.id,c.payload,m.created_at_utc FROM checkpoints c JOIN checkpoint_metadata m ON c.id=m.id WHERE c.session_id=? AND c.owner=? ORDER BY c.rowid', (session_id, owner)):
+            snapshot = Snapshot.model_validate_json(payload)
+            s = snapshot.state
+            result.append({'checkpoint_id': cid, 'session_id': session_id, 'scenario_id': s.scenario.scenario_id,
+                           'tick': s.tick, 'revision': s.revision, 'event_cursor': s.event_cursor, 'state_hash': snapshot.state_hash,
+                           'lifecycle': s.lifecycle, 'created_at_utc': created})
+        return result
+
+
+def list_sessions(owner: str) -> list[dict]:
+    with connect() as db:
+        return [{'session_id': sid, 'scenario_id': scenario, 'tick': tick, 'revision': revision,
+                 'event_cursor': cursor, 'lifecycle': lifecycle} for sid, scenario, tick, revision, cursor, lifecycle in db.execute(
+            "SELECT id,json_extract(payload,'$.scenario.scenario_id'),json_extract(payload,'$.tick'),"
+            "json_extract(payload,'$.revision'),json_extract(payload,'$.event_cursor'),json_extract(payload,'$.lifecycle') "
+            'FROM sessions WHERE owner=? ORDER BY rowid DESC', (owner,))]
+
+
+def manifest_at(owner: str, session_id: str, revision: int) -> ExperimentManifest:
+    """Reconstruct an immutable committed boundary, even if a branch progressed."""
+    current = manifest(owner, session_id)
+    if revision < 0 or revision > len(current.operations):
+        raise EngineError('revision_not_found', 404)
+    operations = current.operations[:revision]
+    state = initial_state(current.scenario)
+    for record in operations:
+        state = apply_command(state, record.command)
+        if digest(state) != record.state_hash or digest(state.events) != record.event_hash:
+            raise EngineError('history_diverged', 422)
+    return ExperimentManifest(session_id=session_id, scenario=state.scenario, implementation_hash=implementation_hash(),
+        ancestry=[a for a in current.ancestry if a.revision <= revision], operations=operations,
+        interventions=state.interventions, event_hashes=[digest(e) for e in state.events],
+        state_hash=digest(state), event_hash=digest(state.events))
+
+
+def history_at(owner: str, session_id: str, at_tick: int) -> dict:
+    """Read-only seek: nearest owned checkpoint, then actual inputs up to cutoff."""
+    with connect() as db:
+        db.execute('BEGIN')
+        source, prefix, _ = load(db, owner, session_id)
+        if not 0 <= at_tick <= source.tick:
+            raise EngineError('tick_ahead', 409)
+        history = records(db, session_id, prefix)
+        saved = [Snapshot.model_validate_json(r[0]) for r in db.execute(
+            'SELECT payload FROM checkpoints WHERE owner=? AND session_id=?', (owner, session_id))]
+    eligible = [s for s in saved if s.state.tick <= at_tick]
+    nearest = max(eligible, key=lambda s: (s.state.tick, s.state.revision)) if eligible else None
+    state = restore_state(nearest) if nearest else initial_state(source.scenario)
+    for record in history[state.revision:]:
+        command = Command.model_validate(record['command'])
+        if command.kind in ('step', 'advance') and state.tick + command.ticks > at_tick:
+            remaining = at_tick - state.tick
+            if remaining:
+                state = apply_command(state, command.model_copy(update={'ticks': remaining}))
+            break
+        state = apply_command(state, command)
+    return {'session_id': session_id, 'source_revision': source.revision, 'at_tick': at_tick,
+            'read_only': True, 'snapshot': capture_state(state)}

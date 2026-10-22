@@ -1,0 +1,207 @@
+{
+  "construction": {
+    "default": {
+      "median_ms": 0.05210001836530864,
+      "p95_ms": 0.057600002037361264,
+      "samples": 1000
+    },
+    "maximal_names_attributes": {
+      "median_ms": 0.05420000525191426,
+      "p95_ms": 0.05950001650489867,
+      "samples": 1000
+    }
+  },
+  "engine_version": "zone-engine/1",
+  "fulltime_runs": [
+    {
+      "event_hash": "0c6f83c432184321c440c6f6362d04c6b9362f7eddeb7e9cc7dcc3f4490f56a1",
+      "events": 1896,
+      "events_per_second": 16195.82598903519,
+      "preset": "balanced",
+      "seconds": 0.11706719998619519,
+      "seed": 0,
+      "tick": 5400
+    },
+    {
+      "event_hash": "f2f89373fb27b05ed042a4b1242db7259330e3ecec405083332ef5ea1147f915",
+      "events": 1814,
+      "events_per_second": 15760.4686810637,
+      "preset": "balanced",
+      "seconds": 0.11509809998096898,
+      "seed": 1,
+      "tick": 5400
+    },
+    {
+      "event_hash": "90aa5d6d841f2721fe0ce2b85fc060878e74a69250c56c91251ee3584e9a1f4a",
+      "events": 1845,
+      "events_per_second": 15802.930177543685,
+      "preset": "balanced",
+      "seconds": 0.1167505000194069,
+      "seed": 2,
+      "tick": 5400
+    },
+    {
+      "event_hash": "c9dc1a1195647daaf2100967aaab36f16be3f2ed913299fc5736fd1b34c3869e",
+      "events": 1793,
+      "events_per_second": 16268.867305678272,
+      "preset": "balanced",
+      "seconds": 0.11021049998817034,
+      "seed": 3,
+      "tick": 5400
+    },
+    {
+      "event_hash": "523033100b8ec4aa401b07985186c1ea574972399ff0ed2ec0f2d8d4071a992b",
+      "events": 1924,
+      "events_per_second": 16602.89567007771,
+      "preset": "balanced",
+      "seconds": 0.11588339999434538,
+      "seed": 4,
+      "tick": 5400
+    },
+    {
+      "event_hash": "2229b5685fbaaeac12ae2924180eeb3f66364356552bfe37bd5a0b88192b033e",
+      "events": 2429,
+      "events_per_second": 16451.54582948716,
+      "preset": "high-press",
+      "seconds": 0.14764569999533705,
+      "seed": 0,
+      "tick": 5400
+    },
+    {
+      "event_hash": "c2056de68ded685fb5c92a0e0d34da8797e879056116c9988b3b332132c5b3e9",
+      "events": 2390,
+      "events_per_second": 16599.25101821595,
+      "preset": "high-press",
+      "seconds": 0.1439824000117369,
+      "seed": 1,
+      "tick": 5400
+    },
+    {
+      "event_hash": "e9a53013b709dd480048551b416bb647a7f56f30adc99299fe421c5faddb639c",
+      "events": 2370,
+      "events_per_second": 16462.84918541141,
+      "preset": "high-press",
+      "seconds": 0.14396049999049865,
+      "seed": 2,
+      "tick": 5400
+    },
+    {
+      "event_hash": "770f62f737629cffb26c07eb48dd11780ff2db51f0f23ba379c2a1b7d52e65d2",
+      "events": 2369,
+      "events_per_second": 16560.284257178035,
+      "preset": "high-press",
+      "seconds": 0.143053100007819,
+      "seed": 3,
+      "tick": 5400
+    },
+    {
+      "event_hash": "f965b4147fc46f0e11194ebad6b5871a7d356dc21d73162a52828055704ea9c8",
+      "events": 2412,
+      "events_per_second": 16247.599403789674,
+      "preset": "high-press",
+      "seconds": 0.14845269999932498,
+      "seed": 4,
+      "tick": 5400
+    },
+    {
+      "event_hash": "4d36538dfc5e0578de0b06d7e463be579112cda834fe0d49e7a0d5f345775a5f",
+      "events": 2313,
+      "events_per_second": 14544.388996148324,
+      "preset": "late-comeback",
+      "seconds": 0.15903040001285262,
+      "seed": 0,
+      "tick": 5400
+    },
+    {
+      "event_hash": "c2dd792eccdc26501210c1849df4c3420e8a169f3d8eb493c1a16e7d71fb189a",
+      "events": 2336,
+      "events_per_second": 15256.038249774994,
+      "preset": "late-comeback",
+      "seconds": 0.15311970000038855,
+      "seed": 1,
+      "tick": 5400
+    },
+    {
+      "event_hash": "439a23f625ced62dba4482c76d3dc18514e88b301acf7502593357b13c906c2b",
+      "events": 2350,
+      "events_per_second": 16121.397554194742,
+      "preset": "late-comeback",
+      "seconds": 0.1457689999951981,
+      "seed": 2,
+      "tick": 5400
+    },
+    {
+      "event_hash": "4f5813ebe60dddae93720d697b4bd34b143c976db4443fc7271e1658078585c3",
+      "events": 2347,
+      "events_per_second": 17000.5693437695,
+      "preset": "late-comeback",
+      "seconds": 0.1380541999824345,
+      "seed": 3,
+      "tick": 5400
+    },
+    {
+      "event_hash": "10f50dd2a5102bb194b33ebeeafe3afa4c97e9b2bf15ef4927aff3ee9583de8e",
+      "events": 2459,
+      "events_per_second": 16015.308002817632,
+      "preset": "late-comeback",
+      "seconds": 0.15354060000390746,
+      "seed": 4,
+      "tick": 5400
+    },
+    {
+      "event_hash": "f19fb58d6712d8334fadf63022922afc4c60fccb53ab0a129c4742e7e786ea92",
+      "events": 1355,
+      "events_per_second": 14468.673986099604,
+      "preset": "stalemate",
+      "seconds": 0.09365059999981895,
+      "seed": 0,
+      "tick": 5400
+    },
+    {
+      "event_hash": "a4fbdd833bed8073763c1ceac88fa278668476007b7af9b82327f5df2b675da5",
+      "events": 1335,
+      "events_per_second": 15416.683508171505,
+      "preset": "stalemate",
+      "seconds": 0.0865944999968633,
+      "seed": 1,
+      "tick": 5400
+    },
+    {
+      "event_hash": "462d317aaa19c0173ceed71ede5d8fddb2ae8f2109e0bc5a611ff1237835bd48",
+      "events": 1362,
+      "events_per_second": 14774.060998759684,
+      "preset": "stalemate",
+      "seconds": 0.09218860001419671,
+      "seed": 2,
+      "tick": 5400
+    },
+    {
+      "event_hash": "be54f32aa964d6acc9f4f37f512750a3c5e174eb7856d64b0d6fa44139bb8bcc",
+      "events": 1350,
+      "events_per_second": 15375.59152969814,
+      "preset": "stalemate",
+      "seconds": 0.08780150001985021,
+      "seed": 3,
+      "tick": 5400
+    },
+    {
+      "event_hash": "e53f401d2bd0b07acc4f98b764dc8d655f23b6163d28ea77d3b0a7e08750aeb8",
+      "events": 1409,
+      "events_per_second": 15364.081848749023,
+      "preset": "stalemate",
+      "seconds": 0.09170740001718514,
+      "seed": 4,
+      "tick": 5400
+    }
+  ],
+  "limitations": "Local wall times include validation/copying; profiler adds overhead. No deployment SLA or real-football accuracy claim.",
+  "platform": "Windows",
+  "profiled_decisions": {
+    "calls": 777,
+    "cumulative_seconds": 0.042721800000000004,
+    "mean_microseconds": 54.98301158301159
+  },
+  "python": "3.13.15",
+  "rng_algorithm": "sha256-counter/1",
+  "schema_version": "sandbox/1"
+}

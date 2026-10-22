@@ -1,8 +1,26 @@
 # Event contract v1.0
 
-The new authenticated, durable sandbox runtime has a separate [authoritative engine contract](AUTHORITATIVE_ENGINE.md). It preserves this legacy replay/import contract and uses a separate runtime database.
+The new authenticated, durable sandbox runtime has a separate [authoritative engine contract](AUTHORITATIVE_ENGINE.md). Its verified branch comparisons use the [Sandbox ProofTrail v1 contract](PROOFTRAIL.md). It preserves this legacy replay/import contract and uses a separate runtime database.
 
 Pass difficulty is a separate versioned read-only contract; see [formula, API and limitations](PASS_DIFFICULTY.md). It preserves the event and existing metrics contracts.
+
+## Control vs Chaos (control-chaos/1)
+
+`GET /api/matches/{match_id}/control-chaos?at_second=N&window_seconds=300|600|900` is a read-only, fixture/imported-match comparison. Its OpenAPI response example is illustrative only and does not describe any fixture. The response is `control-chaos/1`, uses `control-chaos-formulas/1`, and does not change `/metrics` or `/tactics`. Unknown matches return 404; a clock past the match duration, negative clock or unsupported window returns 422; a source stream above 20,000 events returns 413. No `scenario_id` or `branch_id` is accepted before branch contracts exist.
+
+Every window is selected in match-clock time with **start < match_second <= end**, then events are sorted by `(match_second, sequence, event_id)`. `end=min(at_second, duration_seconds)`. The current interval is `(max(0, end-window_seconds), end]`. A previous interval is included only after two complete equal-length intervals exist; then it is `(end-2*window_seconds, end-window_seconds]`. Before that, current-window counts remain visible and every rhythm delta is unavailable. A boundary event belongs to the interval ending on that second, never to the one starting there. The replay cutoff applies to all values and source IDs.
+
+Retention reports distinct non-empty possession IDs with an observed pass, carry, shot, goal or clearance, pass attempts, completed passes and completion percentage. This is not ball-in-play time, possession duration or a possession-share percentage. No first-to-last sequence span is converted to time possession.
+
+Progression uses only completed passes/carries. Forward progression is `sum(max(0, end.x-start.x))` for located eligible events in normalized 0–100 pitch units, not metres. Final-third entries are located events crossing `x < 66.7` to `x >= 66.7`. Coordinate coverage reports located and missing-coordinate eligible events. If no eligible event has both coordinates, progression and entries are unavailable, not zero.
+
+Disruption counts explicit pressure, recovery and turnover events. Rapid transitions are observed recovery or opponent-turnover triggers followed in event order within 30 match seconds by the same team's completed located final-third entry or shot, with an identical non-empty possession ID. Triggers without a possession ID are counted as unknown and make the total unavailable, even when other triggers can be joined; no hidden possession chain is inferred. Attacking activity separately reports shots and the existing descriptive index components: `2 x completed final-third entries + 3 x shots + recoveries`. It is a count proxy, not danger, xG, probability or effectiveness.
+
+Delta values are current minus previous. Counts and normalized-unit sums also show rates per 300 match seconds; ratios show percentage-point changes and do not get a rate. Missing input factors remain unavailable and do not silently become zero in deltas. A turning point is emitted only for the descriptive activity index when the current complete window has at least three activity-contributing events and the index rises by at least 6 points and at least 50% versus a non-zero previous index (or rises from zero). The deterministic verifier recomputes both bounded windows, team attribution, values, threshold, and all unique source IDs and clocks. Narrative language is limited to event association; it cannot claim causation, superiority or complete match control. There is no combined score.
+
+Each metric exposes its numerator, denominator when applicable, unit, eligible/located/missing coverage, unavailable reason, and source event IDs. The UI links turning-point sources to the replay clock. This evidence only supports recorded synthetic events, not tracking or real-world tactical claims.
+
+The reproducible latency harness is `python scripts/benchmark-control-chaos.py`. It reports Python/OS/processor/logical-CPU details, fixture and synthetic input event counts (10,000 synthetic by default, bounded by 20,000), window size, median and p95. It measures warm in-process calculation plus turning-point verification, excluding HTTP transport and JSON encoding; it does not create or persist match data.
 
 The authoritative schema is `backend/app/models.py`; FastAPI serves machine-readable OpenAPI at `/openapi.json`. Every event has a stable `event_id`, a `match_id`, a delivery `sequence`, a logical `match_second`, `period`, `source_type`, `schema_version`, and a UTC generation timestamp. Coordinates are normalized to 0–100 from the attacking team's point of view. Team/player references must belong to the fixture.
 
@@ -64,3 +82,37 @@ Version 1 input remains supported. New exports use `schema_version: "pulse-xi-ma
 Offline `scripts/database-admin.py` is a trusted OS-level operation. SQLite backup API copies a consistent source read snapshot, validates supported schemas (1/2), integrity/foreign keys and payload-vs-column identities, rejects unknown tables/views/triggers, and exclusively creates a new destination. Restore requires the original backup's physical SHA-256. Existing files, including a live database, are never overwritten. To activate a recovered file, stop the app, set PULSE_DB_PATH and restart. Tokens and browser-local notes are not stored in this backup.
 
 Whole-database restore rotates dataset generation IDs and deletion nonces in the new file so forms/recovery requests from before restore are stale. Source match IDs, event IDs/order, provenance, revisions, archive flags and deletion times remain intact. The restored physical-file SHA-256 is reported after these administrative changes. Backup validation currently supports only schemas 1/2 and the documented tables; future engine storage migrations must update this allowlist deliberately.
+
+## FanDNA localization and preference boundary
+
+The FanDNA replay controls have typed English, Spanish and Hindi message catalogs. A missing catalog entry falls back to English and the interface announces that fallback. The locale is applied to the main application region for assistive technology. The existing recap API remains a deterministic template over verified goal evidence; localized copy does not alter scores, clocks, insight IDs or supporting event IDs. Persona labels and analyst/broadcaster templates are localized in all three supported locales.
+
+FanDNA preferences use browser-local `pulse-xi-fandna-preferences-v1`, schema version 1. It stores only locale, persona and selected synthetic team/player IDs; invalid or unknown values return to defaults, and favorites are checked against the selected fixture. Storage failure does not block replay. No speech provider, voice cloning, network speech request, or paid Azure Speech feature is enabled; voice requires a separately approved cost and consent design.
+
+## Owner-scoped runtime analysis
+
+The engine integration branch exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. Default `projection=legacy` retains the 5400-second contract. Explicit `projection=native` returns `runtime-native-analysis/1` for every supported even engine duration (60..5400), with native period validation and unchanged event identity/ticks. It reuses existing event metrics, pass scoring/verification and export writing. All routes reject future cutoffs and conceal other owners; private runtime data never resolves through public `/api/matches`. See [LIVE_SANDBOX](LIVE_SANDBOX.md#native-period-analysis) for schemas, nullable calendar timestamps, unavailable legacy phase and hash scope. Neither dataset lifecycle nor engine serialization is replaced.
+
+## Saved scenarios (introduced in runtime schema 3; retained in schema 4)
+
+The scenario library remains separate from imported-match storage (library schema 2).
+Authenticated GET `/api/sandbox/scenarios` returns at most 100 owned summaries,
+ordered by scenario ID. Existing create/read/preset payloads remain compatible.
+POST `/api/sandbox/scenarios/import` accepts strict raw ScenarioConfig or
+scenario-archive/1; GET `/api/sandbox/scenarios/{id}/archive` exports the persisted
+record. New private responses use Cache-Control: no-store. See
+[LIVE_SANDBOX](LIVE_SANDBOX.md#saved-scenario-library-and-archives) for schema,
+identity verification, idempotence, errors, migration and rollback details.
+
+
+
+## Checkpoint/reproduction additive boundary (runtime schema 4)
+
+Checkpoint reads/summaries add original created_at_utc or null; summaries expose
+saved lifecycle. Command responses add checkpoint_created_at_utc. Timestamp data
+is stored separately and excluded from every deterministic snapshot/hash.
+GET sessions/{id}/reproduction and experiments/{id}/reproduction under
+/api/sandbox wrap the original manifests with versioned unsigned export-build
+provenance. Raw manifest routes remain unchanged; existing verify routes/CLIs
+accept either supported raw payloads or the corresponding wrapper. See the
+[wire/migration and trust contract](LIVE_SANDBOX.md#checkpoint-metadata-and-reproduction-contracts).

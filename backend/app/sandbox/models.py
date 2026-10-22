@@ -154,15 +154,18 @@ class EngineState(Model):
 class Command(Model):
     operation_id: Identifier
     expected_revision: int = Field(ge=0, le=2048)
-    kind: Literal['pause', 'resume', 'step', 'advance', 'intervene', 'cancel', 'checkpoint']
+    kind: Literal['pause', 'resume', 'step', 'advance', 'intervene', 'cancel', 'checkpoint', 'trial']
     ticks: int = Field(default=1, ge=1, le=300)
     team_id: Identifier | None = None
     field: Literal['formation', 'pressing', 'compactness', 'directness', 'tempo', 'risk'] | None = None
     value: int | str | None = None
     requested_tick: int | None = Field(default=None, ge=0, le=5400)
+    trial_index: int | None = Field(default=None, ge=0, le=4)
 
     @model_validator(mode='after')
     def shape(self):
+        if (self.kind == 'trial') != (self.trial_index is not None):
+            raise ValueError('trial requires trial_index; other commands must omit it')
         if self.kind == 'intervene':
             if self.team_id is None or self.field is None or self.value is None or self.requested_tick is None:
                 raise ValueError('intervention requires team_id, field, value and requested_tick')
@@ -255,8 +258,8 @@ class ReplayRecord(Model):
 
 
 class Ancestor(Model):
-    checkpoint_id: str
-    session_id: str
+    checkpoint_id: str = Field(pattern=r'^checkpoint-[0-9a-f]{64}$')
+    session_id: str = Field(pattern=r'^runtime-[0-9a-f]{64}$')
     snapshot_hash: Digest
     revision: int = Field(ge=1, le=2048)
 
@@ -267,7 +270,7 @@ class ExperimentManifest(Model):
     rng_algorithm: Literal['sha256-counter/1'] = RNG_ALGORITHM
     implementation_hash: Digest
     rng_derivation: Literal['sha256(engine_version:seed:stream); sha256(key:counter)'] = 'sha256(engine_version:seed:stream); sha256(key:counter)'
-    session_id: str
+    session_id: str = Field(pattern=r'^runtime-[0-9a-f]{64}$')
     scenario: Scenario
     ancestry: list[Ancestor] = Field(max_length=32)
     operations: list[ReplayRecord] = Field(max_length=2048)
@@ -275,7 +278,8 @@ class ExperimentManifest(Model):
     event_hashes: list[Digest] = Field(max_length=20000)
     state_hash: Digest
     event_hash: Digest
-    execution: Literal['integer-seconds; max-command-ticks=300; manual-bounded-driver'] = 'integer-seconds; max-command-ticks=300; manual-bounded-driver'
+    execution: Literal['integer-seconds; max-command-ticks=300; explicit-command-driver',
+                       'integer-seconds; max-command-ticks=300; manual-bounded-driver'] = 'integer-seconds; max-command-ticks=300; explicit-command-driver'
 
 
 class Verification(Model):
