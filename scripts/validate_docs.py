@@ -38,6 +38,15 @@ def anchors(text: str) -> set[str]:
     return result
 
 
+def contains_credential(value: object) -> bool:
+    if isinstance(value, dict):
+        return any(re.search(r'(?:token|password|secret|credential)', str(key), re.I)
+                   or contains_credential(item) for key, item in value.items())
+    if isinstance(value, list):
+        return any(contains_credential(item) for item in value)
+    return False
+
+
 def validate_markdown(root: Path = ROOT) -> list[str]:
     errors: list[str] = []
     markdown_files = sorted(root.rglob('*.md'))
@@ -110,7 +119,7 @@ def validate_api_examples(root: Path = ROOT) -> list[str]:
             for file_path, data in ((request_path, request_data), (response_path, response_data)):
                 if not isinstance(data, dict):
                     raise ValueError(f'{file_path.name} must contain a JSON object')
-                if any(re.search(r'(?:token|password|secret|credential)', key, re.I) for key in data):
+                if contains_credential(data):
                     raise ValueError(f'{file_path.name} contains a credential-like field')
             if route.body_field is None or route.response_model is None:
                 raise ValueError('example route must declare request and response models')
