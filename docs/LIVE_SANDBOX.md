@@ -690,3 +690,16 @@ completed comparison/export loads with the original experiment ID. The retry
 also invalidates obsolete recovery reads. The 65-case normal project passed after
 that repair; exact-head full CI is the integration gate. Earlier shared-runner
 failures are preserved in PR70; no performance optimization or latency SLA is claimed.
+
+
+### Reusing a completed reproduction archive
+
+The Control Room retains at most one completed experiment reproduction envelope in
+component memory for verification/download actions. It is keyed by operator epoch,
+source session and experiment; source changes, disconnect, unmount, new experiments
+and failed requests discard it. It is never written to browser storage. Every use
+still makes an authenticated server read of the experiment before returning any
+retained archive, so token revocation and owner concealment remain enforced. The
+small status read replaces a repeated independent reconstruction of every branch.
+The original envelope, hashes, verifier and 2 MB online/20 MB offline bounds remain
+unchanged. No backend result cache, engine serializer or analytical formula changes.
