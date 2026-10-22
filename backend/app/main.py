@@ -13,6 +13,7 @@ from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
 from .analytics import control_chaos_at, metrics_at, state_at, tactics_at
+from .fan_lens import FanLensResponse, fan_lens_at
 from .agents import TRACES, configured, run_specialists
 from .evidence import insights_for, overlays_for, recap_for, verify_control_turning_point
 from .models import ControlChaosResponse, EventType, Match, MatchEvent
@@ -253,6 +254,18 @@ def match_state(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
 def match_metrics(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
     match, events = get_match(match_id)
     return metrics_at(match, events, at_second)
+
+
+@app.get("/api/matches/{match_id}/fan-lens", response_model=FanLensResponse)
+def match_fan_lens(match_id: str, at_second: int = Query(5400, ge=0, le=5400),
+                   metric_id: str = Query(...), threshold_id: str = Query("some"),
+                   team_id: str | None = Query(None), player_id: str | None = Query(None)):
+    match, events = get_match(match_id)
+    try:
+        return fan_lens_at(match, events, at_second=at_second, metric_id=metric_id,
+                           threshold_id=threshold_id, team_id=team_id, player_id=player_id)
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
 
 
 @app.get("/api/matches/{match_id}/tactics")
