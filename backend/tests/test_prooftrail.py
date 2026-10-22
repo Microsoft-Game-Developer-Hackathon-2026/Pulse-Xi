@@ -41,6 +41,25 @@ def divergent_pair():
     return baseline, branch, checkpoint
 
 
+def test_prooftrail_preserves_schema4_checkpoint_metadata_and_owner_concealment(runtime_db, monkeypatch):
+    baseline, branch, checkpoint = divergent_pair()
+    assert checkpoint.created_at_utc is not None
+    monkeypatch.setenv('PULSE_RUNTIME_TOKENS', '{"alice":"' + 'a' * 32 + '","bob":"' + 'b' * 32 + '"}')
+    with TestClient(app) as client:
+        path = f'/api/sandbox/sessions/{branch.session_id}/prooftrail'
+        params = {'baseline_session_id': baseline.session_id, 'intervention_id': 'press-change', 'at_tick': 120}
+        response = client.get(path, params=params, headers={'Authorization': 'Bearer ' + 'a' * 32})
+        assert response.status_code == 200, response.text
+        assert response.json()['checkpoint_id'] == checkpoint.checkpoint_id
+        assert response.headers['cache-control'] == 'no-store'
+        hidden = client.get(path, params=params, headers={'Authorization': 'Bearer ' + 'b' * 32})
+        assert hidden.status_code == 404
+        saved = client.get(f'/api/sandbox/checkpoints/{checkpoint.checkpoint_id}', headers={'Authorization': 'Bearer ' + 'a' * 32})
+        assert saved.status_code == 200
+        assert saved.json()['created_at_utc'] == checkpoint.created_at_utc
+        assert saved.json()['snapshot']['state_hash'] == checkpoint.snapshot.state_hash
+
+
 def test_verified_comparison_recalculates_cited_same_window_metrics(runtime_db):
     baseline, branch, checkpoint = divergent_pair()
     result = build_sandbox_insight(
