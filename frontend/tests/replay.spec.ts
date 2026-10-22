@@ -25,6 +25,25 @@ test('loads, seeks without future spoilers, and inspects tactical evidence', asy
   await expect(page.getByRole('link', { name: /Export .* cue JSON/ }).first()).toHaveAttribute('href', /\/overlays\/cue-/)
 })
 
+test('Control vs Chaos stays synchronized with matched replay windows', async ({ page, request }) => {
+  const response = await request.get('/api/matches/comeback-1107/control-chaos?at_second=1200&window_seconds=600')
+  expect(response.ok()).toBeTruthy()
+  const packet = await response.json()
+  expect(packet.schema_version).toBe('control-chaos/1')
+  expect(packet.window).toEqual({ start_second: 600, end_second: 1200 })
+  expect(packet.previous_window).toEqual({ start_second: 0, end_second: 600 })
+  expect(packet.formula_version).toBe('control-chaos-formulas/1')
+
+  await page.goto('/')
+  await expect(page.getByRole('region', { name: 'Control vs Chaos analysis' })).toBeVisible()
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('1200')
+  await page.getByLabel('Control vs Chaos window').selectOption('600')
+  await expect(page.locator('.control-toolbar')).toContainText('CURRENT 10:00–20:00')
+  await expect(page.locator('.control-toolbar')).toContainText('PREVIOUS 0:00–10:00')
+  await expect(page.getByText('RHYTHM TIMELINE / DESCRIPTIVE ACTIVITY INDEX')).toBeVisible()
+  await expect(page.getByText(/Observed possession IDs are not possession time/)).toBeVisible()
+})
+
 test('match selection and mobile replay controls', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/')

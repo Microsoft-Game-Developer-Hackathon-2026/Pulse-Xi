@@ -13,5 +13,55 @@ html { overflow-anchor: none; }
 
 @media(max-width:400px){.scoreboard{grid-template-columns:minmax(0,1fr) 100px minmax(0,1fr)}.team{padding:8px;gap:5px}.team-mark{width:26px;height:32px}.team strong{font-size:11px}}
 
+.control-chaos{margin-top:20px}
+.control-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:13px 18px;border-bottom:1px solid #29464a;color:#8caead;font:700 10px Consolas;letter-spacing:.7px}
+.control-toolbar label{display:flex;align-items:center;gap:9px}
+.control-toolbar select{background:#122a30;border:1px solid #34575b;color:#eaf8f5;padding:7px}
+.control-definitions,.control-empty,.control-error{margin:0;padding:13px 18px;color:#91adaa;font-size:11px;line-height:1.5;border-bottom:1px solid #29464a}
+.control-definitions p{margin:0}.control-definitions details{margin-top:10px}.control-definitions summary{cursor:pointer;color:#5ce0d6;font:700 10px Arial;letter-spacing:.8px}.control-definitions ul{padding-left:18px;margin:10px 0 0}.control-definitions li{margin:6px 0}
+.control-error{color:#ffc2b6;background:#542c30}
+.control-team-grid{display:grid;grid-template-columns:1fr 1fr}
+.control-team{min-width:0;padding:18px;border-right:1px solid #29464a}
+.control-team:last-child{border-right:0}
+.control-team h3{margin:0 0 15px;color:var(--team-color);font-size:18px}
+.control-team h3 i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--team-color)}
+.control-category{padding:11px 0;border-top:1px solid #29464a}
+.control-category h4,.control-rhythm h3,.control-turning-points h3,.control-proof h4{margin:0 0 9px;color:#8caaaa;font:700 10px Arial;letter-spacing:1.2px}
+.control-metric{display:grid;grid-template-columns:minmax(120px,1fr) auto;gap:3px 8px;align-items:baseline;padding:6px 0;border-bottom:1px solid #1d373b;font-size:11px;color:#c1d7d3}
+.control-metric strong{color:#f2faf5;font:700 12px Consolas;text-align:right}
+.control-metric strong small{font:9px Arial;color:#89a8a6}
+.control-delta{grid-column:2;text-align:right;color:#64d8cf;font:10px Consolas}
+.control-coverage{grid-column:1/-1;color:#769896;font-size:9px}
+.control-coverage.unavailable{color:#e9b789}
+.control-rhythm{padding:17px 18px;border-top:1px solid #29464a}
+.control-rhythm h3{color:#d5ebe7}
+.rhythm-row{display:grid;grid-template-columns:minmax(90px,150px) minmax(100px,1fr) 110px;gap:12px;align-items:center;margin:11px 0;font:11px Consolas}
+.rhythm-track{display:flex;align-items:center;gap:3px;height:13px}
+.rhythm-track i,.rhythm-track b{display:block;height:8px;min-width:2px;background:#92aaa655}
+.rhythm-track b{height:12px;background:var(--team-color,#50ded5)}
+.rhythm-row small{color:#a9c4c0;text-align:right}
+.control-rhythm p,.control-turning-points p{color:#86a6a4;font-size:10px;line-height:1.5;margin:12px 0 0}
+.control-interpretation{padding:0 18px}
+.control-interpretation p{padding:11px 13px;background:#122a30;border-left:2px solid #54ded5;color:#b8cfcc;font-size:11px;line-height:1.5}
+.control-turning-points{padding:16px 18px;border-top:1px solid #29464a}
+.control-turning-points h3{color:#d5ebe7}
+.control-turning-points button{display:block;width:100%;text-align:left;padding:10px 12px;margin:6px 0;background:#122a30;border:1px solid #34575b;color:#e4f1ed;font-size:11px}
+.control-turning-points button[aria-pressed="true"],.control-turning-points button:hover{border-color:#54ded5}
+.control-proof{margin:0 18px 18px;padding:15px;border:1px solid #4c8184;background:#0a1b20}
+.control-proof-head{display:flex;justify-content:space-between;gap:12px;color:#58e1d8;font:700 10px Consolas;overflow-wrap:anywhere}
+.control-proof-head small{display:block;margin-top:5px;color:#8eaead}
+.control-proof-head button{align-self:start;background:transparent;border:0;color:#d5e9e5;font-size:23px}
+.control-proof>p{color:#a8c4c0;font-size:11px;line-height:1.5}
+.control-proof-windows{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.control-proof-windows>div{display:flex;flex-direction:column;gap:7px;padding:11px;background:#102a2f;color:#a8c1bf;font-size:10px}
+.control-proof-windows b{color:#5fe2d8;font:700 9px Consolas}
+.control-proof-windows strong{color:#fff;font:700 14px Consolas}
+.control-proof h4{margin-top:17px}
+.control-source-list{display:flex;flex-wrap:wrap;gap:6px;max-height:150px;overflow:auto}
+.control-source-list button{background:#132e33;border:1px solid #35575a;color:#b7d4cf;padding:7px;font:10px Consolas}
+.control-source-list button:hover{border-color:#52e1d8;color:#62e9df}
+.control-source-list p,.control-proof-note{color:#86a6a4;font-size:10px;line-height:1.5}
+@media(max-width:800px){.control-team-grid{grid-template-columns:1fr}.control-team{border-right:0;border-bottom:1px solid #29464a}.control-proof-windows{grid-template-columns:1fr}}
+@media(max-width:500px){.control-toolbar{align-items:flex-start;flex-direction:column}.rhythm-row{grid-template-columns:85px minmax(50px,1fr) 75px;gap:7px;font-size:9px}.control-team{padding:14px}.control-metric{grid-template-columns:minmax(100px,1fr) auto}}
 /* Broadcast proof remains in the existing cue row; no overlay intercepts the pitch. */
 .cue-proof{background:transparent;border:1px solid #416e70;border-radius:4px;color:#9cf4e9;font:700 10px Arial;padding:5px 7px;cursor:pointer}.cue-proof:hover:not(:disabled){background:#24484b}.cue-proof:focus-visible{outline:2px solid #9cf4e9;outline-offset:3px}.cue-proof:disabled{opacity:.5;cursor:not-allowed}
