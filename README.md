@@ -340,3 +340,12 @@ See [the consolidation audit](docs/REPOSITORY_CONSOLIDATION.md) for exact review
 PR/dependency status, safe branch removals and verification boundaries. Premium
 Glass #71, archive reuse #74 and direct broadcast-cue evidence #75 remain under
 review; their compatibility branch is not the shipped main application.
+
+## Pending runtime Control vs Chaos integration
+
+This PR adds authenticated native Control vs Chaos over existing recorded formulas.
+The frontend explicitly sends `projection=native`; the backend rejects unsupported
+projections and validates owner/cutoff/source identity. Window choices300/600/900
+retain honest partial-history states. This adapter is not on main until PR76
+is reviewed and merged; the native analysis and recorded algorithms are already
+merged dependencies. No engine serialization, RNG or formula change is introduced.
