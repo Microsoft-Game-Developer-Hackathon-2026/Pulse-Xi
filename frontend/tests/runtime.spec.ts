@@ -95,6 +95,8 @@ test('configure, step, checkpoint, intervene, fork, compare evidence and indepen
   await expect(evidence).toContainText('Verified source #')
   const unchanged = await (await request.get(`/api/sandbox/sessions/${sid}/state`, { headers })).json()
   expect(unchanged.state_hash).toBe(parent.state_hash)
+  const archiveReads: string[] = []
+  page.on('request', r => { if (r.method() === 'GET' && /\/experiments\/[^/]+\/(manifest|reproduction)$/.test(r.url())) archiveReads.push(r.url()) })
   const download = page.waitForEvent('download')
   await page.getByRole('button', { name: 'Download experiment manifest' }).click()
   const saved = await download
@@ -108,6 +110,22 @@ test('configure, step, checkpoint, intervene, fork, compare evidence and indepen
   expect((await verified.json()).verified).toBe(true)
   await page.getByRole('button', { name: 'Verify experiment independently', exact: true }).click()
   await expect(page.getByText('Experiment independently reproduced: paired branches and metrics match.')).toBeVisible()
+  expect(archiveReads).toHaveLength(1)
+  expect(archiveReads[0]).toMatch(/\/reproduction$/)
+  // A retained archive never bypasses a fresh denied authorization check.
+  let revokedDownload = false
+  const recordRevokedDownload = () => { revokedDownload = true }
+  page.on('download', recordRevokedDownload)
+  await page.route(`**/experiments/${interruptedExperiment}`, route => route.fulfill({status:403,json:{detail:{code:'unauthorized'}}}), {times:1})
+  await page.getByRole('button', { name: 'Download experiment manifest', exact: true }).click()
+  await expect(page.getByRole('alert')).toContainText('unauthorized')
+  expect(revokedDownload).toBe(false)
+  page.off('download', recordRevokedDownload)
+  const retriedDownload = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Download experiment manifest', exact: true }).click()
+  await retriedDownload
+  expect(archiveReads).toHaveLength(2) // failed access discards the cached archive
+
   await page.getByRole('button', { name: 'Verify runtime', exact: true }).click()
   await expect(page.getByText('Runtime independently reproduced: event and state hashes match.')).toBeVisible()
   await page.getByRole('button', { name: 'Open verified source branch', exact: true }).click()
