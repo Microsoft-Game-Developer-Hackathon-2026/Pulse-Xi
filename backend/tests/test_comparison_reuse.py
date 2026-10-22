@@ -1,6 +1,9 @@
 """A successful independent audit must not trigger another full history replay."""
-from app.sandbox import control, experiments
-from app.sandbox.engine import digest
+import pytest
+
+from app.sandbox import control, experiments, storage
+from app.sandbox.engine import EngineError, digest
+from app.sandbox.models import Command, ExperimentManifest
 from test_runtime_integration import database, checkpoint, experiment_request, finish_experiment
 
 
@@ -46,3 +49,40 @@ def test_calculation_reuses_checkpoint_but_full_verifier_still_rejects_bad_prefi
     rejected = experiments.verify_bundle(experiments.ExperimentBundle.model_validate(forged))
     assert not rejected.verified
     assert rejected.component == 'branches[0].operation.state_hash'
+
+
+def test_current_trials_avoid_history_reconstruction_but_extended_branches_keep_original_boundary(database, monkeypatch):
+    root = checkpoint()
+    job = finish_experiment(control.create_experiment('alice', experiment_request(root)))
+    historical = storage.manifest_at
+    reads = []
+
+    def counted(owner, session_id, revision):
+        reads.append(session_id)
+        return historical(owner, session_id, revision)
+
+    monkeypatch.setattr(storage, 'manifest_at', counted)
+    expected = experiments.comparison('alice', job.experiment_id)
+    assert reads == []
+    branch = storage.get_runtime('alice', job.branches[0])
+    storage.mutate('alice', branch.session_id, Command(operation_id='after-trial',
+        expected_revision=branch.revision, kind='step', ticks=1))
+    actual = experiments.comparison('alice', job.experiment_id)
+    assert actual == expected
+    assert reads == [branch.session_id]
+
+
+def test_current_manifest_fast_path_does_not_bypass_corrupt_prefix_rejection(database, monkeypatch):
+    root = checkpoint()
+    job = finish_experiment(control.create_experiment('alice', experiment_request(root)))
+    original = storage.manifest
+
+    def corrupted(owner, session_id):
+        value = original(owner, session_id).model_dump(mode='json')
+        if session_id == job.branches[0]:
+            value['operations'][0]['state_hash'] = '0' * 64
+        return ExperimentManifest.model_validate(value)
+
+    monkeypatch.setattr(storage, 'manifest', corrupted)
+    with pytest.raises(EngineError, match='experiment_diverged'):
+        experiments.comparison('alice', job.experiment_id)

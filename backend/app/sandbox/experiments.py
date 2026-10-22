@@ -185,12 +185,23 @@ def verify_bundle(bundle: ExperimentBundle) -> Verification:
     return Verification(verified=True)
 
 
+def _trial_manifest(owner: str, session_id: str, revision: int) -> ExperimentManifest:
+    # manifest() captures state and receipts in one read transaction. Completed
+    # trials normally remain at exactly this boundary, so historical replay is
+    # unnecessary. A subsequently advanced branch still uses the historical path.
+    # Both paths undergo full independent verification before any result returns.
+    current = storage.manifest(owner, session_id)
+    if len(current.operations) == revision:
+        return current
+    return storage.manifest_at(owner, session_id, revision)
+
+
 def _verified_comparison(owner, identity) -> tuple[ExperimentBundle, Comparison]:
     experiment = read('experiments', owner, identity)[1]
     if experiment.status != 'completed':
         raise EngineError('experiment_not_completed')
     checkpoint = storage.get_checkpoint(owner, experiment.request.checkpoint_id)
-    manifests = [storage.manifest_at(owner, sid, experiment.request.expected_revision + len(trial_commands(experiment, index)))
+    manifests = [_trial_manifest(owner, sid, experiment.request.expected_revision + len(trial_commands(experiment, index)))
                  for index, sid in enumerate(experiment.branches)]
     states = []
     for manifest in manifests:
