@@ -1,5 +1,21 @@
 # Local release evidence and remaining submission gates
 
+## Current audit addendum - 2026-10-22
+
+Main `d19a898` has merged native analysis, recorded Control vs Chaos, FanDNA,
+branch ProofTrail/request isolation, Atelier UI, agent tools and the Foundry
+validation pathway. Earlier snapshots below retain their original provenance;
+statements that these PRs were pending describe those earlier revisions only.
+Provider installation/offline validation is not a hosted model run. Runtime
+Control vs Chaos PR #76 remains conflicting and unreviewed at inspection.
+
+See [requirements](FINAL_REQUIREMENTS_AUDIT.md), [measured performance](PERFORMANCE_AUDIT.md)
+and [current readiness](FINAL_HACKATHON_READINESS_REPORT.md). Registration was
+confirmed by the user; the final public video, clean-browser judge access,
+rights/release decision (#23) and submission confirmation (#25) remain unverified.
+No deployment, paid inference, upload or submission was performed.
+
+
 Audit date: 2026-10-21 UTC (2026-10-22 India). Starting main:
 `c5a93f46a24fa857318f237f37f9184a4b4d90dc`,
 [successful baseline CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39664390354).

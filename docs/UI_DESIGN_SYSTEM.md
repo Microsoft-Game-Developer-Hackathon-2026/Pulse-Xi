@@ -130,3 +130,19 @@ node scripts/measure-ui.mjs http://127.0.0.1:8011 http://127.0.0.1:8000 ui-measu
 ```
 
 Verification in this session: 344 backend tests passed with an empty backend diff; 90 ordinary browser tests passed, including all 28 responsive comparisons. Six focused accessibility/motion tests and six Chromium/Firefox/WebKit material tests passed. Both committed manifest/experiment verifiers, all seven asset validators, pip check and the production npm audit passed. The maximum-history ForkCast probe exceeded its unchanged 90-second comparison-arrival budget locally, including an isolated run and a clean-main reproduction without the redesign. It is not counted as a pass. The same main source passed [Linux CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39749797674); this laptop result remains a documented limitation. Fresh exact-head CI is required before reporting the entire suite green.
+
+## Replay reading stability (audit increment)
+
+The analysis refresh cadence is independent from the 200 ms replay renderer:
+server analysis samples at 1 Hz during playback and uses the exact paused seek.
+Retained public packets must belong to the current match, not exceed its cutoff,
+and (for recaps) match locale/persona/favorite scope. Their actual cutoff remains
+visible. Backward seeks conceal future packets immediately. Private runtime pass
+analysis retains its stricter exact-key behavior.
+
+Recap/moment lists, pass detail and rhythm detail use bounded, keyboard-focusable
+reading viewports with overflow, rather than dropping whole content trees while
+loading. Text remains reachable; browser zoom may increase internal scrolling.
+Tactical descriptive text reserves four lines without a maximum/clipping rule.
+These are reading surfaces, not new routes or data models. Playback no longer
+changes the analyst's selected team merely because a new pass occurs.

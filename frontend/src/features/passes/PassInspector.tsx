@@ -19,7 +19,7 @@ export function PassInspector({ match, atSecond, teamId, seek, dataSecond = atSe
 }) {
   const base = apiBase ?? `/api/matches/${encodeURIComponent(match.match_id)}`
   const cutoff = Math.floor(Math.min(dataSecond, atSecond))
-  const [result, setResult] = useState<{ key: string; items: PassDifficulty[] } | null>(null)
+  const [result, setResult] = useState<{ key: string; base: string; cutoff: number; items: PassDifficulty[] } | null>(null)
   const [selectedId, setSelectedId] = useState('')
   const [filter, setFilter] = useState('all')
   const [error, setError] = useState('')
@@ -42,7 +42,7 @@ export function PassInspector({ match, atSecond, teamId, seek, dataSecond = atSe
           items.push(...page.items)
           cursor = page.next_cursor ?? 0
         } while (cursor && !controller.signal.aborted)
-        if (!controller.signal.aborted) setResult({ key, items })
+        if (!controller.signal.aborted) setResult({ key, base, cutoff, items })
       } catch (reason) {
         if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : 'Pass analysis unavailable.')
       }
@@ -51,7 +51,7 @@ export function PassInspector({ match, atSecond, teamId, seek, dataSecond = atSe
   }, [match.match_id, cutoff, key, retry, base, load])
   // v1 geometry scores cannot change between passes. Cache by visible pass
   // boundary, never by a future cutoff, to avoid request churn during playback.
-  const loaded = result?.key === key
+  const loaded = result && (result.key === key || !apiBase && result.base === base && result.cutoff <= cutoff)
   const all = loaded ? result.items.filter(item => item.team_id === teamId) : []
   const passes = all.filter(item => filter === 'all' || item.score !== null && item.score >= 70 &&
     (filter === 'high-complete' ? item.outcome === 'complete' : item.outcome === 'incomplete'))
@@ -62,7 +62,8 @@ export function PassInspector({ match, atSecond, teamId, seek, dataSecond = atSe
   return <section className="pass-workbench" aria-label="Pass difficulty analysis">
     <div className="pass-heading"><div><span className="section-index">PASS INTELLIGENCE</span><h3>Every pass, explained.</h3></div><span className="pass-badge">EVENT-DERIVED HEURISTIC</span></div>
     <p className="pass-intro">Explore distance and forward progression. Scores describe this synthetic formula; they are not pass-failure probabilities.</p>
-    <div className="pass-filters"><label>PASS FILTER <select value={filter} onChange={event => { setFilter(event.target.value); setSelectedId('') }}><option value="all">All recorded passes</option><option value="high-complete">High difficulty · completed</option><option value="high-failed">High difficulty · not completed</option></select></label><span>{loaded ? `${passes.length} ELIGIBLE EVENTS · ${clock(Math.floor(atSecond))}` : 'UPDATING AT REPLAY CLOCK'}</span></div>
+    <div className="pass-filters"><label>PASS FILTER <select value={filter} onChange={event => { setFilter(event.target.value); setSelectedId('') }}><option value="all">All recorded passes</option><option value="high-complete">High difficulty · completed</option><option value="high-failed">High difficulty · not completed</option></select></label><span>{loaded ? `${passes.length} ELIGIBLE EVENTS · ${clock(result?.cutoff ?? 0)}${result?.cutoff !== cutoff ? " / UPDATING" : ""}` : 'UPDATING AT REPLAY CLOCK'}</span></div>
+    <div className="pass-reading" tabIndex={0} aria-label="Pass analysis details">
     {error ? <div role="alert" className="pass-empty">{error} <button onClick={() => setRetry(value => value + 1)}>Retry pass analysis</button></div> : !loaded ? <p className="pass-empty" role="status">Loading pass analysis…</p> : !selected ? <p className="pass-empty">{filter === 'all' ? 'No passes recorded for this team at the selected time.' : 'No passes meet this filter. High difficulty starts at 70/100; the current fixtures may contain none.'}</p> : <>
       <label className="pass-select">SELECT PASS <select value={selected.event_id} onChange={event => { setSelectedId(event.target.value); const pass = passes.find(item => item.event_id === event.target.value); if (pass) selectPass?.(pass.event_id, pass.match_second) }}>{passes.map(pass => <option key={pass.event_id} value={pass.event_id}>{clock(pass.match_second)} · {playerName(pass.player_id)} · {pass.outcome ?? 'unknown outcome'} · {pass.score ?? 'unavailable'}/100</option>)}</select></label>
       <div className="pass-inspection" data-testid="pass-inspector" data-event-id={selected.event_id}>
@@ -76,6 +77,7 @@ export function PassInspector({ match, atSecond, teamId, seek, dataSecond = atSe
       </div>
       <details className="pass-method" key={selected.event_id}><summary>Inspect calculation and source evidence</summary><p>{selected.formula_version} · {selected.verification_status.replaceAll('_', ' ')}</p><p>100 × [(55/85) × min(distance/100, 1) + (30/85) × min(forward progression/60, 1)]. Round the final sum half up. Low &lt;35; moderate 35–69; high ≥70.</p><p>{selected.factors.find(factor => factor.factor_id === 'pressure_context')?.unavailable_reason} Passing lanes and defender proximity are excluded.</p><p>Source event: <button className="pass-source" onClick={() => selectPass ? selectPass(selected.event_id, selected.match_second) : seek(selected.match_second)}>{selected.event_id} · seek to {clock(selected.match_second)}</button></p>{apiBase ? <button onClick={() => { evidenceRequest.current?.abort(); const controller = new AbortController(); evidenceRequest.current = controller; void load<unknown>(`${base}/passes/${encodeURIComponent(selected.event_id)}/difficulty/evidence?at_second=${cutoff}`, controller.signal).then(value => { if (controller.signal.aborted) return; const blob = new Blob([JSON.stringify(value, null, 2)], {type:'application/json'}); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = 'runtime-pass-evidence.json'; link.click(); window.setTimeout(() => URL.revokeObjectURL(url), 2000) }).catch(reason => { if (!controller.signal.aborted) setError(reason instanceof Error ? reason.message : 'Evidence unavailable.') }) }}>Download authenticated pass evidence</button> : <a href={`/api/matches/${encodeURIComponent(match.match_id)}/passes/${encodeURIComponent(selected.event_id)}/difficulty/evidence?at_second=${cutoff}`} target="_blank" rel="noreferrer">Open versioned evidence JSON ↗</a>}</details>
     </>}
+    </div>
   </section>
 }
 

@@ -10,12 +10,12 @@ from . import storage
 from .engine import EngineError, match_record, match_events
 from .models import RuntimeView
 from .native_analysis import NativeEvent, NativeAnalysis, NativeEvidence, project, analyze
-from ..models import Match, MatchEvent, MatchMetrics, EventType, Insight
-from ..analytics import metrics_at
+from ..models import Match, MatchEvent, MatchMetrics, EventType, Insight, ControlChaosResponse
+from ..analytics import metrics_at, control_chaos_at
 from ..pass_difficulty import (PassDifficulty, PassDifficultyPage, PassDifficultyEvidence,
                                score_pass, verify_pass_difficulty)
 from ..exports import analysis_export
-from ..evidence import insights_for
+from ..evidence import insights_for, verify_control_turning_point
 
 
 class RecordedAnalysis(BaseModel):
@@ -32,6 +32,26 @@ class RecordedAnalysis(BaseModel):
     events: list[MatchEvent]
     metrics: MatchMetrics
     insights: list[Insight]
+
+
+class RuntimeControlChaos(BaseModel):
+    schema_version: Literal['runtime-control-chaos/1'] = 'runtime-control-chaos/1'
+    projection: Literal['native'] = 'native'
+    session_id: str
+    branch_id: str
+    scenario_id: str
+    revision: int
+    authoritative_tick: int
+    event_cursor: int
+    at_second: int
+    duration_seconds: int
+    halftime_tick: int
+    state_hash: str
+    event_hash: str
+    hash_scope: str
+    current_window_complete: bool
+    comparison_available: bool
+    analysis: ControlChaosResponse
 
 
 Projection = Literal['legacy', 'native']
@@ -63,6 +83,31 @@ def register(router: APIRouter, operator: Callable[..., str]) -> None:
             revision=view.revision, authoritative_tick=view.tick, event_cursor=view.event_cursor,
             state_hash=view.state_hash, event_hash=view.event_hash, at_second=at_second,
             match=match, events=events, metrics=metrics_at(match, events, at_second), insights=insights_for(match, events, at_second))
+
+    @router.get('/sessions/{session_id}/control-chaos', response_model=RuntimeControlChaos, dependencies=[Depends(private_response)])
+    def runtime_control(session_id: str, at_second: int = Query(ge=0, le=5400),
+                        window_seconds: int = Query(300, ge=300, le=900), projection: Literal['native'] = 'native',
+                        owner: str = Depends(operator)):
+        if window_seconds not in (300, 600, 900):
+            raise EngineError('unsupported_control_window', 422)
+        # One owner-scoped captured view supplies events, revision and hashes.
+        view, match, events = source(owner, session_id, at_second, projection)
+        packet = control_chaos_at(match, events, at_second, window_seconds)
+        if any(not verify_control_turning_point(claim, match, events, at_second, window_seconds)
+               for claim in packet.interpretation.turning_points):
+            raise EngineError('control_evidence_verification_failed', 500)
+        return {
+            'schema_version': 'runtime-control-chaos/1',
+            'session_id': session_id, 'branch_id': session_id, 'scenario_id': view.scenario_id,
+            'revision': view.revision, 'authoritative_tick': view.tick, 'event_cursor': view.event_cursor,
+            'at_second': at_second, 'duration_seconds': match.duration_seconds,
+            'halftime_tick': match.halftime_tick,
+            'state_hash': view.state_hash, 'event_hash': view.event_hash,
+            'hash_scope': 'captured authoritative boundary, not rewound inspection cutoff',
+            'current_window_complete': at_second >= window_seconds,
+            'comparison_available': packet.previous_window is not None,
+            'analysis': packet,
+        }
 
     @router.get('/sessions/{session_id}/pass-difficulty', response_model=PassDifficultyPage, dependencies=[Depends(private_response)])
     def difficulties(session_id: str, at_second: int = Query(ge=0, le=5400),
