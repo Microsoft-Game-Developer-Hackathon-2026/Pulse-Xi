@@ -6,7 +6,11 @@
 
 A Microsoft Game Developer Hackathon 2026 project turning fictional football events into deterministic statistics, inspectable tactical explanations, synchronized broadcast cues and personalized recaps. Recorded fixture replay and an authenticated authoritative Control Room support reproducible tactical experiments. All teams, players and events are synthetic. No Premier League feed, club logos, real-player tracking or broadcast footage is used.
 
-## Availability and review status (2026-10-21)
+## Non-release combined validation candidate
+
+This branch combines pending #57/#42/#48/#51/#54/#58 with #71/#74/#75 for compatibility testing. Main remains175b7ceb; no feature approval or release is implied. The availability statements below describe shipped main separately.
+
+## Availability and review status (historical main snapshot)
 
 Integration baseline `c2f8c622d21d3db804e57c9a02e4c09b264f9c4b` (#61) includes #67 recorded-event observer synchronization, live runtime #53, saved scenarios/archives and runtime schema 3 (#64/#65), plus original graphics #62. #52 is closed as superseded: its credential hardening and dependency constraints already reached main through #53. A verified three-way merge adds no changes.
 
@@ -20,6 +24,7 @@ PR #52 is closed as superseded because its security code is already present thro
 listing, versioned archives and creation provenance without changing engine hashes.
 See the [scenario library contract](docs/LIVE_SANDBOX.md#saved-scenario-library-and-archives)
 and shared
+
 [architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
 
 Checkpoint source inspection/download, terminal checkpoint capture, isolated restore/reset, auditable pending/applied tactics, ForkCast source navigation and independent reproduction use real authenticated APIs. Original checkpoint UTC stays outside deterministic state; historical dates remain unknown. See the [checkpoint/reproduction contract](docs/LIVE_SANDBOX.md#checkpoint-metadata-and-reproduction-contracts).
