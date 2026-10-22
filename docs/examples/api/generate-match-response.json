@@ -1,0 +1,155 @@
+{
+  "match_id": "custom-1107",
+  "title": "Custom synthetic match",
+  "seed": 1107,
+  "synthetic": true,
+  "schema_version": "1.0",
+  "home": {
+    "team_id": "harbour",
+    "name": "Harbour City",
+    "color": "#27d5df",
+    "players": [
+      {
+        "player_id": "harbour-01",
+        "name": "Ari Harbour",
+        "role": "GK",
+        "shirt_number": 1
+      },
+      {
+        "player_id": "harbour-02",
+        "name": "Bela Harbour",
+        "role": "RB",
+        "shirt_number": 2
+      },
+      {
+        "player_id": "harbour-03",
+        "name": "Cato Harbour",
+        "role": "CB",
+        "shirt_number": 3
+      },
+      {
+        "player_id": "harbour-04",
+        "name": "Dara Harbour",
+        "role": "CB",
+        "shirt_number": 4
+      },
+      {
+        "player_id": "harbour-05",
+        "name": "Eli Harbour",
+        "role": "LB",
+        "shirt_number": 5
+      },
+      {
+        "player_id": "harbour-06",
+        "name": "Faye Harbour",
+        "role": "DM",
+        "shirt_number": 6
+      },
+      {
+        "player_id": "harbour-07",
+        "name": "Gio Harbour",
+        "role": "CM",
+        "shirt_number": 7
+      },
+      {
+        "player_id": "harbour-08",
+        "name": "Hana Harbour",
+        "role": "AM",
+        "shirt_number": 8
+      },
+      {
+        "player_id": "harbour-09",
+        "name": "Ivo Harbour",
+        "role": "RW",
+        "shirt_number": 9
+      },
+      {
+        "player_id": "harbour-10",
+        "name": "Juno Harbour",
+        "role": "ST",
+        "shirt_number": 10
+      },
+      {
+        "player_id": "harbour-11",
+        "name": "Kian Harbour",
+        "role": "LW",
+        "shirt_number": 11
+      }
+    ]
+  },
+  "away": {
+    "team_id": "northbank",
+    "name": "Northbank United",
+    "color": "#ff7869",
+    "players": [
+      {
+        "player_id": "northbank-01",
+        "name": "Ari Northbank",
+        "role": "GK",
+        "shirt_number": 1
+      },
+      {
+        "player_id": "northbank-02",
+        "name": "Bela Northbank",
+        "role": "RB",
+        "shirt_number": 2
+      },
+      {
+        "player_id": "northbank-03",
+        "name": "Cato Northbank",
+        "role": "CB",
+        "shirt_number": 3
+      },
+      {
+        "player_id": "northbank-04",
+        "name": "Dara Northbank",
+        "role": "CB",
+        "shirt_number": 4
+      },
+      {
+        "player_id": "northbank-05",
+        "name": "Eli Northbank",
+        "role": "LB",
+        "shirt_number": 5
+      },
+      {
+        "player_id": "northbank-06",
+        "name": "Faye Northbank",
+        "role": "DM",
+        "shirt_number": 6
+      },
+      {
+        "player_id": "northbank-07",
+        "name": "Gio Northbank",
+        "role": "CM",
+        "shirt_number": 7
+      },
+      {
+        "player_id": "northbank-08",
+        "name": "Hana Northbank",
+        "role": "AM",
+        "shirt_number": 8
+      },
+      {
+        "player_id": "northbank-09",
+        "name": "Ivo Northbank",
+        "role": "RW",
+        "shirt_number": 9
+      },
+      {
+        "player_id": "northbank-10",
+        "name": "Juno Northbank",
+        "role": "ST",
+        "shirt_number": 10
+      },
+      {
+        "player_id": "northbank-11",
+        "name": "Kian Northbank",
+        "role": "LW",
+        "shirt_number": 11
+      }
+    ]
+  },
+  "duration_seconds": 5400,
+  "event_source": "synthetic-generator"
+}
