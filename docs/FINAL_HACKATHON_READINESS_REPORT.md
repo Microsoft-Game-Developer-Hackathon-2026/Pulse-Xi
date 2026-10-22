@@ -211,3 +211,7 @@ The combined local validation tree at 7c34dbc7dd0feeb7d3928e32663e709fa1a2ce2e i
 The unchanged Windows maximum-history browser case passed separately in 2.7 minutes. The full combined 98-browser suite is still being verified; its final result belongs in PR #79's evidence comment. Shared-prefix proof reuse is bounded to one bundle and requires identical independently checked records/scenario/ancestry. No claimed final state is trusted. Verifier source fingerprints change by contract; only build fingerprint fields in examples changed, with canonical events/state hashes and results preserved.
 
 Release classification remains DEMO READY, SUBMISSION BLOCKED. Rights/release approval (#23), functioning public judge access, actual public video under two minutes and submission confirmation (#25) remain external gates. Hosted Foundry execution is not verified or authorized. The remaining broad profiler, long-session and forensic trace gaps remain explicit; this is not a claim of exhaustive product certification.
+
+### Final combined browser result
+
+All 98 Playwright tests passed in 6.0 minutes on the combined validation tree, including the unchanged maximum-history comparison/download/offline-verification case. Backend/frontend application source is identical to the PR79 delivery; subsequent differences are documentation only. This verifies the candidate locally, not a merge or successful remote CI. The candidate ledger now records frontend5/5 and persistence5/5 verified matrix rows. These are scoped row counts, not a whole-project or official judging score.
