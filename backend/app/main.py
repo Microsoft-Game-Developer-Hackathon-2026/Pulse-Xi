@@ -26,8 +26,9 @@ from .security import LocalStaticFiles, RequestBoundary
 from .data_hub import MatchPackage, package_bytes, package_conflict, quality, require_import_token
 from .storage import ingest_package, imported_snapshot
 from .library_lifecycle import (LifecycleAction, change_lifecycle, deletion_record, library_entries,
-                                local_admin_enabled, require_local_admin)
+                                local_admin_enabled, require_local_admin, require_studio_producer)
 from .exports import AnalysisExport, analysis_export
+from .director_studio import ApprovalRequest, DraftUpdate, approve_studio, export_studio, read_studio, save_studio
 from .sandbox.api import router as sandbox_router
 from .sandbox.control import driver as sandbox_driver
 from .deployment import PublicDemoBoundary, deployment_mode, validate_deployment_config
@@ -51,7 +52,7 @@ app.include_router(sandbox_router)
 app.add_middleware(RequestBoundary)
 app.add_middleware(PublicDemoBoundary)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
-                   allow_methods=["GET", "POST"], allow_headers=["Content-Type", "Authorization", "X-Pulse-Deletion-ID"])
+                   allow_methods=["GET", "POST", "PUT"], allow_headers=["Content-Type", "Authorization", "X-Pulse-Deletion-ID"])
 DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 if (DIST / "assets").is_dir():
     app.mount("/assets", LocalStaticFiles(directory=DIST / "assets"), name="assets")
@@ -438,6 +439,44 @@ def match_overlay(match_id: str, cue_id: str):
     if cue is None:
         raise HTTPException(404, "cue not found")
     return cue
+
+
+@app.get("/api/matches/{match_id}/studio")
+def director_studio_read(match_id: str, actor: str = Depends(require_studio_producer)):
+    match, events = get_match(match_id)
+    return read_studio(match, events)
+
+
+@app.put("/api/matches/{match_id}/studio")
+def director_studio_save(match_id: str, update: DraftUpdate, actor: str = Depends(require_studio_producer)):
+    match, events = get_match(match_id)
+    try:
+        return save_studio(match, events, update, actor=actor)
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
+    except RuntimeError as error:
+        raise HTTPException(409, str(error)) from error
+
+
+@app.post("/api/matches/{match_id}/studio/approve")
+def director_studio_approve(match_id: str, approval: ApprovalRequest, actor: str = Depends(require_studio_producer)):
+    match, events = get_match(match_id)
+    try:
+        return approve_studio(match, events, approval, actor=actor)
+    except ValueError as error:
+        raise HTTPException(422, str(error)) from error
+    except RuntimeError as error:
+        raise HTTPException(409, str(error)) from error
+
+
+@app.get("/api/matches/{match_id}/studio/export")
+def director_studio_export(match_id: str, revision: int | None = Query(None, ge=1),
+                            actor: str = Depends(require_studio_producer)):
+    get_match(match_id)
+    try:
+        return export_studio(match_id, revision)
+    except KeyError as error:
+        raise HTTPException(404, str(error)) from error
 
 
 @app.post("/api/matches/{match_id}/recap")
