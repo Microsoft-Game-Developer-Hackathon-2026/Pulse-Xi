@@ -63,13 +63,10 @@ def audit_model_packet(packet: dict, insight: Insight, match: Match, events: lis
     return True
 
 
-async def run_specialists(match: Match, events: list[MatchEvent], insight: Insight) -> dict:
-    if not configured():
-        raise RuntimeError("Foundry is not enabled/configured")
-    # Lazy imports keep local deterministic operation dependency-free.
-    started = time.perf_counter()
+def _new_trace(match: Match, insight: Insight) -> dict:
+    """Create the versioned trace envelope before crossing the provider boundary."""
     run_id = str(uuid4())
-    trace = {
+    return {
         "schema_version": "pulse-xi-workflow-trace/1",
         "run_id": run_id,
         "trace_id": f"trace-{run_id}",
@@ -78,20 +75,23 @@ async def run_specialists(match: Match, events: list[MatchEvent], insight: Insig
         "insight_id": insight.insight_id,
         "provider": "microsoft_foundry_agent_framework",
         "provider_status": "authenticated_inference_pending",
+        "model": os.getenv("FOUNDRY_MODEL"),
         "status": "running",
         "max_model_attempts": 1,
         "max_tool_calls": 8,
         "unavailable_capabilities": UNAVAILABLE_CAPABILITIES,
         "tool_calls": [],
         "stages": [],
+        "usage_details": None,
     }
-    invocation_id = str(uuid4())
-    trace = {"invocation_id": invocation_id, "trace_id": f"trace-{invocation_id}",
-             "started_at_utc": datetime.now(timezone.utc).isoformat(),
-             "provider": "microsoft_foundry_agent_framework",
-             "provider_status": "authenticated_inference_pending",
-             "model": os.getenv("FOUNDRY_MODEL"), "status": "running", "stages": [],
-             "usage_details": None}
+
+
+async def run_specialists(match: Match, events: list[MatchEvent], insight: Insight) -> dict:
+    if not configured():
+        raise RuntimeError("Foundry is not enabled/configured")
+    # Lazy imports keep local deterministic operation dependency-free.
+    started = time.perf_counter()
+    trace = _new_trace(match, insight)
     TRACES.append(trace)
     TRACES[:] = TRACES[-50:]
     ctx = ToolContext(match=match, events=events, insight=insight, trace=trace)
@@ -144,8 +144,6 @@ async def run_specialists(match: Match, events: list[MatchEvent], insight: Insig
             trace["status"] = "fallback"
             trace["provider_status"] = "fallback"
             return _fallback_result(match, events, insight, trace, "audit_rejected")
-            trace["status"] = "rejected"
-            return {"status": "rejected", "reason": "unsupported model packet", "trace_id": trace["trace_id"]}
         trace["audit_verdict"] = "approved"
         trace["stages"].append({"role": "EvidenceAuditor", "kind": "deterministic_gate", "status": "approved"})
         cue = next((cue for cue in overlays_for(match, events) if cue.insight_id == insight.insight_id), None)
@@ -177,10 +175,6 @@ async def run_specialists(match: Match, events: list[MatchEvent], insight: Insig
         trace["provider_status"] = "error"
         trace["error_code"] = type(error).__name__
         return _fallback_result(match, events, insight, trace, type(error).__name__)
-        trace["status"] = "failed"
-        trace["provider_status"] = "error"
-        trace["error_type"] = type(error).__name__
-        raise
     finally:
         trace["elapsed_ms"] = round((time.perf_counter() - started) * 1000, 1)
 
