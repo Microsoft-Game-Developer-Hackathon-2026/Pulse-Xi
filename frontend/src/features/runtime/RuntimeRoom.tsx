@@ -50,10 +50,12 @@ export function RuntimeRoom() {
   const [proof, setProof] = useState<NativeEvent | null>(null)
   const [proofSource, setProofSource] = useState<Evidence | null>(null)
   const experimentRecovery = useRef(0)
+  // One completed archive, memory-only and scoped to the current operator/session.
+  const experimentArchive = useRef<{ epoch: number; session: string; id: string; payload: unknown } | null>(null)
   const retry = useRef<Retry | null>(null)
   const [retryAvailable, setRetryAvailable] = useState(false)
 
-  useEffect(() => { live.current = true; return () => { live.current = false; epoch.current++ } }, [])
+  useEffect(() => { live.current = true; return () => { live.current = false; epoch.current++; experimentArchive.current = null } }, [])
   useEffect(() => { if (view) setTeam(view.state.scenario.config.home.team_id) }, [view?.scenario_id])
 
   async function perform(task: () => Promise<void>) {
@@ -88,6 +90,7 @@ export function RuntimeRoom() {
     // A redundant selection must not clear the view: the session-keyed effect
     // would not rerun, leaving the current authoritative runtime invisible.
     if (sid === sessionRef.current) return
+    experimentArchive.current = null
     sessionRef.current = sid; setSessionId(sid); setView(null); setRun(null); setCutoff(null); setSelectedSequence(null); setAudit([]); setCheckpoints([]); setCheckpointId('')
     try { sessionStorage.setItem('pulse-runtime-session', sid) } catch { /* Optional identity only, never credentials. */ }
   }
@@ -145,6 +148,7 @@ export function RuntimeRoom() {
   useEffect(() => {
     if (!token || !sessionId) return
     let stopped = false
+    experimentArchive.current = null
     const recovery = ++experimentRecovery.current
     setExperiment(null); setComparison(null); setMetric(null); setProof(null); setProofSource(null)
     void request<Experiment[]>(token, '/experiments').then(async items => {
@@ -232,6 +236,32 @@ export function RuntimeRoom() {
   const checkpoint = checkpoints.find(c => c.checkpoint_id === checkpointId)
   const remainingExperimentTicks = checkpoint && state ? state.scenario.config.duration_seconds - checkpoint.tick : 0
 
+  async function loadExperimentArchive(id: string) {
+    const current = epoch.current, sid = sessionRef.current, generation = experimentRecovery.current
+    const sameSource = () => {
+      if (!live.current || epoch.current !== current || sessionRef.current !== sid || experimentRecovery.current !== generation) {
+        throw new Error('Experiment source changed. Select the current experiment and retry.')
+      }
+    }
+    try {
+      const cached = experimentArchive.current
+      if (cached?.epoch === current && cached.session === sid && cached.id === id) {
+        // Recheck authorization on every action: memory reuse must not bypass revocation.
+        const source = await request<Experiment>(token, `/experiments/${id}`)
+        sameSource()
+        if (source.status !== 'completed' || source.parent_session_id !== sid) throw new Error('Completed experiment source is unavailable.')
+        return cached.payload
+      }
+      const payload = await request(token, `/experiments/${id}/reproduction`)
+      sameSource()
+      experimentArchive.current = { epoch: current, session: sid, id, payload }
+      return payload
+    } catch (reason) {
+      experimentArchive.current = null
+      throw reason
+    }
+  }
+
   async function inspectEvidence(ref: Evidence) {
     await perform(async () => {
       const page = await request<{ events: NativeEvent[] }>(token, `/sessions/${ref.session_id}/events?cursor=${ref.sequence - 1}&limit=1`)
@@ -244,7 +274,7 @@ export function RuntimeRoom() {
   return <section className="runtime-room" lang="en" aria-label="Authoritative Control Room">
     <div className="runtime-heading"><div><span className="section-index">AUTHORITATIVE SANDBOX / ENGINE CONTROL ROOM</span><h2>Change the tactics.<br/><em>Test the consequences.</em></h2><p>Fictional football. One server clock. Every branch can be replayed and verified.</p></div><a href="#/sandbox">Open recorded fixture workspace</a></div>
     {!token ? <form className="panel runtime-auth" onSubmit={connect} aria-busy={busy}><h3>Operator access</h3><p>Use your provisioned runtime operator token. It is never saved in browser storage or included in exports.</p><label>Operator access token<input type="password" autoComplete="off" value={credential} onChange={e => setCredential(e.target.value)} required minLength={32} disabled={busy}/></label><button disabled={busy}>{busy ? 'Connecting…' : 'Connect operator'}</button></form> : <>
-      <div className="runtime-toolbar"><span>{transport}</span><button disabled={busy} onClick={() => void perform(() => refresh())}>Refresh authoritative state</button><button disabled={busy} onClick={() => { epoch.current++; setError(''); setExperiment(null); setComparison(null); setMetric(null); setProof(null); setProofSource(null); setToken(''); setCredential(''); setView(null); setSessionId(''); sessionRef.current = ''; setSavedScenarios([]); setSavedScenarioId(''); setArchive(null); setConfig(null); setConfigJson(''); retry.current = null; setRetryAvailable(false); setNotice('Disconnected. Accepted server runs continue until paused, completed or cancelled.'); }}>Disconnect operator</button></div>
+      <div className="runtime-toolbar"><span>{transport}</span><button disabled={busy} onClick={() => void perform(() => refresh())}>Refresh authoritative state</button><button disabled={busy} onClick={() => { epoch.current++; experimentArchive.current = null; setError(''); setExperiment(null); setComparison(null); setMetric(null); setProof(null); setProofSource(null); setToken(''); setCredential(''); setView(null); setSessionId(''); sessionRef.current = ''; setSavedScenarios([]); setSavedScenarioId(''); setArchive(null); setConfig(null); setConfigJson(''); retry.current = null; setRetryAvailable(false); setNotice('Disconnected. Accepted server runs continue until paused, completed or cancelled.'); }}>Disconnect operator</button></div>
 
       <details className="panel runtime-setup" open={!view}><summary>Scenario builder</summary>{config && <form onSubmit={event => { event.preventDefault(); void perform(async () => {
         const scenario = await saveScenario()
@@ -317,11 +347,11 @@ export function RuntimeRoom() {
           if (!checkpoint) return
           const result = await post<Experiment>('/experiments', { operation_id: newId(), checkpoint_id: checkpoint.checkpoint_id, expected_revision: checkpoint.revision, trials, horizon,
             baseline: [], variation: [{ team_id: team, field, value: field === 'formation' ? value : Number(value) }] }, 'experiment')
-          experimentRecovery.current++; setExperiment(result); setComparison(null); setMetric(null); setProof(null); setProofSource(null)
+          experimentRecovery.current++; experimentArchive.current = null; setExperiment(result); setComparison(null); setMetric(null); setProof(null); setProofSource(null)
         }) }}><div className="runtime-form-grid"><label>Paired trials<input type="number" min={1} max={5} required value={trials} onChange={e => setTrials(e.target.valueAsNumber)}/></label><label>Experiment horizon seconds<input type="number" min={1} max={Math.min(600, state.scenario.config.duration_seconds - (checkpoint?.tick ?? 0))} required value={horizon} onChange={e => setHorizon(e.target.valueAsNumber)}/></label></div><p>Baseline: unchanged · Variation: {team} {field} = {value}. Choose the change in Tactical intervention above; it is applied only in the experimental variation branches.</p><button disabled={busy || !checkpoint || remainingExperimentTicks <= 0 || checkpoint?.lifecycle !== 'paused' || active(experiment?.status) || running}>Run paired ForkCast</button>{checkpoint && remainingExperimentTicks <= 0 && <p role="status">This checkpoint has no remaining simulation time. Choose an earlier checkpoint for ForkCast.</p>}{checkpoint && remainingExperimentTicks > 0 && checkpoint.lifecycle !== 'paused' && <p role="status">ForkCast requires a checkpoint saved while paused; this source is {checkpoint.lifecycle}.</p>}</form>
           {experiment && <div role="status">Experiment {experiment.status} · {Math.min(experiment.branch_index, experiment.request.trials * 2)}/{experiment.request.trials * 2} branches complete {experiment.error && `· ${experiment.error}`}{active(experiment.status) && <button disabled={busy} onClick={() => void perform(async () => setExperiment(await post<Experiment>(`/experiments/${experiment.experiment_id}/cancel`, {})))}>Cancel experiment</button>}</div>}
           {experiment?.status === 'completed' && !comparison && <p role="status">Reproducing saved trial histories and comparison metrics. Large experiments can take longer; the result is not ready yet.</p>}
-          {comparison && <><p>{comparison.verification_status} · {clock(comparison.start_tick)}–{clock(comparison.end_tick)} · {comparison.limitation}</p><div className="runtime-table-wrap"><table><caption>Paired results · variation minus baseline · mean [minimum, maximum]</caption><thead><tr><th>Team / metric</th><th>Baseline</th><th>Variation</th><th>Difference</th><th>Evidence</th></tr></thead><tbody>{comparison.metrics.map(m => <tr key={m.team_id + m.metric}><th>{m.team_id} / {m.metric.replaceAll('_', ' ')}</th><td>{m.baseline.mean} [{m.baseline.minimum}, {m.baseline.maximum}]</td><td>{m.variation.mean} [{m.variation.minimum}, {m.variation.maximum}]</td><td>{m.difference > 0 ? '+' : ''}{m.difference}</td><td><button disabled={busy} onClick={() => { setMetric(m); setProof(null) }}>Inspect {m.evidence_count} sources</button></td></tr>)}</tbody></table></div><details><summary>Trial provenance and branches</summary>{comparison.trials.map(t => <div key={t.trial}><p>Trial {t.trial + 1} · RNG offset {t.rng_counter_offset}</p><button disabled={busy} onClick={() => selectSession(t.baseline_session_id)}>Open baseline {t.trial + 1}</button><button disabled={busy} onClick={() => selectSession(t.variation_session_id)}>Open variation {t.trial + 1}</button><p><code>{t.baseline_event_hash}</code> / <code>{t.variation_event_hash}</code></p></div>)}</details><details><summary>Player involvement per trial</summary>{Object.entries(comparison.player_involvement).map(([arm, players]) => <p key={arm}>{arm}: {Object.entries(players).map(([id, count]) => `${id} ${count}`).join(' · ')}</p>)}</details><button disabled={busy} onClick={() => void perform(async () => { const bundle = await request(token, `/experiments/${comparison.experiment_id}/manifest`); if (new TextEncoder().encode(JSON.stringify(bundle)).byteLength > 2_000_000) { setNotice('This experiment exceeds the 2 MB online verification limit. Download the manifest and run the offline verifier from backend: python -m app.sandbox.verify_experiment <downloaded-file> (20 MB limit). Verification has not been completed in this browser.'); return } const result = await request<{verified:boolean;component:string|null}>(token, '/experiments/verify', bundle); setNotice(result.verified ? 'Experiment independently reproduced: paired branches and metrics match.' : `Experiment verification failed: ${result.component}`) })}>Verify experiment independently</button><button disabled={busy} onClick={() => void perform(async () => download(await request(token, `/experiments/${comparison.experiment_id}/reproduction`), 'pulse-forkcast-manifest.json'))}>Download experiment manifest</button>
+          {comparison && <><p>{comparison.verification_status} · {clock(comparison.start_tick)}–{clock(comparison.end_tick)} · {comparison.limitation}</p><div className="runtime-table-wrap"><table><caption>Paired results · variation minus baseline · mean [minimum, maximum]</caption><thead><tr><th>Team / metric</th><th>Baseline</th><th>Variation</th><th>Difference</th><th>Evidence</th></tr></thead><tbody>{comparison.metrics.map(m => <tr key={m.team_id + m.metric}><th>{m.team_id} / {m.metric.replaceAll('_', ' ')}</th><td>{m.baseline.mean} [{m.baseline.minimum}, {m.baseline.maximum}]</td><td>{m.variation.mean} [{m.variation.minimum}, {m.variation.maximum}]</td><td>{m.difference > 0 ? '+' : ''}{m.difference}</td><td><button disabled={busy} onClick={() => { setMetric(m); setProof(null) }}>Inspect {m.evidence_count} sources</button></td></tr>)}</tbody></table></div><details><summary>Trial provenance and branches</summary>{comparison.trials.map(t => <div key={t.trial}><p>Trial {t.trial + 1} · RNG offset {t.rng_counter_offset}</p><button disabled={busy} onClick={() => selectSession(t.baseline_session_id)}>Open baseline {t.trial + 1}</button><button disabled={busy} onClick={() => selectSession(t.variation_session_id)}>Open variation {t.trial + 1}</button><p><code>{t.baseline_event_hash}</code> / <code>{t.variation_event_hash}</code></p></div>)}</details><details><summary>Player involvement per trial</summary>{Object.entries(comparison.player_involvement).map(([arm, players]) => <p key={arm}>{arm}: {Object.entries(players).map(([id, count]) => `${id} ${count}`).join(' · ')}</p>)}</details><button disabled={busy} onClick={() => void perform(async () => { const bundle = await loadExperimentArchive(comparison.experiment_id); if (new TextEncoder().encode(JSON.stringify(bundle)).byteLength > 2_000_000) { setNotice('This experiment exceeds the 2 MB online verification limit. Download the manifest and run the offline verifier from backend: python -m app.sandbox.verify_experiment <downloaded-file> (20 MB limit). Verification has not been completed in this browser.'); return } const result = await request<{verified:boolean;component:string|null}>(token, '/experiments/verify', bundle); setNotice(result.verified ? 'Experiment independently reproduced: paired branches and metrics match.' : `Experiment verification failed: ${result.component}`) })}>Verify experiment independently</button><button disabled={busy} onClick={() => void perform(async () => download(await loadExperimentArchive(comparison.experiment_id), 'pulse-forkcast-manifest.json'))}>Download experiment manifest</button>
           {metric && <section aria-label="Comparison evidence"><h4>{metric.team_id} / {metric.metric}</h4><p>{metric.evidence_truncated ? `Showing ${metric.evidence.length} of ${metric.evidence_count} event references; calculations use every source event.` : `${metric.evidence_count} event references.`}</p><ul>{metric.evidence.map(ref => <li key={`${ref.session_id}-${ref.sequence}`}><button disabled={busy} onClick={() => void inspectEvidence(ref)}>Trial {ref.trial + 1} · {ref.arm} · #{ref.sequence} · {clock(ref.tick)} · {ref.type} · contribution {ref.contribution}</button></li>)}</ul>{proof && <p role="status">Verified source #{proof.sequence} · {clock(proof.tick)} · {proof.type} · {proof.actor_id} · {proof.outcome}{proofSource && <button disabled={busy} onClick={() => { selectSession(proofSource.session_id); setCutoff(proofSource.tick); setSelectedSequence(proofSource.sequence) }}>Open verified source branch</button>}</p>}</section>}</>}
         </section>
       </> : <p role="status">Create a scenario or select an owned runtime to begin.</p>}
@@ -334,7 +364,7 @@ export function RuntimeRoom() {
       if (pending.target === 'session') { setSessions(await request<Session[]>(token, '/sessions')); selectSession(result.session_id) }
       else if (pending.target === 'run') setRun(result)
       else if (pending.target === 'experiment') {
-        experimentRecovery.current++; setExperiment(result); setComparison(null); setMetric(null); setProof(null); setProofSource(null)
+        experimentRecovery.current++; experimentArchive.current = null; setExperiment(result); setComparison(null); setMetric(null); setProof(null); setProofSource(null)
         if (result.status === 'completed') setComparison(await request<Comparison>(token, `/experiments/${result.experiment_id}/comparison`))
       }
       else await refresh()
