@@ -76,7 +76,7 @@ test('FanDNA localizes controls, persists valid preferences, and announces recap
 
 
 test('localized preferences survive saved scenario navigation without persisting operator credentials', async ({ page }) => {
-  const token = 'test-runtime-token-at-least-32-characters'
+  const token = 'test-fandna-navigation-token-at-least-32-characters'
   await page.goto('/')
   await page.getByLabel('Language').selectOption('es')
   await page.getByLabel('Vista').selectOption('analyst')
