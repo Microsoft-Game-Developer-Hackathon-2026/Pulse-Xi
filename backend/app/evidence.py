@@ -1,6 +1,51 @@
 """Deterministic evidence packets and rule-based verification."""
-from .analytics import event_metric, events_at, state_at, window_events
-from .models import EventType, FactualClaim, Insight, Match, MatchEvent, OverlayCue
+from .analytics import control_chaos_at, event_metric, events_at, state_at, window_events
+from .models import ControlTurningPoint, EventType, FactualClaim, Insight, Match, MatchEvent, OverlayCue
+
+
+def verify_control_turning_point(
+    claim: ControlTurningPoint, match: Match, events: list[MatchEvent],
+    at_second: int, window_seconds: int,
+) -> bool:
+    """Recompute the approved activity-index rule and validate every source reference."""
+    if claim.verification_status != "verified_rule_based" or claim.team_id not in (
+        match.home.team_id, match.away.team_id,
+    ):
+        return False
+    try:
+        packet = control_chaos_at(match, events, at_second, window_seconds)
+    except ValueError:
+        return False
+    expected = next(
+        (item for item in packet.interpretation.turning_points
+         if item.evidence_id == claim.evidence_id),
+        None,
+    )
+    if expected is None or expected.model_copy(update={
+        "verification_status": claim.verification_status,
+    }) != claim:
+        return False
+    indexed = {event.event_id: event for event in events}
+    if packet.previous_window is None:
+        return False
+    previous_start = packet.previous_window.start_second
+    previous_end = packet.previous_window.end_second
+    current_start = packet.window.start_second
+    current_end = packet.window.end_second
+    source_pairs = (
+        (claim.previous_event_ids, previous_start, previous_end),
+        (claim.current_event_ids, current_start, current_end),
+    )
+    for index, (source_ids, start, end) in enumerate(source_pairs):
+        if (index == 1 and not source_ids) or len(source_ids) != len(set(source_ids)):
+            return False
+        for event_id in source_ids:
+            event = indexed.get(event_id)
+            if event is None or event.team_id != claim.team_id:
+                return False
+            if not start < event.match_second <= end or event.match_second > at_second:
+                return False
+    return True
 
 
 def verify(insight: Insight, match: Match, events: list[MatchEvent]) -> bool:
@@ -194,9 +239,17 @@ def recap_for(match: Match, events: list[MatchEvent], locale: str = "en", person
         team = match.home if goal.team_id == match.home.team_id else match.away
         score = {claim.metric: claim.value for claim in insight.factual_claims}
         if persona == "analyst":
-            text = f"{team.name} {verbs[locale]} · {goal.match_second // 60}' · {score['score_home']}–{score['score_away']} · {len(insight.supporting_event_ids)} source events"
+            text = {
+                "en": f"{team.name} scored · {goal.match_second // 60}' · {score['score_home']}–{score['score_away']} · {len(insight.supporting_event_ids)} source events",
+                "es": f"{team.name} marcó · {goal.match_second // 60}' · {score['score_home']}–{score['score_away']} · {len(insight.supporting_event_ids)} eventos de origen",
+                "hi": f"{team.name} ने गोल किया · {goal.match_second // 60}' · {score['score_home']}–{score['score_away']} · {len(insight.supporting_event_ids)} स्रोत इवेंट",
+            }[locale]
         elif persona == "broadcaster":
-            text = f"{goal.match_second // 60}' | {team.name.upper()} {verbs[locale].upper()} | {score['score_home']}–{score['score_away']}"
+            text = {
+                "en": f"{goal.match_second // 60}' | {team.name.upper()} SCORED | {score['score_home']}–{score['score_away']}",
+                "es": f"{goal.match_second // 60}' | {team.name.upper()} MARCÓ | {score['score_home']}–{score['score_away']}",
+                "hi": f"{goal.match_second // 60}' | {team.name.upper()} ने गोल किया | {score['score_home']}–{score['score_away']}",
+            }[locale]
         else:
             text = {
                 "en": f"{team.name} scored at {goal.match_second // 60}'! {score['score_home']}–{score['score_away']}",
