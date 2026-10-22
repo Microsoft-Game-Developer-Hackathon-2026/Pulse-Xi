@@ -123,6 +123,84 @@ class MatchMetrics(BaseModel):
     computed_from_event_count: int
 
 
+class ControlMetric(BaseModel):
+    value: int | float | None
+    numerator: int | float
+    denominator: int | None = None
+    unit: str
+    eligible_event_count: int
+    located_event_count: int | None = None
+    missing_coordinate_count: int | None = None
+    missing_identifier_count: int | None = None
+    unknown_chain_count: int | None = None
+    supporting_event_ids: list[str] = Field(max_length=20_000)
+    unavailable_reason: str | None = None
+
+
+class ControlTeamComponents(BaseModel):
+    team_id: str
+    retention: dict[str, ControlMetric]
+    progression: dict[str, ControlMetric]
+    disruption: dict[str, ControlMetric]
+    attacking_activity: dict[str, ControlMetric]
+
+
+class ControlMetricDelta(BaseModel):
+    current: int | float | None
+    previous: int | float | None
+    difference: int | float | None
+    current_rate_per_300_seconds: float | None
+    previous_rate_per_300_seconds: float | None
+    rate_difference_per_300_seconds: float | None
+    unit: str
+    unavailable_reason: str | None = None
+
+
+class ControlWindow(BaseModel):
+    start_second: int = Field(ge=0, le=5400)
+    end_second: int = Field(ge=0, le=5400)
+
+    @model_validator(mode="after")
+    def check_order(self):
+        if self.start_second > self.end_second:
+            raise ValueError("control window start must not exceed its end")
+        return self
+
+
+class ControlTurningPoint(BaseModel):
+    evidence_id: str
+    category: Literal["control_chaos_turning_point"] = "control_chaos_turning_point"
+    team_id: str
+    metric: Literal["activity_index"] = "activity_index"
+    previous_value: int
+    current_value: int
+    difference: int
+    rule: str
+    previous_event_ids: list[str] = Field(max_length=20_000)
+    current_event_ids: list[str] = Field(max_length=20_000)
+    verification_status: Literal["verified_rule_based", "rejected"]
+
+
+class ControlInterpretation(BaseModel):
+    status: Literal["verified_rule_based", "unavailable"]
+    language_limit: str
+    turning_points: list[ControlTurningPoint]
+
+
+class ControlChaosResponse(BaseModel):
+    schema_version: Literal["control-chaos/1"] = "control-chaos/1"
+    match_id: str
+    at_second: int
+    window: ControlWindow
+    previous_window: ControlWindow | None
+    formula_version: Literal["control-chaos-formulas/1"] = "control-chaos-formulas/1"
+    units: dict[str, str]
+    teams: dict[str, ControlTeamComponents]
+    deltas: dict[str, dict[str, ControlMetricDelta]] | None
+    interpretation: ControlInterpretation
+    unavailable_reasons: list[str]
+
+
 class FactualClaim(BaseModel):
     metric: Literal["score_home", "score_away", "pressure_events", "recoveries", "completed_passes", "final_third_entries", "momentum_points"]
     value: int
