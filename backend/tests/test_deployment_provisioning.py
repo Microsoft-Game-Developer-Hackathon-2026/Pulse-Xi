@@ -17,6 +17,7 @@ DIGEST = "a" * 64
 @pytest.mark.parametrize("image,valid", [
     (f"ghcr.io/example/pulse-xi-demo@sha256:{DIGEST}", True),
     ("ghcr.io/example/pulse-xi-demo:latest", False),
+    (f"ghcr.io/example/pulse-xi-demo@sha256:{DIGEST}\n", False),
     ("ghcr.io/example/pulse-xi-demo:" + "b" * 40, False),
     ("ghcr.io/example/pulse-xi-demo@sha256:" + "a" * 63, False),
     ("ghcr.io/example/pulse-xi-demo@sha256:" + "g" * 64, False),
