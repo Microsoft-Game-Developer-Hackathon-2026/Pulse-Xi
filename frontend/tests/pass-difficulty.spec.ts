@@ -47,7 +47,7 @@ test('favorite-player lens shows a backend-calculated sample summary', async ({ 
   await page.goto('/')
   await page.getByRole('slider', { name: 'Seek match time' }).fill('5400')
   await page.getByLabel('VIEW').selectOption('favorite_player')
-  await page.getByLabel('FOLLOW PLAYER').selectOption(player.player_id)
+  await page.getByLabel('FANDNA / RECAP: FOLLOW PLAYER', { exact: true }).selectOption(player.player_id)
   await expect(page.locator('.pass-player-summary')).toContainText(`${player.sample_count} rated passes`)
   await page.getByRole('slider', { name: 'Seek match time' }).fill('0')
   await expect(page.locator('.pass-player-summary')).toContainText('No rated pass summary available')
