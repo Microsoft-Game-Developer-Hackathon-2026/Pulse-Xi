@@ -30,12 +30,12 @@ backend paths under `backend/app` unless stated otherwise.
 | F2 | frontend | #10 | Authenticated Control Room workflow | runtime/RuntimeRoom.tsx | sandbox/api.py; sandbox/storage.py | runtime schema 4 SQLite | runtime.spec.ts; scenario-library.spec.ts | real scenario/run/checkpoint/ForkCast/reconnect flows | verified | high | keep operator credentials memory-only |
 | F3 | frontend | #11/#12/#66 | Source-linked observer, quality/camera and fallbacks | observer/ObserverSwitch.tsx; SceneCanvas.tsx | recorded/native events only | local quality/view preference | observer.spec.ts; observer-sync.spec.ts; graphics.spec.ts | actual GLB loading and failed graphics recovery | verified | medium | no new physical GPU/FPS claim |
 | F4 | frontend | #16/#54 | Branch ProofTrail request isolation | sandbox/ProofTrail.tsx | sandbox/prooftrail.py | runtime DB; transient result | prooftrail.spec.ts; test_sandbox/prooftrail.py | clear/credential/branch/cutoff/unmount/late error cases | verified | high | do not expose private events to public agent tools |
-| F5 | frontend | #58/#76 | Authenticated runtime Control vs Chaos | runtime/RuntimeAnalysis.tsx pending adapter | pending runtime adapter | owner-scoped runtime | PR76 head checks are historical | main does not contain this pending adapter | partial | medium | resolve #76 conflicts and obtain actual review |
+| F5 | frontend | #58/#76 | Authenticated runtime Control vs Chaos | runtime/RuntimeAnalysis.tsx | sandbox/analysis.py | owner-scoped runtime | test_runtime_control.py; runtime-control.spec.ts | PR76 merged; native projection, ownership, cutoffs and delayed private responses tested | verified | medium | preserve strict private revision boundaries |
 | B1 | backend | #4 | Deterministic clock, RNG, halftime, terminal state | Control Room consumer | sandbox/engine.py | hashed engine state | test_authoritative_engine.py | fresh backend suite; goldens and independent verifiers | verified | high | preserve engine semantics |
 | B2 | backend | #57 | Native duration analysis without future leakage | runtime/RuntimeAnalysis.tsx | native analysis adapters | runtime source identity | test_native_analysis.py; test_runtime_analysis.py | fresh backend duration/cutoff/identity regressions | verified | high | do not conflate legacy projection with native |
 | P1 | persistence | #3/#64 | Saved scenario/archive identity and owner isolation | runtime/RuntimeRoom.tsx | sandbox/scenario_archive.py; storage.py | runtime SQLite | test_scenario_library.py; browser scenario suite | real HTTP archive round trip and browser reload | verified | high | schema 4 and source identity retained |
 | P2 | persistence | #6/#70 | Atomic checkpoint UTC, retries, restore and exact continuation | runtime checkpoint inspector | sandbox/checkpoint_metadata.py; storage.py | schema 4 sidecar + immutable snapshot | test_checkpoint_metadata.py; checkpoint-source.spec.ts | fresh tests + actual HTTP UTC/hash/isolated restore | verified | high | legacy timestamps remain unknown |
-| P3 | persistence | #8 | Paired ForkCast trials and independent bundle verification | runtime ForkCast comparison | sandbox/experiments.py | persisted trials and immutable parent | test_reproduction.py; runtime.spec.ts; forkcast-limit.spec.ts | bounded real experiment + both CLI verifiers pass; local maximum-history comparison exceeds 90s | partial | high | profile repeated independent replay with Diyan; preserve verification and hashes |
+| P3 | persistence | #8 | Paired ForkCast trials and independent bundle verification | runtime ForkCast comparison | sandbox/experiments.py | persisted trials and immutable parent | test_reproduction.py; runtime.spec.ts; forkcast-limit.spec.ts | combined candidate: 98 browser tests pass including unchanged dense/offline case; both CLI verifiers pass | verified | high | PR79 review and exact-head CI required before main integration |
 | P4 | persistence | #9 | Data Hub import, revisions, lifecycle and backup | sandbox/MatchDataHub.tsx | storage.py; database_backup.py; main.py | separate imported library SQLite | test_storage_startup.py; test_library_lifecycle.py; data-hub.spec.ts | fresh migration/rollback/corruption plus real browser import/lifecycle | verified | high | personal databases untouched |
 | P5 | persistence | #7/#10 | Browser notes/preferences and private disconnect recovery | analysisStorage.ts; RuntimeRoom.tsx | owner-authorized reads | browser-local notes; memory-only credentials | analysis-workspace.spec.ts; runtime.spec.ts | refresh, stale source and disconnect/reconnect regressions | verified | high | no server token persistence |
 | S1 | security | #23/#44/#72 | Owner denial, hostile inputs, no-store and fail-closed admin | existing API clients | security dependencies; main.py | scoped SQLite and no private cache | test_security_boundary.py; test_release_security.py; test_foundry_command_auth.py | all backend security cases executed with full suite | verified | high | not an independent penetration-test certification |
@@ -63,9 +63,9 @@ Only `verified` counts in the numerator. Optional rows do not enter mandatory ch
 | Category | Verified | Total | Coverage |
 |---|---:|---:|---:|
 | challenge | 5 | 6 | 83.3% |
-| frontend | 4 | 5 | 80.0% |
+| frontend | 5 | 5 | 100.0% |
 | backend | 2 | 2 | 100.0% |
-| persistence | 4 | 5 | 80.0% |
+| persistence | 5 | 5 | 100.0% |
 | security | 2 | 3 | 66.7% |
 | agents | 2 | 3 | 66.7% |
 | ux | 1 | 2 | 50.0% |
@@ -96,3 +96,9 @@ are local; runtime credentials remain memory-only. No personal database was used
 A simultaneous browser + server-process restart + SQL query capture for every
 feature has not been performed; do not confuse the combined suites with that
 additional forensic trace.
+
+## Subsequent ledger update
+
+PR76 is now merged into main7a8cccf; F5 and its scoped frontend numerator are updated accordingly. The original P3 maximum-history failure was subsequently fixed in the PR79 candidate and passed the unchanged standalone Windows test. Its full combined browser result and review/merge boundary are recorded in PR79; candidate verification must not be mistaken for main integration. All percentages describe this finite matrix, not exhaustive feature certification.
+
+Final combined validation passed 98 browser tests in 6.0 minutes and 367 backend tests. P3 now counts as verified on the PR79 candidate; it remains pending main integration. Frontend5/5 and persistence5/5 are scoped matrix-row counts. Broader profiler/security/release/submission limitations remain unchanged.
