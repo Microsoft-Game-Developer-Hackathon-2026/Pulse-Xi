@@ -1,20 +1,26 @@
 export type Locale = 'en' | 'es' | 'hi'
 export type Persona = 'casual' | 'analyst' | 'favorite_team' | 'favorite_player' | 'broadcaster'
 export type FanPreferences = {
-  version: 1
+  version: 2
   locale: Locale
   persona: Persona
   favoriteTeamId: string
   favoritePlayerId: string
+  metricId: string
+  thresholdId: string
+  alertsEnabled: boolean
 }
 
 const preferenceKey = 'pulse-xi-fandna-preferences-v1'
 const defaultPreferences: FanPreferences = {
-  version: 1,
+  version: 2,
   locale: 'en',
   persona: 'casual',
   favoriteTeamId: '',
   favoritePlayerId: '',
+  metricId: 'pressure_events',
+  thresholdId: 'some',
+  alertsEnabled: true,
 }
 
 const en = {
@@ -34,6 +40,16 @@ const en = {
   source_events: 'SOURCE EVENTS', fallback: 'English fallback active', locale_status: 'FanDNA controls use the selected language.',
   recap_error: 'Recap unavailable. Your replay and other analysis remain available.',
   recap_scope: 'Verified goal recap · synthetic events',
+  voice_read: 'Read recap aloud', voice_stop: 'Stop narration', voice_unavailable: 'Browser speech is unavailable here.',
+  voice_language_missing: 'No {language} voice is available on this device. The text recap remains available.',
+  voice_speaking: 'Reading the recap aloud.', voice_finished: 'Narration finished.', voice_stopped: 'Narration stopped.',
+  voice_failed: 'Narration failed. The text recap remains available.', voice_no_text: 'There is no recap text to read yet.', voice_attribution: 'Device/browser speech · recap text remains visible',
+  fan_lens: 'FAN LENS / FOLLOW A METRIC', metric: 'METRIC', threshold: 'ALERT THRESHOLD', alerts: 'ALERTS', alerts_enabled: 'ENABLE ALERTS',
+  all_teams: 'All teams', all_players: 'All players', followed_team: 'Follow team', followed_player: 'Follow player', no_metric_data: 'No eligible recorded events at this replay time.',
+  no_alerts: 'No completed window crossed this threshold yet.', alert_count: '{value} {unit} in {start}–{end} · threshold {threshold}', event_metric_pressure: 'Recorded pressure events',
+  metric_coverage: '{count} eligible events', coordinate_coverage: '{located} located · {missing} missing coordinates', no_metric_coordinates: 'Eligible events exist, but required coordinates are unavailable.',
+  event_metric_passes: 'Completed passes', event_metric_recoveries: 'Ball recoveries', event_metric_shots: 'Shots', event_metric_entries: 'Completed final-third entries', event_metric_progression: 'Completed forward progression',
+  threshold_few: 'Few', threshold_some: 'Some', threshold_many: 'Many',
 }
 const es: typeof en = {
   workspace: 'Espacio de trabajo', match_intelligence: 'Análisis del partido', sandbox_lab: 'Laboratorio Sandbox', match_data_hub: 'Centro de datos',
@@ -52,6 +68,16 @@ const es: typeof en = {
   source_events: 'Eventos de origen', fallback: 'Se muestra la versión en inglés', locale_status: 'Los controles de FanDNA usan el idioma seleccionado.',
   recap_error: 'Resumen no disponible. La repetición y los demás análisis siguen disponibles.',
   recap_scope: 'Resumen verificado de goles · eventos sintéticos',
+  voice_read: 'Leer el resumen en voz alta', voice_stop: 'Detener narración', voice_unavailable: 'La voz del navegador no está disponible aquí.',
+  voice_language_missing: 'No hay una voz {language} disponible en este dispositivo. El resumen de texto sigue disponible.',
+  voice_speaking: 'Leyendo el resumen en voz alta.', voice_finished: 'Narración finalizada.', voice_stopped: 'Narración detenida.',
+  voice_failed: 'La narración falló. El resumen de texto sigue disponible.', voice_no_text: 'Todavía no hay texto para leer.', voice_attribution: 'Voz del dispositivo/navegador · el resumen de texto sigue visible',
+  fan_lens: 'FAN LENS / SEGUIR UNA MÉTRICA', metric: 'MÉTRICA', threshold: 'UMBRAL DE ALERTA', alerts: 'ALERTAS', alerts_enabled: 'ACTIVAR ALERTAS',
+  all_teams: 'Todos los equipos', all_players: 'Todos los jugadores', followed_team: 'Seguir equipo', followed_player: 'Seguir jugador', no_metric_data: 'No hay eventos registrados disponibles en este momento de la repetición.',
+  no_alerts: 'Ninguna ventana completada ha superado este umbral.', alert_count: '{value} {unit} entre {start} y {end} · umbral {threshold}', event_metric_pressure: 'Eventos de presión registrados',
+  metric_coverage: '{count} eventos elegibles', coordinate_coverage: '{located} ubicados · {missing} sin coordenadas', no_metric_coordinates: 'Hay eventos elegibles, pero faltan las coordenadas necesarias.',
+  event_metric_passes: 'Pases completados', event_metric_recoveries: 'Recuperaciones', event_metric_shots: 'Tiros', event_metric_entries: 'Entradas completadas al último tercio', event_metric_progression: 'Progresión hacia delante completada',
+  threshold_few: 'Pocos', threshold_some: 'Algunos', threshold_many: 'Muchos',
 }
 const hi: typeof en = {
   workspace: 'कार्यस्थान', match_intelligence: 'मैच विश्लेषण', sandbox_lab: 'सैंडबॉक्स लैब', match_data_hub: 'मैच डेटा केंद्र',
@@ -70,6 +96,16 @@ const hi: typeof en = {
   source_events: 'स्रोत घटनाएँ', fallback: 'अंग्रेज़ी विकल्प दिखाया जा रहा है', locale_status: 'FanDNA नियंत्रण चुनी गई भाषा का उपयोग करते हैं।',
   recap_error: 'सारांश उपलब्ध नहीं है। रीप्ले और अन्य विश्लेषण उपलब्ध हैं।',
   recap_scope: 'सत्यापित गोल सारांश · कृत्रिम घटनाएँ',
+  voice_read: 'सारांश ज़ोर से पढ़ें', voice_stop: 'वाचन रोकें', voice_unavailable: 'इस ब्राउज़र में वाणी सुविधा उपलब्ध नहीं है।',
+  voice_language_missing: 'इस डिवाइस पर {language} की वाणी उपलब्ध नहीं है। पाठ सारांश उपलब्ध रहेगा।',
+  voice_speaking: 'सारांश पढ़ा जा रहा है।', voice_finished: 'वाचन समाप्त हुआ।', voice_stopped: 'वाचन रोक दिया गया।',
+  voice_failed: 'वाचन विफल हुआ। पाठ सारांश उपलब्ध रहेगा।', voice_no_text: 'पढ़ने के लिए अभी कोई सारांश उपलब्ध नहीं है।', voice_attribution: 'डिवाइस/ब्राउज़र की वाणी · पाठ सारांश दिखाई देता रहेगा',
+  fan_lens: 'फैन लेंस / मेट्रिक का अनुसरण करें', metric: 'मेट्रिक', threshold: 'अलर्ट सीमा', alerts: 'अलर्ट', alerts_enabled: 'अलर्ट चालू करें',
+  all_teams: 'सभी टीमें', all_players: 'सभी खिलाड़ी', followed_team: 'टीम का अनुसरण करें', followed_player: 'खिलाड़ी का अनुसरण करें', no_metric_data: 'रीप्ले के इस समय पर कोई योग्य रिकॉर्ड की गई घटना नहीं है।',
+  no_alerts: 'अभी तक कोई पूरी विंडो इस सीमा तक नहीं पहुँची है।', alert_count: '{start}–{end} में {value} {unit} · सीमा {threshold}', event_metric_pressure: 'रिकॉर्ड की गई दबाव घटनाएँ',
+  metric_coverage: '{count} योग्य घटनाएँ', coordinate_coverage: '{located} स्थान ज्ञात · {missing} की जगह अज्ञात', no_metric_coordinates: 'योग्य घटनाएँ हैं, लेकिन आवश्यक निर्देशांक उपलब्ध नहीं हैं।',
+  event_metric_passes: 'पूरे किए गए पास', event_metric_recoveries: 'गेंद वापसी', event_metric_shots: 'शॉट', event_metric_entries: 'अंतिम तिहाई में पूरे प्रवेश', event_metric_progression: 'पूरी की गई आगे की प्रगति',
+  threshold_few: 'कम', threshold_some: 'कुछ', threshold_many: 'अधिक',
 }
 const catalogs: Record<Locale, typeof en> = { en, es, hi }
 export type MessageKey = keyof typeof en
@@ -92,9 +128,13 @@ export function readFanPreferences(): FanPreferences {
     const raw = localStorage.getItem(preferenceKey)
     if (!raw || raw.length > 2048) return { ...defaultPreferences }
     const value = JSON.parse(raw)
-    if (value?.version !== 1 || !locales.has(value.locale) || !personas.has(value.persona) ||
+    if ((value?.version !== 1 && value?.version !== 2) || !locales.has(value.locale) || !personas.has(value.persona) ||
         !validId(value.favoriteTeamId) || !validId(value.favoritePlayerId)) return { ...defaultPreferences }
-    return value as FanPreferences
+    return { ...defaultPreferences, ...value, version: 2,
+      metricId: typeof value.metricId === 'string' && ['pressure_events', 'completed_passes', 'recoveries', 'shots', 'final_third_entries', 'forward_progression'].includes(value.metricId) ? value.metricId : defaultPreferences.metricId,
+      thresholdId: typeof value.thresholdId === 'string' && ['few', 'some', 'many'].includes(value.thresholdId) ? value.thresholdId : defaultPreferences.thresholdId,
+      alertsEnabled: typeof value.alertsEnabled === 'boolean' ? value.alertsEnabled : defaultPreferences.alertsEnabled,
+    } as FanPreferences
   } catch {
     return { ...defaultPreferences }
   }

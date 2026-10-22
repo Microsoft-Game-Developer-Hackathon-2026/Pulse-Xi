@@ -62,6 +62,69 @@ def test_api_and_websocket():
         assert event["kind"] == "event" and event["sequence"] == 2
 
 
+def test_fan_lens_is_replay_bounded_scoped_and_validated():
+    client = TestClient(app)
+    path = "/api/matches/comeback-1107/fan-lens"
+    early = client.get(path, params={"at_second": 299, "metric_id": "pressure_events", "threshold_id": "few", "team_id": "harbour"})
+    assert early.status_code == 200
+    assert early.json()["alerts"] == []
+    later = client.get(path, params={"at_second": 5400, "metric_id": "pressure_events", "threshold_id": "few", "team_id": "harbour"})
+    packet = later.json()
+    assert packet["formula_version"] == "fan-lens-windows/1"
+    assert packet["alerts"]
+    assert all(alert["window_end"] <= 5400 and alert["verification_status"] == "verified_rule_based" for alert in packet["alerts"])
+    assert all(alert["supporting_event_ids"] for alert in packet["alerts"])
+    player = client.get(path, params={"at_second": 5400, "metric_id": "shots", "threshold_id": "few", "player_id": "harbour-01"})
+    assert player.status_code == 200
+    assert all(event["player_id"] == "harbour-01" for event in player.json()["alerts"])
+    assert client.get(path, params={"metric_id": "invented", "threshold_id": "few"}).status_code == 422
+    assert client.get(path, params={"metric_id": "shots", "threshold_id": "huge"}).status_code == 422
+    assert client.get(path, params={"metric_id": "shots", "threshold_id": "few", "team_id": "unknown"}).status_code == 422
+
+
+def test_fan_lens_window_boundary_is_exclusive_at_start_inclusive_at_end():
+    from app.fan_lens import METRICS, fan_lens_at
+
+    match, events = generate("comeback")
+    source = next(event for event in events if event.event_type == EventType.pressure)
+    boundary_events = [source.model_copy(update={"event_id": f"boundary-{index}", "sequence": index, "match_second": 300})
+                       for index in (1, 2)]
+    before = fan_lens_at(match, boundary_events, at_second=299, metric_id="pressure_events", threshold_id="few", team_id=source.team_id)
+    at_boundary = fan_lens_at(match, boundary_events, at_second=300, metric_id="pressure_events", threshold_id="few", team_id=source.team_id)
+    assert before.alerts == []
+    assert len(at_boundary.alerts) == 1
+    assert at_boundary.alerts[0]["window_start"] == 0
+    assert at_boundary.alerts[0]["window_end"] == 300
+    assert at_boundary.alerts[0]["supporting_event_ids"] == ["boundary-1", "boundary-2"]
+    assert at_boundary.alerts[0]["observed_value"] == METRICS["pressure_events"]["thresholds"]["few"]
+    assert METRICS["pressure_events"]["thresholds"] == {"few": 2, "some": 4, "many": 6}
+    above_few_only = fan_lens_at(match, boundary_events, at_second=300, metric_id="pressure_events", threshold_id="some", team_id=source.team_id)
+    assert above_few_only.alerts == []
+
+
+def test_fan_lens_spatial_metrics_report_missing_coordinate_coverage():
+    from app.fan_lens import fan_lens_at
+    from app.models import Point
+
+    match, events = generate("comeback")
+    source = next(event for event in events if event.event_type == EventType.pressure)
+    missing = source.model_copy(update={"event_id": "missing-coordinates", "sequence": 1, "match_second": 120,
+                                        "event_type": EventType.pass_, "outcome": "complete", "start": None, "end": None})
+    unavailable = fan_lens_at(match, [missing], at_second=300, metric_id="forward_progression",
+                              threshold_id="few", team_id=source.team_id)
+    assert unavailable.value == 0
+    assert unavailable.coverage == {"eligible_event_count": 1, "located_event_count": 0, "missing_coordinate_count": 1}
+    assert unavailable.unavailable_reason == "missing_coordinates"
+    assert unavailable.alerts == []
+
+    located = missing.model_copy(update={"event_id": "located-progress", "start": Point(x=20, y=50), "end": Point(x=40, y=50)})
+    available = fan_lens_at(match, [located], at_second=300, metric_id="forward_progression",
+                            threshold_id="few", team_id=source.team_id)
+    assert available.value == 20
+    assert available.alerts[0]["supporting_event_ids"] == ["located-progress"]
+    assert available.alerts[0]["coverage"] == {"eligible_event_count": 1, "located_event_count": 1, "missing_coordinate_count": 0}
+
+
 def test_idempotent_out_of_order_ingest(tmp_path, monkeypatch):
     monkeypatch.setenv("PULSE_IMPORT_TOKEN", "test-import-token-at-least-32-characters")
     monkeypatch.setenv("PULSE_DB_PATH", str(tmp_path / "matches.sqlite"))
