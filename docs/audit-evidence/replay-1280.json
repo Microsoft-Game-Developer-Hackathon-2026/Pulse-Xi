@@ -1,0 +1,1645 @@
+{
+  "width": 1280,
+  "samples": [
+    {
+      "speed": 0.5,
+      "requests": 9,
+      "before": {
+        "scroll": 5405,
+        "top": 190.078125
+      },
+      "rows": [
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        }
+      ]
+    },
+    {
+      "speed": 1,
+      "requests": 6,
+      "before": {
+        "scroll": 5405,
+        "top": 190.078125
+      },
+      "rows": [
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        }
+      ]
+    },
+    {
+      "speed": 2,
+      "requests": 6,
+      "before": {
+        "scroll": 5405,
+        "top": 190.078125
+      },
+      "rows": [
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        }
+      ]
+    },
+    {
+      "speed": 4,
+      "requests": 6,
+      "before": {
+        "scroll": 5405,
+        "top": 190.078125
+      },
+      "rows": [
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        },
+        {
+          "scroll": 5405,
+          "top": 190.078125,
+          "missingMetrics": false,
+          "regions": {
+            ".content-grid": 1025.84375,
+            ".tactical-lab": 1764.421875,
+            ".control-chaos": 693.59375,
+            ".intelligence-grid": 676.390625,
+            ".pass-filters": 64,
+            ".pass-workbench": 871.296875,
+            ".tactical-layout": 720.125,
+            ".tactical-controls": 75
+          },
+          "loadingRecap": false
+        }
+      ]
+    }
+  ]
+}
