@@ -326,6 +326,8 @@ Local startup/test serving uses an explicit Uvicorn loop factory: Windows Select
 
 In the integrated runtime, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to existing pass analysis, ProofTrail, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. The current engine projection requires a 5400-second scenario; shortened runs retain native controls. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#existing-analysis-integration) for authenticated routes, cutoff/hash semantics and limitations. The base runtime/analysis integration reached main through #53; native-period analysis and other open feature PRs are not implied.
 
+Frontend visual materials and layout invariants: [Precision Glass design system](docs/UI_DESIGN_SYSTEM.md).
+
 ## Release verification and submission
 
 See [release readiness](docs/RELEASE_READINESS.md) for the tested clean setup, risk-weighted matrix, generated endpoint/dependency inventory, measured benchmarks and unresolved rights/public-service gates. After building, `python scripts/release-smoke.py` exercises a real temporary HTTP server and independently verifies its runtime/ForkCast exports without using personal databases or hosted inference. The [submission runbook](docs/SUBMISSION_RUNBOOK.md) contains the 110-second capture plan; it is not a claim that a final video or public deployment exists.
