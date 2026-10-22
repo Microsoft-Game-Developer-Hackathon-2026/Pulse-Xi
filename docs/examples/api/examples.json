@@ -1,0 +1,11 @@
+{
+  "examples": [
+    {
+      "method": "POST",
+      "path": "/api/matches/generate",
+      "request": "generate-match-request.json",
+      "response": "generate-match-response.json",
+      "execute": true
+    }
+  ]
+}

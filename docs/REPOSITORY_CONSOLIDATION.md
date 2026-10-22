@@ -61,7 +61,7 @@ branch was deleted. No local worktree was removed or reset.
 
 | Deleted Satvik branch | Last SHA | Preserved implementation/history |
 |---|---|---|
-| `docs/independent-integration-handoff` | `2711c31b0ae8833932f24c68c74d8811e88713eb` | `origin/main` |
+| historical deleted branch docs/independent-integration-handoff | `2711c31b0ae8833932f24c68c74d8811e88713eb` | `origin/main` |
 | `feat/10-sandbox-control-room` | `5eea5cfed8a97840bd96963954f8a4b56bf9e57f` | `origin/main` |
 | `feat/11-three-d-observer` | `bade6a2b384eda91d7fd8ddaf95294b011a43fbc` | `origin/main` |
 | `feat/27-pass-difficulty` | `fdd0de14b85ee19f654b4bc2cffd2e6f1fc5a269` | `origin/main` |
