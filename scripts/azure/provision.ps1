@@ -8,7 +8,7 @@ param(
 )
 $ErrorActionPreference = "Stop"
 
-if ($Image -cnotmatch '^ghcr\.io/[a-z0-9_.-]+/[a-z0-9_.-]+@sha256:[a-f0-9]{64}$') {
+if ($Image -cnotmatch '\Aghcr\.io/[a-z0-9_.-]+/[a-z0-9_.-]+@sha256:[a-f0-9]{64}\z') {
     throw "Image must be a public ghcr.io repository@sha256 digest (64 lowercase hex characters); tags and credentials are not accepted."
 }
 if (-not (Get-Command az -ErrorAction SilentlyContinue)) { throw "Azure CLI is required. No resources were created." }
