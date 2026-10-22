@@ -40,7 +40,7 @@ def safe_cell(value: Any) -> Any:
 
 
 def analysis_export(match: Match, events: list[MatchEvent], cutoff: int, category: Literal['events', 'pass', 'metrics'],
-                    format: Literal['json', 'csv'], team_id: str | None, event_type: str | None, event_id: str | None, *, runtime_provenance: dict[str, Any] | None = None) -> Response:
+                    format: Literal['json', 'csv'], team_id: str | None, event_type: str | None, event_id: str | None, *, runtime_provenance: dict[str, Any] | None = None, event_fields: list[str] | None = None) -> Response:
     if cutoff > match.duration_seconds:
         raise HTTPException(422, 'cutoff exceeds match duration')
     if team_id and team_id not in (match.home.team_id, match.away.team_id):
@@ -55,7 +55,7 @@ def analysis_export(match: Match, events: list[MatchEvent], cutoff: int, categor
             raise HTTPException(413, 'export exceeds 5000 events; narrow filters or cutoff')
         data = [e.model_dump(mode='json', by_alias=True) for e in selected]
         supporting_ids = [e.event_id for e in selected]
-        fields = list(MatchEvent.model_fields)
+        fields = event_fields if event_fields is not None else list(MatchEvent.model_fields)
         fields = ['type' if f == 'event_type' else f for f in fields]
     elif category == 'pass':
         event = next((e for e in visible if e.event_id == event_id and e.event_type == 'pass'), None)

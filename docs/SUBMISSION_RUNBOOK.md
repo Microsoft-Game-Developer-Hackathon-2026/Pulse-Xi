@@ -31,7 +31,7 @@ they do not justify bypassing #21's separate public-demo security gate.
 - Public deployed URL: **not established**. #21 still requires cost authorization,
   configuration, durable storage and public-access verification.
 - Recorded final video / public video URL / submission confirmation: **not created**.
-- Rights clearance: **pending** #12/#23; root application/helper licensing unresolved.
+- Rights clearance: **pending** #23 (technical asset pipeline #12 is closed); root application/helper licensing unresolved.
   Asset declarations and third-party notices are technical inventory, not approval.
 
 ## Rehearse the real judge journey
@@ -111,7 +111,7 @@ local-only video is not a claim that all hackathon technology goals are satisfie
   redacted screenshots and reproduction files together in a **private local evidence
   directory**. Do not commit raw recordings, real tokens, local DBs or unreviewed media.
   Committed technical JSON reports belong in `docs/release-evidence/`.
-- Rights holders record actual asset/root/helper license decisions in #12/#23;
+- Rights holders record actual asset/root/helper license decisions in #23;
   preserve third-party notices. No agent may sign these decisions for them.
 - Authorized team representative checks eligibility/registration and required
   project-page fields. Review the current rules again immediately before upload.
@@ -129,3 +129,10 @@ Current stop signs: #23 rights/license decisions; #14/#15 approved Microsoft AI
 validation if claimed; #21 public deployment if selected; actual capture/edit,
 public video playback, representative submission and confirmation. No fabricated
 approval, provider output, video link or deployment substitutes for these gates.
+
+## Competition evidence and story
+
+See the [judging evidence matrix](HACKATHON_JUDGING_EVIDENCE.md) and
+[submission working package](HACKATHON_SUBMISSION_PACKAGE.md) for the event-to-story
+capture sequence, category evidence and mandatory registration/access/video gates.
+These documents do not certify submission or an authenticated hosted model run.

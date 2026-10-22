@@ -1,6 +1,6 @@
 # Event contract v1.0
 
-The new authenticated, durable sandbox runtime has a separate [authoritative engine contract](AUTHORITATIVE_ENGINE.md). It preserves this legacy replay/import contract and uses a separate runtime database.
+The new authenticated, durable sandbox runtime has a separate [authoritative engine contract](AUTHORITATIVE_ENGINE.md). Its verified branch comparisons use the [Sandbox ProofTrail v1 contract](PROOFTRAIL.md). It preserves this legacy replay/import contract and uses a separate runtime database.
 
 Pass difficulty is a separate versioned read-only contract; see [formula, API and limitations](PASS_DIFFICULTY.md). It preserves the event and existing metrics contracts.
 
@@ -73,7 +73,7 @@ FanDNA preferences use browser-local `pulse-xi-fandna-preferences-v1`, schema ve
 
 ## Owner-scoped runtime analysis
 
-The integrated runtime exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. They reuse existing calculations over a committed engine-owned v1 projection, reject future cutoffs and conceal other owners. Private runtime datasets are not resolved through public `/api/matches` routes. Current compatibility is 5400-second scenarios only. See [LIVE_SANDBOX](LIVE_SANDBOX.md#existing-analysis-integration) for every route, local bookmark namespace, export limits and runtime-boundary hash scope. Neither dataset lifecycle nor engine state serialization is replaced.
+The engine integration branch exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. Default `projection=legacy` retains the 5400-second contract. Explicit `projection=native` returns `runtime-native-analysis/1` for every supported even engine duration (60..5400), with native period validation and unchanged event identity/ticks. It reuses existing event metrics, pass scoring/verification and export writing. All routes reject future cutoffs and conceal other owners; private runtime data never resolves through public `/api/matches`. See [LIVE_SANDBOX](LIVE_SANDBOX.md#native-period-analysis) for schemas, nullable calendar timestamps, unavailable legacy phase and hash scope. Neither dataset lifecycle nor engine serialization is replaced.
 
 ## Saved scenarios (introduced in runtime schema 3; retained in schema 4)
 
@@ -85,6 +85,7 @@ scenario-archive/1; GET `/api/sandbox/scenarios/{id}/archive` exports the persis
 record. New private responses use Cache-Control: no-store. See
 [LIVE_SANDBOX](LIVE_SANDBOX.md#saved-scenario-library-and-archives) for schema,
 identity verification, idempotence, errors, migration and rollback details.
+
 
 
 ## Checkpoint/reproduction additive boundary (runtime schema 4)

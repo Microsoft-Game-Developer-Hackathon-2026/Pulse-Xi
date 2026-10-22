@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from . import storage
 from .engine import EngineError, match_record, match_events
 from .models import RuntimeView
+from .native_analysis import NativeEvent, NativeAnalysis, NativeEvidence, project, analyze
 from ..models import Match, MatchEvent, MatchMetrics, EventType, Insight
 from ..analytics import metrics_at
 from ..pass_difficulty import (PassDifficulty, PassDifficultyPage, PassDifficultyEvidence,
@@ -33,14 +34,18 @@ class RecordedAnalysis(BaseModel):
     insights: list[Insight]
 
 
-def source(owner: str, session_id: str, cutoff: int) -> tuple[RuntimeView, Match, list[MatchEvent]]:
+Projection = Literal['legacy', 'native']
+
+
+def source(owner: str, session_id: str, cutoff: int, projection: Projection = 'legacy'):
     view = storage.get_runtime(owner, session_id)
     if cutoff > view.tick:
         raise EngineError('future_analysis_cutoff', 422)
-    # The engine's existing v1 adapter explicitly rejects shortened scenarios;
-    # do not rescale periods/timestamps or invent a competing projection.
-    match = match_record(view.state, session_id)
-    events = [e for e in match_events(view.state, session_id) if e.match_second <= cutoff]
+    if projection == 'native':
+        match, projected = project(view)
+    else:
+        match, projected = match_record(view.state, session_id), match_events(view.state, session_id)
+    events = [e for e in projected if e.match_second <= cutoff]
     return view, match, events
 
 
@@ -49,9 +54,11 @@ def register(router: APIRouter, operator: Callable[..., str]) -> None:
         response.headers['Cache-Control'] = 'no-store'
 
 
-    @router.get('/sessions/{session_id}/analysis', response_model=RecordedAnalysis, dependencies=[Depends(private_response)])
-    def recorded_analysis(session_id: str, at_second: int = Query(ge=0, le=5400), owner: str = Depends(operator)):
-        view, match, events = source(owner, session_id, at_second)
+    @router.get('/sessions/{session_id}/analysis', response_model=RecordedAnalysis | NativeAnalysis, dependencies=[Depends(private_response)])
+    def recorded_analysis(session_id: str, at_second: int = Query(ge=0, le=5400), projection: Projection = 'legacy', owner: str = Depends(operator)):
+        view, match, events = source(owner, session_id, at_second, projection)
+        if projection == 'native':
+            return analyze(view, match, events, at_second)
         return RecordedAnalysis(session_id=session_id, scenario_id=view.scenario_id,
             revision=view.revision, authoritative_tick=view.tick, event_cursor=view.event_cursor,
             state_hash=view.state_hash, event_hash=view.event_hash, at_second=at_second,
@@ -59,8 +66,8 @@ def register(router: APIRouter, operator: Callable[..., str]) -> None:
 
     @router.get('/sessions/{session_id}/pass-difficulty', response_model=PassDifficultyPage, dependencies=[Depends(private_response)])
     def difficulties(session_id: str, at_second: int = Query(ge=0, le=5400),
-                     cursor: int = Query(0, ge=0, le=20000), limit: int = Query(200, ge=1, le=200), owner: str = Depends(operator)):
-        _, match, events = source(owner, session_id, at_second)
+                     cursor: int = Query(0, ge=0, le=20000), limit: int = Query(200, ge=1, le=200), projection: Projection = 'legacy', owner: str = Depends(operator)):
+        _, match, events = source(owner, session_id, at_second, projection)
         passes = [e for e in events if e.event_type == EventType.pass_]
         page = [e for e in passes if e.sequence > cursor][:limit]
         return PassDifficultyPage(match_id=session_id, at_second=at_second,
@@ -68,28 +75,31 @@ def register(router: APIRouter, operator: Callable[..., str]) -> None:
             next_cursor=page[-1].sequence if page and any(e.sequence > page[-1].sequence for e in passes) else None,
             total_visible_passes=len(passes))
 
-    @router.get('/sessions/{session_id}/passes/{event_id}/difficulty/evidence', response_model=PassDifficultyEvidence, dependencies=[Depends(private_response)])
-    def evidence(session_id: str, event_id: str, at_second: int = Query(ge=0, le=5400), owner: str = Depends(operator)):
-        _, match, events = source(owner, session_id, at_second)
+    @router.get('/sessions/{session_id}/passes/{event_id}/difficulty/evidence', response_model=PassDifficultyEvidence | NativeEvidence, dependencies=[Depends(private_response)])
+    def evidence(session_id: str, event_id: str, at_second: int = Query(ge=0, le=5400), projection: Projection = 'legacy', owner: str = Depends(operator)):
+        _, match, events = source(owner, session_id, at_second, projection)
         event = next((e for e in events if e.event_id == event_id and e.event_type == EventType.pass_), None)
         if event is None:
             raise EngineError('visible_pass_not_found', 404)
         claim = score_pass(match, event, at_second)
-        return PassDifficultyEvidence(claim=claim, verified=verify_pass_difficulty(claim, match, events),
+        envelope = NativeEvidence if projection == 'native' else PassDifficultyEvidence
+        return envelope(claim=claim, verified=verify_pass_difficulty(claim, match, events),
             source_events=[e for e in events if e.event_id in claim.supporting_event_ids])
 
     @router.get('/sessions/{session_id}/passes/{event_id}/difficulty', response_model=PassDifficulty, dependencies=[Depends(private_response)])
-    def difficulty(session_id: str, event_id: str, at_second: int = Query(ge=0, le=5400), owner: str = Depends(operator)):
-        return evidence(session_id, event_id, at_second, owner).claim
+    def difficulty(session_id: str, event_id: str, at_second: int = Query(ge=0, le=5400), projection: Projection = 'legacy', owner: str = Depends(operator)):
+        return evidence(session_id, event_id, at_second, projection, owner).claim
 
     @router.get('/sessions/{session_id}/analysis-export')
     def export(session_id: str, at_second: int = Query(ge=0, le=5400),
                category: Literal['events', 'pass', 'metrics'] = 'events', format: Literal['json', 'csv'] = 'json',
                team_id: str | None = Query(None, max_length=160), event_type: EventType | None = None,
-               event_id: str | None = Query(None, max_length=160), owner: str = Depends(operator)):
-        view, match, events = source(owner, session_id, at_second)
+               event_id: str | None = Query(None, max_length=160), projection: Projection = 'legacy', owner: str = Depends(operator)):
+        view, match, events = source(owner, session_id, at_second, projection)
         return analysis_export(match, events, at_second, category, format, team_id, event_type, event_id,
-            runtime_provenance={'session_id': session_id, 'scenario_id': view.scenario_id,
+            event_fields=list(NativeEvent.model_fields) if projection == 'native' else None,
+            runtime_provenance={**({'analysis_projection':'runtime-native-analysis/1', 'duration_seconds':match.duration_seconds,
+                'halftime_tick':match.halftime_tick} if projection == 'native' else {}), 'session_id': session_id, 'scenario_id': view.scenario_id,
                 'revision': view.revision, 'authoritative_tick': view.tick, 'event_cursor': view.event_cursor,
                 'state_hash': view.state_hash, 'event_hash': view.event_hash,
                 'engine_version': view.state.engine_version, 'scenario_seed': view.state.scenario.config.seed,
