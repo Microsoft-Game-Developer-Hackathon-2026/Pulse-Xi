@@ -1,5 +1,30 @@
 # Current project status - 2026-10-21
 
+## Four-issue acceptance reconciliation (2026-10-22)
+
+Verified main: `175b7ceb29b2f29437ba6a0a9886934fe5aebc4d`.
+[Exact-main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39671842382)
+passed 297 backend and 66 real browser tests, TypeScript/build, both independent
+example verifiers and asset validation. These counts describe that revision.
+
+| Issue | Main implementation | GitHub disposition |
+|---|---|---|
+| #6 Checkpoints | #70 / `c5a93f4`: atomic original UTC sidecar, legacy null, schema-4 migration, retry/restart/backup, immutable source/history and deterministic restoration | Closed; [acceptance](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/6#issuecomment-6325141434) |
+| #8 ForkCast | #70 includes #59: real paired trials, source navigation, independent verification, cancellation and bounded offline verification for large archives | Closed; [acceptance](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/8#issuecomment-6325147077) |
+| #10 Control Room | #53/#64/#65/#69/#70: saved scenarios/archives, authoritative controls, checkpoint/history/branch/ForkCast, mobile/keyboard/viewport and recovery | Closed; main browser journeys execute actual authenticated operations |
+| #12 Asset pipeline | #62: seven editable sources/GLBs, manifest declarations/hashes/budgets, original generators, actual loading and procedural/2D failure recovery | Technically completed and closed; [acceptance and release restriction](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/12#issuecomment-6332486377) |
+
+#59 reached main through #70, preserving its commits; it is already merged, not
+an abandoned competing implementation. Native analysis #57 and glass UI #71 are
+separate pending work and are not prerequisites for these issue closures.
+
+Closing #12 records technical pipeline acceptance only. **#23 remains open** for
+actual rights-holder/CC0 authority, application/helper licensing and release
+approval. The asset manifest remains `pending-team-review`; no right, signature,
+public distribution permission, deployment or submission approval is granted.
+The following sections retain their historical verification boundaries.
+
+
 ## Release verification (#22-#25)
 
 Starting main `c5a93f46a24fa857318f237f37f9184a4b4d90dc` has successful exact-main CI. The focused release work fixes detached checkpoint metadata acceptance during backup and adds no-store to privileged trace responses, route-wide/CORS regressions, offline browser isolation and a disposable real-HTTP/CLI smoke journey in CI. See [release evidence and remaining gates](RELEASE_READINESS.md) and [submission runbook](SUBMISSION_RUNBOOK.md). Rights/root-license approval, authenticated paid Foundry validation, public deployment, actual video and submission remain unfulfilled; these are not cleared by local green tests. Final PR/main CI evidence belongs to the release PR/issue records.
