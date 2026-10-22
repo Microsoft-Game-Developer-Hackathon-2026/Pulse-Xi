@@ -86,7 +86,7 @@ test('authorized Director Studio edits, previews, approves, and exports a stable
   const download = page.waitForEvent('download')
   await page.getByRole('button', { name: 'Export approved JSON' }).click()
   expect((await download).suggestedFilename()).toBe('comeback-1107-studio-approved.json')
-  const exportResponse = await request.get('/api/matches/comeback-1107/studio/export?revision=1', { headers: { Authorization: 'Bearer test-import-token-at-least-32-characters' } })
+  const exportResponse = await request.get('/api/matches/comeback-1107/studio/export?revision=1', { headers: { Authorization: 'Bearer test-studio-producer-token-at-least-32-characters' } })
   expect(exportResponse.ok()).toBeTruthy()
   expect((await exportResponse.json()).schema_version).toBe('director-studio-export/1')
 })
