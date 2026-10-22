@@ -297,7 +297,7 @@ html[data-px-material="glass"] .speed button { border-radius: var(--px-radius-pi
 }
 
 /* Preserve narrow-screen text metrics and the existing stacked brand height. */
-@media (max-width:800px) {
+@media (max-width:700px) {
   html[data-px-material="glass"] .brand h1 { font-family: Impact, "Arial Narrow", sans-serif; font-weight: 500; letter-spacing: 1px; }
   html[data-px-material="glass"] .brand h1 small { letter-spacing: 3px; }
   html[data-px-material="glass"] .header .eyebrow { letter-spacing: 2px; font-weight: 700; }

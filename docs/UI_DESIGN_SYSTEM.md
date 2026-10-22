@@ -94,3 +94,5 @@ Refinement captures: [desktop](images/precision-glass/refined-desktop.png), [mob
 Refinement verification: TypeScript/production build and all 16 focused browser tests passed, covering 28 route/viewport geometry comparisons with the existing 2px desktop and 4px mobile limits. Narrow-screen moment and runtime-heading typography retain their original metrics to prevent wrapping changes. Backend and component logic diffs are empty.
 
 All six desktop/mobile material smoke tests also passed across Chromium, Firefox and Playwright WebKit. These checks cover the real replay, Sandbox, Data Hub and authenticated runtime routes, reduced motion, overflow and browser console errors.
+
+Cross-platform header correction: narrow-screen brand and eyebrow font metrics follow the original styles at the existing 700px header breakpoint. This avoids Linux font fallback changing the header height while retaining the refined materials. The Glass branch also incorporates main `973f29b`, including broadcast evidence and the authorized experiment archive reuse correction.
