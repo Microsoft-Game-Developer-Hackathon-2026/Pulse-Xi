@@ -127,6 +127,10 @@ test('FanDNA speaks the visible recap only after explicit request and supports s
   await expect(page.getByRole('status').filter({ hasText: 'Narration stopped.' })).toBeVisible()
   expect(await page.evaluate(() => (window as Window & { __speechHarness?: { cancellations: () => number } }).__speechHarness?.cancellations())).toBeGreaterThan(0)
   await expect(page.locator('.recap-body')).toBeVisible()
+  await page.getByRole('button', { name: 'Read recap aloud' }).click()
+  await expect(page.getByRole('button', { name: 'Stop narration' })).toBeEnabled()
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('3500')
+  await expect(page.getByRole('button', { name: 'Stop narration' })).toBeDisabled()
 })
 
 test('FanDNA reports a missing device voice without removing the text recap', async ({ page }) => {

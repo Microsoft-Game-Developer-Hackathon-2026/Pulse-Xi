@@ -293,7 +293,9 @@ export default function App() {
   useEffect(() => {
     return () => {
       try { if (voiceUtterance.current && 'speechSynthesis' in window) window.speechSynthesis.cancel() } catch { /* Browser speech may already be unavailable during teardown. */ }
+      if (voiceUtterance.current) setVoiceSpeaking(false)
       voiceUtterance.current = null
+      setVoiceStatus('')
     }
   }, [matchId, locale, persona, favoriteTeamId, favoritePlayerId, analysisSecond])
   useEffect(() => {
