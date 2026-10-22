@@ -5,7 +5,7 @@ from typing import Literal
 
 from . import storage
 from .control import Experiment, ExperimentRequest, read, trial_commands
-from .engine import EngineError, apply_command, digest, initial_state, restore_state, implementation_hash
+from .engine import EngineError, apply_command, digest, restore_state, implementation_hash
 from .manifest import verify_manifest
 from .models import ExperimentManifest, Model, Snapshot, Verification, Digest
 
@@ -163,16 +163,18 @@ def verify_bundle(bundle: ExperimentBundle) -> Verification:
         if (manifest.session_id != experiment.branches[index] or not manifest.ancestry
                 or manifest.ancestry[-1].checkpoint_id != experiment.request.checkpoint_id
                 or manifest.ancestry[-1].session_id != experiment.parent_session_id
+                or manifest.ancestry[-1].revision != parent.revision
                 or manifest.ancestry[-1].snapshot_hash != digest(parent)):
             return Verification(verified=False, component=f'branches[{index}].ancestry')
         expected = trial_commands(experiment, index)
         if [r.command for r in manifest.operations[parent.revision:]] != expected:
             return Verification(verified=False, component=f'branches[{index}].inputs')
-        state = initial_state(manifest.scenario)
-        for record in manifest.operations:
+        # verify_manifest already replayed every prefix operation from kickoff
+        # and checked this ancestor's hash at its exact revision. Reconstruct
+        # only the trial suffix from that same verified immutable parent.
+        state = parent
+        for record in manifest.operations[parent.revision:]:
             state = apply_command(state, record.command)
-            if state.revision == parent.revision and digest(state) != digest(parent):
-                return Verification(verified=False, component=f'branches[{index}].parent')
         states.append(state)
     if (experiment.session_id != bundle.branches[-1].session_id or experiment.tick != states[-1].tick
             or experiment.revision != states[-1].revision or experiment.event_cursor != states[-1].event_cursor):
@@ -192,8 +194,10 @@ def _verified_comparison(owner, identity) -> tuple[ExperimentBundle, Comparison]
                  for index, sid in enumerate(experiment.branches)]
     states = []
     for manifest in manifests:
-        state = initial_state(manifest.scenario)
-        for record in manifest.operations:
+        # This provisional calculation is never returned before verify_bundle
+        # independently validates the full history and its checkpoint ancestry.
+        state = checkpoint.snapshot.state
+        for record in manifest.operations[experiment.request.expected_revision:]:
             state = apply_command(state, record.command)
         states.append(state)
     comparison = calculate(experiment, checkpoint.snapshot.state, states, manifests)
