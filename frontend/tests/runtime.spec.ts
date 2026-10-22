@@ -25,7 +25,7 @@ async function create(page: Page, duration = 300) {
   return await page.getByLabel('Runtime / branch').inputValue()
 }
 
-test('configure, step, checkpoint, intervene, fork, compare evidence and independently verify real exports', async ({ page, request }) => {
+test('configure, step, checkpoint, intervene, fork, compare evidence and independently verify real exports', async ({ page, request }, info) => {
   const failures: string[] = []; page.on('pageerror', error => failures.push(error.message))
   await connect(page)
   await page.getByLabel('Duration seconds',{exact:true}).fill('300')
@@ -95,6 +95,11 @@ test('configure, step, checkpoint, intervene, fork, compare evidence and indepen
   await expect(evidence).toContainText('Verified source #')
   const unchanged = await (await request.get(`/api/sandbox/sessions/${sid}/state`, { headers })).json()
   expect(unchanged.state_hash).toBe(parent.state_hash)
+  // Optional visual capture is excluded from the bounded functional journey.
+  if (process.env.PX_VISUAL_DIR) {
+    await page.locator('.runtime-checkpoints').screenshot({path:info.outputPath('atelier-checkpoint.png')})
+    await page.locator('.runtime-forkcast').screenshot({path:info.outputPath('atelier-forkcast.png')})
+  }
   const archiveReads: string[] = []
   page.on('request', r => { if (r.method() === 'GET' && /\/experiments\/[^/]+\/(manifest|reproduction)$/.test(r.url())) archiveReads.push(r.url()) })
   const download = page.waitForEvent('download')
@@ -173,7 +178,7 @@ test('server progresses while the browser leaves and reconnects after refresh wi
   const sid = await create(page, 120)
   await page.getByLabel('Server progression rate').selectOption('60')
   await page.getByRole('button', { name: 'Run on server', exact: true }).click()
-  await page.getByRole('link', { name: 'MATCH INTELLIGENCE', exact: true }).click()
+  await page.locator('.workspace-nav a[href="#/"]').click()
   await expect.poll(async () => (await (await request.get(`/api/sandbox/sessions/${sid}/state`, { headers })).json()).tick).toBe(120)
   await page.goto('/#/runtime')
   await expect(page.getByLabel('Operator access token')).toHaveValue('')
