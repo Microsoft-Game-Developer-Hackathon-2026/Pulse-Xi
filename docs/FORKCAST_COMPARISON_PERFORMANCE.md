@@ -1,4 +1,4 @@
-﻿# Verified ForkCast comparison reuse
+# Verified ForkCast comparison reuse
 
 ## Defect and scope
 
@@ -137,4 +137,3 @@ is retained; the prefix-proof increment specifically addresses that remaining wo
 ## Final local acceptance
 
 At source 743916c, the unchanged bounded-forkcast Playwright project passed: 1 test in 2.7 minutes, including the 90-second comparison arrival and 30-second offline verifier budgets. The same copied dense disposable database completed comparison in 30.06 seconds versus 102.57 seconds before the later optimizations. These are single local observations, not percentile guarantees. Raw dense profiles are retained alongside the smaller benchmark.
-
