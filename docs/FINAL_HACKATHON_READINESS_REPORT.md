@@ -175,3 +175,29 @@ ForkCast replay path with Diyan, resolve PR76's integration conflicts, and prote
 time for rights/access/video/submission. The broad forensic/performance audit is
 not complete; the remaining profiling tasks are explicitly listed rather than
 silently marked done.
+
+## K. Subsequent runtime analytics reconciliation
+
+After the baseline audit delivery in PR77, PR76 was reconciled with current main
+and then stacked on PR77. Its old conflict status above describes the initial
+inspection, not the final review path. Normal merge99f4eb5 retained current-main
+schema4/UI/features; mergea4f1622 combined the replay change with strict private
+runtime request/revision boundaries. No contributor history was rewritten.
+
+PR76 code at `a4f1622a525ac3b1210adc384911d93497921cb8` passed **354 backend tests**
+in268.79s and **97 ordinary browser tests** in3.8min, plus TypeScript/build.
+The native-only parameter, short/full durations, invalid projection, owner denial,
+captured source hashes, partial windows and delayed session switching are covered.
+These counts are for the combined candidate, not current main. Engine, canonical
+serializers, RNG and shared metric formula files remain unchanged.
+
+PR76 now targets `audit/hackathon-final-readiness` for a focused stacked review.
+Review/merge77 first, then retarget76 to main and verify its checks again. Both
+PRs were mergeable at delivery and Diyan/Mahir reviews were requested; no submitted
+human approval or merge is claimed. PR77 exact delivery headb1c2216 has two green
+Actions runs:39771331806 and39771346571, including344 backend/95 browser on Linux.
+PR76 exact-head checks and final delivery SHA are available on its GitHub page.
+
+The local maximum-history Windows timeout remains unresolved; Linux PR77 CI passes
+that same test. No weakened assertion or new hosted-performance guarantee is made.
+The remaining profiler/memory/rights/video/access/submission work still applies.

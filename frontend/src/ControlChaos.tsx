@@ -44,7 +44,9 @@ function coverage(metric: ControlMetric) {
   return `${metric.eligible_event_count} supporting/eligible events`
 }
 
-export function ControlChaosPanel({ match, atSecond, analysisSecond = atSecond, events, selectEvent }: {
+export function ControlChaosPanel({ match, atSecond, analysisSecond = atSecond, events, selectEvent, load, requestKey = "recorded" }: {
+  load?: (path: string, signal: AbortSignal) => Promise<ControlChaos>
+  requestKey?: string
   match: Match
   atSecond: number
   analysisSecond?: number
@@ -53,27 +55,37 @@ export function ControlChaosPanel({ match, atSecond, analysisSecond = atSecond, 
 }) {
   const [windowSeconds, setWindowSeconds] = useState<300 | 600 | 900>(300)
   const [data, setData] = useState<ControlChaos | null>(null)
+  const [dataKey, setDataKey] = useState('')
+  const [dataScope, setDataScope] = useState('')
+  const [retry, setRetry] = useState(0)
   const [dataWindow, setDataWindow] = useState(300)
   const [selected, setSelected] = useState<ControlTurningPoint | null>(null)
   const [error, setError] = useState('')
   const second = Math.floor(atSecond)
   const requestSecond = Math.floor(analysisSecond)
+  const boundaryKey = `${requestKey}:${match.match_id}:${requestSecond}:${windowSeconds}`
 
   useEffect(() => {
+    // Private adapters retain exact request/revision boundaries. Only public
+    // recorded packets use the past-only refresh policy.
+    if (load) { setData(null); setSelected(null) }
+    setError('')
     const controller = new AbortController()
     const timer = window.setTimeout(() => {
       const params = new URLSearchParams({
         at_second: String(requestSecond),
         window_seconds: String(windowSeconds),
       })
-      fetch(`/api/matches/${encodeURIComponent(match.match_id)}/control-chaos?${params}`, { signal: controller.signal })
+      const pending = load ? load(params.toString(), controller.signal) : fetch(`/api/matches/${encodeURIComponent(match.match_id)}/control-chaos?${params}`, { signal: controller.signal })
         .then(response => {
           if (!response.ok) throw new Error(`Control vs Chaos request failed (${response.status})`)
           return response.json() as Promise<ControlChaos>
         })
-        .then(value => {
+      pending.then(value => {
           if (!controller.signal.aborted) {
             setData(value)
+            setDataKey(boundaryKey)
+            setDataScope(requestKey)
             setDataWindow(windowSeconds)
             setError('')
             setSelected(current => value.interpretation.turning_points.find(
@@ -86,9 +98,9 @@ export function ControlChaosPanel({ match, atSecond, analysisSecond = atSecond, 
         })
     }, 160)
     return () => { controller.abort(); window.clearTimeout(timer) }
-  }, [match.match_id, requestSecond, windowSeconds])
+  }, [match.match_id, requestSecond, windowSeconds, load, boundaryKey, requestKey, retry])
 
-  const visible = data?.match_id === match.match_id && data.at_second <= second && dataWindow === windowSeconds
+  const visible = dataScope === requestKey && (!load || dataKey === boundaryKey) && data?.match_id === match.match_id && data.at_second <= second && dataWindow === windowSeconds
     && data.window.start_second === Math.max(0, data.at_second - windowSeconds)
     && data.formula_version === 'control-chaos-formulas/1' ? data : null
   const activityDelta = (teamId: string) => visible?.deltas?.[teamId]?.['attacking_activity.activity_index']
@@ -127,9 +139,10 @@ export function ControlChaosPanel({ match, atSecond, analysisSecond = atSecond, 
         : 'PREVIOUS WINDOW UNAVAILABLE · NEED TWO COMPLETE WINDOWS'}</span>
     </div>
     <div className="control-reading" tabIndex={0} aria-label="Match rhythm details">
-    {error && <p className="control-error" role="alert">{error}</p>}
+    {error && <p className="control-error" role="alert">{error} <button onClick={() => setRetry(n => n + 1)}>Retry Control vs Chaos</button></p>}
     {!visible && !error && <p className="control-empty" role="status">Calculating event windows at the selected replay time…</p>}
     {visible && <>
+      <p role="status">{visible.at_second < windowSeconds ? "Partial current window: observed events only; no complete-window comparison." : "Complete current window."}</p>
       <div className="control-definitions">
         <p>Observed possession IDs are not possession time. Progression is completed, located horizontal movement in normalized pitch units. Pressure, recoveries, turnovers, shots and activity points stay separate.</p>
         <details>
