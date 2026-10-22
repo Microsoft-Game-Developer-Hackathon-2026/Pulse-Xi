@@ -30,9 +30,11 @@ from .library_lifecycle import (LifecycleAction, change_lifecycle, deletion_reco
 from .exports import AnalysisExport, analysis_export
 from .sandbox.api import router as sandbox_router
 from .sandbox.control import driver as sandbox_driver
+from .deployment import PublicDemoBoundary, deployment_mode, validate_deployment_config
 
 @asynccontextmanager
 async def lifespan(app):
+    validate_deployment_config()
     stop = asyncio.Event()
     enabled = os.getenv('PULSE_RUNTIME_DRIVER', '1') != '0' and bool(os.getenv('PULSE_RUNTIME_TOKEN') or os.getenv('PULSE_RUNTIME_TOKENS'))
     task = asyncio.create_task(sandbox_driver(stop)) if enabled else None
@@ -47,6 +49,7 @@ async def lifespan(app):
 app = FastAPI(title="PULSE XI API", version="0.1.0", lifespan=lifespan)
 app.include_router(sandbox_router)
 app.add_middleware(RequestBoundary)
+app.add_middleware(PublicDemoBoundary)
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
                    allow_methods=["GET", "POST"], allow_headers=["Content-Type", "Authorization", "X-Pulse-Deletion-ID"])
 DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
@@ -65,7 +68,7 @@ def stored(fixture: str, seed: int | None = None) -> tuple[Match, list[MatchEven
 
 
 def get_match(match_id: str) -> tuple[Match, list[MatchEvent]]:
-    imported = imported_match(match_id)
+    imported = imported_match(match_id) if deployment_mode() != "public-readonly" else None
     if imported:
         return imported
     for fixture, (seed, _, _) in FIXTURES.items():
@@ -102,6 +105,14 @@ def health():
             "narrative_provider": "configured_not_verified" if configured() else "not_configured"}
 
 
+@app.get("/ready", include_in_schema=False)
+def ready():
+    """Static frontend readiness; SQLite is intentionally disposable in public mode."""
+    if not (DIST / "index.html").is_file() or not (DIST / "assets").is_dir():
+        raise HTTPException(503, "frontend assets are not ready")
+    return {"status": "ready"}
+
+
 @app.get('/api/matches/{match_id}/analysis-export', responses={200: {'description': 'Bounded analysis download', 'content': {
     'application/json': {'schema': AnalysisExport.model_json_schema()}, 'text/csv': {'schema': {'type': 'string'}}}}})
 def export_analysis(match_id: str, at_second: int = Query(ge=0),
@@ -114,7 +125,7 @@ def export_analysis(match_id: str, at_second: int = Query(ge=0),
 
 @app.get("/api/matches")
 def list_matches():
-    return [stored(name)[0] for name in FIXTURES] + imported_matches()
+    return [stored(name)[0] for name in FIXTURES] + (imported_matches() if deployment_mode() != "public-readonly" else [])
 
 
 @app.post("/api/matches/generate", response_model=Match)
@@ -154,7 +165,7 @@ def match_library(request: Request):
             "local_admin_enabled": local_admin_enabled(request),
             "limits": {"bytes": 2_000_000, "events": 1000, "imported_matches": 100},
             "matches": [{"match": match, "origin": "built-in", "quality": quality(match, events), "provenance":None, "lifecycle":None}
-                        for match, events in generated] + library_entries()}
+                        for match, events in generated] + (library_entries() if deployment_mode() != "public-readonly" else [])}
 
 
 def check_package_identity(package: MatchPackage):
@@ -208,7 +219,7 @@ def manage_imported_match(match_id: str, request: LifecycleAction):
 
 @app.get("/api/matches/{match_id}/package")
 def export_match_package(match_id: str):
-    snapshot = imported_snapshot(match_id)
+    snapshot = imported_snapshot(match_id) if deployment_mode() != "public-readonly" else None
     match, events, provenance = snapshot if snapshot else (*get_match(match_id),None)
     from pydantic import ValidationError
     try:
