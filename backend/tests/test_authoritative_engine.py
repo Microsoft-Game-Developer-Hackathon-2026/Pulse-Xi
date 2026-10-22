@@ -398,6 +398,30 @@ def test_api_authorization_contract_journey_and_rejection_audit(database, monkey
         assert client.get(route + '/match-events', headers=headers).status_code == 422  # v1 only represents 90-minute matches
 
 
+def test_invalid_runtime_commands_are_rejected_without_mutation(database, monkeypatch):
+    token = 't' * 32
+    monkeypatch.setenv('PULSE_RUNTIME_TOKENS', json.dumps({'alice': token}))
+    root = runtime(duration=120)
+    route = f'/api/sandbox/sessions/{root.session_id}/commands'
+    headers = {'Authorization': f'Bearer {token}'}
+    invalid = [
+        {'operation_id': 'bad/id', 'expected_revision': 0, 'kind': 'step'},
+        {'operation_id': 'x' * 81, 'expected_revision': 0, 'kind': 'step'},
+        {'operation_id': 'bad-cutoff', 'expected_revision': 0, 'kind': 'intervene',
+         'team_id': 'home', 'field': 'pressing', 'value': 80, 'requested_tick': 5401},
+        {'operation_id': 'bad-batch', 'expected_revision': 0, 'kind': 'step', 'ticks': 301},
+        {'operation_id': 'bad-shape', 'expected_revision': 0, 'kind': 'pause', 'ticks': 2},
+    ]
+    with TestClient(app) as client:
+        for payload in invalid:
+            response = client.post(route, headers=headers, json=payload)
+            assert response.status_code == 422, response.text
+        current = storage.get_runtime('alice', root.session_id)
+        assert current.revision == 0 and current.tick == 0
+        with storage.connect() as db:
+            assert db.execute('SELECT COUNT(*) FROM commands').fetchone()[0] == 0
+
+
 def test_cancel_limits_and_database_separation(database, monkeypatch):
     root = runtime()
     root = mutate(root, 'cancel')

@@ -2,6 +2,17 @@
 
 > Historical report: statuses and counts below describe the dated build. See [current handoff](SATVIK_INDEPENDENT_HANDOFF.md) and [project status](PROJECT_STATUS.md) for the integrated baseline.
 
+## Issue #22 follow-up verification - 2026-10-22
+
+Starting baseline: `origin/main` at `175b7ce` (merge of release verification PR #72). The merged release report already covers 297 backend tests, 66 Playwright cases, current engine/checkpoint/storage/security regressions and prior measured runtime benchmarks. This follow-up adds a focused request-boundary regression where coverage was still thin: malformed/overlong command operation IDs, intervention cutoff beyond match time, oversized tick batch and invalid command shape must return 422 without advancing or writing a command receipt. No engine, storage or API implementation changed.
+
+- Focused test: `cd backend && python -m pytest tests/test_authoritative_engine.py::test_invalid_runtime_commands_are_rejected_without_mutation -q -p no:cacheprovider` ? **1 passed**.
+- Final local candidate suite: `cd backend && python -m pytest tests -q -p no:cacheprovider` ? **298 passed** in **69.61 seconds**, one upstream Starlette/httpx `TestClient` deprecation warning. The run used Python 3.14.5 on Windows 10.0.26200; Python 3.13 was unavailable on this host. Tests use per-test temporary SQLite files.
+- Existing browser baseline in the merged release PR: **66 Playwright Chromium tests passed** on tested head `14f676b38618287441b3318bb9ae0deaad9f126d` (documented in [PR #72](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/72)). They were not rerun for this candidate because Node/npm is absent here. Attempts to run `npm ci`, `npm run build`, `npm run validate:assets` and `npm run test:e2e` each stopped immediately because `npm` is not recognized. No candidate browser pass is claimed.
+- Benchmark: `python scripts/sandbox-benchmark.py --samples 5`; raw output: [issue-22-sandbox-benchmark-win-python314.json](release-evidence/issue-22-sandbox-benchmark-win-python314.json). The harness now discards one warm-up per construction case and per preset. It measured 20 full-time runs (five seeds for each of four presets), all at 5,400 seconds with engine `zone-engine/1`, Python 3.14.5, Windows 10.0.26200, AMD Ryzen 7 8745HX. Run-time median **276.6 ms**, nearest-rank p95 **329.9 ms** (20 samples, so this tail estimate resolves to the maximum), event-throughput median **7,434.8 events/s**. Default scenario construction: 1,000 samples, median **0.141 ms**, p95 **0.245 ms**; maximal-name/attribute construction: 1,000 samples, median **0.147 ms**, p95 **0.253 ms**. cProfile reported 777 decisions and 142.3 microseconds mean cumulative time per decision. Peak memory was not measured. These are local observations, not service targets; no before/after claim is made.
+
+The CI workflow runs backend tests, frontend build/assets, Playwright and the isolated release smoke journey. This local candidate was not pushed, so there is no exact-candidate CI result or review. The merged release PR's results are evidence for its tested head only.
+
 # Quality report — first vertical slice
 
 - `python -m pytest tests -q -p no:cacheprovider`: 6 passed (fixture invariants, golden scores, REST/WebSocket, idempotent out-of-order ingest, ProofTrail/overlay/recap, guarded agent auditor).
