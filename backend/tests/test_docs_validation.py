@@ -3,11 +3,16 @@ from tempfile import TemporaryDirectory
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'scripts'))
-from validate_docs import anchors, validate_api_examples, validate_markdown
+from validate_docs import anchors, contains_credential, validate_api_examples, validate_markdown
 
 
 def test_anchor_slugs_and_duplicate_headings():
     assert anchors('# Intro\n\n# Intro\n\n## A `code` & test') == {'intro', 'intro-1', 'a-code-test'}
+
+
+def test_credential_scan_checks_nested_examples():
+    assert contains_credential({'metadata': [{'provider': {'api_token': 'private'}}]})
+    assert not contains_credential({'match_id': 'synthetic-7', 'events': [{'type': 'pass'}]})
 
 
 def test_repository_markdown_links_and_api_examples():
