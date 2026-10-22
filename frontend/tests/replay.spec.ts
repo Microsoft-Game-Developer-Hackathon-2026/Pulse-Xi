@@ -73,3 +73,25 @@ test('FanDNA localizes controls, persists valid preferences, and announces recap
   const transition = await page.locator('.recap-body').evaluate(element => getComputedStyle(element).transitionDuration)
   expect(Number.parseFloat(transition)).toBeLessThan(0.001)
 })
+
+
+test('localized preferences survive saved scenario navigation without persisting operator credentials', async ({ page }) => {
+  const token = 'test-runtime-token-at-least-32-characters'
+  await page.goto('/')
+  await page.getByLabel('Language').selectOption('es')
+  await page.getByLabel('Vista').selectOption('analyst')
+  await page.locator('a[href="#/runtime"]').click()
+  await page.getByLabel('Operator access token').fill(token)
+  await page.getByRole('button', { name: 'Connect operator', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Disconnect operator' })).toBeVisible()
+  if (!await page.getByRole('button', { name: 'Save scenario', exact: true }).isVisible()) await page.getByText('Scenario builder', { exact: true }).click()
+  await page.getByLabel('Initial seed', { exact: true }).fill('54321')
+  await page.getByRole('button', { name: 'Save scenario', exact: true }).click()
+  await expect(page.locator('.runtime-notice')).toContainText('Scenario saved without creating a runtime session.')
+  await page.locator('a[href="#/"]').click()
+  await expect(page.getByLabel('Idioma')).toHaveValue('es')
+  await expect(page.getByLabel('Vista')).toHaveValue('analyst')
+  expect(await page.evaluate(() => JSON.stringify({ ...localStorage, ...sessionStorage }))).not.toContain(token)
+  await page.reload()
+  await expect(page.getByLabel('Idioma')).toHaveValue('es')
+})
