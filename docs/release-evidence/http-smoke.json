@@ -1,0 +1,14 @@
+{
+  "audit_records": 4,
+  "checkpoint_utc_recorded": true,
+  "cold_scenario_create_ms": 8.77,
+  "comparison_available": true,
+  "config_hash": "6c82255c292b24246ad23e90ca5c2a4f87fde926b124ada3c2f0e92e7646ac59",
+  "database": "disposable isolated files",
+  "elapsed_seconds": 4.52,
+  "foundry": "disabled; no inference",
+  "startup_health_ms": 768.13,
+  "status": "passed",
+  "transport": "real loopback HTTP + independent CLI",
+  "verifiers": 2
+}

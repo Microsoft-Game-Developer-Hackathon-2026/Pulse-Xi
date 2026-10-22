@@ -1,4 +1,4 @@
-"""Dedicated runtime DB, schema 3. Never migrate or reinterpret the data-hub DB.
+"""Dedicated runtime DB, schema 4. Never migrate or reinterpret the data-hub DB.
 
 Every command, appended events, checkpoint and acknowledgment commits together.
 BEGIN IMMEDIATE serializes workers/processes; Python memory is never the authority.
@@ -12,8 +12,9 @@ from pathlib import Path
 from ..storage import database_path, enable_wal
 from .engine import (EngineError, apply_command, canonical, capture_state, digest, initial_state,
                      restore_state, validate_state, implementation_hash)
-from .models import (Ancestor, AuditEntry, CheckpointView, Command, EngineState, EventPage,
+from .models import (Ancestor, AuditEntry, Command, EngineState, EventPage,
                      ExperimentManifest, MutationResult, ReplayRecord, RuntimeView, Scenario, Snapshot)
+from .checkpoint_metadata import StoredCheckpoint
 from .scenario_archive import ScenarioArchive, ScenarioSummary, utc_now, validate_identity
 
 DDL = (
@@ -42,6 +43,12 @@ SCENARIO_METADATA_DDL = (
     '''CREATE TABLE scenario_metadata (owner TEXT NOT NULL, id TEXT NOT NULL, created_at_utc TEXT,
        PRIMARY KEY(owner,id), FOREIGN KEY(owner,id) REFERENCES scenarios(owner,id))''',
     'INSERT INTO scenario_metadata(owner,id,created_at_utc) SELECT owner,id,NULL FROM scenarios',
+)
+
+
+CHECKPOINT_METADATA_DDL = (
+    'CREATE TABLE checkpoint_metadata (id TEXT PRIMARY KEY REFERENCES checkpoints(id), created_at_utc TEXT)',
+    'INSERT INTO checkpoint_metadata(id,created_at_utc) SELECT id,NULL FROM checkpoints',
 )
 
 
@@ -81,7 +88,14 @@ def connect():
                     db.execute(statement)
                 db.execute('PRAGMA user_version=3')
             db.commit()
-        if db.execute('PRAGMA user_version').fetchone()[0] != 3:
+        if db.execute('PRAGMA user_version').fetchone()[0] == 3:
+            db.execute('BEGIN IMMEDIATE')
+            if db.execute('PRAGMA user_version').fetchone()[0] == 3:
+                for statement in CHECKPOINT_METADATA_DDL:
+                    db.execute(statement)
+                db.execute('PRAGMA user_version=4')
+            db.commit()
+        if db.execute('PRAGMA user_version').fetchone()[0] != 4:
             raise RuntimeError('unsupported runtime database version')
         with db:
             yield db
@@ -275,6 +289,7 @@ def mutate(owner: str, session_id: str, command: Command) -> MutationResult:
                 db.execute('INSERT INTO checkpoints VALUES (?,?,?,?,?,?)',
                     (checkpoint_id, session_id, owner, canonical(capture_state(updated)),
                      canonical(records(db, session_id, prefix)), canonical(ancestry)))
+                db.execute('INSERT INTO checkpoint_metadata VALUES (?,?)', (checkpoint_id, utc_now()))
             entry = AuditEntry(session_id=session_id, scenario_id=state.scenario.scenario_id, command=command,
                 result='accepted', tick=updated.tick, revision=updated.revision, event_cursor=updated.event_cursor,
                 intervention=updated.interventions[-1] if command.kind == 'intervene' else None)
@@ -284,15 +299,15 @@ def mutate(owner: str, session_id: str, command: Command) -> MutationResult:
     return result
 
 
-def get_checkpoint(owner: str, checkpoint_id: str) -> CheckpointView:
+def get_checkpoint(owner: str, checkpoint_id: str) -> StoredCheckpoint:
     with connect() as db:
-        row = db.execute('SELECT session_id,payload FROM checkpoints WHERE id=? AND owner=?', (checkpoint_id, owner)).fetchone()
+        row = db.execute('SELECT c.session_id,c.payload,m.created_at_utc FROM checkpoints c JOIN checkpoint_metadata m ON c.id=m.id WHERE c.id=? AND c.owner=?', (checkpoint_id, owner)).fetchone()
         if row is None:
             raise EngineError('not_found', 404)
         payload = json.loads(row[1])
         state = restore_state(payload)
         snapshot = Snapshot.model_validate(payload)
-        return CheckpointView(checkpoint_id=checkpoint_id, session_id=row[0], scenario_id=state.scenario.scenario_id,
+        return StoredCheckpoint(created_at_utc=row[2], checkpoint_id=checkpoint_id, session_id=row[0], scenario_id=state.scenario.scenario_id,
                               tick=state.tick, revision=state.revision, event_cursor=state.event_cursor, snapshot=snapshot)
 
 
@@ -316,11 +331,12 @@ def list_checkpoints(owner: str, session_id: str) -> list[dict]:
     with connect() as db:
         load(db, owner, session_id)
         result = []
-        for cid, payload in db.execute('SELECT id,payload FROM checkpoints WHERE session_id=? AND owner=? ORDER BY rowid', (session_id, owner)):
+        for cid, payload, created in db.execute('SELECT c.id,c.payload,m.created_at_utc FROM checkpoints c JOIN checkpoint_metadata m ON c.id=m.id WHERE c.session_id=? AND c.owner=? ORDER BY c.rowid', (session_id, owner)):
             snapshot = Snapshot.model_validate_json(payload)
             s = snapshot.state
             result.append({'checkpoint_id': cid, 'session_id': session_id, 'scenario_id': s.scenario.scenario_id,
-                           'tick': s.tick, 'revision': s.revision, 'event_cursor': s.event_cursor, 'state_hash': snapshot.state_hash})
+                           'tick': s.tick, 'revision': s.revision, 'event_cursor': s.event_cursor, 'state_hash': snapshot.state_hash,
+                           'lifecycle': s.lifecycle, 'created_at_utc': created})
         return result
 
 
