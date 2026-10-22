@@ -2,6 +2,7 @@ import { useStableViewport } from './useStableViewport'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Activity, ArrowRight, ChevronLeft, ChevronRight, CirclePause, CirclePlay, Radio, RotateCcw, Wifi } from 'lucide-react'
 import type { Cue, Event, Insight, Match, Metrics, Recap, Tactics } from './types'
+import { ControlChaosPanel } from './ControlChaos'
 import { TacticalLab } from './TacticalLab'
 import { PassPlayerSummary } from './features/passes/PassInspector'
 import { MatchDataHub } from './features/sandbox/MatchDataHub'
@@ -303,6 +304,7 @@ export default function App() {
         {workspace === 'sandbox' && <EventTimeline match={match} seen={seen} atSecond={second} selectedId={current?.event_id} filters={filters} setFilters={setFilters} select={selectRecorded}/>}
         <AnalysisTools match={match} events={events} selected={current} second={second} filters={filters} panel={analysisPanel} setPanel={setAnalysisPanel} select={selectRecorded}/>
         <TacticalLab match={match} tactics={tactics} seen={seen} selectedEvent={current} selectPass={(eventId, time) => { const source = events.find(e => e.event_id === eventId && e.match_second === time); if (source) selectRecorded(source) }} atSecond={second} seek={seekReplay}/>
+        <ControlChaosPanel match={match} atSecond={second} events={events} selectEvent={selectRecorded}/>
         {persona === 'favorite_player' && <PassPlayerSummary matchId={matchId} playerId={favoritePlayerId || match.home.players[0].player_id} atSecond={second}/>}
         <div className="intelligence-grid">
           <section className="panel"><div className="panel-title"><span>PROOFTRAIL / VERIFIED MOMENTS</span><small>RULE-BASED · EVENT CITATIONS</small></div><div className="insight-list">{visibleInsights.length ? visibleInsights.map(insight => <article className="insight-card" key={insight.insight_id}><div><span className="insight-minute">{Math.floor(insight.match_second / 60)}′</span><div><strong>{insight.title}</strong><p>{insight.explanation}</p></div></div><button onClick={() => openProof(insight.insight_id)}>VIEW PROOF · {insight.supporting_event_ids.length} EVENTS <ArrowRight size={14}/></button></article>) : <div className="empty">Verified insights will appear as the replay reaches them.</div>}</div></section>
