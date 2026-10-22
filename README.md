@@ -8,6 +8,13 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 
 ## Application functionality
 
+**Branch boundary:** main `4d8a01e` (inspected 2026-10-21) contains the
+engine foundation and trace-security correction alongside recorded replay and
+Match Data Hub. Live runtime/ForkCast and analysis forward integration remains
+in #53; native-period analysis is #57. This dependent Control vs Chaos branch
+combines #57 and the recorded algorithms from #42 for integration testing, not
+as evidence of approval or incorporation into main. See the shared
+
 **Integrated baseline:** main `100106a` includes #64's saved-scenario library and #53's live runtime, architecture,
 private analysis and command-credential hardening, alongside original graphics #62.
 PR #52 remains open, but its code is present through #53; its separate PR state
@@ -15,6 +22,7 @@ does not mean the fix is absent. The [completion PR #64](https://github.com/Micr
 listing, versioned archives and creation provenance without changing engine hashes.
 See the [scenario library contract](docs/LIVE_SANDBOX.md#saved-scenario-library-and-archives)
 and shared
+
 [architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
 
 | Capability | Status and boundary |
@@ -271,4 +279,5 @@ Local startup/test serving uses an explicit Uvicorn loop factory: Windows Select
 ### Authoritative recorded-event analysis
 
 On this native-analysis branch above merged runtime main aefc046, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to pass analysis, source evidence, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. Short scenarios use the versioned native projection: actual duration, halftime at `duration_seconds // 2`, unchanged event ticks/periods, event counts, pass geometry/evidence and exports. Goal/activity ProofTrail rules retain their event-derived definitions; legacy match-state phase and continuous tracking remain unavailable. Standard 5400-second analysis retains its legacy behavior. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#native-period-analysis) for contracts and limitations. Native analysis remains subject to #57 review; the base runtime and saved-scenario library are already on main.
+
 
