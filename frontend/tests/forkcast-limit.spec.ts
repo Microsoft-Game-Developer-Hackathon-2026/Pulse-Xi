@@ -37,6 +37,8 @@ test('large bounded ForkCast downloads verify offline without exceeding the onli
   } catch (reason) {
     throw new Error(`${String(reason)}; visible API/UI errors: ${JSON.stringify(await page.getByRole('alert').allTextContents())}; selected runtime: ${await page.getByLabel('Runtime / branch').inputValue()}`)
   }
+  const archiveReads:string[]=[]
+  page.on('request',r=>{if(r.method()==='GET' && /\/experiments\/[^/]+\/(manifest|reproduction)$/.test(r.url()))archiveReads.push(r.url())})
   const uploads:string[]=[]
   page.on('request',r=>{if(r.url().endsWith('/api/sandbox/experiments/verify'))uploads.push(r.url())})
   await page.getByRole('button',{name:'Verify experiment independently',exact:true}).click()
@@ -47,6 +49,8 @@ test('large bounded ForkCast downloads verify offline without exceeding the onli
   await page.getByRole('button',{name:'Download experiment manifest',exact:true}).click()
   const file=testInfo.outputPath('large-forkcast.json')
   await (await pending).saveAs(file)
+  expect(archiveReads).toHaveLength(1)
+  expect(archiveReads[0]).toMatch(/\/reproduction$/)
   const bytes=await readFile(file)
   expect(bytes.byteLength).toBeGreaterThan(2_000_000)
   expect(bytes.byteLength).toBeLessThanOrEqual(20_000_000)
