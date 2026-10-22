@@ -19,8 +19,9 @@ do not accept URLs, SQL, arbitrary tool names, or model-supplied metric values.
 - `find_key_moments` returns only verified deterministic insight candidates.
 - `get_evidence_for_insight` returns a verified packet and its source events.
 - `prepare_broadcast_cue` produces a draft marked `publishing: false`.
-- `compare_scenarios` is explicitly unavailable until the #8 ForkCast
-  contract exists.
+- `compare_scenarios` remains explicitly unavailable. ForkCast is now merged,
+  but an owner-authorized, bounded, verified branch-evidence tool adapter has not
+  been implemented; the engine alone does not enable this tool.
 
 Tool inputs reject unknown fields, mismatched match IDs, out-of-cutoff clocks,
 invalid windows, and unverified insights. Each invocation is bounded to eight
@@ -51,7 +52,7 @@ Tests should use deterministic adapters and mocks only; routine CI must not make
 hosted calls. A real authenticated Foundry run is still a separate acceptance
 step requiring valid deployment credentials and explicit cost approval under
 issue #14. No hosted run, provider latency, token use, or cost is claimed by
-this implementation. Scenario comparison awaits #8, while producer approval
+this implementation. Scenario comparison awaits its scoped tool adapter, while producer approval
 and cue publishing remain with the broadcast studio work in #17.
 
 The integration follows Microsoft's documented
