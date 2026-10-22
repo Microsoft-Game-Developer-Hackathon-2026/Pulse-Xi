@@ -12,3 +12,6 @@ html { overflow-anchor: none; }
 .cue-toggle{display:flex;align-items:center;gap:7px;color:#8caead;font:700 10px Arial;letter-spacing:1px}.cue-toggle input{accent-color:#44e0d7}.cue-entry{display:flex;align-items:stretch;gap:6px;margin-bottom:7px}.cue-entry .cue-row{margin-bottom:0;min-width:0}.cue-entry>a{display:grid;place-items:center;padding:0 9px;border:1px solid #2b4d51;color:#5ae5dd;text-decoration:none;font:700 10px Consolas}.cue-entry>a:hover{border-color:#5ae5dd}
 
 @media(max-width:400px){.scoreboard{grid-template-columns:minmax(0,1fr) 100px minmax(0,1fr)}.team{padding:8px;gap:5px}.team-mark{width:26px;height:32px}.team strong{font-size:11px}}
+
+/* Broadcast proof remains in the existing cue row; no overlay intercepts the pitch. */
+.cue-proof{background:transparent;border:1px solid #416e70;border-radius:4px;color:#9cf4e9;font:700 10px Arial;padding:5px 7px;cursor:pointer}.cue-proof:hover:not(:disabled){background:#24484b}.cue-proof:focus-visible{outline:2px solid #9cf4e9;outline-offset:3px}.cue-proof:disabled{opacity:.5;cursor:not-allowed}
