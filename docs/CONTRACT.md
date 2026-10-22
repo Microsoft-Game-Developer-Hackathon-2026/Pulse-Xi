@@ -1,6 +1,6 @@
 # Event contract v1.0
 
-The new authenticated, durable sandbox runtime has a separate [authoritative engine contract](AUTHORITATIVE_ENGINE.md). It preserves this legacy replay/import contract and uses a separate runtime database.
+The new authenticated, durable sandbox runtime has a separate [authoritative engine contract](AUTHORITATIVE_ENGINE.md). Its verified branch comparisons use the [Sandbox ProofTrail v1 contract](PROOFTRAIL.md). It preserves this legacy replay/import contract and uses a separate runtime database.
 
 Pass difficulty is a separate versioned read-only contract; see [formula, API and limitations](PASS_DIFFICULTY.md). It preserves the event and existing metrics contracts.
 
@@ -83,12 +83,17 @@ Offline `scripts/database-admin.py` is a trusted OS-level operation. SQLite back
 
 Whole-database restore rotates dataset generation IDs and deletion nonces in the new file so forms/recovery requests from before restore are stale. Source match IDs, event IDs/order, provenance, revisions, archive flags and deletion times remain intact. The restored physical-file SHA-256 is reported after these administrative changes. Backup validation currently supports only schemas 1/2 and the documented tables; future engine storage migrations must update this allowlist deliberately.
 
+## FanDNA localization and preference boundary
+
+The FanDNA replay controls have typed English, Spanish and Hindi message catalogs. A missing catalog entry falls back to English and the interface announces that fallback. The locale is applied to the main application region for assistive technology. The existing recap API remains a deterministic template over verified goal evidence; localized copy does not alter scores, clocks, insight IDs or supporting event IDs. Persona labels and analyst/broadcaster templates are localized in all three supported locales.
+
+FanDNA preferences use browser-local `pulse-xi-fandna-preferences-v1`, schema version 1. It stores only locale, persona and selected synthetic team/player IDs; invalid or unknown values return to defaults, and favorites are checked against the selected fixture. Storage failure does not block replay. No speech provider, voice cloning, network speech request, or paid Azure Speech feature is enabled; voice requires a separately approved cost and consent design.
+
 ## Owner-scoped runtime analysis
 
 The engine integration branch exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. Default `projection=legacy` retains the 5400-second contract. Explicit `projection=native` returns `runtime-native-analysis/1` for every supported even engine duration (60..5400), with native period validation and unchanged event identity/ticks. It reuses existing event metrics, pass scoring/verification and export writing. All routes reject future cutoffs and conceal other owners; private runtime data never resolves through public `/api/matches`. See [LIVE_SANDBOX](LIVE_SANDBOX.md#native-period-analysis) for schemas, nullable calendar timestamps, unavailable legacy phase and hash scope. Neither dataset lifecycle nor engine serialization is replaced.
 
-
-## Saved scenarios (runtime schema 3)
+## Saved scenarios (introduced in runtime schema 3; retained in schema 4)
 
 The scenario library remains separate from imported-match storage (library schema 2).
 Authenticated GET `/api/sandbox/scenarios` returns at most 100 owned summaries,
@@ -103,3 +108,15 @@ identity verification, idempotence, errors, migration and rollback details.
 ## Authenticated runtime Control vs Chaos
 
 GET `/api/sandbox/sessions/{id}/control-chaos?at_second=T&window_seconds=300&projection=native` reuses `control-chaos-formulas/1` over one owner-scoped captured native view. Only `projection=native` is accepted (default for older clients); other values return 422. Response `runtime-control-chaos/1` identifies projection, session/branch/scenario, revision, actual duration/halftime, captured tick/cursor/hash scope, window completeness and genuine source evidence. The frontend sends and validates native explicitly for all durations. Private responses use no-store, future cutoffs return 422 and other owners remain concealed. Partial histories never imply two complete windows.
+
+
+## Checkpoint/reproduction additive boundary (runtime schema 4)
+
+Checkpoint reads/summaries add original created_at_utc or null; summaries expose
+saved lifecycle. Command responses add checkpoint_created_at_utc. Timestamp data
+is stored separately and excluded from every deterministic snapshot/hash.
+GET sessions/{id}/reproduction and experiments/{id}/reproduction under
+/api/sandbox wrap the original manifests with versioned unsigned export-build
+provenance. Raw manifest routes remain unchanged; existing verify routes/CLIs
+accept either supported raw payloads or the corresponding wrapper. See the
+[wire/migration and trust contract](LIVE_SANDBOX.md#checkpoint-metadata-and-reproduction-contracts).

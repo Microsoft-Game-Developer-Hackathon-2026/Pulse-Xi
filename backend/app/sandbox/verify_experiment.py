@@ -1,8 +1,9 @@
 """python -m app.sandbox.verify_experiment forkcast.json (no DB or network)."""
 import argparse
 from pathlib import Path
-from .engine import canonical, parse_json
-from .experiments import ExperimentBundle, verify_bundle
+from .engine import canonical
+from .experiments import verify_bundle
+from .reproduction import read_forkcast, read_bounded
 
 
 def main():
@@ -10,9 +11,7 @@ def main():
     parser.add_argument('bundle', type=Path)
     args = parser.parse_args()
     try:
-        if args.bundle.stat().st_size > 20_000_000:
-            raise ValueError('experiment bundle exceeds 20 MB')
-        result = verify_bundle(ExperimentBundle.model_validate(parse_json(args.bundle.read_bytes()))).model_dump()
+        result = verify_bundle(read_forkcast(read_bounded(args.bundle, 20_000_000))).model_dump()
     except (ValueError, OSError, RecursionError):
         result = {'verified': False, 'component': 'schema_or_version'}
     print(canonical(result))

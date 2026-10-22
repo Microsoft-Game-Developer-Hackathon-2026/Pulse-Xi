@@ -181,3 +181,32 @@ def test_saved_archive_native_analysis_preserves_source(database, duration):
     assert all(e['event_id'].startswith(view.session_id+'-') for e in packet['events'])
     assert client.get(path,headers=HEADERS).json() == original
     assert storage.get_runtime('alice',view.session_id).state.scenario.config_hash == scenario['config_hash']
+
+
+def test_schema4_checkpoint_metadata_does_not_change_native_branch_projection(database, monkeypatch):
+    view = advance(create(120), 60)
+    first = '2026-10-21T18:00:00.000001Z'
+    monkeypatch.setattr(storage, 'utc_now', lambda: first)
+    saved = storage.mutate('alice', view.session_id, Command(operation_id='native-schema4-save',
+        expected_revision=view.revision, kind='checkpoint'))
+    checkpoint = storage.get_checkpoint('alice', saved.checkpoint_id)
+    parent = read(view.session_id, 'analysis?at_second=60').json()
+    monkeypatch.setattr(storage, 'utc_now', lambda: '2026-10-22T18:00:00.000002Z')
+    restored = storage.create_session('alice', 'native-schema4-restore',
+        checkpoint_id=saved.checkpoint_id, expected_revision=saved.revision)
+    child = read(restored.session_id, 'analysis?at_second=60').json()
+    assert child['schema_version'] == 'runtime-native-analysis/1'
+    assert child['clock']['halftime_tick'] == 60
+    assert child['scenario_id'] == parent['scenario_id']
+    assert child['state_hash'] == parent['state_hash'] == checkpoint.snapshot.state_hash
+    assert child['event_hash'] == parent['event_hash']
+    assert child['branch_id'] == restored.session_id != view.session_id
+    assert {e['event_id'] for e in child['events']}.isdisjoint(e['event_id'] for e in parent['events'])
+    assert [(e['sequence'], e['tick'], e['period']) for e in child['events']] == [
+        (e['sequence'], e['tick'], e['period']) for e in parent['events']]
+    # Checkpoint creation UTC is persisted metadata, not an observed event timestamp.
+    assert all(e['generated_at_utc'] is None and e['tick'] <= 60 for e in child['events'])
+    assert storage.get_checkpoint('alice', saved.checkpoint_id).created_at_utc == first
+    assert storage.get_runtime('alice', view.session_id).state_hash == checkpoint.snapshot.state_hash
+    with storage.connect() as db:
+        assert db.execute('PRAGMA user_version').fetchone()[0] == 4

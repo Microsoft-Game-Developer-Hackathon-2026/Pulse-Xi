@@ -1,0 +1,32 @@
+{
+  "baseline_commit": "050e9c1a0f4f795ceb2290610333b43b0ab0672b",
+  "candidate_source_commit": "5997c746f986b0bdba6b43816c432e6f6022b382",
+  "baseline": {
+    "css": {
+      "bytes": 50412,
+      "gzip9_bytes": 11911
+    },
+    "entry": {
+      "bytes": 385813,
+      "gzip9_bytes": 117787
+    },
+    "observer": {
+      "bytes": 983869,
+      "gzip9_bytes": 262846
+    }
+  },
+  "candidate": {
+    "css": {
+      "bytes": 90000,
+      "gzip9_bytes": 18674
+    },
+    "entry": {
+      "bytes": 386894,
+      "gzip9_bytes": 118203
+    },
+    "observer": {
+      "bytes": 983869,
+      "gzip9_bytes": 262846
+    }
+  }
+}

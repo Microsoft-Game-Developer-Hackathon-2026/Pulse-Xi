@@ -1,0 +1,28 @@
+name: foundry-compat
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/app/agents.py"
+      - "backend/requirements-foundry.txt"
+      - "backend/scripts/foundry_smoke.py"
+      - ".github/workflows/foundry-compat.yml"
+  pull_request:
+    paths:
+      - "backend/app/agents.py"
+      - "backend/requirements-foundry.txt"
+      - "backend/scripts/foundry_smoke.py"
+      - ".github/workflows/foundry-compat.yml"
+jobs:
+  sdk-compatibility:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install pinned optional provider dependencies
+        run: python -m pip install -r backend/requirements-foundry.txt
+      - name: Import SDK and build workflow without inference
+        working-directory: backend
+        run: python scripts/foundry_smoke.py --check-only

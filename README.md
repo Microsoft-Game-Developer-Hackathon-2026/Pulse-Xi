@@ -6,24 +6,24 @@
 
 A Microsoft Game Developer Hackathon 2026 project turning fictional football events into deterministic statistics, inspectable tactical explanations, synchronized broadcast cues and personalized recaps. Recorded fixture replay and an authenticated authoritative Control Room support reproducible tactical experiments. All teams, players and events are synthetic. No Premier League feed, club logos, real-player tracking or broadcast footage is used.
 
+## Availability and review status (2026-10-22)
+
+Audited main `175b7ceb29b2f29437ba6a0a9886934fe5aebc4d` includes recorded-event observer synchronization #67, viewport stability #69, live runtime #53, saved scenarios/archives #64/#65, schema-4 checkpoint metadata and acceptance #70, release hardening #72, creative-media provenance #49 and original graphics #62. PR #52 is closed as superseded because its credential hardening and dependency constraints reached main through #53.
+
+Main incorporates #59 through merged #70: checkpoint/history/ForkCast consumer work with original authorship, plus checkpoint UTC metadata and reproduction envelopes. Native analysis #57 and runtime Control vs Chaos #58 remain separate. Recorded Control vs Chaos #42, FanDNA expansion #48 and branch ProofTrail #51 with request-isolation fix #54 are separate review-gated work. Draft agent tools #55, cost-gated Foundry validation #56 and Broadcast Studio proposal #50 are not shipped. Assets are technically integrated; manifest release approval and rights-holder decisions remain separate. Main's current runtime analysis projection supports 5,400-second scenarios; native engine controls already support shorter scenarios.
+
 ## Application functionality
 
-**Branch boundary:** main `4d8a01e` (inspected 2026-10-21) contains the
-engine foundation and trace-security correction alongside recorded replay and
-Match Data Hub. Live runtime/ForkCast and analysis forward integration remains
-in #53; native-period analysis is #57. This dependent Control vs Chaos branch
-combines #57 and the recorded algorithms from #42 for integration testing, not
-as evidence of approval or incorporation into main. See the shared
-
-**Integrated baseline:** main `100106a` includes #64's saved-scenario library and #53's live runtime, architecture,
+**Integrated baseline:** main `175b7ceb` includes schema-4 checkpoints, #64's saved-scenario library and #53's live runtime, architecture,
 private analysis and command-credential hardening, alongside original graphics #62.
-PR #52 remains open, but its code is present through #53; its separate PR state
-does not mean the fix is absent. The [completion PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64) integrated owner-scoped saved-scenario
+PR #52 is closed as superseded because its security code is already present through #53. The [completion PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64) integrated owner-scoped saved-scenario
 listing, versioned archives and creation provenance without changing engine hashes.
 See the [scenario library contract](docs/LIVE_SANDBOX.md#saved-scenario-library-and-archives)
 and shared
-
 [architecture and verification map](docs/AUTHORITATIVE_ENGINE.md).
+
+Checkpoint source inspection/download, terminal checkpoint capture, isolated restore/reset, auditable pending/applied tactics, ForkCast source navigation and independent reproduction use real authenticated APIs. Original checkpoint UTC stays outside deterministic state; historical dates remain unknown. See the [checkpoint/reproduction contract](docs/LIVE_SANDBOX.md#checkpoint-metadata-and-reproduction-contracts).
+
 
 | Capability | Status and boundary |
 |---|---|
@@ -39,15 +39,15 @@ and shared
 | Persistence | SQLite imported-event persistence and idempotent ingest; built-in/custom fixtures regenerate |
 | Microsoft AI | Guarded optional provider code; verified local path uses deterministic fallback, not authenticated model inference |
 
-The [Live Sandbox guide](docs/LIVE_SANDBOX.md) documents the proposed Control Room at `/#/runtime`: configure, run on the server, pause, intervene, checkpoint, restore, run paired trials and inspect/verify event evidence. Runtime access requires provisioned operator credentials, kept only in page memory. The fixture workspace remains at `/#/sandbox`. Original graphics, licensing notices and fallback behavior from merged #62 are preserved; see its [asset review record](docs/ASSET_SECURITY_RELEASE_REVIEW.md). Other preparation and feature PRs retain separate review gates. Calibrated prediction, public Azure deployment and real multi-agent inference are not supplied by the engine. See the [earlier handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
+The [Live Sandbox guide](docs/LIVE_SANDBOX.md) documents the integrated Control Room at `/#/runtime`: configure, run on the server, pause, intervene, checkpoint, restore, run paired trials and inspect/verify event evidence. Runtime access requires provisioned operator credentials, kept only in page memory. The fixture workspace remains at `/#/sandbox`. Original graphics, licensing notices and fallback behavior from merged #62 are preserved; see its [asset review record](docs/ASSET_SECURITY_RELEASE_REVIEW.md). Other preparation and feature PRs retain separate review gates. Calibrated prediction, public Azure deployment and real multi-agent inference are not supplied by the engine. See the [earlier handoff](docs/SATVIK_INDEPENDENT_HANDOFF.md).
 
 ## Windows quick start
 
-Prerequisites: Python 3.11+, Node **20.19+ or 22.12+** (Vite requirement), npm and PowerShell. Verification used Python 3.13 and Node 24. From the repository root:
+Tested baseline: Python **3.13**, Node **24**, npm and PowerShell (also used by CI). Vite requires Node **20.19+ or 22.12+**; other Python/Node combinations were not verified in this release audit. From the repository root:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+$env:Path = "$(Resolve-Path .venv\Scripts);$env:Path"
 .\scripts\start.ps1
 ```
 
@@ -66,11 +66,45 @@ python -m uvicorn app.main:app --loop app.local_event_loop:create_loop --app-dir
 ```powershell
 # Terminal 2, repository root
 cd frontend
-npm ci
-npm run dev
+npm.cmd ci
+npm.cmd run dev
 ```
 
 Open the Vite URL printed by the command. Its API/WebSocket proxy targets port 8000. FastAPI serves `frontend/dist` after production build. Optional backend-only configuration is in [Foundry](docs/FOUNDRY.md); never put secrets in frontend variables. Keep hosted inference disabled without explicit authorization.
+
+### macOS/Linux manual equivalent
+
+From the cloned repository root (Python 3.13 and Node 24 match CI):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r backend/requirements.txt
+(cd frontend && npm ci && npm run build)
+python -m uvicorn app.main:app --loop app.local_event_loop:create_loop --app-dir backend --host 127.0.0.1 --port 8000
+```
+
+These are the same Python/npm entry points; local verification here used Windows, while CI executes on Ubuntu. For frontend development, run `npm run dev` from `frontend` in another terminal; its proxy expects backend port 8000.
+
+## Configuration and trust boundaries
+
+Set variables in the server shell before startup. Do not commit credentials or put them in frontend variables, URLs, logs or browser storage.
+
+| Variable | Actual main behavior |
+|---|---|
+| `PULSE_RUNTIME_TOKEN` | Single operator bearer capability; at least 32 ASCII characters; unset/invalid configuration fails closed |
+| `PULSE_RUNTIME_TOKENS` | Alternative JSON mapping of stable owner IDs to distinct tokens; takes precedence over the single-token configuration |
+| `PULSE_RUNTIME_DB_PATH` | Separate durable engine database; defaults beside the match database as `pulse_runtime.sqlite` |
+| `PULSE_DB_PATH` | Imported-match SQLite database; default `backend/data/pulse_xi.sqlite` |
+| `PULSE_IMPORT_TOKEN` | Shared dataset write capability, at least 32 characters; not private multi-user ownership |
+| `PULSE_ENABLE_LOCAL_DATA_ADMIN` | Exact value `1` enables additional direct-loopback administration checks; keep unset publicly |
+| `PULSE_FOUNDRY_ADMIN_TOKEN` | Administrative capability for privileged agent operations; see security qualification below |
+| `PULSE_ENABLE_FOUNDRY`, `FOUNDRY_PROJECT_ENDPOINT`, `FOUNDRY_MODEL` | Optional provider path; enabled only by exact `true` plus endpoint/model; leave disabled for offline work |
+| `PULSE_BUILD_REVISION` | Optional truthful build revision in analysis exports; otherwise unavailable |
+
+Generate a development secret server-side with `python -c "import secrets; print(secrets.token_urlsafe(32))"`. Operator tokens scope private runtime records to provisioned owners; inaccessible identities are concealed with 404. They do not create public signup or a collaborative permission model. Public recorded/imported matches have a different access boundary.
+
+Runtime provisioned credentials remain memory-only in the browser. New saved scenarios and scenario archives reside in runtime SQLite schema 4 (scenario metadata introduced in schema 3), separately from imported-match schema 2 and browser notes. The live Control Room is available at `/#/runtime`; see [LIVE_SANDBOX](docs/LIVE_SANDBOX.md) for saved-scenario, archive, checkpoint, run and ForkCast workflows. Optional hosted agents remain disabled without explicit authorization; no hosted inference or public deployment is certified.
 
 ## Analysis workflow
 
@@ -184,14 +218,14 @@ flowchart LR
   UI --> O[Lazy R3F event observer]
 ```
 
-Frontend: React 19, strict TypeScript, Vite, Tailwind/CSS, Three.js and React Three Fiber. Backend: Python, FastAPI, Pydantic and SQLite. pytest/Playwright exercise APIs and browsers. Calculations stay outside language models. Future authoritative state/clock/RNG ownership belongs to Diyan, not the replay client.
+Frontend: React 19, strict TypeScript, Vite, Tailwind/CSS, Three.js and React Three Fiber. Backend: Python, FastAPI, Pydantic and SQLite. pytest/Playwright exercise APIs and browsers. Calculations stay outside language models. The integrated authoritative backend owns simulation state, clock and RNG; browser replay/inspection state does not advance it.
 
 ```text
 backend/app/                  models, generator, analytics, evidence, APIs, storage
 backend/tests/                API, determinism, persistence and scoring tests
 frontend/src/features/passes/  pass inspector and typed responses
 frontend/src/features/sandbox/ fixture setup, timeline, replay transport
-frontend/src/features/observer/ lazy procedural 3D, cameras, evidence overlay
+frontend/src/features/observer/ lazy GLB/procedural 3D, cameras, evidence overlay
 frontend/tests/               browser and transport regressions
 scripts/                      Windows build/start and scoring benchmark
 docs/                         contracts, methodology and handoff
@@ -199,6 +233,16 @@ docs/                         contracts, methodology and handoff
 ```
 
 ## Testing
+
+From `backend`, independently verify both checked-in bundles:
+
+```powershell
+python -m app.sandbox.verify_manifest ../docs/examples/sandbox/experiment.json
+python -m app.sandbox.verify_experiment ../docs/examples/sandbox/forkcast.json
+```
+
+From the repository root, run `python scripts/asset_contract.py` and `git diff --check`; from `frontend`, run `npm run validate:assets` and `npm audit`. `python -m pip check` checks installed dependency consistency. Optional development scanner: `python -m pip_audit -r backend/requirements.txt --progress-spinner off` (install pip-audit separately). Results belong to the tested commit, not all future builds.
+
 
 ```powershell
 # Repository root
@@ -217,13 +261,15 @@ npm run test:e2e
 
 `build` includes strict TypeScript. Playwright starts a real FastAPI server on port 8765; avoid an unrelated process using that port. CI uses software rendering for reproducibility, not physical GPU performance evidence. Final counts and measured limitations are in the handoff.
 
-Asset validation (`python scripts/asset_contract.py`, `npm run validate:assets`) and `npm run test:contracts` belong to unmerged #31/#33 respectively; **they are not available on this main baseline**.
+Asset validation is available on main: run `python scripts/asset_contract.py` from the repository root and `npm run validate:assets` from `frontend`. Historical preparation PRs #32/#33 are closed as superseded by the authoritative checkpoint/ForkCast implementation; their proposal schemas are not current APIs.
 
 ## Graphics pipeline and provenance
 
-Main's observer is procedural and independently usable. Blender 5.2.2 authored an original editable source/GLB pipeline on PR #31, including manifest hashes, export tools and Khronos checks. Main also includes a renderer probe that supports procedural and asset-enabled scenes. It remains unmerged pending release review. Unreal #34 is optional offline authoring; neither tool is a browser runtime requirement. No mandatory CUDA, RTX, Pixel Streaming or cloud GPU is introduced.
+Main includes original editable Blender sources, exported GLBs, manifest hashes, export tools and Khronos validation through graphics PR #62. The observer supports an asset-enabled scene and procedural fallback; Blender is optional for authoring, not required to run the web application. The renderer probe supports both configurations. Unreal #34 remains optional offline authoring. No mandatory CUDA, RTX, Pixel Streaming or cloud GPU is introduced.
 
-The handoff records separate physical Iris Xe and software-renderer evidence; neither certifies RTX performance. Asset licenses and provenance are in PR #31's `assets/LICENSE.md` and `assets/manifest.json`, not yet main. No asset release approval is implied; third-party package licenses remain applicable.
+Duplicate implementation PR #31 is closed because its contents are already integrated. This does **not** grant rights or release approval: [security/legal/licensing issue #23](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/23) remains open, and the manifest approval status is unchanged. See [asset licenses](assets/LICENSE.md) and the [manifest](assets/manifest.json).
+
+Physical Iris Xe and software-renderer evidence are separate; neither certifies RTX performance. The earlier physical procedural-scene probe did not load the GLB kit and does not establish asset-loaded hardware performance. Recorded event positions remain sparse snapshots, not continuous tracking.
 
 ### Repeat physical-GPU measurement
 
@@ -265,12 +311,12 @@ Use focused branches/PRs with reproducible evidence. Do not push directly to mai
 | Port 8000 occupied | Stop its known owner or use another manual uvicorn port; do not terminate unknown processes |
 | Startup exits | Fix the first dependency/build error; startup stops on failures |
 | Blank/failed 3D | Return to 2D, try Low, check WebGL2/hardware acceleration; replay remains independent |
-| Blender not found | Main does not require Blender; authors on #31 can set `PULSE_BLENDER_PATH` |
-| Missing asset/contract command | Utilities remain on the unmerged branches, not this main baseline |
+| Blender not found | Main does not require Blender; asset authors can set `PULSE_BLENDER_PATH` |
+| Missing asset validator | Use current main; run `python scripts/asset_contract.py` at the repository root or `npm run validate:assets` after `npm ci` in `frontend`. Historical proposal-only scripts are not current contracts. |
 
 ### Limitations
 
-Synthetic streams are simplified and not calibrated against real football outcomes. Full localization, advanced studio editing, authenticated Microsoft inference, Azure hosting and authoritative experimentation remain incomplete. A seed alone is not a full experiment manifest. The handoff identifies owners and exact integration gates.
+Synthetic streams are simplified and not calibrated against real football outcomes. Full interface localization, advanced studio editing, authenticated Microsoft inference and Azure hosting remain incomplete. Authoritative paired experiments and independent reproduction are implemented; they describe this synthetic simulation rather than calibrated real-football outcomes. A seed alone is not a full experiment manifest. The handoff identifies owners and exact integration gates.
 
 Browser regression runs are bounded to two workers to avoid oversubscribing software-rendering contexts on developer laptops; explicit multi-tab and database race tests retain their own concurrency. Deep-link navigation hides stale controls until recorded-source restoration completes. No test retries or suppressed failures are used.
 
@@ -278,6 +324,26 @@ Local startup/test serving uses an explicit Uvicorn loop factory: Windows Select
 
 ### Authoritative recorded-event analysis
 
-On this native-analysis branch above merged runtime main aefc046, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to pass analysis, source evidence, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. Short scenarios use the versioned native projection: actual duration, halftime at `duration_seconds // 2`, unchanged event ticks/periods, event counts, pass geometry/evidence and exports. Goal/activity ProofTrail rules retain their event-derived definitions; legacy match-state phase and continuous tracking remain unavailable. Standard 5400-second analysis retains its legacy behavior. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#native-period-analysis) for contracts and limitations. Native analysis remains subject to #57 review; the base runtime and saved-scenario library are already on main.
+On this native-analysis branch above merged runtime/schema-4 main 175b7ce, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to pass analysis, source evidence, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. Short scenarios use the versioned native projection: actual duration, halftime at `duration_seconds // 2`, unchanged event ticks/periods, event counts, pass geometry/evidence and exports. Goal/activity ProofTrail rules retain their event-derived definitions; legacy match-state phase and continuous tracking remain unavailable. Standard 5400-second analysis retains its legacy behavior. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#native-period-analysis) for contracts and limitations. Native analysis remains subject to #57 review; the base runtime and saved-scenario library are already on main.
 
+Frontend visual materials and layout invariants: [Atelier design system](docs/UI_DESIGN_SYSTEM.md).
 
+## Release verification and submission
+
+See [release readiness](docs/RELEASE_READINESS.md) for the tested clean setup, risk-weighted matrix, generated endpoint/dependency inventory, measured benchmarks and unresolved rights/public-service gates. After building, `python scripts/release-smoke.py` exercises a real temporary HTTP server and independently verifies its runtime/ForkCast exports without using personal databases or hosted inference. The [submission runbook](docs/SUBMISSION_RUNBOOK.md) contains the 110-second capture plan; it is not a claim that a final video or public deployment exists.
+
+## Repository consolidation record
+
+See [the consolidation audit](docs/REPOSITORY_CONSOLIDATION.md) for exact reviewed
+PR/dependency status, safe branch removals and verification boundaries. Premium
+Glass #71, archive reuse #74 and direct broadcast-cue evidence #75 remain under
+review; their compatibility branch is not the shipped main application.
+
+## Pending runtime Control vs Chaos integration
+
+This PR adds authenticated native Control vs Chaos over existing recorded formulas.
+The frontend explicitly sends `projection=native`; the backend rejects unsupported
+projections and validates owner/cutoff/source identity. Window choices300/600/900
+retain honest partial-history states. This adapter is not on main until PR76
+is reviewed and merged; the native analysis and recorded algorithms are already
+merged dependencies. No engine serialization, RNG or formula change is introduced.
