@@ -102,6 +102,29 @@ def test_fan_lens_window_boundary_is_exclusive_at_start_inclusive_at_end():
     assert above_few_only.alerts == []
 
 
+def test_fan_lens_spatial_metrics_report_missing_coordinate_coverage():
+    from app.fan_lens import fan_lens_at
+    from app.models import Point
+
+    match, events = generate("comeback")
+    source = next(event for event in events if event.event_type == EventType.pressure)
+    missing = source.model_copy(update={"event_id": "missing-coordinates", "sequence": 1, "match_second": 120,
+                                        "event_type": EventType.pass_, "outcome": "complete", "start": None, "end": None})
+    unavailable = fan_lens_at(match, [missing], at_second=300, metric_id="forward_progression",
+                              threshold_id="few", team_id=source.team_id)
+    assert unavailable.value == 0
+    assert unavailable.coverage == {"eligible_event_count": 1, "located_event_count": 0, "missing_coordinate_count": 1}
+    assert unavailable.unavailable_reason == "missing_coordinates"
+    assert unavailable.alerts == []
+
+    located = missing.model_copy(update={"event_id": "located-progress", "start": Point(x=20, y=50), "end": Point(x=40, y=50)})
+    available = fan_lens_at(match, [located], at_second=300, metric_id="forward_progression",
+                            threshold_id="few", team_id=source.team_id)
+    assert available.value == 20
+    assert available.alerts[0]["supporting_event_ids"] == ["located-progress"]
+    assert available.alerts[0]["coverage"] == {"eligible_event_count": 1, "located_event_count": 1, "missing_coordinate_count": 0}
+
+
 def test_idempotent_out_of_order_ingest(tmp_path, monkeypatch):
     monkeypatch.setenv("PULSE_IMPORT_TOKEN", "test-import-token-at-least-32-characters")
     monkeypatch.setenv("PULSE_DB_PATH", str(tmp_path / "matches.sqlite"))

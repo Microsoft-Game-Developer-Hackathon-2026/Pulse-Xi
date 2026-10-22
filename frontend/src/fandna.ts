@@ -43,6 +43,7 @@ const en = {
   fan_lens: 'FAN LENS / FOLLOW A METRIC', metric: 'METRIC', threshold: 'ALERT THRESHOLD', alerts: 'ALERTS', alerts_enabled: 'ENABLE ALERTS',
   all_teams: 'All teams', all_players: 'All players', followed_team: 'Follow team', followed_player: 'Follow player', no_metric_data: 'No eligible recorded events at this replay time.',
   no_alerts: 'No completed window crossed this threshold yet.', alert_count: '{value} {unit} in {start}–{end} · threshold {threshold}', event_metric_pressure: 'Recorded pressure events',
+  metric_coverage: '{count} eligible events', coordinate_coverage: '{located} located · {missing} missing coordinates', no_metric_coordinates: 'Eligible events exist, but required coordinates are unavailable.',
   event_metric_passes: 'Completed passes', event_metric_recoveries: 'Ball recoveries', event_metric_shots: 'Shots', event_metric_entries: 'Completed final-third entries', event_metric_progression: 'Completed forward progression',
   threshold_few: 'Few', threshold_some: 'Some', threshold_many: 'Many',
 }
@@ -66,6 +67,7 @@ const es: typeof en = {
   fan_lens: 'FAN LENS / SEGUIR UNA MÉTRICA', metric: 'MÉTRICA', threshold: 'UMBRAL DE ALERTA', alerts: 'ALERTAS', alerts_enabled: 'ACTIVAR ALERTAS',
   all_teams: 'Todos los equipos', all_players: 'Todos los jugadores', followed_team: 'Seguir equipo', followed_player: 'Seguir jugador', no_metric_data: 'No hay eventos registrados disponibles en este momento de la repetición.',
   no_alerts: 'Ninguna ventana completada ha superado este umbral.', alert_count: '{value} {unit} entre {start} y {end} · umbral {threshold}', event_metric_pressure: 'Eventos de presión registrados',
+  metric_coverage: '{count} eventos elegibles', coordinate_coverage: '{located} ubicados · {missing} sin coordenadas', no_metric_coordinates: 'Hay eventos elegibles, pero faltan las coordenadas necesarias.',
   event_metric_passes: 'Pases completados', event_metric_recoveries: 'Recuperaciones', event_metric_shots: 'Tiros', event_metric_entries: 'Entradas completadas al último tercio', event_metric_progression: 'Progresión hacia delante completada',
   threshold_few: 'Pocos', threshold_some: 'Algunos', threshold_many: 'Muchos',
 }
@@ -89,6 +91,7 @@ const hi: typeof en = {
   fan_lens: 'फैन लेंस / मेट्रिक का अनुसरण करें', metric: 'मेट्रिक', threshold: 'अलर्ट सीमा', alerts: 'अलर्ट', alerts_enabled: 'अलर्ट चालू करें',
   all_teams: 'सभी टीमें', all_players: 'सभी खिलाड़ी', followed_team: 'टीम का अनुसरण करें', followed_player: 'खिलाड़ी का अनुसरण करें', no_metric_data: 'रीप्ले के इस समय पर कोई योग्य रिकॉर्ड की गई घटना नहीं है।',
   no_alerts: 'अभी तक कोई पूरी विंडो इस सीमा तक नहीं पहुँची है।', alert_count: '{start}–{end} में {value} {unit} · सीमा {threshold}', event_metric_pressure: 'रिकॉर्ड की गई दबाव घटनाएँ',
+  metric_coverage: '{count} योग्य घटनाएँ', coordinate_coverage: '{located} स्थान ज्ञात · {missing} की जगह अज्ञात', no_metric_coordinates: 'योग्य घटनाएँ हैं, लेकिन आवश्यक निर्देशांक उपलब्ध नहीं हैं।',
   event_metric_passes: 'पूरे किए गए पास', event_metric_recoveries: 'गेंद वापसी', event_metric_shots: 'शॉट', event_metric_entries: 'अंतिम तिहाई में पूरे प्रवेश', event_metric_progression: 'पूरी की गई आगे की प्रगति',
   threshold_few: 'कम', threshold_some: 'कुछ', threshold_many: 'अधिक',
 }
