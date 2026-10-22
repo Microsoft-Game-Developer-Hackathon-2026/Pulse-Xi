@@ -302,6 +302,9 @@ Use focused branches/PRs with reproducible evidence. Do not push directly to mai
 - [Pass methodology](docs/PASS_DIFFICULTY.md)
 - [3D Observer](docs/3D_OBSERVER.md)
 - [Optional Foundry path](docs/FOUNDRY.md)
+- [Azure public demo deployment runbook](docs/AZURE_DEMO_DEPLOYMENT.md) (prepared, not provisioned or live)
+- [Local security boundary](docs/LOCAL_SECURITY_BOUNDARY.md)
+- [Quality evidence](docs/QUALITY_REPORT.md)
 - [Historical implementation audit](docs/SATVIK_IMPLEMENTATION.md)
 
 ## Troubleshooting
@@ -318,7 +321,7 @@ Use focused branches/PRs with reproducible evidence. Do not push directly to mai
 
 ### Limitations
 
-Synthetic streams are simplified and not calibrated against real football outcomes. Full interface localization, advanced studio editing, authenticated Microsoft inference and Azure hosting remain incomplete. Authoritative paired experiments and independent reproduction are implemented; they describe this synthetic simulation rather than calibrated real-football outcomes. A seed alone is not a full experiment manifest. The handoff identifies owners and exact integration gates.
+Synthetic streams are simplified and not calibrated against real football outcomes. Full interface localization, advanced studio editing, authenticated Microsoft inference and public authenticated runtime intervention remain incomplete. Authoritative paired experiments and independent reproduction are implemented; they describe this synthetic simulation rather than calibrated real-football outcomes. Azure deployment files are prepared, but no public deployment or URL is claimed; see the [cost-gated runbook](docs/AZURE_DEMO_DEPLOYMENT.md). A seed alone is not a full experiment manifest. The handoff identifies owners and exact integration gates.
 
 Browser regression runs are bounded to two workers to avoid oversubscribing software-rendering contexts on developer laptops; explicit multi-tab and database race tests retain their own concurrency. Deep-link navigation hides stale controls until recorded-source restoration completes. No test retries or suppressed failures are used.
 
