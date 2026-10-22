@@ -90,7 +90,7 @@ Publish the image by manually dispatching **Publish or deploy Azure demo** on `m
   -ConfirmProvisioning
 ```
 
-Set the protected environment variables to that resource group and app name. Dispatch the workflow again with `operation=deploy`. It builds/publishes a source-tagged image and passes the build action's immutable `repository@sha256:digest` output to the existing app; it does not provision infrastructure. GitHub environment reviewers must approve. The job prints the FQDN after updating. The deploy workflow does not create Azure credentials or secrets in the repository.
+Set the protected environment variables to that resource group and app name. Dispatch the workflow again with `operation=deploy`. It builds/publishes a source-tagged image and passes the build action's immutable `repository@sha256:digest` output to the existing app; it does not provision infrastructure. Revision suffixes use `r-<workflow-run-id>-<attempt>` to satisfy the [ACA naming rules](https://learn.microsoft.com/en-us/azure/container-apps/revisions#name-suffix) and keep retries distinct. Retain the source SHA and exact image digest in the release record. GitHub environment reviewers must approve. The job prints the FQDN after updating. The deploy workflow does not create Azure credentials or secrets in the repository.
 
 ## Verify and operate
 
