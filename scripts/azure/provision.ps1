@@ -8,10 +8,10 @@ param(
 )
 $ErrorActionPreference = "Stop"
 
-if (-not (Get-Command az -ErrorAction SilentlyContinue)) { throw "Azure CLI is required. No resources were created." }
-if ($Image -notmatch '^ghcr\.io/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+$') {
-    throw "Image must be an immutable, public ghcr.io image reference; credentials are not accepted."
+if ($Image -cnotmatch '^ghcr\.io/[a-z0-9_.-]+/[a-z0-9_.-]+@sha256:[a-f0-9]{64}$') {
+    throw "Image must be a public ghcr.io repository@sha256 digest (64 lowercase hex characters); tags and credentials are not accepted."
 }
+if (-not (Get-Command az -ErrorAction SilentlyContinue)) { throw "Azure CLI is required. No resources were created." }
 $template = Join-Path $PSScriptRoot "../../infra/azure/main.bicep"
 $template = [System.IO.Path]::GetFullPath($template)
 if (-not (az group exists --name $ResourceGroup | ConvertFrom-Json)) {
