@@ -1,0 +1,87 @@
+name: Publish or deploy Azure demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Publish an immutable image, or deploy it to the protected Azure demo environment
+        type: choice
+        options: [publish, deploy]
+        default: publish
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.image.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build immutable image reference
+        id: image
+        shell: bash
+        run: |
+          owner="$(printf '%s' "$GITHUB_REPOSITORY_OWNER" | tr '[:upper:]' '[:lower:]')"
+          echo "image=ghcr.io/${owner}/pulse-xi-demo:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.image.outputs.image }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && inputs.operation == 'deploy'
+    needs: image
+    runs-on: ubuntu-latest
+    environment: azure-demo
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Validate protected environment configuration
+        shell: bash
+        env:
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          CONTAINER_APP: ${{ vars.AZURE_CONTAINER_APP }}
+        run: |
+          test -n "$AZURE_CLIENT_ID" && test -n "$AZURE_TENANT_ID" && test -n "$AZURE_SUBSCRIPTION_ID"
+          test -n "$RESOURCE_GROUP" && test -n "$CONTAINER_APP"
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - uses: azure/CLI@v2
+        env:
+          RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+          CONTAINER_APP: ${{ vars.AZURE_CONTAINER_APP }}
+          IMAGE: ${{ needs.image.outputs.image }}
+          REVISION_SUFFIX: ${{ github.sha }}
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az containerapp update \
+              --resource-group "$RESOURCE_GROUP" \
+              --name "$CONTAINER_APP" \
+              --image "$IMAGE" \
+              --revision-suffix "$REVISION_SUFFIX" \
+              --output none
+            az containerapp show --resource-group "$RESOURCE_GROUP" --name "$CONTAINER_APP" \
+              --query 'properties.configuration.ingress.fqdn' --output tsv

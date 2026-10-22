@@ -57,3 +57,27 @@ jobs:
         working-directory: frontend
       - name: Fresh-process offline release journey
         run: python scripts/release-smoke.py
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and smoke-test public read-only container
+        run: python scripts/container-smoke.py --image pulse-xi:ci
+  deployment-template:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile deployment template without Azure credentials or resource access
+        uses: azure/CLI@v2
+        with:
+          azcliversion: latest
+          inlineScript: az bicep build --file infra/azure/main.bicep --stdout > "$GITHUB_WORKSPACE/main.generated.json"
+      - name: Verify prepared workflow is manual and non-PR scoped
+        shell: python
+        run: |
+          from pathlib import Path
+          workflow = Path('.github/workflows/deploy-azure.yml').read_text()
+          assert 'workflow_dispatch:' in workflow
+          assert '\n  pull_request:' not in workflow
+          assert "if: github.ref == 'refs/heads/main'" in workflow
+          assert 'id-token: write' in workflow
