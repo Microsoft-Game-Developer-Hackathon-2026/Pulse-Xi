@@ -25,7 +25,7 @@ invocation, video recording or submission upload was performed in this audit.
 | Normal / documentation gap | Windows build helper selected `npm.ps1`; README called integrated runtime proposed, schema 3 current and engine ownership future | Helper uses `npm.cmd`; README corrected without changing execution policy |
 | Normal / already satisfied | Real scenario library, archive roundtrip, checkpoint UTC, interventions, evidence, run recovery, comparison, asset fallback, keyboard/mobile/viewport | 66 real Playwright tests; largest history case runs after ordinary cases to avoid CPU-contention failures; no skips/retries added |
 | High / not verifiable | Public HTTPS, gateway limits, production durability, live model/provider failure behavior and final submission | Separate #14/#15/#21/#25 gates; local tests do not satisfy these |
-| High / external approval required | Asset author/CC0 authority and root application/helper license decisions | #12/#23 remain open; technical validation cannot authorize distribution |
+| High / external approval required | Asset author/CC0 authority and root application/helper license decisions | #12 is technically complete/closed; #23 remains open; technical validation cannot authorize distribution |
 
 The risk priorities describe what release validation should protect; they are not
 claims that a high-severity exploit was reproduced. No complete penetration test,
@@ -164,7 +164,7 @@ compatibility clearance or a license grant for the application's own code.
 | Public compute/WS abuse | Body/depth/event/trial caps and bounded DB capacities exist; no gateway rate quota, per-owner fair scheduler, retention cleanup or slow-client SLA | #21 must define exposure, gateway timeouts/rate limits and durable storage before public release |
 | Optional model prompt/output risk | Evidence allowlist, deterministic audit and truthful fallback; secrets backend-only; ordinary tests disable paid path | #14/#15 need actual approved credential/cost smoke, timeout/cancellation/tool review; open PRs #55/#56 are not main |
 | Dependency supply chain | Exact Node integrity lock, direct Python pins, retained declared licenses and fresh advisory scans | Python transitives are not fully locked; retain actual inventory per candidate; optional SDK scan still separate |
-| Asset/application rights | Technical hashes/notices verified; procedural/CSS/SVG fallback exists | #12/#23 rights holder confirmation and root/helper license decision; **not approved by this audit** |
+| Asset/application rights | Technical hashes/notices verified; procedural/CSS/SVG fallback exists | #23 rights holder confirmation and root/helper license decision; **not approved by this audit** |
 | Submission/deployment claims | Offline/local evidence only; no fabricated provider/deployment/video | #21 public demo, #25 actual capture/upload and authorized representative submission |
 
 Issues #16/#17 and PRs #51/#54/#50 remain separate proposed sandbox ProofTrail/

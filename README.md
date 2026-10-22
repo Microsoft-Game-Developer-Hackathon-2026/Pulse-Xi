@@ -6,15 +6,15 @@
 
 A Microsoft Game Developer Hackathon 2026 project turning fictional football events into deterministic statistics, inspectable tactical explanations, synchronized broadcast cues and personalized recaps. Recorded fixture replay and an authenticated authoritative Control Room support reproducible tactical experiments. All teams, players and events are synthetic. No Premier League feed, club logos, real-player tracking or broadcast footage is used.
 
-## Availability and review status (2026-10-21)
+## Availability and review status (2026-10-22)
 
-Integration baseline `c2f8c622d21d3db804e57c9a02e4c09b264f9c4b` (#61) includes #67 recorded-event observer synchronization, live runtime #53, saved scenarios/archives and runtime schema 3 (#64/#65), plus original graphics #62. #52 is closed as superseded: its credential hardening and dependency constraints already reached main through #53. A verified three-way merge adds no changes.
+Audited main `175b7ceb29b2f29437ba6a0a9886934fe5aebc4d` includes recorded-event observer synchronization #67, viewport stability #69, live runtime #53, saved scenarios/archives #64/#65, schema-4 checkpoint metadata and acceptance #70, release hardening #72, creative-media provenance #49 and original graphics #62. PR #52 is closed as superseded because its credential hardening and dependency constraints reached main through #53.
 
-This acceptance update incorporates #59 checkpoint/history/ForkCast consumer work with original authorship, plus checkpoint UTC metadata and reproduction envelopes. Native analysis #57 and runtime Control vs Chaos #58 remain separate. Recorded Control vs Chaos #42, FanDNA expansion #48 and branch ProofTrail #51 with request-isolation fix #54 are separate review-gated work. Draft agent tools #55, cost-gated Foundry validation #56 and Broadcast Studio proposal #50 are not shipped. Assets are technically integrated; manifest release approval and rights-holder decisions remain separate. Main's current runtime analysis projection supports 5,400-second scenarios; native engine controls already support shorter scenarios.
+Main incorporates #59 through merged #70: checkpoint/history/ForkCast consumer work with original authorship, plus checkpoint UTC metadata and reproduction envelopes. Native analysis #57 and runtime Control vs Chaos #58 remain separate. Recorded Control vs Chaos #42, FanDNA expansion #48 and branch ProofTrail #51 with request-isolation fix #54 are separate review-gated work. Draft agent tools #55, cost-gated Foundry validation #56 and Broadcast Studio proposal #50 are not shipped. Assets are technically integrated; manifest release approval and rights-holder decisions remain separate. Main's current runtime analysis projection supports 5,400-second scenarios; native engine controls already support shorter scenarios.
 
 ## Application functionality
 
-**Integrated baseline:** main `4d1d11c` includes #64's saved-scenario library and #53's live runtime, architecture,
+**Integrated baseline:** main `175b7ceb` includes schema-4 checkpoints, #64's saved-scenario library and #53's live runtime, architecture,
 private analysis and command-credential hardening, alongside original graphics #62.
 PR #52 is closed as superseded because its security code is already present through #53. The [completion PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64) integrated owner-scoped saved-scenario
 listing, versioned archives and creation provenance without changing engine hashes.
@@ -316,7 +316,7 @@ Use focused branches/PRs with reproducible evidence. Do not push directly to mai
 
 ### Limitations
 
-Synthetic streams are simplified and not calibrated against real football outcomes. Full localization, advanced studio editing, authenticated Microsoft inference, Azure hosting and authoritative experimentation remain incomplete. A seed alone is not a full experiment manifest. The handoff identifies owners and exact integration gates.
+Synthetic streams are simplified and not calibrated against real football outcomes. Full interface localization, advanced studio editing, authenticated Microsoft inference and Azure hosting remain incomplete. Authoritative paired experiments and independent reproduction are implemented; they describe this synthetic simulation rather than calibrated real-football outcomes. A seed alone is not a full experiment manifest. The handoff identifies owners and exact integration gates.
 
 Browser regression runs are bounded to two workers to avoid oversubscribing software-rendering contexts on developer laptops; explicit multi-tab and database race tests retain their own concurrency. Deep-link navigation hides stale controls until recorded-source restoration completes. No test retries or suppressed failures are used.
 
@@ -324,8 +324,15 @@ Local startup/test serving uses an explicit Uvicorn loop factory: Windows Select
 
 ### Authoritative recorded-event analysis
 
-In the integrated runtime, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to existing pass analysis, ProofTrail, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. The current engine projection requires a 5400-second scenario; shortened runs retain native controls. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#existing-analysis-integration) for authenticated routes, cutoff/hash semantics and limitations. The base runtime/analysis integration reached main through #53; native-period analysis and other open feature PRs are not implied.
+On this native-analysis branch above merged runtime/schema-4 main 175b7ce, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to pass analysis, source evidence, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. Short scenarios use the versioned native projection: actual duration, halftime at `duration_seconds // 2`, unchanged event ticks/periods, event counts, pass geometry/evidence and exports. Goal/activity ProofTrail rules retain their event-derived definitions; legacy match-state phase and continuous tracking remain unavailable. Standard 5400-second analysis retains its legacy behavior. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#native-period-analysis) for contracts and limitations. Native analysis remains subject to #57 review; the base runtime and saved-scenario library are already on main.
 
 ## Release verification and submission
 
 See [release readiness](docs/RELEASE_READINESS.md) for the tested clean setup, risk-weighted matrix, generated endpoint/dependency inventory, measured benchmarks and unresolved rights/public-service gates. After building, `python scripts/release-smoke.py` exercises a real temporary HTTP server and independently verifies its runtime/ForkCast exports without using personal databases or hosted inference. The [submission runbook](docs/SUBMISSION_RUNBOOK.md) contains the 110-second capture plan; it is not a claim that a final video or public deployment exists.
+
+## Repository consolidation record
+
+See [the consolidation audit](docs/REPOSITORY_CONSOLIDATION.md) for exact reviewed
+PR/dependency status, safe branch removals and verification boundaries. Premium
+Glass #71, archive reuse #74 and direct broadcast-cue evidence #75 remain under
+review; their compatibility branch is not the shipped main application.
