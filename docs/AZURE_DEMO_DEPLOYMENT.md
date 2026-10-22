@@ -79,18 +79,18 @@ az bicep build --file infra/azure/main.bicep --stdout > $null
 python scripts/container-smoke.py --image pulse-xi:local
 ```
 
-Publish the image by manually dispatching **Publish or deploy Azure demo** on `main` with `operation=publish`. Mark the resulting `pulse-xi-demo` GHCR package public, then review subscription-specific costs and obtain explicit approval. Provision only into a dedicated existing resource group (the script runs `what-if`, then requires both `-ConfirmProvisioning` and an exact typed phrase):
+Publish the image by manually dispatching **Publish or deploy Azure demo** on `main` with `operation=publish`. Retain the source commit and the digest reported by the build action. A commit tag is a lookup aid and can be overwritten; use `repository@sha256:<digest>` for provisioning, deployment and rollback. The provisioning script rejects tags, malformed digests and credential-bearing references before calling Azure CLI. Mark the resulting `pulse-xi-demo` GHCR package public, then review subscription-specific costs and obtain explicit approval. Provision only into a dedicated existing resource group (the script runs `what-if`, then requires both `-ConfirmProvisioning` and an exact typed phrase):
 
 ```powershell
 ./scripts/azure/provision.ps1 -ResourceGroup <dedicated-rg> -Location eastus `
-  -Image ghcr.io/microsoft-game-developer-hackathon-2026/pulse-xi-demo:<immutable-commit-sha>
+  -Image ghcr.io/microsoft-game-developer-hackathon-2026/pulse-xi-demo@sha256:<64-lowercase-hex-digest>
 # Only after cost approval and reviewing what-if:
 ./scripts/azure/provision.ps1 -ResourceGroup <dedicated-rg> -Location eastus `
-  -Image ghcr.io/microsoft-game-developer-hackathon-2026/pulse-xi-demo:<immutable-commit-sha> `
+  -Image ghcr.io/microsoft-game-developer-hackathon-2026/pulse-xi-demo@sha256:<64-lowercase-hex-digest> `
   -ConfirmProvisioning
 ```
 
-Set the protected environment variables to that resource group and app name. Dispatch the workflow again with `operation=deploy`. It builds/publishes the immutable commit image and updates the existing app; it does not provision infrastructure. GitHub environment reviewers must approve. The job prints the FQDN after updating. The deploy workflow does not create Azure credentials or secrets in the repository.
+Set the protected environment variables to that resource group and app name. Dispatch the workflow again with `operation=deploy`. It builds/publishes a source-tagged image and passes the build action's immutable `repository@sha256:digest` output to the existing app; it does not provision infrastructure. Revision suffixes use `r-<workflow-run-id>-<attempt>` to satisfy the [ACA naming rules](https://learn.microsoft.com/en-us/azure/container-apps/revisions#name-suffix) and keep retries distinct. Retain the source SHA and exact image digest in the release record. GitHub environment reviewers must approve. The job prints the FQDN after updating. The deploy workflow does not create Azure credentials or secrets in the repository.
 
 ## Verify and operate
 
@@ -111,9 +111,9 @@ az containerapp logs show -g <dedicated-rg> -n pulse-xi-demo --tail 100
 az containerapp revision list -g <dedicated-rg> -n pulse-xi-demo -o table
 ```
 
-The app uses active revisions in single mode and scale-to-zero. For rollback, identify the prior immutable `ghcr.io/...:<sha>` and run the protected deploy workflow from `main` with that exact source revision, or after evaluating it run `az containerapp update -g <dedicated-rg> -n pulse-xi-demo --image <prior-immutable-image>`. Then rerun the HTTPS smoke. A rollback is a new revision and may incur transient overlap/usage. Do not edit the image tag to a mutable `latest` tag.
+The app uses active revisions in single mode and scale-to-zero. For rollback, retrieve the previously verified `ghcr.io/...@sha256:<digest>` from the release record and, after authorization and target review, run `az containerapp update -g <dedicated-rg> -n pulse-xi-demo --image <prior-digest-reference>`. The current workflow always builds its selected main revision; it has no historical-image rollback input. Do not describe dispatching it as selecting an earlier image. Then rerun the HTTPS smoke. A rollback is a new revision and may incur transient overlap/usage. Do not edit the image tag to a mutable `latest` tag.
 
-Troubleshooting: a failed `/ready` means the bundled `frontend/dist/index.html` or assets are missing; rebuild/redeploy the image. `/health` is liveness only and does not test SQLite or Azure services. Public write routes return 403 by design; the runtime/control-room routes require a separately provisioned private service and credentials. Provider status should remain `not_configured`. Container logs are only available while platform log streaming can reach the active app; this template does not retain them centrally. A failed image pull usually means the GHCR package is still private or the immutable image tag is wrong. HTTPS/WebSocket browser errors should be checked against the ACA FQDN and the smoke command, not fixed by broadening CORS.
+Troubleshooting: a failed `/ready` means the bundled `frontend/dist/index.html` or assets are missing; rebuild/redeploy the image. `/health` is liveness only and does not test SQLite or Azure services. Public write routes return 403 by design; the runtime/control-room routes require a separately provisioned private service and credentials. Provider status should remain `not_configured`. Container logs are only available while platform log streaming can reach the active app; this template does not retain them centrally. A failed image pull usually means the GHCR package is still private or the recorded image digest is wrong. HTTPS/WebSocket browser errors should be checked against the ACA FQDN and the smoke command, not fixed by broadening CORS.
 
 ## Teardown
 
