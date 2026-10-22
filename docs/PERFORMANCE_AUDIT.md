@@ -115,3 +115,7 @@ Changing verifier/experiment source also changes the versioned implementation
 hash. A Diyan-reviewed reuse of already verified states/comparison is needed;
 this frontend correction intentionally does not alter canonical engine behavior,
 verifiers or hash-bound source. No test timeout was increased or test skipped.
+
+## Subsequent performance delivery
+
+The maximum-history failure above records the initial audit, not the final candidate. PR #79 follows the earlier PR #78 merge with atomic current-boundary capture, request-local independently proven prefix reuse and idle observer revision reads. At source 743916c the unchanged Windows bounded-forkcast test passed in 2.7 minutes, including offline verification. The same copied disposable dense store measured 102.57 seconds before the later increments and 30.06 seconds afterward; one observation per revision, not a latency percentile. See [detailed method and raw measurements](FORKCAST_COMPARISON_PERFORMANCE.md). No timeout or verification gate was weakened. Broad React Profiler, Web Vitals and long-session memory measurements remain outstanding.
