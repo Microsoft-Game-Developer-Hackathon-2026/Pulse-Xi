@@ -35,17 +35,44 @@ class ApprovalRequest(BaseModel):
 
 
 def _ensure_tables(db: sqlite3.Connection) -> None:
-    db.execute("""CREATE TABLE IF NOT EXISTS director_studio_state (
-        match_id TEXT PRIMARY KEY, revision INTEGER NOT NULL, cues_json TEXT NOT NULL)""")
-    db.execute("""CREATE TABLE IF NOT EXISTS director_studio_approvals (
-        match_id TEXT NOT NULL, revision INTEGER NOT NULL, snapshot_json TEXT NOT NULL,
-        approved_at TEXT NOT NULL, PRIMARY KEY(match_id, revision))""")
-    db.execute("""CREATE TABLE IF NOT EXISTS director_studio_audit (
-        id INTEGER PRIMARY KEY AUTOINCREMENT, match_id TEXT NOT NULL, revision INTEGER NOT NULL,
-        action TEXT NOT NULL, at_utc TEXT NOT NULL, actor TEXT NOT NULL DEFAULT 'local_admin')""")
-    audit_columns = {row[1] for row in db.execute("PRAGMA table_info(director_studio_audit)")}
-    if "actor" not in audit_columns:
-        db.execute("ALTER TABLE director_studio_audit ADD COLUMN actor TEXT NOT NULL DEFAULT 'local_admin'")
+    version = db.execute("PRAGMA user_version").fetchone()[0]
+    if version not in (2, 3):
+        raise RuntimeError(f"Director Studio requires imported-match schema 2 or 3, found {version}")
+    tables = {row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    audit_columns = ({row[1] for row in db.execute("PRAGMA table_info(director_studio_audit)")}
+                     if "director_studio_audit" in tables else set())
+    studio_tables = {"director_studio_state", "director_studio_approvals", "director_studio_audit"}
+    if version == 3 and studio_tables <= tables and "actor" in audit_columns:
+        return
+    db.execute("BEGIN IMMEDIATE")
+    try:
+        # Another request can finish the migration between our fast-path read
+        # and the writer lock, so re-read the version before making changes.
+        version = db.execute("PRAGMA user_version").fetchone()[0]
+        if version not in (2, 3):
+            raise RuntimeError(f"Director Studio requires imported-match schema 2 or 3, found {version}")
+        db.execute("""CREATE TABLE IF NOT EXISTS director_studio_state (
+            match_id TEXT PRIMARY KEY, revision INTEGER NOT NULL CHECK(revision > 0),
+            cues_json TEXT NOT NULL CHECK(json_valid(cues_json)))""")
+        db.execute("""CREATE TABLE IF NOT EXISTS director_studio_approvals (
+            match_id TEXT NOT NULL, revision INTEGER NOT NULL CHECK(revision > 0),
+            snapshot_json TEXT NOT NULL CHECK(json_valid(snapshot_json)), approved_at TEXT NOT NULL,
+            PRIMARY KEY(match_id, revision))""")
+        db.execute("""CREATE TABLE IF NOT EXISTS director_studio_audit (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, match_id TEXT NOT NULL,
+            revision INTEGER NOT NULL CHECK(revision > 0),
+            action TEXT NOT NULL CHECK(action IN ('draft_saved', 'approved')),
+            at_utc TEXT NOT NULL, actor TEXT NOT NULL DEFAULT 'local_admin'
+            CHECK(actor IN ('local_admin', 'producer_token')))""")
+        audit_columns = {row[1] for row in db.execute("PRAGMA table_info(director_studio_audit)")}
+        if "actor" not in audit_columns:
+            db.execute("ALTER TABLE director_studio_audit ADD COLUMN actor TEXT NOT NULL DEFAULT 'local_admin'")
+        if version == 2:
+            db.execute("PRAGMA user_version=3")
+        db.commit()
+    except BaseException:
+        db.rollback()
+        raise
 
 
 def _sources(match: Match, events: list[MatchEvent]) -> dict[str, OverlayCue]:
