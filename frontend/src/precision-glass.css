@@ -206,6 +206,8 @@ html[data-px-material="glass"] {
   & .broadcast-cue { min-width:0; max-width:85%; }
   & .studio-queue { padding:4px; }
   & .studio-editor { margin-top:18px; }
+  & .studio-route { padding:24px; }
+  & .studio-route-link { display:inline-flex; margin:16px 0; color:var(--px-accent); font-weight:600; }
   & .studio-auth,.studio-editor-actions,.studio-edit-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:12px 0; }
   & .studio-auth input { min-width:240px; }
   & .studio-edit-preview { display:grid; grid-template-columns:minmax(260px, 1fr) minmax(320px, 1.4fr); gap:16px; align-items:start; }

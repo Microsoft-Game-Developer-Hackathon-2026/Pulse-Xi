@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Cue, Event } from './types'
 
 type StudioCue = Omit<Cue, 'safe_area'> & { order: number; end_match_second: number; priority: number; safe_area: 'lower_third' | 'top_left' | 'top_right'; transition: 'fade' | 'slide' | 'wipe' }
@@ -11,6 +11,7 @@ export function DirectorStudio({ matchId, atSecond, events, seek }: { matchId: s
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
   const base = `/api/matches/${encodeURIComponent(matchId)}/studio`
+  useEffect(() => { setStudio(null); setPreviewCue(null); setMessage('') }, [matchId])
   const request = async <T,>(url: string, init: RequestInit = {}): Promise<T> => {
     const response = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, ...init.headers } })
     if (!response.ok) throw Error((await response.json().catch(() => ({}))).detail ?? `Studio request failed (${response.status})`)

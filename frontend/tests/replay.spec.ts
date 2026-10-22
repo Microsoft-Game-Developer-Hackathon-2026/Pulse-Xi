@@ -70,6 +70,7 @@ test('FanDNA changes the actual recap focus at the replay time', async ({ page }
 
 test('authorized Director Studio edits, previews, approves, and exports a stable revision', async ({ page, request }) => {
   await page.goto('/')
+  await page.getByRole('link', { name: 'Director studio' }).click()
   await expect(page.getByRole('heading', { name: 'Director studio / Draft and approval' })).toBeVisible()
   await page.getByLabel('Producer access token').fill('test-import-token-at-least-32-characters')
   await page.getByRole('button', { name: 'Connect producer' }).click()
