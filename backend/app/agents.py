@@ -7,6 +7,7 @@ import os
 import re
 import time
 from datetime import datetime, timezone
+from uuid import uuid4
 
 from .evidence import overlays_for, recap_for, verify
 from .models import Insight, Match, MatchEvent
@@ -18,6 +19,21 @@ def configured() -> bool:
     return (os.getenv("PULSE_ENABLE_FOUNDRY") == "true"
             and bool(os.getenv("FOUNDRY_PROJECT_ENDPOINT"))
             and bool(os.getenv("FOUNDRY_MODEL")))
+
+
+def _safe_usage_details(outputs: list) -> dict | None:
+    """Aggregate only documented integer token counters; never serialize provider objects."""
+    fields = ("input_token_count", "output_token_count", "total_token_count")
+    totals: dict[str, int] = {}
+    for output in outputs:
+        usage = getattr(output, "usage_details", None)
+        if usage is None:
+            continue
+        for field in fields:
+            value = usage.get(field) if isinstance(usage, dict) else getattr(usage, field, None)
+            if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+                totals[field] = totals.get(field, 0) + value
+    return totals or None
 
 
 def audit_model_packet(packet: dict, insight: Insight, match: Match, events: list[MatchEvent]) -> bool:
@@ -49,9 +65,13 @@ async def run_specialists(match: Match, events: list[MatchEvent], insight: Insig
     from azure.identity import AzureCliCredential
 
     started = time.perf_counter()
-    trace = {"trace_id": f"trace-{match.match_id}-{insight.insight_id}-{int(time.time())}",
+    invocation_id = str(uuid4())
+    trace = {"invocation_id": invocation_id, "trace_id": f"trace-{invocation_id}",
              "started_at_utc": datetime.now(timezone.utc).isoformat(),
-             "provider": "microsoft_foundry_agent_framework", "status": "running", "stages": []}
+             "provider": "microsoft_foundry_agent_framework",
+             "provider_status": "authenticated_inference_pending",
+             "model": os.getenv("FOUNDRY_MODEL"), "status": "running", "stages": [],
+             "usage_details": None}
     TRACES.append(trace)
     TRACES[:] = TRACES[-50:]
     try:
@@ -70,6 +90,8 @@ async def run_specialists(match: Match, events: list[MatchEvent], insight: Insig
         workflow = SequentialBuilder(participants=[analyst, editor]).build()
         result = await workflow.run(prompt)
         outputs = result.get_outputs()
+        trace["usage_details"] = _safe_usage_details(outputs)
+        trace["provider_status"] = "authenticated_success"
         if not outputs or not outputs[0].messages:
             raise ValueError("Agent Framework returned no output")
         raw = outputs[0].messages[-1].text.strip()
@@ -81,9 +103,11 @@ async def run_specialists(match: Match, events: list[MatchEvent], insight: Insig
             {"role": "StoryEditor", "kind": "foundry_agent", "status": "completed"},
         ]
         if not audit_model_packet(packet, insight, match, events):
+            trace["audit_verdict"] = "rejected"
             trace["stages"].append({"role": "EvidenceAuditor", "kind": "deterministic_gate", "status": "rejected"})
             trace["status"] = "rejected"
             return {"status": "rejected", "reason": "unsupported model packet", "trace_id": trace["trace_id"]}
+        trace["audit_verdict"] = "approved"
         trace["stages"].append({"role": "EvidenceAuditor", "kind": "deterministic_gate", "status": "approved"})
         cue = next(cue for cue in overlays_for(match, events) if cue.insight_id == insight.insight_id)
         trace["stages"].append({"role": "BroadcastDirector", "kind": "deterministic_scheduler", "status": "completed"})
@@ -96,6 +120,7 @@ async def run_specialists(match: Match, events: list[MatchEvent], insight: Insig
                 "overlay_cue_id": cue.cue_id, "recap_provider": recap["provider"], "trace_id": trace["trace_id"]}
     except Exception as error:
         trace["status"] = "failed"
+        trace["provider_status"] = "error"
         trace["error_type"] = type(error).__name__
         raise
     finally:

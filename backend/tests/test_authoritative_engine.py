@@ -461,7 +461,7 @@ def test_atomic_migration_and_concurrent_cold_start(database, monkeypatch):
             return db.execute('PRAGMA user_version').fetchone()[0]
 
     with ThreadPoolExecutor(max_workers=6) as pool:
-        assert list(pool.map(read, range(6))) == [3] * 6
+        assert list(pool.map(read, range(6))) == [4] * 6
 
 
 def test_concurrent_restore_isolated_and_duplicate_creation(database):
