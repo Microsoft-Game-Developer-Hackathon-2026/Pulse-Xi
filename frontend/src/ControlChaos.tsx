@@ -44,23 +44,26 @@ function coverage(metric: ControlMetric) {
   return `${metric.eligible_event_count} supporting/eligible events`
 }
 
-export function ControlChaosPanel({ match, atSecond, events, selectEvent }: {
+export function ControlChaosPanel({ match, atSecond, analysisSecond = atSecond, events, selectEvent }: {
   match: Match
   atSecond: number
+  analysisSecond?: number
   events: Event[]
   selectEvent: (event: Event) => void
 }) {
   const [windowSeconds, setWindowSeconds] = useState<300 | 600 | 900>(300)
   const [data, setData] = useState<ControlChaos | null>(null)
+  const [dataWindow, setDataWindow] = useState(300)
   const [selected, setSelected] = useState<ControlTurningPoint | null>(null)
   const [error, setError] = useState('')
   const second = Math.floor(atSecond)
+  const requestSecond = Math.floor(analysisSecond)
 
   useEffect(() => {
     const controller = new AbortController()
     const timer = window.setTimeout(() => {
       const params = new URLSearchParams({
-        at_second: String(second),
+        at_second: String(requestSecond),
         window_seconds: String(windowSeconds),
       })
       fetch(`/api/matches/${encodeURIComponent(match.match_id)}/control-chaos?${params}`, { signal: controller.signal })
@@ -71,6 +74,7 @@ export function ControlChaosPanel({ match, atSecond, events, selectEvent }: {
         .then(value => {
           if (!controller.signal.aborted) {
             setData(value)
+            setDataWindow(windowSeconds)
             setError('')
             setSelected(current => value.interpretation.turning_points.find(
               point => point.evidence_id === current?.evidence_id,
@@ -82,10 +86,10 @@ export function ControlChaosPanel({ match, atSecond, events, selectEvent }: {
         })
     }, 160)
     return () => { controller.abort(); window.clearTimeout(timer) }
-  }, [match.match_id, second, windowSeconds])
+  }, [match.match_id, requestSecond, windowSeconds])
 
-  const visible = data?.match_id === match.match_id && data.at_second === second
-    && data.window.start_second === Math.max(0, second - windowSeconds)
+  const visible = data?.match_id === match.match_id && data.at_second <= second && dataWindow === windowSeconds
+    && data.window.start_second === Math.max(0, data.at_second - windowSeconds)
     && data.formula_version === 'control-chaos-formulas/1' ? data : null
   const activityDelta = (teamId: string) => visible?.deltas?.[teamId]?.['attacking_activity.activity_index']
   const maxActivity = Math.max(1, ...[match.home.team_id, match.away.team_id].flatMap(teamId => {
@@ -108,7 +112,7 @@ export function ControlChaosPanel({ match, atSecond, events, selectEvent }: {
   return <section className="control-chaos panel" aria-label="Control vs Chaos analysis">
     <div className="panel-title">
       <span>CONTROL VS CHAOS / EVENT-DERIVED RHYTHM</span>
-      <small>{visible ? `${visible.formula_version} · THROUGH ${clock(second)}` : 'SYNCING TO REPLAY'}</small>
+      <small>{visible ? `${visible.formula_version} · THROUGH ${clock(visible.at_second)}${visible.at_second < second ? " / UPDATING" : ""}` : 'SYNCING TO REPLAY'}</small>
     </div>
     <div className="control-toolbar">
       <label>WINDOW
@@ -122,6 +126,7 @@ export function ControlChaosPanel({ match, atSecond, events, selectEvent }: {
         ? `PREVIOUS ${clock(visible.previous_window.start_second)}–${clock(visible.previous_window.end_second)}`
         : 'PREVIOUS WINDOW UNAVAILABLE · NEED TWO COMPLETE WINDOWS'}</span>
     </div>
+    <div className="control-reading" tabIndex={0} aria-label="Match rhythm details">
     {error && <p className="control-error" role="alert">{error}</p>}
     {!visible && !error && <p className="control-empty" role="status">Calculating event windows at the selected replay time…</p>}
     {visible && <>
@@ -240,5 +245,6 @@ export function ControlChaosPanel({ match, atSecond, events, selectEvent }: {
         <small className="control-proof-note">Points = 2 × completed final-third entries + 3 × shots + recoveries. Association only; not a causal claim or calibrated tactical score.</small>
       </section>}
     </>}
+    </div>
   </section>
 }

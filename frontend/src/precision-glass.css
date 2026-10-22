@@ -116,7 +116,8 @@ html[data-px-material="glass"] {
   & .recap-controls { gap:18px; padding:22px 24px; border-color:#ffffff0e; flex-wrap:wrap; }
   & .recap-controls label { min-width:110px; font:500 11px/1.4 var(--px-font); letter-spacing:.2px; color:var(--px-text-secondary); }
   & .recap-controls select { min-height:44px; font:500 13px var(--px-font); }
-  & .recap-body { padding:18px 24px 24px; max-height:440px; }
+  & :is(.recap-body,.insight-list) { block-size:28rem; overflow:auto; scrollbar-gutter:stable; }
+  & .recap-body { padding:18px 24px 24px; max-height:none; }
   & .recap-body button { padding:16px 0; color:var(--px-text-primary); background:none; border-radius:0; box-shadow:none; border-color:#ffffff0e; font:400 13px/1.6 var(--px-font); }
   & :is(.recap-body button small,.locale-status,.recap-scope) { color:var(--px-text-muted); font:500 10px/1.6 var(--px-font); }
   & .locale-status { border-color:#ffffff0e; }
@@ -421,3 +422,15 @@ html[data-px-material="glass"] {
   & .hub-import h3 { font:600 22px/1.4 var(--px-font); letter-spacing:-.5px; }
 }
 @media(max-width:700px) { html[data-px-material="glass"] .sandbox-setup { padding:26px 20px; gap:26px; } }
+
+/* Local reading viewports preserve page anchors while source rows change.
+   Overflow stays keyboard accessible; no text or evidence is discarded. */
+html[data-px-material="glass"] {
+  & .control-reading { block-size:clamp(30rem,65vh,46rem); overflow:auto; scrollbar-gutter:stable; }
+  & .pass-reading { block-size:clamp(32rem,75vh,58rem); overflow:auto; scrollbar-gutter:stable; }
+  & .control-chaos>.panel-title small { min-block-size:2.8em; }
+  & .control-toolbar>span { min-block-size:2.8em; }
+  & .pass-filters>span { min-block-size:2.8em; }
+}
+
+html[data-px-material="glass"] .tactical-chart>p { min-block-size:4lh; }
