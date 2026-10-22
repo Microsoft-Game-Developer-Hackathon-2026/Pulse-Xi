@@ -18,15 +18,15 @@ const defaultPreferences: FanPreferences = {
 }
 
 const en = {
-  workspace: 'Workspace', match_intelligence: 'MATCH INTELLIGENCE', sandbox_lab: 'SANDBOX LAB', match_data_hub: 'MATCH DATA HUB',
+  workspace: 'Workspace', match_intelligence: 'Match Intelligence', sandbox_lab: 'Sandbox Lab', match_data_hub: 'Match Data Hub',
   command_center: 'COMMAND CENTER', live_match: 'LIVE MATCH INTELLIGENCE', select_match: 'SELECT MATCH',
   home: 'HOME', away: 'AWAY', replay_in_progress: 'REPLAY IN PROGRESS', ready_to_replay: 'READY TO REPLAY', end_of_replay: 'END OF REPLAY',
   time_machine: 'TIME MACHINE', sim_clock: 'SIM CLOCK · 30 MATCH SECONDS / REAL SECOND AT 1×',
   seek_match: 'Seek match time', restart: 'Restart', previous_event: 'Previous event', play: 'Play', pause: 'Pause', next_event: 'Next event', speed: 'SPEED',
   critical_moments: 'CRITICAL MOMENTS', select_to_seek: 'SELECT TO SEEK', no_goals: 'No goal events at this replay time.',
-  match_signals: 'MATCH SIGNALS', computed_from: 'COMPUTED FROM {count} EVENTS', shots: 'Shots', completed_passes: 'Completed passes',
+  match_signals: 'Match signals', computed_from: 'COMPUTED FROM {count} EVENTS', shots: 'Shots', completed_passes: 'Completed passes',
   pass_accuracy: 'Pass accuracy', final_third_entries: 'Final-third entries', recoveries: 'Recoveries', pressure_events: 'Pressure events',
-  event_wire: 'EVENT WIRE', sequenced_feed: 'SEQUENCED FEED', empty_feed: 'Press play or seek to inspect the event stream.',
+  event_wire: 'The event wire', sequenced_feed: 'SEQUENCED FEED', empty_feed: 'Press play or seek to inspect the event stream.',
   verified_moments: 'PROOFTRAIL / VERIFIED MOMENTS', rule_based_citations: 'RULE-BASED · EVENT CITATIONS', view_proof: 'VIEW PROOF · {count} EVENTS',
   no_insights: 'Verified insights will appear as the replay reaches them.', fandna_recap: 'FANDNA / RECAP', loading: 'Loading event-verified recap…',
   view: 'VIEW', language: 'LANGUAGE', casual: 'Casual fan', analyst: 'Tactical analyst', favorite_team: 'Favorite team',
