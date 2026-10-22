@@ -58,7 +58,7 @@ test('real runtime analysis preserves source, evidence, bookmarks, exports and 3
   await expect(page.getByTestId('observer-canvas')).toHaveAttribute('data-camera','tactical')
   await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status','ready')
   await page.getByRole('button',{name:'2D pitch',exact:true}).click()
-  await page.getByRole('link',{name:'MATCH DATA HUB',exact:true}).click()
+  await page.locator('.workspace-nav a[href="#/data"]').click()
   await page.getByRole('button',{name:'Check saved sources',exact:true}).click()
   await expect(page.getByRole('region',{name:'Unavailable bookmark recovery'})).toContainText('Source check complete')
   expect(publicReads).toEqual([])

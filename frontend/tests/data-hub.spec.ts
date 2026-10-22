@@ -63,7 +63,7 @@ test('real package preview, SQLite import, replay, bookmark recovery and verifie
   const exported = JSON.parse(await readFile(await (await download).path() as string,'utf8'))
   const authoritative = await (await request.get(`/api/matches/${id}/passes/${source.event_id}/difficulty?at_second=${source.match_second}`)).json()
   expect(exported.data).toEqual([authoritative]); expect(exported.match_id).toBe(id)
-  await page.getByRole('link',{name:'MATCH DATA HUB',exact:true}).click()
+  await page.locator('.workspace-nav a[href="#/data"]').click()
   await expect(page.getByLabel('Import token',{exact:true})).toHaveValue('')
   const imported = page.getByRole('article').filter({has:page.getByRole('heading',{name:packet.match.title,exact:true})})
   const packageDownload = page.waitForEvent('download'); await imported.getByRole('button',{name:'Download complete package'}).click()

@@ -48,7 +48,7 @@ test(`real verified comparison stays isolated after ${action} and can retry`, as
   if (action === 'credential') await page.getByLabel('Operator bearer token').fill('different-owner-token-at-least-32-characters')
   if (action === 'branch') await page.getByLabel('Branch session ID').fill(baseline.session_id)
   if (action === 'cutoff') await page.getByLabel('Compare through tick').fill('60')
-  if (action === 'navigate') await page.getByRole('link',{name:'MATCH DATA HUB',exact:true}).click()
+  if (action === 'navigate') await page.locator('.workspace-nav a[href="#/data"]').click()
   release(); await finished
   await expect(page.locator('.prooftrail-result')).toHaveCount(0)
   await expect(page.locator('.prooftrail-error')).toHaveCount(0)
