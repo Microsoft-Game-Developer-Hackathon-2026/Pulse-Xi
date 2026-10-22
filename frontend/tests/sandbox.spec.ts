@@ -96,7 +96,7 @@ test('validates seeds, recovers from generation failure, and fits mobile', async
   await page.getByRole('button', { name: 'Generate replay' }).click()
   await expect(page.getByLabel('SELECT MATCH')).toHaveValue('custom-123')
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2)).toBe(true)
-  await page.getByRole('link', { name: 'MATCH INTELLIGENCE', exact: true }).click()
+  await page.locator('.workspace-nav a[href="#/"]').click()
   await expect(page.getByRole('region', { name: 'Sandbox fixture setup' })).toHaveCount(0)
 })
 
@@ -113,7 +113,7 @@ test('past replay timeline contains no future events and can be used with a keyb
   await rows.getByRole('button').focus()
   await page.keyboard.press('Enter')
   await expect(rows.getByRole('button')).toHaveAttribute('aria-pressed', 'true')
-  await expect(page.getByText(/Live tactical changes, checkpoint restore and ForkCast are awaiting/)).toBeVisible()
+  await expect(page.getByText(/Live tactical changes, checkpoint restore and ForkCast are available in the Engine Control Room/)).toBeVisible()
 })
 
 test('duplicate generation is blocked and leaving the workspace cancels a pending result', async ({ page }) => {
@@ -133,7 +133,7 @@ test('duplicate generation is blocked and leaving the workspace cancels a pendin
   await page.getByLabel('REPRODUCIBLE MATCH SEED').fill('9876')
   await page.getByRole('button', { name: 'Generate replay' }).click()
   await expect(page.getByRole('button', { name: 'Generating…' })).toBeDisabled()
-  await page.getByRole('link', { name: 'MATCH INTELLIGENCE', exact: true }).click()
+  await page.locator('.workspace-nav a[href="#/"]').click()
   release()
   await completion
   expect(calls).toBe(1)

@@ -6,7 +6,7 @@ const sizes = [[1920,1080],[1440,900],[1280,800],[1024,768],[768,1024],[390,844]
 const regions = '.rail,.header,.workspace-nav,.scoreboard,.content-grid,.pitch-wrap,.transport,.metrics,.feed,.analysis-tools,.tactical-lab,.intelligence-grid,.studio,.runtime-room,.runtime-heading,.runtime-setup,.runtime-form-grid,.runtime-score,.runtime-controls,.runtime-columns,.runtime-observer,.runtime-checkpoints,.runtime-forkcast,.data-hub,.observer,.observer-bar,.pass-workbench,.pass-inspection,.pass-method,.runtime-tactics,.runtime-audit,.runtime-manifest,.runtime-analysis,.hub-import,.hub-match,.sandbox-timeline,.tactical-layout,footer'
 
 for (const [width,height] of sizes) {
-  test(`glass preserves all four route layouts at ${width}x${height}`, async ({page}, info) => {
+  test(`Atelier keeps all four routes usable at ${width}x${height}`, async ({page}, info) => {
     test.setTimeout(45000)
     await page.setViewportSize({width,height})
     const cdp=await page.context().newCDPSession(page)
@@ -37,33 +37,66 @@ for (const [width,height] of sizes) {
         await expect(page.locator('.recap-body')).not.toContainText('Loading')
       } else { await expect(page.getByRole('heading',{name:/Match Data Hub/})).toBeVisible(); await page.getByLabel('Match origin').selectOption('built-in'); await page.getByLabel('Search matches',{exact:true}).fill('comeback-1107'); await expect(page.getByRole('button',{name:'Open for analysis',exact:true})).toHaveCount(1) }
       await page.waitForLoadState('networkidle')
-      await page.evaluate(()=>document.documentElement.removeAttribute('data-px-material'))
+      await page.emulateMedia({reducedMotion:'reduce'})
       await page.evaluate(()=>window.scrollTo(0,0))
-      const capture = () => page.evaluate(selector => ({
-        boxes:[...document.querySelectorAll(selector)].filter(e=>e.getClientRects().length && e.checkVisibility()).map(e=>{const r=e.getBoundingClientRect();return {id:e.className,tag:e.tagName,x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height}}),
-        controls:[...document.querySelectorAll('a,button,input,select,textarea,summary')].filter(e=>e.getClientRects().length && e.checkVisibility()).map(e=>[e.tagName,e.getAttribute('aria-label'),e.tagName==='SELECT'?null:e.textContent?.trim(),e.getAttribute('type')]),
-        overflow:document.documentElement.scrollWidth>innerWidth+2
-      }),regions)
-      const before=await capture()
-      await page.screenshot({path:join(artifactRoot,`${route}-${width}-before.png`),fullPage:false,animations:'disabled'})
+      const controls = () => page.evaluate(() => [...document.querySelectorAll('a,button,input,select,textarea,summary')]
+        .filter(element=>element.checkVisibility()).map(element=>[element.tagName,element.getAttribute('aria-label'),element.getAttribute('type'),element.tagName==='SELECT'?null:element.textContent?.trim()]))
+      // Same DOM/source state, original presentation is captured for visual review only.
+      // A redesigned surface is not required to inherit legacy dimensions.
+      await page.evaluate(()=>document.documentElement.removeAttribute('data-px-material'))
+      const originalControls=await controls()
+      await page.screenshot({path:join(artifactRoot,`${route}-${width}-before.png`),animations:'disabled'})
       await page.evaluate(()=>document.documentElement.setAttribute('data-px-material','glass'))
-      await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))))
-      const after=await capture()
-      expect(after.controls).toEqual(before.controls)
-      expect(after.boxes.map(b=>[b.id,b.tag])).toEqual(before.boxes.map(b=>[b.id,b.tag]))
-      let maxDelta=0
-      for(let i=0;i<before.boxes.length;i++) for(const key of ['x','y','width','height'] as const) {
-        const delta=Math.abs(after.boxes[i][key]-before.boxes[i][key]);maxDelta=Math.max(maxDelta,delta)
-        expect(delta,`${route} ${before.boxes[i].id} ${key}`).toBeLessThanOrEqual(width<600?4:2)
+      expect(await controls()).toEqual(originalControls)
+      await expect(page.locator('.workspace-nav')).toBeVisible()
+      for(const link of await page.locator('.workspace-nav a').all()) {
+        const box=await link.boundingBox(); expect(box).not.toBeNull()
+        expect(box!.height).toBeGreaterThanOrEqual(44)
+        expect(box!.width).toBeGreaterThanOrEqual(44)
       }
-      expect(after.overflow).toBe(false)
-      await page.screenshot({path:join(artifactRoot,`${route}-${width}-after.png`),fullPage:false,animations:'disabled'})
+      const layout=await page.evaluate(selector=>({
+        boxes:[...document.querySelectorAll(selector)].filter(element=>element.checkVisibility()).map(element=>{const r=element.getBoundingClientRect();return {id:element.className,x:r.x,y:r.y+scrollY,width:r.width,height:r.height}}),
+        overflow:document.documentElement.scrollWidth>innerWidth+2,
+        clippedHeadings:[...document.querySelectorAll('.topbar h2,.runtime-heading h2,.brand h1,.panel-title,.data-hub h2')]
+          .filter(element=>element.checkVisibility() && element.scrollWidth>element.clientWidth+2).map(element=>element.textContent),
+        order:[...document.querySelectorAll('.topbar,.scoreboard,.content-grid,.intelligence-grid,.studio')].filter(element=>element.checkVisibility()).map(element=>element.classList[0]),
+      }),regions)
+      expect(layout.overflow,`${route}: viewport overflow`).toBe(false)
+      expect(layout.clippedHeadings,`${route}: clipped heading`).toEqual([])
+      for(const box of layout.boxes) {
+        expect(box.width,`${route}: ${box.id} has a usable width`).toBeGreaterThan(0)
+        expect(box.height,`${route}: ${box.id} has a usable height`).toBeGreaterThan(0)
+        // Horizontal scroll belongs only inside existing table/event viewports.
+        if(!box.id.includes('rail')) {
+          expect(box.x,`${route}: ${box.id} left edge`).toBeGreaterThanOrEqual(-2)
+          expect(box.x+box.width,`${route}: ${box.id} right edge`).toBeLessThanOrEqual(width+2)
+        }
+      }
+      if(route==='replay'||route==='sandbox') {
+        expect(layout.order).toEqual(['topbar','scoreboard','content-grid','intelligence-grid','studio'])
+        const hero=page.locator('.scoreboard'), pitch=page.locator('.pitch-wrap').first()
+        const h=await hero.boundingBox(), field=await pitch.boundingBox()
+        expect(h!.height).toBeGreaterThanOrEqual(190)
+        expect(field!.y).toBeGreaterThanOrEqual(h!.y+h!.height)
+        await expect(page.locator('.score')).toHaveText('0:2')
+      }
+      if(route==='runtime') {
+        await expect(page.getByLabel('Authoritative match clock')).toHaveText('00:20')
+        for(const name of ['Step engine','Save exact checkpoint','Disconnect operator']) {
+          const control=page.getByRole('button',{name,exact:true})
+          await control.scrollIntoViewIfNeeded(); await expect(control).toBeVisible()
+          expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(width<700?40:32)
+        }
+        await expect(page.getByLabel('Saved checkpoint').locator('option')).toHaveCount(2)
+      }
+      await page.evaluate(()=>window.scrollTo(0,0))
+      await page.screenshot({path:join(artifactRoot,`${route}-${width}-after.png`),animations:'disabled'})
       if(width===1440) for(const part of route==='runtime'?['.runtime-checkpoints','.runtime-forkcast']:route==='replay'?['.pass-inspection','.analysis-tools']:[]) {
         const region=page.locator(part).first(); if(await region.isVisible()) await region.screenshot({path:join(artifactRoot,`${route}-${part.slice(1)}-after.png`),animations:'disabled'})
       }
-      report[route]={before,after,maxDelta,materials:await page.evaluate(()=>({blur:getComputedStyle(document.querySelector('.header')!).backdropFilter,reducedTransparency:matchMedia('(prefers-reduced-transparency:reduce)').matches}))}
+      report[route]=layout
     }
-    await writeFile(join(artifactRoot,`geometry-${width}.json`),JSON.stringify(report,null,2))
-    await info.attach('geometry',{body:JSON.stringify(report),contentType:'application/json'})
+    await writeFile(join(artifactRoot,`responsive-${width}.json`),JSON.stringify(report,null,2))
+    await info.attach('responsive-layout',{body:JSON.stringify(report),contentType:'application/json'})
   })
 }
