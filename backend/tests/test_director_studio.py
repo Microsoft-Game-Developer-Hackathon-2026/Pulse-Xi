@@ -63,3 +63,28 @@ def test_studio_rejects_unverified_unknown_and_overlapping_cues(isolated_applica
     response = client.put(BASE, headers=headers, json={"expected_revision": 0, "cues": cues})
     assert response.status_code == 422
     assert client.get(BASE, headers=headers).json()["revision"] == 0
+
+
+def test_shared_demo_producer_token_and_audit_actor(isolated_application_environment, monkeypatch):
+    monkeypatch.setenv("PULSE_STUDIO_PRODUCER_TOKEN", TOKEN)
+    remote = TestClient(app, base_url="https://demo.example", client=("203.0.113.7", 443))
+    assert remote.get(BASE).status_code == 403
+    producer = {"Authorization": f"Bearer {TOKEN}"}
+    original = remote.get(BASE, headers=producer)
+    assert original.status_code == 200
+    cues = [{key: cue[key] for key in ("cue_id", "order", "start_match_second", "show_duration_seconds", "priority", "visual_template", "safe_area", "transition")}
+            for cue in original.json()["cues"]]
+    saved = remote.put(BASE, headers=producer, json={"expected_revision": 0, "cues": cues})
+    assert saved.status_code == 200
+    assert saved.json()["audit_history"][0]["actor"] == "producer_token"
+    approved = remote.post(f"{BASE}/approve", headers=producer, json={"expected_revision": 1})
+    assert approved.status_code == 200
+    assert remote.get(f"{BASE}/export", headers=producer).status_code == 200
+    assert remote.get(BASE, headers={"Authorization": "Bearer wrong-token"}).status_code == 403
+
+
+def test_public_readonly_never_accepts_studio_producer_token(isolated_application_environment, monkeypatch):
+    monkeypatch.setenv("PULSE_DEPLOYMENT_MODE", "public-readonly")
+    monkeypatch.setenv("PULSE_STUDIO_PRODUCER_TOKEN", TOKEN)
+    remote = TestClient(app, base_url="https://demo.example", client=("203.0.113.7", 443))
+    assert remote.get(BASE, headers={"Authorization": f"Bearer {TOKEN}"}).status_code == 403

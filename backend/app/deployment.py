@@ -29,7 +29,8 @@ def validate_deployment_config() -> None:
         return
     forbidden = (
         "PULSE_RUNTIME_TOKEN", "PULSE_RUNTIME_TOKENS", "PULSE_IMPORT_TOKEN",
-        "PULSE_FOUNDRY_ADMIN_TOKEN", "FOUNDRY_PROJECT_ENDPOINT", "FOUNDRY_MODEL",
+        "PULSE_FOUNDRY_ADMIN_TOKEN", "PULSE_STUDIO_PRODUCER_TOKEN",
+        "FOUNDRY_PROJECT_ENDPOINT", "FOUNDRY_MODEL",
     )
     if any(os.getenv(name) for name in forbidden):
         raise RuntimeError("public-readonly mode cannot be configured with privileged tokens or hosted inference")

@@ -1,11 +1,12 @@
 """Administrative dataset lifecycle; not simulation checkpoints."""
 import ipaddress
 import os
+import secrets
 from datetime import datetime, timezone
 from typing import Literal
 from uuid import uuid4
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, Header, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
 from .data_hub import require_import_token
@@ -32,6 +33,27 @@ def local_admin_enabled(request: Request) -> bool:
 def require_local_admin(request: Request, _: None = Depends(require_import_token)) -> None:
     if not local_admin_enabled(request):
         raise HTTPException(403, 'Dataset lifecycle is disabled. It requires explicit local administrator mode and a direct loopback connection; public/proxied administration is unsupported.')
+
+
+def require_studio_producer(request: Request, authorization: str | None = Header(default=None)) -> str:
+    """Authorize a configured shared-demo producer or an explicitly local admin."""
+    from .deployment import deployment_mode
+
+    if deployment_mode() == 'public-readonly':
+        raise HTTPException(403, 'The public read-only deployment does not allow studio changes.')
+    expected = os.getenv('PULSE_STUDIO_PRODUCER_TOKEN', '')
+    if expected:
+        if len(expected) < 32:
+            raise HTTPException(503, 'Studio producer access is misconfigured; the token must contain at least 32 characters.')
+        supplied = (authorization or '').removeprefix('Bearer ')
+        if not (authorization or '').startswith('Bearer ') or not secrets.compare_digest(
+                supplied.encode('utf-8'), expected.encode('utf-8')):
+            raise HTTPException(403, 'Producer authorization required.')
+        return 'producer_token'
+    require_import_token(authorization)
+    if not local_admin_enabled(request):
+        raise HTTPException(403, 'Studio editing requires configured producer access or explicit local administrator mode.')
+    return 'local_admin'
 
 
 class LifecycleAction(BaseModel):
