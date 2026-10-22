@@ -1,0 +1,74 @@
+{
+  "cues": [
+    {
+      "cue_id": "goal:comeback-1107-e0067",
+      "event_sequence": 67,
+      "insight_refs": [],
+      "match_second": 1000,
+      "shot_id": "synthetic_goal_wide_v1",
+      "source_event_id": "comeback-1107-e0067",
+      "team_id": "northbank",
+      "team_label": "Northbank United"
+    },
+    {
+      "cue_id": "goal:comeback-1107-e0239",
+      "event_sequence": 239,
+      "insight_refs": [],
+      "match_second": 3400,
+      "shot_id": "synthetic_goal_wide_v1",
+      "source_event_id": "comeback-1107-e0239",
+      "team_id": "northbank",
+      "team_label": "Northbank United"
+    },
+    {
+      "cue_id": "goal:comeback-1107-e0273",
+      "event_sequence": 273,
+      "insight_refs": [],
+      "match_second": 3900,
+      "shot_id": "synthetic_goal_wide_v1",
+      "source_event_id": "comeback-1107-e0273",
+      "team_id": "harbour",
+      "team_label": "Harbour City"
+    },
+    {
+      "cue_id": "goal:comeback-1107-e0327",
+      "event_sequence": 327,
+      "insight_refs": [],
+      "match_second": 4700,
+      "shot_id": "synthetic_goal_wide_v1",
+      "source_event_id": "comeback-1107-e0327",
+      "team_id": "harbour",
+      "team_label": "Harbour City"
+    },
+    {
+      "cue_id": "goal:comeback-1107-e0364",
+      "event_sequence": 364,
+      "insight_refs": [],
+      "match_second": 5240,
+      "shot_id": "synthetic_goal_wide_v1",
+      "source_event_id": "comeback-1107-e0364",
+      "team_id": "harbour",
+      "team_label": "Harbour City"
+    }
+  ],
+  "scene": {
+    "required_assets": [
+      {
+        "asset_id": "neutral-procedural-primitive-set",
+        "license_basis": "new project-authored geometry; rights confirmation pending issue #23",
+        "release_status": "pending-human-review"
+      }
+    ],
+    "template_version": "synthetic-goal-beat/1"
+  },
+  "schema_version": "pulse-cinematic-cues/1",
+  "source": {
+    "event_schema_version": "1.0",
+    "fixture": "comeback",
+    "match_id": "comeback-1107",
+    "match_schema_version": "1.0",
+    "provenance": "synthetic-generator",
+    "seed": 1107,
+    "synthetic": true
+  }
+}
