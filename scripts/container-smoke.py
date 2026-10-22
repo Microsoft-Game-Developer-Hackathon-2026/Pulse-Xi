@@ -19,7 +19,7 @@ from uuid import uuid4
 
 def run(*args: str, capture: bool = False) -> str:
     result = subprocess.run(args, check=True, text=True, capture_output=capture)
-    return result.stdout.strip()
+    return (result.stdout or "").strip()
 
 
 def get(url: str, expected: int = 200) -> tuple[bytes, dict[str, str]]:
