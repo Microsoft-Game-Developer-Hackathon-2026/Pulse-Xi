@@ -48,3 +48,23 @@ function az { throw 'OFFLINE_AZURE_SENTINEL' }
     else:
         assert "tags and credentials are not accepted" in output, output
         assert "OFFLINE_AZURE_SENTINEL" not in output, output
+
+
+def test_workflow_revision_names_allow_numeric_shas_and_distinguish_retries():
+    import re
+    import yaml
+
+    # ACA requires an alphabetic prefix; revision contents are immutable.
+    workflow_path = Path(__file__).resolve().parents[2] / ".github" / "workflows" / "deploy-azure.yml"
+    workflow = yaml.safe_load(workflow_path.read_text(encoding="utf-8"))
+    suffix = next(step["env"]["REVISION_SUFFIX"] for step in workflow["jobs"]["deploy"]["steps"]
+                  if "REVISION_SUFFIX" in step.get("env", {}))
+    names = []
+    for run_id, attempt in [(123, 1), (123, 2), (456, 1)]:
+        name = suffix.replace("${{ github.sha }}", "45eabc4ca058a47241e58ecc42c8bc49980eaf92")
+        name = name.replace("${{ github.run_id }}", str(run_id)).replace("${{ github.run_attempt }}", str(attempt))
+        assert 1 <= len(name) <= 64
+        assert re.fullmatch(r"[a-z](?:[a-z0-9-]*[a-z0-9])?", name), name
+        assert "--" not in name
+        names.append(name)
+    assert len(set(names)) == len(names), "Deployments/retries must not reuse an immutable revision name"
