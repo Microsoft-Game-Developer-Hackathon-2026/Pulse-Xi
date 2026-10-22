@@ -4,7 +4,7 @@ Privileged trace inspection (`GET /api/agent-traces`) requires the current
 `PULSE_FOUNDRY_ADMIN_TOKEN` through the `X-Admin-Token` header. Missing/empty server
 configuration returns 503; absent or invalid credentials return 403 without
 trace records. Removing configuration also denies access to traces retained in
-the process. Authorized reads do not start inference. This change fixes Issue #44;
+the process. Authorized reads do not start inference. Successful and denied trace reads use `Cache-Control: no-store`. This change fixes Issue #44;
 it does not introduce a public trace viewer or prove hosted-provider execution.
 
 The normal local application uses verified rule-based narratives and makes **zero hosted model calls**. `/health` reports `not_configured`. The optional code path in `backend/app/agents.py` uses Microsoft Agent Framework's `FoundryChatClient` and `SequentialBuilder` per [Microsoft Foundry provider guidance](https://learn.microsoft.com/en-us/agent-framework/agents/providers/microsoft-foundry) and [sequential workflow documentation](https://learn.microsoft.com/en-us/agent-framework/workflows/orchestrations/sequential).

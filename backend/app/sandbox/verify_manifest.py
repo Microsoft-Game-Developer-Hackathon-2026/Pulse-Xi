@@ -4,8 +4,7 @@ import json
 from pathlib import Path
 from pydantic import ValidationError
 from .manifest import verify_manifest
-from .engine import parse_json
-from .models import ExperimentManifest
+from .reproduction import read_runtime, read_bounded
 
 
 def main():
@@ -13,9 +12,7 @@ def main():
     parser.add_argument('manifest', type=Path)
     args = parser.parse_args()
     try:
-        if args.manifest.stat().st_size > 2_000_000:
-            raise ValueError('manifest exceeds 2 MB')
-        manifest = ExperimentManifest.model_validate(parse_json(args.manifest.read_bytes()))
+        manifest = read_runtime(read_bounded(args.manifest, 2_000_000))
         result = verify_manifest(manifest).model_dump()
     except (OSError, ValueError, ValidationError, RecursionError) as error:
         result = {'verified': False, 'component': 'schema_or_version', 'error': type(error).__name__}
