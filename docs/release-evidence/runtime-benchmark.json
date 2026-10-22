@@ -1,0 +1,99 @@
+{
+  "checkpoints": [
+    {
+      "events": 1,
+      "restore": {
+        "maximum_ms": 6.061,
+        "median_ms": 5.514,
+        "samples": 3
+      },
+      "save": {
+        "maximum_ms": 7.701,
+        "median_ms": 7.07,
+        "samples": 3
+      },
+      "snapshot_bytes": 5957,
+      "tick": 0
+    },
+    {
+      "events": 918,
+      "restore": {
+        "maximum_ms": 35.689,
+        "median_ms": 29.634,
+        "samples": 3
+      },
+      "save": {
+        "maximum_ms": 650.393,
+        "median_ms": 30.532,
+        "samples": 3
+      },
+      "snapshot_bytes": 198410,
+      "tick": 2700
+    },
+    {
+      "events": 1819,
+      "restore": {
+        "maximum_ms": 64.7,
+        "median_ms": 58.987,
+        "samples": 3
+      },
+      "save": {
+        "maximum_ms": 53.938,
+        "median_ms": 53.065,
+        "samples": 3
+      },
+      "snapshot_bytes": 389573,
+      "tick": 5400
+    }
+  ],
+  "controls": {
+    "intervention_ack": {
+      "maximum_ms": 66.557,
+      "median_ms": 24.838,
+      "samples": 20
+    },
+    "manifest_bytes": 85398,
+    "manifest_verify": {
+      "maximum_ms": 432.928,
+      "median_ms": 413.71,
+      "samples": 5
+    },
+    "method": "warm TestClient HTTP including auth/validation/serialization; seed7; ticks2700-2720; no network latency guarantee",
+    "next_tick_request": {
+      "maximum_ms": 24.014,
+      "median_ms": 21.636,
+      "samples": 20
+    }
+  },
+  "experiments": [
+    {
+      "execution_with_tracemalloc": {
+        "maximum_ms": 204.713,
+        "median_ms": 180.819,
+        "samples": 3
+      },
+      "horizon": 120,
+      "maximum_traced_python_bytes": 251977,
+      "trials": 1
+    },
+    {
+      "execution_with_tracemalloc": {
+        "maximum_ms": 1796.423,
+        "median_ms": 845.669,
+        "samples": 3
+      },
+      "horizon": 120,
+      "maximum_traced_python_bytes": 2167508,
+      "trials": 3
+    }
+  ],
+  "method": "isolated temporary SQLite; in-process storage calls; warm process; not HTTP or deployment latency. Experiment timings include tracemalloc instrumentation; traced allocations are not process RSS.",
+  "os": "Windows-11-10.0.26300-SP0",
+  "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+  "python": "3.13.15",
+  "read_only_history_5399": {
+    "maximum_ms": 125.47,
+    "median_ms": 125.051,
+    "samples": 3
+  }
+}
