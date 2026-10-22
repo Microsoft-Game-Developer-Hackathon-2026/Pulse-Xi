@@ -7,6 +7,7 @@ export type EventSnapshot = {
   team_id: string | null; team_name: string | null; color: string
   actor_id: string | null; recipient_id: string | null
   origin: ScenePoint | null; target: ScenePoint | null
+  ball: ScenePoint | null; ball_sample: 'start' | 'end' | null; recipient_position: ScenePoint | null
   provenance: 'recorded_synthetic_event'; unavailable_reason: string | null
 }
 
@@ -18,7 +19,7 @@ export function projectPoint(point: Point | null): ScenePoint | null {
 }
 
 export function eventSnapshot(match: Match, event: Event | undefined, atSecond: number,
-  scope: ObserverScope = { match_id: match.match_id }): EventSnapshot {
+  scope: ObserverScope = { match_id: match.match_id }, sample: 'start' | 'end' = 'end'): EventSnapshot {
   const visible = Number.isFinite(atSecond) && atSecond >= 0 && scope.match_id === match.match_id &&
     atSecond <= match.duration_seconds && event?.match_id === match.match_id &&
     Number.isSafeInteger(event.match_second) && event.match_second >= 0 && event.match_second <= atSecond &&
@@ -28,13 +29,28 @@ export function eventSnapshot(match: Match, event: Event | undefined, atSecond: 
   const validRecipient = !event?.recipient_id || team?.players.some(player => player.player_id === event.recipient_id)
   const accepted = visible && validActor && validRecipient && (!event?.team_id || !!team)
   const origin = accepted ? projectPoint(event?.start ?? null) : null
+  const target = accepted && origin ? projectPoint(event?.end ?? null) : null
+  const ballAction = accepted && event && ['pass','carry','shot'].includes(event.type)
+  const ball = ballAction ? sample === 'end' && target ? target : origin : null
   return {
+    ball, ball_sample: ball ? sample === 'end' && target ? 'end' : 'start' : null,
+    recipient_position: target && event?.type === 'pass' && event.outcome === 'complete' && event.recipient_id ? target : null,
     scope, at_second: atSecond, event_id: accepted ? event!.event_id : null,
     event_type: accepted ? event!.type : null, team_id: team?.team_id ?? null,
     team_name: team?.name ?? null, color: team?.color ?? '#b2c9c1',
     actor_id: accepted ? event!.actor_id : null, recipient_id: accepted ? event!.recipient_id : null,
-    origin, target: accepted && origin ? projectPoint(event?.end ?? null) : null,
+    origin, target,
     provenance: 'recorded_synthetic_event',
     unavailable_reason: !accepted ? 'No valid event at this replay time.' : !origin ? 'This event has no valid recorded position.' : null,
   }
+}
+
+/** Select from the actual replay/filter boundary, including unlocated events.
+ * An unlocated current event must clear old geometry, not retain an older point.
+ */
+export function replayObserverEvent(events: Event[], matchId: string, atSecond: number,
+  selectedId: string, filters: {team: string; kind: string}): Event | undefined {
+  const visible = events.filter(e => e.match_id === matchId && e.match_second <= atSecond &&
+    (filters.team === 'all' || e.team_id === filters.team) && (filters.kind === 'all' || e.type === filters.kind))
+  return visible.find(e => e.event_id === selectedId) ?? visible.at(-1)
 }
