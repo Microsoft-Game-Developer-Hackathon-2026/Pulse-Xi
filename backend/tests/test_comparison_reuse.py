@@ -107,7 +107,7 @@ def test_prefix_proof_is_replayed_once_per_bundle_and_never_reused_between_reque
     assert len(prefix_reads) == 2 * root.revision
 
 
-@pytest.mark.parametrize('field', ['state_hash', 'event_hash', 'command', 'ancestry', 'scenario'])
+@pytest.mark.parametrize('field', ['state_hash', 'event_hash', 'command', 'duplicate_operation', 'ancestry', 'scenario'])
 def test_shared_prefix_never_accepts_a_different_later_branch_claim(database, field):
     job = finish_experiment(control.create_experiment('alice', experiment_request(checkpoint())))
     value = experiments.bundle('alice', job.experiment_id).model_dump(mode='json')
@@ -116,6 +116,9 @@ def test_shared_prefix_never_accepts_a_different_later_branch_claim(database, fi
         branch['operations'][0][field] = '0' * 64
     elif field == 'command':
         branch['operations'][0]['command']['ticks'] += 1
+    elif field == 'duplicate_operation':
+        revision = value['parent']['state']['revision']
+        branch['operations'][revision]['command']['operation_id'] = branch['operations'][0]['command']['operation_id']
     elif field == 'ancestry':
         branch['ancestry'][0]['session_id'] = 'runtime-' + '0' * 64
     else:

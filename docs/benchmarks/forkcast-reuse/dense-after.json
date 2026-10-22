@@ -1,0 +1,18 @@
+{
+  "source_sha": "743916ca6a305ad96e9b054342d93e4b5bffedc9",
+  "input": "same copied disposable failed-test database as dense-before; no browser load",
+  "seconds": 30.063976399993408,
+  "branch_seconds": [
+    4.295490899996366,
+    1.8459760999976425,
+    1.2475666000027559,
+    1.7467380999951274,
+    1.2561663999949815,
+    1.7076917000013054,
+    1.2439749000041047,
+    1.7214569999996456,
+    1.258615099999588,
+    1.8524725000024773
+  ],
+  "comparison_hash": "1fc52d3dfe497c3a39f119932bfcb201a72de79b8162ce86cfe6c31f1a1c13fb"
+}

@@ -1,0 +1,41 @@
+{
+  "source_sha": "f06654f8b0e4828f6c108065b76a8031b6f0b82f",
+  "experiment_implementation_hash": "0a889f64705fd50918039b023293eda6d64db0a6b4989ab9600158a4551c086c",
+  "os": "Windows-11-10.0.26300-SP0",
+  "cpu": "Intel64 Family 6 Model 186 Stepping 3, GenuineIntel",
+  "python": "3.13.14",
+  "seed": 7,
+  "duration": 1800,
+  "checkpoint_tick": 1200,
+  "horizon": 300,
+  "paired_trials": 2,
+  "concurrency": 1,
+  "samples": [
+    {
+      "milliseconds": 662.6545999970403,
+      "replay_calls": {
+        "comparison_replay": 20,
+        "independent_verifier_replay": 30
+      },
+      "comparison_hash": "c071ffb03edad0d6dedc86dcff76f1f0cebd3fce5ace4c5054b4fce5236e075d"
+    },
+    {
+      "milliseconds": 2056.2979000023915,
+      "replay_calls": {
+        "comparison_replay": 20,
+        "independent_verifier_replay": 30
+      },
+      "comparison_hash": "c071ffb03edad0d6dedc86dcff76f1f0cebd3fce5ace4c5054b4fce5236e075d"
+    },
+    {
+      "milliseconds": 4141.915499996685,
+      "replay_calls": {
+        "comparison_replay": 20,
+        "independent_verifier_replay": 30
+      },
+      "comparison_hash": "c071ffb03edad0d6dedc86dcff76f1f0cebd3fce5ace4c5054b4fce5236e075d"
+    }
+  ],
+  "p50_ms": 2056.2979000023915,
+  "limitations": "Three sequential in-process samples; temporary stores; uncontrolled background load; not HTTP/P95/GPU/provider measurement."
+}
