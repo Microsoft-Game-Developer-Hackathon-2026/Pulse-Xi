@@ -36,6 +36,17 @@ def test_runtime_database_path_is_not_required_in_clean_checkout(tmp_path):
     assert validate_markdown(tmp_path) == []
 
 
+def test_generated_build_files_and_browser_artifacts_are_not_source_docs(tmp_path):
+    (tmp_path / 'docs').mkdir()
+    (tmp_path / 'docs' / 'deploy.md').write_text(
+        'A failed readiness check means `frontend/dist/index.html` is absent.\n'
+    )
+    generated_docs = tmp_path / 'frontend' / 'test-results' / 'audit-tools'
+    generated_docs.mkdir(parents=True)
+    (generated_docs / 'README.md').write_text('[stale](../../../missing-tool.py)\n')
+    assert validate_markdown(tmp_path) == []
+
+
 def test_documented_health_openapi_and_fixture_read_smoke(monkeypatch, tmp_path):
     from fastapi.testclient import TestClient
     from app.main import app

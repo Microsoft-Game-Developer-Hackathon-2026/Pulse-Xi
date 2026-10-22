@@ -16,6 +16,10 @@ REPO_PATH = re.compile(r'^(?:README\.md|(?:backend|frontend|docs|scripts|assets|
 # Paths that are intentionally created by the application and therefore absent
 # from a clean source checkout.
 RUNTIME_PATHS = {'backend/data/pulse_xi.sqlite', 'frontend/dist'}
+IGNORED_DIRECTORY_NAMES = {
+    '.git', '.pytest_cache', '.venv', '.venv-audit', '.codex-progress',
+    'node_modules', 'test-results', 'playwright-report', 'coverage', 'htmlcov',
+}
 
 
 def anchor_slug(heading: str) -> str:
@@ -50,8 +54,8 @@ def contains_credential(value: object) -> bool:
 def validate_markdown(root: Path = ROOT) -> list[str]:
     errors: list[str] = []
     markdown_files = sorted(root.rglob('*.md'))
-    ignored = {'.git', '.venv', '.venv-audit', 'node_modules'}
-    markdown_files = [p for p in markdown_files if not ignored.intersection(p.relative_to(root).parts)]
+    markdown_files = [p for p in markdown_files
+                      if not IGNORED_DIRECTORY_NAMES.intersection(p.relative_to(root).parts)]
     for path in markdown_files:
         text = path.read_text(encoding='utf-8-sig')
         rel = path.relative_to(root)
@@ -81,7 +85,8 @@ def validate_markdown(root: Path = ROOT) -> list[str]:
                 candidate = candidate.split()[0].split('::', 1)[0].rstrip('.,:;')
                 if 'node_modules' in Path(candidate).parts:
                     continue  # generated install tree; its absence is expected in a clean clone
-                if candidate in RUNTIME_PATHS:
+                if any(candidate == runtime_path or candidate.startswith(runtime_path + '/')
+                       for runtime_path in RUNTIME_PATHS):
                     continue  # runtime database, documented as generated state
                 if not (root / candidate).exists():
                     errors.append(f'{rel}:{number}: missing repository path: {candidate}')
