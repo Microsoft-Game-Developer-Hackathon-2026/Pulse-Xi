@@ -93,6 +93,27 @@ test('FanDNA localizes controls, persists valid preferences, and announces recap
   expect(Number.parseFloat(transition)).toBeLessThan(0.001)
 })
 
+test('Fan Lens follows event metrics at replay time and filters alert history', async ({ page, request }) => {
+  const response = await request.get('/api/matches/comeback-1107/fan-lens?at_second=5400&metric_id=pressure_events&threshold_id=few&team_id=harbour')
+  expect(response.ok()).toBeTruthy()
+  const packet = await response.json()
+  expect(packet.formula_version).toBe('fan-lens-windows/1')
+  expect(packet.alerts.length).toBeGreaterThan(0)
+  expect(packet.alerts.every((alert: { window_end: number; supporting_event_ids: string[] }) => alert.window_end <= 5400 && alert.supporting_event_ids.length > 0)).toBeTruthy()
+
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'FAN LENS / FOLLOW A METRIC' })).toBeVisible()
+  await page.getByLabel('METRIC', { exact: true }).selectOption('shots')
+  await page.getByLabel('ALERT THRESHOLD', { exact: true }).selectOption('few')
+  await page.getByLabel('FOLLOW TEAM').last().selectOption('harbour')
+  await page.getByRole('slider', { name: 'Seek match time' }).fill('5400')
+  await expect(page.getByRole('region', { name: 'ALERTS' })).toContainText('shots')
+  await page.getByLabel('LANGUAGE').selectOption('es')
+  await expect(page.getByRole('heading', { name: 'FAN LENS / SEGUIR UNA MÉTRICA' })).toBeVisible()
+  await page.reload()
+  await expect(page.getByLabel('MÉTRICA', { exact: true })).toHaveValue('shots')
+})
+
 
 test('localized preferences survive saved scenario navigation without persisting operator credentials', async ({ page }) => {
   const token = 'test-fandna-navigation-token-at-least-32-characters'
