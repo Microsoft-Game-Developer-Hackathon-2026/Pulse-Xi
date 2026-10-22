@@ -8,13 +8,15 @@ A Microsoft Game Developer Hackathon 2026 project turning fictional football eve
 
 ## Availability and review status (2026-10-22)
 
-Audited main `175b7ceb29b2f29437ba6a0a9886934fe5aebc4d` includes recorded-event observer synchronization #67, viewport stability #69, live runtime #53, saved scenarios/archives #64/#65, schema-4 checkpoint metadata and acceptance #70, release hardening #72, creative-media provenance #49 and original graphics #62. PR #52 is closed as superseded because its credential hardening and dependency constraints reached main through #53.
+Audited main: `d19a898492f8c4a303caa576a9370411b21093ff` ([passing exact-main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39766286652)). It includes the authoritative runtime, saved scenarios and archives, schema-4 checkpoints, ForkCast, native-period analysis #57, recorded Control vs Chaos #42, FanDNA #48, branch ProofTrail #51/#54, Atelier UI #71 and broadcast evidence #75. Optional agent tools #55, offline/cost-gated provider validation #56 and the Broadcast Studio contract #50 are merged; merging a contract does not implement producer editing or approval.
 
-Main incorporates #59 through merged #70: checkpoint/history/ForkCast consumer work with original authorship, plus checkpoint UTC metadata and reproduction envelopes. Native analysis #57 and runtime Control vs Chaos #58 remain separate. Recorded Control vs Chaos #42, FanDNA expansion #48 and branch ProofTrail #51 with request-isolation fix #54 are separate review-gated work. Draft agent tools #55, cost-gated Foundry validation #56 and Broadcast Studio proposal #50 are not shipped. Assets are technically integrated; manifest release approval and rights-holder decisions remain separate. Main's current runtime analysis projection supports 5,400-second scenarios; native engine controls already support shorter scenarios.
+Runtime Control vs Chaos remains in PR #76, which was conflicting and had no submitted reviews at this audit. Microsoft provider code and offline checks are available, but no authorized hosted inference is evidenced. Assets remain `pending-team-review`; #23 licensing/release and #25 actual submission are open.
+
+The [requirements audit](docs/FINAL_REQUIREMENTS_AUDIT.md), [performance measurements](docs/PERFORMANCE_AUDIT.md) and [readiness report](docs/FINAL_HACKATHON_READINESS_REPORT.md) separate exercised functionality from missing release deliverables. The replay refresh correction in the audit PR is not shipped until that PR merges.
 
 ## Application functionality
 
-**Integrated baseline:** main `175b7ceb` includes schema-4 checkpoints, #64's saved-scenario library and #53's live runtime, architecture,
+**Integrated baseline:** main includes schema-4 checkpoints, #64's saved-scenario library and #53's live runtime, architecture,
 private analysis and command-credential hardening, alongside original graphics #62.
 PR #52 is closed as superseded because its security code is already present through #53. The [completion PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64) integrated owner-scoped saved-scenario
 listing, versioned archives and creation provenance without changing engine hashes.
@@ -29,8 +31,8 @@ Checkpoint source inspection/download, terminal checkpoint capture, isolated res
 |---|---|
 | Synthetic fixtures | Three built-in seeded matches and validated custom seeds; reproducible on the same supported build |
 | Replay | Play/pause, speed, seek, event stepping/filtering and selected-event pitch; versioned browser-local restoration of match/time/event, filters, speed, view, quality and analysis tab; restores paused |
-| Analytics | Event-derived passes, shots, recoveries, pressure activity, networks, player summaries and windowed activity proxies |
-| ProofTrail | Goal/tactical insights with supporting events and deterministic numerical verification |
+| Analytics | Event-derived passes, shots, recoveries, pressure activity, networks, player summaries, native runtime analysis and recorded Control vs Chaos with bounded windows |
+| ProofTrail | Goal/tactical insights and authenticated common-checkpoint branch comparisons, supporting events and deterministic numerical verification |
 | Pass Difficulty | Versioned 0–100 geometry heuristic with inspectable factors and player summaries; not a failure probability; pressure coverage unavailable |
 | Sandbox Lab | Fixture replay plus a separate authenticated live Control Room with server-driven runs, tactical interventions, exact checkpoints, isolated branches and verified paired ForkCast experiments |
 | 3D Observer | Lazy original Blender kit with procedural fallback, five cameras, Low/Medium/High profiles, recorded-event evidence and 2D/WebGL fallback |
