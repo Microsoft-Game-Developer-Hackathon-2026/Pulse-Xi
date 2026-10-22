@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Event, Match, Metrics, Insight } from '../../types'
+import type { Event, Match, Metrics, Insight, ControlChaos } from '../../types'
 import { PassInspector } from '../passes/PassInspector'
 import { ObserverSwitch } from '../observer/ObserverSwitch'
 import { AnalysisTools } from '../sandbox/AnalysisTools'
 import type { View } from './api'
 import { root } from './api'
+import { ControlChaosPanel } from '../../ControlChaos'
 
 type Analysis = { schema_version: 'runtime-analysis/1' | 'runtime-native-analysis/1'; session_id: string; scenario_id: string; revision: number;
   authoritative_tick: number; at_second: number; match: Match; events: Event[]; metrics: Metrics; insights: Insight[];
@@ -16,6 +17,7 @@ export function RuntimeAnalysis({ token, view, cutoff, sequence, select }: {
   token: string; view: View; cutoff: number; sequence?: number; select: (sequence: number, tick?: number) => void
 }) {
   const [open, setOpen] = useState(false)
+  const [controlOpen, setControlOpen] = useState(false)
   const [result, setResult] = useState<{ key: string; credential: string; data: Analysis } | null>(null)
   const [error, setError] = useState(''), [retry, setRetry] = useState(0)
   const [panel, setPanel] = useState<'bookmarks' | 'exports'>('bookmarks')
@@ -33,6 +35,16 @@ export function RuntimeAnalysis({ token, view, cutoff, sequence, select }: {
     if (native) params.set('projection', 'native')
     return fetch(`${base}/analysis-export?${params}`, { headers: {Authorization: `Bearer ${token}`}, signal })
   }, [base, token, native])
+  const loadControl = useCallback(async (params: string, signal: AbortSignal) => {
+    const query = new URLSearchParams(params)
+    query.set('projection', 'native')
+    const response = await fetch(`${base}/control-chaos?${query}`, {headers: {Authorization: `Bearer ${token}`}, signal})
+    if (!response.ok) throw Error(`Runtime Control vs Chaos unavailable (${response.status}).`)
+    const packet = await response.json() as {projection: 'native'; session_id: string; revision: number; at_second: number; analysis: ControlChaos}
+    if (packet.projection !== 'native' || packet.session_id !== view.session_id || packet.revision < view.revision || packet.at_second !== cutoff)
+      throw Error('Control vs Chaos response does not match the requested runtime boundary.')
+    return packet.analysis
+  }, [base, token, view.session_id, view.revision, cutoff])
   useEffect(() => {
     if (!open) return
     const controller = new AbortController(); setError('')
@@ -66,6 +78,10 @@ export function RuntimeAnalysis({ token, view, cutoff, sequence, select }: {
           seek={tick => select(selected?.sequence ?? 1, tick)}
           selectPass={id => { const event = data.events.find(e => e.event_id === id); if (event) select(event.sequence) }}/>
         <details><summary>ProofTrail / verified recorded-event claims ({data.insights.length})</summary>{!data.insights.length && <p>{data.unavailable?.legacy_insight_templates ?? 'No existing rule-based insight qualifies at this cutoff.'}</p>}{data.insights.map(insight => <article key={insight.insight_id}><h4>{insight.title}</h4><p>{insight.explanation}</p><p>{insight.verification_status} / {insight.uncertainty}</p><ul>{insight.supporting_event_ids.map(id => { const event = data.events.find(e => e.event_id === id); return <li key={id}><button disabled={!event} onClick={() => { if (event) select(event.sequence) }}>{id}</button></li> })}</ul></article>)}</details>
+        <details onToggle={e => setControlOpen(e.currentTarget.open)}><summary>Runtime Control vs Chaos</summary>
+          {controlOpen && <ControlChaosPanel key={`${view.session_id}:${token}`} match={data.match} events={data.events} atSecond={cutoff}
+            load={loadControl} requestKey={key} selectEvent={event => select(event.sequence, event.match_second)}/>}
+        </details>
         <AnalysisTools match={data.match} events={data.events} selected={selected} second={cutoff}
           filters={{team:'all',kind:'all'}} panel={panel} setPanel={setPanel} runtimeExport={exportData}
           select={event => select(event.sequence, event.match_second)}/>
