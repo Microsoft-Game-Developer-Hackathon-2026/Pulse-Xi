@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
 from app.analytics import metrics_at, state_at, tactics_at
-from app.agents import audit_model_packet
+from app.agents import _new_trace, audit_model_packet
 from app.evidence import insights_for, overlays_for, verify
 from app.main import app
 from app.models import EventType, MatchEvent
@@ -171,3 +171,18 @@ def test_agent_auditor_and_unconfigured_guard():
     response = client.post(f"/api/insights/{insight.insight_id}/agent-run")
     assert response.status_code == 503
     assert client.get("/api/agent-traces").status_code == 503
+
+
+def test_foundry_trace_keeps_versioned_run_context():
+    match, events = generate("late-winner")
+    insight = insights_for(match, events)[0]
+    trace = _new_trace(match, insight)
+    assert trace["schema_version"] == "pulse-xi-workflow-trace/1"
+    assert trace["run_id"] and trace["trace_id"] == f"trace-{trace['run_id']}"
+    assert trace["match_id"] == match.match_id
+    assert trace["insight_id"] == insight.insight_id
+    assert trace["max_model_attempts"] == 1
+    assert trace["max_tool_calls"] == 8
+    assert trace["tool_calls"] == []
+    assert trace["stages"] == []
+    assert "compare_scenarios" in trace["unavailable_capabilities"]
