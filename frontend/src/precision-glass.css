@@ -116,6 +116,10 @@ html[data-px-material="glass"] {
   & .recap-controls { gap:18px; padding:22px 24px; border-color:#ffffff0e; flex-wrap:wrap; }
   & .recap-controls label { min-width:110px; font:500 11px/1.4 var(--px-font); letter-spacing:.2px; color:var(--px-text-secondary); }
   & .recap-controls select { min-height:44px; font:500 13px var(--px-font); }
+  & .recap-voice-controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:0 24px 16px; }
+  & .recap-voice-controls button { min-height:36px; padding:8px 12px; font-size:12px; }
+  & .recap-voice-controls span { color:var(--px-text-secondary); font-size:12px; }
+  & .recap-voice-controls small { color:var(--px-text-muted); font-size:10px; }
   & :is(.recap-body,.insight-list) { block-size:28rem; overflow:auto; scrollbar-gutter:stable; }
   & .recap-body { padding:18px 24px 24px; max-height:none; }
   & .recap-body button { padding:16px 0; color:var(--px-text-primary); background:none; border-radius:0; box-shadow:none; border-color:#ffffff0e; font:400 13px/1.6 var(--px-font); }
