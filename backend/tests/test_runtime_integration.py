@@ -275,10 +275,10 @@ def test_lifespan_driver_progresses_without_browser_clock(monkeypatch):
 def test_runtime_schema_one_upgrade_preserves_receipts(database):
     root = command(runtime(), ticks=10)
     with storage.connect() as db:
-        db.execute('DROP TABLE scenario_metadata'); db.execute('DROP TABLE runs'); db.execute('DROP TABLE experiments'); db.execute('PRAGMA user_version=1')
+        db.execute('DROP TABLE checkpoint_metadata'); db.execute('DROP TABLE scenario_metadata'); db.execute('DROP TABLE runs'); db.execute('DROP TABLE experiments'); db.execute('PRAGMA user_version=1')
     assert storage.get_runtime('alice', root.session_id).state_hash == root.state_hash
     with storage.connect() as db:
-        assert db.execute('PRAGMA user_version').fetchone()[0] == 3
+        assert db.execute('PRAGMA user_version').fetchone()[0] == 4
     repeated = storage.mutate('alice', root.session_id, Command(operation_id='op-0', expected_revision=0, kind='step', ticks=10))
     assert repeated == root
 
@@ -305,7 +305,7 @@ def test_control_migration_interruption_is_atomic(monkeypatch):
     root = command(runtime(), ticks=10)
     path = storage.runtime_database_path()
     with storage.connect() as db:
-        db.execute('DROP TABLE scenario_metadata'); db.execute('DROP TABLE runs'); db.execute('DROP TABLE experiments'); db.execute('PRAGMA user_version=1')
+        db.execute('DROP TABLE checkpoint_metadata'); db.execute('DROP TABLE scenario_metadata'); db.execute('DROP TABLE runs'); db.execute('DROP TABLE experiments'); db.execute('PRAGMA user_version=1')
     original = storage.CONTROL_DDL
     monkeypatch.setattr(storage, 'CONTROL_DDL', original[:1] + ('INVALID SQL',))
     with pytest.raises(sqlite3.OperationalError):
@@ -325,7 +325,7 @@ def test_schema_two_backup_preserves_active_jobs(database, monkeypatch):
     control.tick_run('alice', run.run_id)
     target = database / 'backup.sqlite'
     result = copy_database(storage.runtime_database_path(), target)
-    assert result['schema_version'] == 3
+    assert result['schema_version'] == 4
     recovered = database / 'recovered.sqlite'
     copy_database(target, recovered, result['sha256'])
     monkeypatch.setenv('PULSE_RUNTIME_DB_PATH', str(recovered))

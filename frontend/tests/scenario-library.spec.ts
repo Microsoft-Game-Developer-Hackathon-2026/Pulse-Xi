@@ -77,6 +77,15 @@ test('save, reload, archive import/export and real engine runs preserve configur
     expect(response.ok(), await response.text()).toBe(true)
     const view: View = await (await request.get(`/api/sandbox/sessions/${sid}/state`, {headers})).json()
     eventHashes.push(view.event_hash)
+    await page.getByRole('button', {name:'Refresh authoritative state',exact:true}).click()
+    await expect(page.getByLabel('Authoritative match clock')).toHaveText('02:00')
+    const analysis = page.locator('.runtime-analysis')
+    if (!await analysis.evaluate(element => (element as HTMLDetailsElement).open)) {
+      await page.getByText('Recorded-event analysis, bookmarks and 3D',{exact:true}).click()
+    }
+    await expect(analysis).toContainText('Native duration 120s / halftime 60s')
+    await expect(analysis).toContainText(sid)
+
     expect(view.state.scenario).toEqual(packet.scenario)
   }
   expect(eventHashes[0]).toBe(eventHashes[1])
