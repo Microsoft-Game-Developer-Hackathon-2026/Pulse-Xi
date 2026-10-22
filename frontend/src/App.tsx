@@ -80,6 +80,8 @@ export default function App() {
   const [recapResponse, setRecap] = useState<Recap | null>(null)
   const [persona, setPersona] = useState<Persona>(fanPreferences.persona)
   const [locale, setLocale] = useState<Locale>(fanPreferences.locale)
+  const [voiceStatus, setVoiceStatus] = useState('')
+  const [voiceSpeaking, setVoiceSpeaking] = useState(false)
   const [favoriteTeamId, setFavoriteTeamId] = useState(fanPreferences.favoriteTeamId)
   const [favoritePlayerId, setFavoritePlayerId] = useState(fanPreferences.favoritePlayerId)
   const [fanMetric, setFanMetric] = useState(fanPreferences.metricId)
@@ -101,6 +103,7 @@ export default function App() {
   const proofRequest = useRef<AbortController | null>(null)
   const announcedFanAlerts = useRef(new Set<string>())
   const lastFanLensClock = useRef(0)
+  const voiceUtterance = useRef<SpeechSynthesisUtterance | null>(null)
 
   useEffect(() => {
     writeFanPreferences({ version: 2, locale, persona, favoriteTeamId, favoritePlayerId, metricId: fanMetric, thresholdId: fanThreshold, alertsEnabled: fanAlertsEnabled })
@@ -249,6 +252,50 @@ export default function App() {
 
   const match = matches.find(m => m.match_id === matchId)
   const tx = (key: MessageKey, values?: Record<string, string | number>) => translate(locale, key, values)
+  const stopRecapSpeech = () => {
+    try { if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel() }
+    catch { setVoiceStatus(tx('voice_failed')); setVoiceSpeaking(false); voiceUtterance.current = null; return }
+    voiceUtterance.current = null
+    setVoiceSpeaking(false)
+    setVoiceStatus(tx('voice_stopped'))
+  }
+  const readRecapAloud = () => {
+    if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
+      setVoiceStatus(tx('voice_unavailable')); return
+    }
+    const text = [recap?.lead, ...(recap?.moments ?? []).map(moment => moment.text)].filter(Boolean).join('. ')
+    if (!text) { setVoiceStatus(tx('voice_no_text')); return }
+    const synthesis = window.speechSynthesis
+    try { synthesis.cancel() }
+    catch { setVoiceStatus(tx('voice_failed')); return }
+    voiceUtterance.current = null
+    const language = locale === 'es' ? 'es' : locale === 'hi' ? 'hi' : 'en'
+    let voices: SpeechSynthesisVoice[]
+    try { voices = synthesis.getVoices() }
+    catch { setVoiceStatus(tx('voice_unavailable')); return }
+    const voice = voices.find(candidate => candidate.lang.toLowerCase().startsWith(`${language}-`) || candidate.lang.toLowerCase() === language)
+    if (!voice) {
+      setVoiceSpeaking(false)
+      setVoiceStatus(tx('voice_language_missing', { language: locale === 'es' ? 'española' : locale === 'hi' ? 'हिन्दी' : 'English' }))
+      return
+    }
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = voice.lang
+    utterance.voice = voice
+    utterance.onstart = () => { if (voiceUtterance.current === utterance) { setVoiceSpeaking(true); setVoiceStatus(tx('voice_speaking')) } }
+    utterance.onend = () => { if (voiceUtterance.current === utterance) { voiceUtterance.current = null; setVoiceSpeaking(false); setVoiceStatus(tx('voice_finished')) } }
+    utterance.onerror = () => { if (voiceUtterance.current === utterance) { voiceUtterance.current = null; setVoiceSpeaking(false); setVoiceStatus(tx('voice_failed')) } }
+    voiceUtterance.current = utterance
+    setVoiceSpeaking(true)
+    try { synthesis.speak(utterance) }
+    catch { voiceUtterance.current = null; setVoiceSpeaking(false); setVoiceStatus(tx('voice_failed')) }
+  }
+  useEffect(() => {
+    return () => {
+      try { if (voiceUtterance.current && 'speechSynthesis' in window) window.speechSynthesis.cancel() } catch { /* Browser speech may already be unavailable during teardown. */ }
+      voiceUtterance.current = null
+    }
+  }, [matchId, locale, persona, favoriteTeamId, favoritePlayerId, analysisSecond])
   useEffect(() => {
     if (!match) return
     const teamIds = new Set([match.home.team_id, match.away.team_id])
@@ -373,7 +420,7 @@ export default function App() {
         {persona === 'favorite_player' && <PassPlayerSummary matchId={matchId} playerId={favoritePlayerId || match.home.players[0].player_id} atSecond={second}/>}
         <div className="intelligence-grid">
           <section className="panel"><div className="panel-title"><span>{tx("verified_moments")}</span><small>{tx("rule_based_citations")}</small></div><div className="insight-list">{visibleInsights.length ? visibleInsights.map(insight => <article className="insight-card" key={insight.insight_id}><div><span className="insight-minute">{Math.floor(insight.match_second / 60)}′</span><div><strong>{insight.title}</strong><p>{insight.explanation}</p></div></div><button onClick={() => openProof(insight.insight_id)}>{tx("view_proof", { count: insight.supporting_event_ids.length })} <ArrowRight size={14}/></button></article>) : <div className="empty">{tx("no_insights")}</div>}</div></section>
-          <section className="panel"><div className="panel-title"><span>{tx("fandna_recap")}</span><small>{recap?.provider.replaceAll('_', ' ').toUpperCase() ?? tx('loading').toUpperCase()}</small></div><div className="recap-controls"><label>{tx("view")} <select value={persona} onChange={e => setPersona(e.target.value as Persona)}><option value="casual">{tx("casual")}</option><option value="analyst">{tx("analyst")}</option><option value="favorite_team">{tx("favorite_team")}</option><option value="favorite_player">{tx("favorite_player")}</option><option value="broadcaster">{tx("broadcaster")}</option></select></label><label>{tx("language")} <select value={locale} onChange={e => setLocale(e.target.value as Locale)}><option value="en">English</option><option value="es">Español</option><option value="hi">हिन्दी</option></select></label><small className="locale-status" role="status">{hasLocaleFallback(locale) ? tx("fallback") : tx("locale_status")}</small></div>{persona === 'favorite_team' && <div className="focus-control"><label>{tx("follow_team")} <select aria-label={`${tx("fandna_recap")}: ${tx("follow_team")}`} value={favoriteTeamId || match.home.team_id} onChange={e => setFavoriteTeamId(e.target.value)}><option value={match.home.team_id}>{match.home.name}</option><option value={match.away.team_id}>{match.away.name}</option></select></label></div>}{persona === 'favorite_player' && <div className="focus-control"><label>{tx("follow_player")} <select aria-label={`${tx("fandna_recap")}: ${tx("follow_player")}`} value={favoritePlayerId || match.home.players[0].player_id} onChange={e => setFavoritePlayerId(e.target.value)}>{[...match.home.players, ...match.away.players].map(player => <option key={player.player_id} value={player.player_id}>{player.name}</option>)}</select></label></div>}
+          <section className="panel"><div className="panel-title"><span>{tx("fandna_recap")}</span><small>{recap?.provider.replaceAll('_', ' ').toUpperCase() ?? tx('loading').toUpperCase()}</small></div><div className="recap-controls"><label>{tx("view")} <select value={persona} onChange={e => setPersona(e.target.value as Persona)}><option value="casual">{tx("casual")}</option><option value="analyst">{tx("analyst")}</option><option value="favorite_team">{tx("favorite_team")}</option><option value="favorite_player">{tx("favorite_player")}</option><option value="broadcaster">{tx("broadcaster")}</option></select></label><label>{tx("language")} <select value={locale} onChange={e => setLocale(e.target.value as Locale)}><option value="en">English</option><option value="es">Español</option><option value="hi">हिन्दी</option></select></label><small className="locale-status" role="status">{hasLocaleFallback(locale) ? tx("fallback") : tx("locale_status")}</small></div><div className="recap-voice-controls"><button type="button" onClick={readRecapAloud} disabled={!recap || voiceSpeaking || !("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)}>{tx('voice_read')}</button><button type="button" onClick={stopRecapSpeech} disabled={!voiceSpeaking}>{tx('voice_stop')}</button><span role="status" aria-live="polite">{voiceStatus || (!("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window) ? tx('voice_unavailable') : '')}</span><small>{tx('voice_attribution')}</small></div>{persona === 'favorite_team' && <div className="focus-control"><label>{tx("follow_team")} <select aria-label={`${tx("fandna_recap")}: ${tx("follow_team")}`} value={favoriteTeamId || match.home.team_id} onChange={e => setFavoriteTeamId(e.target.value)}><option value={match.home.team_id}>{match.home.name}</option><option value={match.away.team_id}>{match.away.name}</option></select></label></div>}{persona === 'favorite_player' && <div className="focus-control"><label>{tx("follow_player")} <select aria-label={`${tx("fandna_recap")}: ${tx("follow_player")}`} value={favoritePlayerId || match.home.players[0].player_id} onChange={e => setFavoritePlayerId(e.target.value)}>{[...match.home.players, ...match.away.players].map(player => <option key={player.player_id} value={player.player_id}>{player.name}</option>)}</select></label></div>}
           <section className="fan-lens" aria-labelledby="fan-lens-title"><h4 id="fan-lens-title">{tx('fan_lens')}</h4><div className="recap-controls"><label>{tx('metric')} <select aria-label={tx('metric')} value={fanMetric} onChange={e => setFanMetric(e.target.value)}><option value="pressure_events">{tx('event_metric_pressure')}</option><option value="completed_passes">{tx('event_metric_passes')}</option><option value="recoveries">{tx('event_metric_recoveries')}</option><option value="shots">{tx('event_metric_shots')}</option><option value="final_third_entries">{tx('event_metric_entries')}</option><option value="forward_progression">{tx('event_metric_progression')}</option></select></label><label>{tx('threshold')} <select aria-label={tx('threshold')} value={fanThreshold} onChange={e => setFanThreshold(e.target.value)}><option value="few">{tx('threshold_few')}</option><option value="some">{tx('threshold_some')}</option><option value="many">{tx('threshold_many')}</option></select></label><label><input type="checkbox" checked={fanAlertsEnabled} onChange={e => setFanAlertsEnabled(e.target.checked)}/> {tx('alerts_enabled')}</label></div><div className="focus-control"><label>{tx('follow_team')} <select aria-label={`${tx('fan_lens')}: ${tx('follow_team')}`} value={favoriteTeamId} onChange={e => { setFavoriteTeamId(e.target.value); if (e.target.value && favoritePlayerId && !match[e.target.value === match.home.team_id ? 'home' : 'away'].players.some(p => p.player_id === favoritePlayerId)) setFavoritePlayerId('') }}><option value="">{tx('all_teams')}</option><option value={match.home.team_id}>{match.home.name}</option><option value={match.away.team_id}>{match.away.name}</option></select></label><label>{tx('follow_player')} <select aria-label={`${tx('fan_lens')}: ${tx('follow_player')}`} value={favoritePlayerId} onChange={e => { const id = e.target.value; setFavoritePlayerId(id); const playerTeam = id.startsWith(match.home.team_id + '-') ? match.home.team_id : id ? match.away.team_id : ''; if (favoriteTeamId && playerTeam && favoriteTeamId !== playerTeam) setFavoriteTeamId('') }}><option value="">{tx('all_players')}</option>{[...match.home.players, ...match.away.players].map(player => <option key={player.player_id} value={player.player_id}>{player.name}</option>)}</select></label></div><div className="fan-lens-alerts" role="region" aria-label={tx('alerts')} aria-live="off"><strong>{fanLens?.value ?? '—'} {fanLens?.metric.unit ?? ''} · {tx('alerts')} · {clock(Math.floor(second))}</strong>{fanLens && <small>{fanLens.coverage.located_event_count === null ? tx('metric_coverage', { count: fanLens.coverage.eligible_event_count }) : tx('coordinate_coverage', { located: fanLens.coverage.located_event_count, missing: fanLens.coverage.missing_coordinate_count })}</small>}{fanLensError ? <p role="alert">{tx('recap_error')}</p> : fanLens?.unavailable_reason ? <p>{tx(fanLens.unavailable_reason === 'missing_coordinates' ? 'no_metric_coordinates' : 'no_metric_data')}</p> : !fanLens?.alerts.length ? <p>{tx('no_alerts')}</p> : fanLens.alerts.map(alert => <button key={alert.alert_id} disabled={!fanAlertsEnabled} onClick={() => { const source = events.find(event => alert.supporting_event_ids.includes(event.event_id)); if (source) setSecond(source.match_second) }}>{tx('alert_count', { value: alert.observed_value, unit: alert.unit, start: clock(alert.window_start), end: clock(alert.window_end), threshold: alert.threshold })} <small>{alert.supporting_event_ids.length} {tx('source_events')} · {alert.coverage.located_event_count === null ? tx('metric_coverage', { count: alert.coverage.eligible_event_count }) : tx('coordinate_coverage', { located: alert.coverage.located_event_count, missing: alert.coverage.missing_coordinate_count })}</small></button>)}</div><span className="sr-only" role="status" aria-live="polite">{fanLensAnnouncement}</span></section>
           <div className="recap-body" data-analysis-cutoff={recap?.at_second} tabIndex={0} aria-label="Personalized recap" aria-live="polite" aria-atomic="true"><small className="recap-scope">{tx("recap_scope")} / {recap ? `Through ${clock(recap.at_second)}${recap.at_second < Math.floor(second) ? " / updating" : ""}` : "Synchronizing current source"}</small><p>{recap?.lead ?? tx("loading")}</p>{recap?.moments.map(moment => <button key={moment.insight_id} onClick={() => { setSecond(moment.match_second); openProof(moment.insight_id) }}><span>{moment.text}</span><small>{moment.supporting_event_ids.length} {tx("source_events")}</small></button>)}</div></section>
         </div>
