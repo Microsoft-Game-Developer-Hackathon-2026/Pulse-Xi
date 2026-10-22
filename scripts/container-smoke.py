@@ -42,28 +42,38 @@ def websocket_snapshot(host: str, port: int, secure: bool = False) -> dict:
         connection.sendall(("GET /ws/matches/comeback-1107 HTTP/1.1\r\n"
                             f"Host: {host}:{port}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
                             f"Sec-WebSocket-Key: {key}\r\nSec-WebSocket-Version: 13\r\n\r\n").encode())
+        def receive() -> bytes:
+            chunk = connection.recv(4096)
+            if not chunk:
+                raise ConnectionError("WebSocket peer closed before a complete snapshot")
+            return chunk
+
         data = b""
         while b"\r\n\r\n" not in data:
-            data += connection.recv(4096)
+            data += receive()
+            if len(data) > 65_536:
+                raise AssertionError("WebSocket upgrade headers exceed the smoke-test limit")
         headers, data = data.split(b"\r\n\r\n", 1)
         if not headers.startswith(b"HTTP/1.1 101"):
             raise AssertionError(f"WebSocket upgrade failed: {headers!r}")
         while len(data) < 2:
-            data += connection.recv(4096)
+            data += receive()
         first, second = data[0], data[1]
         if first & 0x0F != 1 or second & 0x80:
             raise AssertionError("Expected an unmasked server text frame")
         length, offset = second & 0x7F, 2
         if length == 126:
             while len(data) < 4:
-                data += connection.recv(4096)
+                data += receive()
             length, offset = int.from_bytes(data[2:4], "big"), 4
         elif length == 127:
             while len(data) < 10:
-                data += connection.recv(4096)
+                data += receive()
             length, offset = int.from_bytes(data[2:10], "big"), 10
+        if length > 2_000_000:
+            raise AssertionError("WebSocket snapshot exceeds the smoke-test limit")
         while len(data) < offset + length:
-            data += connection.recv(4096)
+            data += receive()
         packet = json.loads(data[offset:offset + length])
         if packet.get("kind") != "snapshot" or packet.get("match", {}).get("match_id") != "comeback-1107":
             raise AssertionError("WebSocket did not begin with the expected fixture snapshot")
@@ -82,8 +92,10 @@ def main() -> int:
         if remote:
             from urllib.parse import urlsplit
             parsed = urlsplit(args.url)
-            if parsed.scheme != "https" or not parsed.hostname or parsed.path not in ("", "/"):
-                raise ValueError("--url must be an HTTPS origin with no path, query or fragment")
+            if (parsed.scheme != "https" or not parsed.hostname or parsed.path not in ("", "/")
+                    or parsed.username is not None or parsed.password is not None
+                    or "?" in args.url or "#" in args.url):
+                raise ValueError("--url must be an HTTPS origin without credentials, path, query or fragment")
             base, host, port, secure = args.url.rstrip("/"), parsed.hostname, parsed.port or 443, True
         elif not args.skip_build:
             run("docker", "build", "--tag", args.image, ".")
