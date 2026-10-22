@@ -17,7 +17,12 @@ sys.path.insert(0, str(ROOT / 'backend'))
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--application-root', type=Path, default=ROOT)
     args = parser.parse_args()
+    application_root = args.application_root.resolve()
+    if not (application_root / "backend/app/sandbox/experiments.py").is_file():
+        parser.error("application-root must identify a Pulse-Xi checkout")
+    sys.path.insert(0, str(application_root / "backend"))
     with tempfile.TemporaryDirectory(prefix='pulse-comparison-profile-') as folder:
         os.environ['PULSE_RUNTIME_DB_PATH'] = str(Path(folder) / 'runtime.sqlite')
         os.environ['PULSE_DB_PATH'] = str(Path(folder) / 'library.sqlite')
@@ -43,8 +48,8 @@ def main():
             if job.status == 'completed':
                 break
         assert job.status == 'completed'
-        calls = {'comparison_replay': 0, 'independent_verifier_replay': 0}
-        real_comparison_apply, real_manifest_apply = experiments.apply_command, manifest.apply_command
+        calls = {'comparison_replay': 0, 'independent_verifier_replay': 0, 'historical_boundary_replay': 0}
+        real_comparison_apply, real_manifest_apply, real_history_apply = experiments.apply_command, manifest.apply_command, storage.apply_command
 
         def comparison_apply(*values):
             calls['comparison_replay'] += 1
@@ -54,20 +59,24 @@ def main():
             calls['independent_verifier_replay'] += 1
             return real_manifest_apply(*values)
 
-        experiments.apply_command, manifest.apply_command = comparison_apply, verifier_apply
+        def history_apply(*values):
+            calls['historical_boundary_replay'] += 1
+            return real_history_apply(*values)
+
+        experiments.apply_command, manifest.apply_command, storage.apply_command = comparison_apply, verifier_apply, history_apply
         samples = []
         try:
             for _ in range(3):
-                calls.update(comparison_replay=0, independent_verifier_replay=0)
+                calls.update(comparison_replay=0, independent_verifier_replay=0, historical_boundary_replay=0)
                 start = time.perf_counter()
                 result = experiments.comparison('benchmark', job.experiment_id)
                 elapsed = (time.perf_counter() - start) * 1000
                 samples.append(dict(milliseconds=elapsed, replay_calls=dict(calls), comparison_hash=digest(result)))
         finally:
-            experiments.apply_command, manifest.apply_command = real_comparison_apply, real_manifest_apply
+            experiments.apply_command, manifest.apply_command, storage.apply_command = real_comparison_apply, real_manifest_apply, real_history_apply
         assert len({row['comparison_hash'] for row in samples}) == 1
         assert storage.get_runtime('benchmark', state.session_id).state_hash == state.state_hash
-        output = dict(source_sha=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+        output = dict(source_sha=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=application_root, text=True).strip(),
             experiment_implementation_hash=experiments.experiment_implementation_hash(),
             os=platform.platform(), cpu=platform.processor(), python=platform.python_version(),
             seed=7, duration=1800, checkpoint_tick=1200, horizon=300, paired_trials=2,
