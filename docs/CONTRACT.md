@@ -69,7 +69,7 @@ Whole-database restore rotates dataset generation IDs and deletion nonces in the
 
 The engine integration branch exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. Default `projection=legacy` retains the 5400-second contract. Explicit `projection=native` returns `runtime-native-analysis/1` for every supported even engine duration (60..5400), with native period validation and unchanged event identity/ticks. It reuses existing event metrics, pass scoring/verification and export writing. All routes reject future cutoffs and conceal other owners; private runtime data never resolves through public `/api/matches`. See [LIVE_SANDBOX](LIVE_SANDBOX.md#native-period-analysis) for schemas, nullable calendar timestamps, unavailable legacy phase and hash scope. Neither dataset lifecycle nor engine serialization is replaced.
 
-## Saved scenarios (runtime schema 3)
+## Saved scenarios (introduced in runtime schema 3; retained in schema 4)
 
 The scenario library remains separate from imported-match storage (library schema 2).
 Authenticated GET `/api/sandbox/scenarios` returns at most 100 owned summaries,
@@ -80,3 +80,15 @@ record. New private responses use Cache-Control: no-store. See
 [LIVE_SANDBOX](LIVE_SANDBOX.md#saved-scenario-library-and-archives) for schema,
 identity verification, idempotence, errors, migration and rollback details.
 
+
+
+## Checkpoint/reproduction additive boundary (runtime schema 4)
+
+Checkpoint reads/summaries add original created_at_utc or null; summaries expose
+saved lifecycle. Command responses add checkpoint_created_at_utc. Timestamp data
+is stored separately and excluded from every deterministic snapshot/hash.
+GET sessions/{id}/reproduction and experiments/{id}/reproduction under
+/api/sandbox wrap the original manifests with versioned unsigned export-build
+provenance. Raw manifest routes remain unchanged; existing verify routes/CLIs
+accept either supported raw payloads or the corresponding wrapper. See the
+[wire/migration and trust contract](LIVE_SANDBOX.md#checkpoint-metadata-and-reproduction-contracts).

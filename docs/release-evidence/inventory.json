@@ -1,0 +1,3829 @@
+{
+  "http_endpoints": [
+    {
+      "access": "X-Admin-Token; configured capability",
+      "dependencies": [],
+      "function": "agent_traces",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/agent-traces",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "match_library",
+      "method": "GET",
+      "openapi_responses": [
+        "200"
+      ],
+      "path": "/api/data-hub",
+      "response_schemas": {
+        "200": {}
+      }
+    },
+    {
+      "access": "shared import bearer",
+      "dependencies": [
+        "require_import_token"
+      ],
+      "function": "import_package",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/data-hub/import",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "import bearer + opt-in direct loopback",
+      "dependencies": [
+        "require_local_admin"
+      ],
+      "function": "manage_imported_match",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/data-hub/matches/{match_id}/lifecycle",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "shared import bearer",
+      "dependencies": [
+        "require_import_token"
+      ],
+      "function": "preview_package",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/data-hub/preview",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "import bearer + opt-in direct loopback",
+      "dependencies": [
+        "require_local_admin"
+      ],
+      "function": "recover_package",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/data-hub/recover",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "X-Admin-Token + explicitly enabled Foundry; paid path not exercised",
+      "dependencies": [],
+      "function": "agent_run",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/insights/{insight_id}/agent-run",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "explain_insight",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/insights/{insight_id}/explain",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "list_matches",
+      "method": "GET",
+      "openapi_responses": [
+        "200"
+      ],
+      "path": "/api/matches",
+      "response_schemas": {
+        "200": {}
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "create_match",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/generate",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Match-Output"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "shared import bearer",
+      "dependencies": [
+        "require_import_token"
+      ],
+      "function": "ingest_match",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/ingest",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "match_detail",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Match-Output"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "export_analysis",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/analysis-export",
+      "response_schemas": {
+        "200": {
+          "properties": {
+            "category": {
+              "enum": [
+                "events",
+                "pass",
+                "metrics"
+              ],
+              "title": "Category",
+              "type": "string"
+            },
+            "data": {
+              "items": {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              "title": "Data",
+              "type": "array"
+            },
+            "generated_at": {
+              "title": "Generated At",
+              "type": "string"
+            },
+            "match_id": {
+              "title": "Match Id",
+              "type": "string"
+            },
+            "provenance": {
+              "additionalProperties": true,
+              "title": "Provenance",
+              "type": "object"
+            },
+            "replay_cutoff": {
+              "title": "Replay Cutoff",
+              "type": "integer"
+            },
+            "schema_version": {
+              "const": "analysis-export/1",
+              "default": "analysis-export/1",
+              "title": "Schema Version",
+              "type": "string"
+            },
+            "synthetic": {
+              "const": true,
+              "default": true,
+              "title": "Synthetic",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "match_id",
+            "replay_cutoff",
+            "generated_at",
+            "category",
+            "provenance",
+            "data"
+          ],
+          "title": "AnalysisExport",
+          "type": "object"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "match_events",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/events",
+      "response_schemas": {
+        "200": {
+          "items": {
+            "$ref": "#/components/schemas/MatchEvent"
+          },
+          "title": "Response Match Events Api Matches  Match Id  Events Get",
+          "type": "array"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "match_insights",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/insights",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "match_insight_evidence",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/insights/{insight_id}/evidence",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "match_metrics",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/metrics",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "match_overlays",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/overlays",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "match_overlay",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/overlays/{cue_id}",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "export_match_package",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/package",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "pass_difficulties",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/pass-difficulty",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/PassDifficultyPage"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "pass_difficulty_players",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/pass-difficulty/players",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/PlayerDifficultyResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "pass_difficulty",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/passes/{event_id}/difficulty",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/PassDifficulty"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "pass_difficulty_evidence",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/passes/{event_id}/difficulty/evidence",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/PassDifficultyEvidence"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "match_recap",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/recap",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "match_state",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/state",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "match_tactics",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "422"
+      ],
+      "path": "/api/matches/{match_id}/tactics",
+      "response_schemas": {
+        "200": {},
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "checkpoint",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/checkpoints/{checkpoint_id}",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/StoredCheckpoint"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "restore",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/checkpoints/{checkpoint_id}/restore",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/MutationResult"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "experiments",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/experiments",
+      "response_schemas": {
+        "200": {
+          "items": {
+            "$ref": "#/components/schemas/Experiment-Output"
+          },
+          "title": "Response Experiments Api Sandbox Experiments Get",
+          "type": "array"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "experiment",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/experiments",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Experiment-Output"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "verify_experiment",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/experiments/verify",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Verification"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "experiment_state",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/experiments/{experiment_id}",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Experiment-Output"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "stop_experiment",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/experiments/{experiment_id}/cancel",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Experiment-Output"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "experiment_comparison",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/experiments/{experiment_id}/comparison",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Comparison"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "experiment_manifest",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/experiments/{experiment_id}/manifest",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/ExperimentBundle-Output"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "experiment_archive",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/experiments/{experiment_id}/reproduction",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/ForkCastReproduction-Output"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "get_presets",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/presets",
+      "response_schemas": {
+        "200": {
+          "additionalProperties": {
+            "$ref": "#/components/schemas/ScenarioConfig-Output"
+          },
+          "title": "Response Get Presets Api Sandbox Presets Get",
+          "type": "object"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "run_state",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/runs/{run_id}",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Run"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "stop_run",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/runs/{run_id}/cancel",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Run"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "private_scenario_response",
+        "require_operator"
+      ],
+      "function": "scenarios",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/scenarios",
+      "response_schemas": {
+        "200": {
+          "items": {
+            "$ref": "#/components/schemas/ScenarioSummary"
+          },
+          "title": "Response Scenarios Api Sandbox Scenarios Get",
+          "type": "array"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "create_scenario",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/scenarios",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Scenario-Output"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "private_scenario_response",
+        "require_operator"
+      ],
+      "function": "import_scenario",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "400",
+        "403",
+        "404",
+        "409",
+        "413",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/scenarios/import",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/ScenarioArchive-Output"
+        },
+        "400": null,
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "413": null,
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "get_scenario",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/scenarios/{scenario_id}",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Scenario-Output"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "private_scenario_response",
+        "require_operator"
+      ],
+      "function": "scenario_archive",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/scenarios/{scenario_id}/archive",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/ScenarioArchive-Output"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "sessions",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions",
+      "response_schemas": {
+        "200": {
+          "items": {
+            "$ref": "#/components/schemas/SessionSummary"
+          },
+          "title": "Response Sessions Api Sandbox Sessions Get",
+          "type": "array"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "create_session",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/MutationResult"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "private_response",
+        "require_operator"
+      ],
+      "function": "recorded_analysis",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/analysis",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/RecordedAnalysis"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "export",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/analysis-export",
+      "response_schemas": {
+        "200": {},
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "audit",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/audit",
+      "response_schemas": {
+        "200": {
+          "items": {
+            "$ref": "#/components/schemas/AuditEntry"
+          },
+          "title": "Response Audit Api Sandbox Sessions  Session Id  Audit Get",
+          "type": "array"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "checkpoints",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/checkpoints",
+      "response_schemas": {
+        "200": {
+          "items": {
+            "$ref": "#/components/schemas/CheckpointSummary"
+          },
+          "title": "Response Checkpoints Api Sandbox Sessions  Session Id  Checkpoints Get",
+          "type": "array"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "command",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/commands",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/CommandReceipt"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "events",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/events",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/EventPage"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "history",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/history",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/HistoricalView"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "manifest",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/manifest",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/ExperimentManifest-Output"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "compatible_match",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/match",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Match-Output"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "compatible_events",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/match-events",
+      "response_schemas": {
+        "200": {
+          "items": {
+            "$ref": "#/components/schemas/MatchEvent"
+          },
+          "title": "Response Compatible Events Api Sandbox Sessions  Session Id  Match Events Get",
+          "type": "array"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "private_response",
+        "require_operator"
+      ],
+      "function": "difficulties",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/pass-difficulty",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/PassDifficultyPage"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "private_response",
+        "require_operator"
+      ],
+      "function": "difficulty",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/passes/{event_id}/difficulty",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/PassDifficulty"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "private_response",
+        "require_operator"
+      ],
+      "function": "evidence",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/passes/{event_id}/difficulty/evidence",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/PassDifficultyEvidence"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "runtime_archive",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/reproduction",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/RuntimeReproduction-Output"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "session_runs",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/runs",
+      "response_schemas": {
+        "200": {
+          "items": {
+            "$ref": "#/components/schemas/Run"
+          },
+          "title": "Response Session Runs Api Sandbox Sessions  Session Id  Runs Get",
+          "type": "array"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "run",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/runs",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Run"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "snapshot",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/snapshot",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Snapshot-Output"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "state",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/sessions/{session_id}/state",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/RuntimeView"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "verify",
+      "method": "POST",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/verify",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/Verification"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "owner-scoped operator bearer",
+      "dependencies": [
+        "require_operator"
+      ],
+      "function": "versions",
+      "method": "GET",
+      "openapi_responses": [
+        "200",
+        "403",
+        "404",
+        "409",
+        "422",
+        "429",
+        "503"
+      ],
+      "path": "/api/sandbox/versions",
+      "response_schemas": {
+        "200": {
+          "$ref": "#/components/schemas/VersionInfo"
+        },
+        "403": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "404": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "409": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "422": {
+          "$ref": "#/components/schemas/HTTPValidationError"
+        },
+        "429": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        },
+        "503": {
+          "$ref": "#/components/schemas/ErrorResponse"
+        }
+      }
+    },
+    {
+      "access": "public; inspect operation semantics",
+      "dependencies": [],
+      "function": "health",
+      "method": "GET",
+      "openapi_responses": [
+        "200"
+      ],
+      "path": "/health",
+      "response_schemas": {
+        "200": {}
+      }
+    }
+  ],
+  "inventory_version": "release-inventory/1",
+  "limitations": "Declarations are not rights clearance. Missing licenses require review; root application license unresolved. OpenAPI responses are declared responses, not exhaustive middleware/auth failure codes. Installed optional SDKs outside this environment are not inventoried.",
+  "limited_secret_scan": {
+    "findings": [],
+    "scope": "AWS access-key IDs, GitHub token patterns and private-key headers only; no entropy/history scan",
+    "text_files_and_built_js": 191
+  },
+  "node_lockfile_packages": [
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/code-frame",
+      "version": "7.29.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/compat-data",
+      "version": "7.29.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/core",
+      "version": "7.29.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/generator",
+      "version": "7.29.8"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/helper-compilation-targets",
+      "version": "7.29.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/helper-globals",
+      "version": "7.29.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/helper-module-imports",
+      "version": "7.29.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/helper-module-transforms",
+      "version": "7.29.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/helper-plugin-utils",
+      "version": "7.29.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/helper-string-parser",
+      "version": "7.29.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/helper-validator-identifier",
+      "version": "7.29.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/helper-validator-option",
+      "version": "7.29.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/helpers",
+      "version": "7.29.10"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/parser",
+      "version": "7.29.9"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/plugin-transform-react-jsx-self",
+      "version": "7.29.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/plugin-transform-react-jsx-source",
+      "version": "7.29.7"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/runtime",
+      "version": "7.29.10"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/template",
+      "version": "7.29.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/traverse",
+      "version": "7.29.10"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@babel/types",
+      "version": "7.29.8"
+    },
+    {
+      "development": true,
+      "license": "Apache-2.0",
+      "optional": false,
+      "package_path": "node_modules/@dimforge/rapier3d-compat",
+      "version": "0.12.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/aix-ppc64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/android-arm",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/android-arm64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/android-x64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/darwin-arm64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/darwin-x64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/freebsd-arm64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/freebsd-x64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/linux-arm",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/linux-arm64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/linux-ia32",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/linux-loong64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/linux-mips64el",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/linux-ppc64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/linux-riscv64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/linux-s390x",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/linux-x64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/netbsd-arm64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/netbsd-x64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/openbsd-arm64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/openbsd-x64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/openharmony-arm64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/sunos-x64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/win32-arm64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/win32-ia32",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@esbuild/win32-x64",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@jridgewell/gen-mapping",
+      "version": "0.3.13"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@jridgewell/remapping",
+      "version": "2.3.5"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@jridgewell/resolve-uri",
+      "version": "3.1.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@jridgewell/sourcemap-codec",
+      "version": "1.6.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@jridgewell/trace-mapping",
+      "version": "0.3.31"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@napi-rs/lzma-linux-x64-gnu",
+      "version": "1.5.1"
+    },
+    {
+      "development": true,
+      "license": "Apache-2.0",
+      "optional": false,
+      "package_path": "node_modules/@playwright/test",
+      "version": "1.64.1"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@react-three/fiber",
+      "version": "9.4.0"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@react-three/fiber/node_modules/scheduler",
+      "version": "0.25.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@rolldown/pluginutils",
+      "version": "1.0.0-rc.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-android-arm-eabi",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-android-arm64",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-darwin-arm64",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-darwin-x64",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-freebsd-arm64",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-freebsd-x64",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-linux-arm-gnueabihf",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-linux-arm-musleabihf",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-linux-arm64-gnu",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-linux-arm64-musl",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-linux-loong64-gnu",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-linux-loong64-musl",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-linux-ppc64-gnu",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-linux-ppc64-musl",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-linux-riscv64-gnu",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-linux-riscv64-musl",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-linux-s390x-gnu",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-linux-x64-gnu",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-linux-x64-musl",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-openbsd-x64",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-openharmony-arm64",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-win32-arm64-msvc",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-win32-ia32-msvc",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-win32-x64-gnu",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@rollup/rollup-win32-x64-msvc",
+      "version": "4.64.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@tailwindcss/node",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@tailwindcss/oxide",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@tailwindcss/oxide-android-arm64",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@tailwindcss/oxide-darwin-arm64",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@tailwindcss/oxide-darwin-x64",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@tailwindcss/oxide-freebsd-x64",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@tailwindcss/oxide-linux-arm-gnueabihf",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@tailwindcss/oxide-linux-arm64-gnu",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@tailwindcss/oxide-linux-arm64-musl",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@tailwindcss/oxide-linux-x64-gnu",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@tailwindcss/oxide-linux-x64-musl",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@tailwindcss/oxide-wasm32-wasi",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@tailwindcss/oxide-win32-arm64-msvc",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/@tailwindcss/oxide-win32-x64-msvc",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@tailwindcss/vite",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@tweenjs/tween.js",
+      "version": "23.1.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@types/babel__core",
+      "version": "7.20.5"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@types/babel__generator",
+      "version": "7.27.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@types/babel__template",
+      "version": "7.4.4"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@types/babel__traverse",
+      "version": "7.28.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@types/estree",
+      "version": "1.0.9"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@types/react",
+      "version": "19.3.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@types/react-dom",
+      "version": "19.3.0"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@types/react-reconciler",
+      "version": "0.32.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@types/stats.js",
+      "version": "0.17.4"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@types/three",
+      "version": "0.186.0"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@types/webxr",
+      "version": "0.5.24"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/@vitejs/plugin-react",
+      "version": "5.2.0"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/base64-js",
+      "version": "1.5.1"
+    },
+    {
+      "development": true,
+      "license": "Apache-2.0",
+      "optional": false,
+      "package_path": "node_modules/baseline-browser-mapping",
+      "version": "2.11.28"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/browserslist",
+      "version": "4.29.3"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/buffer",
+      "version": "6.0.3"
+    },
+    {
+      "development": true,
+      "license": "CC-BY-4.0",
+      "optional": false,
+      "package_path": "node_modules/caniuse-lite",
+      "version": "1.0.30001816"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/convert-source-map",
+      "version": "2.0.0"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/csstype",
+      "version": "3.2.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/debug",
+      "version": "4.4.3"
+    },
+    {
+      "development": true,
+      "license": "Apache-2.0",
+      "optional": false,
+      "package_path": "node_modules/detect-libc",
+      "version": "2.1.2"
+    },
+    {
+      "development": true,
+      "license": "ISC",
+      "optional": false,
+      "package_path": "node_modules/electron-to-chromium",
+      "version": "1.5.456"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/enhanced-resolve",
+      "version": "5.26.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/esbuild",
+      "version": "0.28.2"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/escalade",
+      "version": "3.2.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/fdir",
+      "version": "6.5.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/fflate",
+      "version": "0.8.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": true,
+      "package_path": "node_modules/fsevents",
+      "version": "2.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/gensync",
+      "version": "1.0.0-beta.2"
+    },
+    {
+      "development": true,
+      "license": "Apache-2.0",
+      "optional": false,
+      "package_path": "node_modules/gltf-validator",
+      "version": "2.0.0-dev.3.10"
+    },
+    {
+      "development": true,
+      "license": "ISC",
+      "optional": false,
+      "package_path": "node_modules/graceful-fs",
+      "version": "4.2.11"
+    },
+    {
+      "development": false,
+      "license": "BSD-3-Clause",
+      "optional": false,
+      "package_path": "node_modules/ieee754",
+      "version": "1.2.1"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/its-fine",
+      "version": "2.1.1"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/its-fine/node_modules/@types/react-reconciler",
+      "version": "0.28.9"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/jiti",
+      "version": "2.7.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/js-tokens",
+      "version": "4.0.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/jsesc",
+      "version": "3.1.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/json5",
+      "version": "2.2.3"
+    },
+    {
+      "development": true,
+      "license": "MPL-2.0",
+      "optional": false,
+      "package_path": "node_modules/lightningcss",
+      "version": "1.32.0"
+    },
+    {
+      "development": true,
+      "license": "MPL-2.0",
+      "optional": true,
+      "package_path": "node_modules/lightningcss-android-arm64",
+      "version": "1.32.0"
+    },
+    {
+      "development": true,
+      "license": "MPL-2.0",
+      "optional": true,
+      "package_path": "node_modules/lightningcss-darwin-arm64",
+      "version": "1.32.0"
+    },
+    {
+      "development": true,
+      "license": "MPL-2.0",
+      "optional": true,
+      "package_path": "node_modules/lightningcss-darwin-x64",
+      "version": "1.32.0"
+    },
+    {
+      "development": true,
+      "license": "MPL-2.0",
+      "optional": true,
+      "package_path": "node_modules/lightningcss-freebsd-x64",
+      "version": "1.32.0"
+    },
+    {
+      "development": true,
+      "license": "MPL-2.0",
+      "optional": true,
+      "package_path": "node_modules/lightningcss-linux-arm-gnueabihf",
+      "version": "1.32.0"
+    },
+    {
+      "development": true,
+      "license": "MPL-2.0",
+      "optional": true,
+      "package_path": "node_modules/lightningcss-linux-arm64-gnu",
+      "version": "1.32.0"
+    },
+    {
+      "development": true,
+      "license": "MPL-2.0",
+      "optional": true,
+      "package_path": "node_modules/lightningcss-linux-arm64-musl",
+      "version": "1.32.0"
+    },
+    {
+      "development": true,
+      "license": "MPL-2.0",
+      "optional": true,
+      "package_path": "node_modules/lightningcss-linux-x64-gnu",
+      "version": "1.32.0"
+    },
+    {
+      "development": true,
+      "license": "MPL-2.0",
+      "optional": true,
+      "package_path": "node_modules/lightningcss-linux-x64-musl",
+      "version": "1.32.0"
+    },
+    {
+      "development": true,
+      "license": "MPL-2.0",
+      "optional": true,
+      "package_path": "node_modules/lightningcss-win32-arm64-msvc",
+      "version": "1.32.0"
+    },
+    {
+      "development": true,
+      "license": "MPL-2.0",
+      "optional": true,
+      "package_path": "node_modules/lightningcss-win32-x64-msvc",
+      "version": "1.32.0"
+    },
+    {
+      "development": true,
+      "license": "ISC",
+      "optional": false,
+      "package_path": "node_modules/lru-cache",
+      "version": "5.1.1"
+    },
+    {
+      "development": false,
+      "license": "ISC",
+      "optional": false,
+      "package_path": "node_modules/lucide-react",
+      "version": "0.546.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/magic-string",
+      "version": "0.30.21"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/meshoptimizer",
+      "version": "1.1.1"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/ms",
+      "version": "2.1.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/nanoid",
+      "version": "3.3.20"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/node-releases",
+      "version": "2.0.58"
+    },
+    {
+      "development": true,
+      "license": "ISC",
+      "optional": false,
+      "package_path": "node_modules/picocolors",
+      "version": "1.1.1"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/picomatch",
+      "version": "4.0.7"
+    },
+    {
+      "development": true,
+      "license": "Apache-2.0",
+      "optional": false,
+      "package_path": "node_modules/playwright",
+      "version": "1.64.1"
+    },
+    {
+      "development": true,
+      "license": "Apache-2.0",
+      "optional": false,
+      "package_path": "node_modules/playwright-core",
+      "version": "1.64.1"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/postcss",
+      "version": "8.5.29"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/react",
+      "version": "19.3.0"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/react-dom",
+      "version": "19.3.0"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/react-reconciler",
+      "version": "0.31.0"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/react-reconciler/node_modules/scheduler",
+      "version": "0.25.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/react-refresh",
+      "version": "0.18.0"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/react-use-measure",
+      "version": "2.1.7"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/rollup",
+      "version": "4.64.0"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/scheduler",
+      "version": "0.28.0"
+    },
+    {
+      "development": true,
+      "license": "ISC",
+      "optional": false,
+      "package_path": "node_modules/semver",
+      "version": "6.3.1"
+    },
+    {
+      "development": true,
+      "license": "BSD-3-Clause",
+      "optional": false,
+      "package_path": "node_modules/source-map-js",
+      "version": "1.2.2"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/suspend-react",
+      "version": "0.1.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/tailwindcss",
+      "version": "4.3.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/tapable",
+      "version": "2.3.3"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/three",
+      "version": "0.186.1"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/tinyglobby",
+      "version": "0.2.17"
+    },
+    {
+      "development": true,
+      "license": "Apache-2.0",
+      "optional": false,
+      "package_path": "node_modules/typescript",
+      "version": "5.9.3"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/update-browserslist-db",
+      "version": "1.3.4"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/use-sync-external-store",
+      "version": "1.7.0"
+    },
+    {
+      "development": true,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/vite",
+      "version": "7.3.7"
+    },
+    {
+      "development": true,
+      "license": "ISC",
+      "optional": false,
+      "package_path": "node_modules/yallist",
+      "version": "3.1.1"
+    },
+    {
+      "development": false,
+      "license": "MIT",
+      "optional": false,
+      "package_path": "node_modules/zustand",
+      "version": "5.0.15"
+    }
+  ],
+  "python_distributions": [
+    {
+      "license_classifiers": [],
+      "license_declaration": "MIT",
+      "license_files": [
+        "annotated_doc-0.0.5.dist-info/licenses/LICENSE"
+      ],
+      "name": "annotated-doc",
+      "version": "0.0.5"
+    },
+    {
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_declaration": "MIT",
+      "license_files": [
+        "annotated_types-0.8.0.dist-info/licenses/LICENSE"
+      ],
+      "name": "annotated-types",
+      "version": "0.8.0"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "MIT",
+      "license_files": [
+        "anyio-4.14.2.dist-info/licenses/LICENSE"
+      ],
+      "name": "anyio",
+      "version": "4.14.2"
+    },
+    {
+      "license_classifiers": [
+        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
+      ],
+      "license_declaration": "MPL-2.0",
+      "license_files": [
+        "certifi-2026.10.19.dist-info/licenses/LICENSE"
+      ],
+      "name": "certifi",
+      "version": "2026.10.19"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "BSD-3-Clause",
+      "license_files": [
+        "click-8.5.0.dist-info/licenses/LICENSE.txt"
+      ],
+      "name": "click",
+      "version": "8.5.0"
+    },
+    {
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_declaration": null,
+      "license_files": [
+        "colorama-0.4.6.dist-info/licenses/LICENSE.txt"
+      ],
+      "name": "colorama",
+      "version": "0.4.6"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "MIT",
+      "license_files": [
+        "fastapi-0.143.3.dist-info/licenses/LICENSE"
+      ],
+      "name": "fastapi",
+      "version": "0.143.3"
+    },
+    {
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_declaration": "MIT",
+      "license_files": [
+        "h11-0.16.0.dist-info/licenses/LICENSE.txt"
+      ],
+      "name": "h11",
+      "version": "0.16.0"
+    },
+    {
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_declaration": "BSD-3-Clause",
+      "license_files": [
+        "httpcore-1.0.9.dist-info/licenses/LICENSE.md"
+      ],
+      "name": "httpcore",
+      "version": "1.0.9"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "MIT",
+      "license_files": [
+        "httptools-0.9.0.dist-info/licenses/LICENSE",
+        "httptools-0.9.0.dist-info/licenses/vendor/http-parser/LICENSE-MIT",
+        "httptools-0.9.0.dist-info/licenses/vendor/llhttp/LICENSE"
+      ],
+      "name": "httptools",
+      "version": "0.9.0"
+    },
+    {
+      "license_classifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "license_declaration": "BSD-3-Clause",
+      "license_files": [
+        "httpx-0.28.1.dist-info/licenses/LICENSE.md"
+      ],
+      "name": "httpx",
+      "version": "0.28.1"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "BSD-3-Clause",
+      "license_files": [
+        "idna-3.20.dist-info/licenses/LICENSE.md"
+      ],
+      "name": "idna",
+      "version": "3.20"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "MIT",
+      "license_files": [
+        "iniconfig-2.3.1.dist-info/licenses/LICENSE"
+      ],
+      "name": "iniconfig",
+      "version": "2.3.1"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "Apache-2.0",
+      "license_files": [
+        "opentelemetry_api-1.45.1.dist-info/licenses/LICENSE"
+      ],
+      "name": "opentelemetry-api",
+      "version": "1.45.1"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "Apache-2.0 OR BSD-2-Clause",
+      "license_files": [
+        "packaging-26.3.dist-info/licenses/LICENSE",
+        "packaging-26.3.dist-info/licenses/LICENSE.APACHE",
+        "packaging-26.3.dist-info/licenses/LICENSE.BSD"
+      ],
+      "name": "packaging",
+      "version": "26.3"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "MIT",
+      "license_files": [
+        "pip-26.2.1.dist-info/licenses/AUTHORS.txt",
+        "pip-26.2.1.dist-info/licenses/LICENSE.txt",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/cachecontrol/LICENSE.txt",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/certifi/LICENSE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/distlib/LICENSE.txt",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/distro/LICENSE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/idna/LICENSE.md",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/msgpack/COPYING",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/packaging/LICENSE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/packaging/LICENSE.APACHE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/packaging/LICENSE.BSD",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/pkg_resources/LICENSE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/platformdirs/LICENSE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/pygments/LICENSE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/pyproject_hooks/LICENSE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/requests/LICENSE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/resolvelib/LICENSE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/rich/LICENSE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/tomli/LICENSE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/tomli_w/LICENSE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/truststore/LICENSE",
+        "pip-26.2.1.dist-info/licenses/src/pip/_vendor/urllib3/LICENSE.txt"
+      ],
+      "name": "pip",
+      "version": "26.2.1"
+    },
+    {
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_declaration": "MIT",
+      "license_files": [
+        "pluggy-1.7.0.dist-info/licenses/LICENSE"
+      ],
+      "name": "pluggy",
+      "version": "1.7.0"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "MIT",
+      "license_files": [
+        "pydantic-2.12.5.dist-info/licenses/LICENSE"
+      ],
+      "name": "pydantic",
+      "version": "2.12.5"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "MIT",
+      "license_files": [
+        "pydantic_core-2.41.5.dist-info/licenses/LICENSE"
+      ],
+      "name": "pydantic_core",
+      "version": "2.41.5"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "BSD-2-Clause",
+      "license_files": [
+        "pygments-2.20.0.dist-info/licenses/AUTHORS",
+        "pygments-2.20.0.dist-info/licenses/LICENSE"
+      ],
+      "name": "Pygments",
+      "version": "2.20.0"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "MIT",
+      "license_files": [
+        "pytest-9.0.3.dist-info/licenses/LICENSE"
+      ],
+      "name": "pytest",
+      "version": "9.0.3"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "BSD-3-Clause",
+      "license_files": [
+        "python_dotenv-1.2.2.dist-info/licenses/LICENSE"
+      ],
+      "name": "python-dotenv",
+      "version": "1.2.2"
+    },
+    {
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_declaration": "MIT",
+      "license_files": [
+        "pyyaml-6.0.3.dist-info/licenses/LICENSE"
+      ],
+      "name": "PyYAML",
+      "version": "6.0.3"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "BSD-3-Clause",
+      "license_files": [
+        "starlette-1.3.1.dist-info/licenses/LICENSE.md"
+      ],
+      "name": "starlette",
+      "version": "1.3.1"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "MIT",
+      "license_files": [
+        "typing_inspection-0.4.4.dist-info/licenses/LICENSE"
+      ],
+      "name": "typing-inspection",
+      "version": "0.4.4"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "PSF-2.0",
+      "license_files": [
+        "typing_extensions-4.16.0.dist-info/licenses/LICENSE"
+      ],
+      "name": "typing_extensions",
+      "version": "4.16.0"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "BSD-3-Clause",
+      "license_files": [
+        "uvicorn-0.40.0.dist-info/licenses/LICENSE.md"
+      ],
+      "name": "uvicorn",
+      "version": "0.40.0"
+    },
+    {
+      "license_classifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "license_declaration": "MIT",
+      "license_files": [
+        "watchfiles-1.3.0.dist-info/licenses/LICENSE"
+      ],
+      "name": "watchfiles",
+      "version": "1.3.0"
+    },
+    {
+      "license_classifiers": [],
+      "license_declaration": "BSD-3-Clause",
+      "license_files": [
+        "websockets-17.3.dist-info/licenses/LICENSE"
+      ],
+      "name": "websockets",
+      "version": "17.3"
+    }
+  ],
+  "websockets": [
+    {
+      "access": "origin check + first-frame operator token; rechecked during observation; 1008 on rejection",
+      "path": "/api/sandbox/sessions/{session_id}/observe"
+    },
+    {
+      "access": "public synthetic recorded-event replay",
+      "path": "/ws/matches/{match_id}"
+    }
+  ]
+}
