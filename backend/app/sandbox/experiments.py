@@ -183,7 +183,7 @@ def verify_bundle(bundle: ExperimentBundle) -> Verification:
     return Verification(verified=True)
 
 
-def bundle(owner, identity) -> ExperimentBundle:
+def _verified_comparison(owner, identity) -> tuple[ExperimentBundle, Comparison]:
     experiment = read('experiments', owner, identity)[1]
     if experiment.status != 'completed':
         raise EngineError('experiment_not_completed')
@@ -202,17 +202,15 @@ def bundle(owner, identity) -> ExperimentBundle:
     verified = verify_bundle(result)
     if not verified.verified:
         raise EngineError('experiment_diverged', 422)
-    return result
+    # verify_bundle independently replays these captured manifests and checks
+    # comparison_hash. Reuse the matching calculation from this same request;
+    # replaying yet again cannot improve its verified source boundary.
+    return result, comparison
+
+
+def bundle(owner, identity) -> ExperimentBundle:
+    return _verified_comparison(owner, identity)[0]
 
 
 def comparison(owner, identity) -> Comparison:
-    result = bundle(owner, identity)
-    # Reconstruct from the verified manifests so a concurrent branch command
-    # cannot change the verified comparison between read and response.
-    states = []
-    for manifest in result.branches:
-        state = initial_state(manifest.scenario)
-        for record in manifest.operations:
-            state = apply_command(state, record.command)
-        states.append(state)
-    return calculate(result.experiment, result.parent.state, states, result.branches)
+    return _verified_comparison(owner, identity)[1]
