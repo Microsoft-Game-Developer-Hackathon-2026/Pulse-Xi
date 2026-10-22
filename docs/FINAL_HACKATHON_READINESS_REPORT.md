@@ -201,3 +201,13 @@ PR76 exact-head checks and final delivery SHA are available on its GitHub page.
 The local maximum-history Windows timeout remains unresolved; Linux PR77 CI passes
 that same test. No weakened assertion or new hosted-performance guarantee is made.
 The remaining profiler/memory/rights/video/access/submission work still applies.
+
+## L. Subsequent GitHub integration and performance verification
+
+GitHub now confirms PRs #76, #77 and #78 merged. Main at 7a8cccf9b9a3b6a6217c5188468493725d01129c has successful Actions run 39790628382. Earlier review-path and unresolved-conflict statements above are historical evidence. PR #78 merged at an intermediate optimization; the remaining verified correction is proposed separately in PR #79, preserving normal history and review.
+
+The combined local validation tree at 7c34dbc7dd0feeb7d3928e32663e709fa1a2ce2e includes the replay fix, native runtime adapter and final performance source. It passed 367 backend tests in 242.42 seconds, TypeScript/production build, both independent committed example verifiers, pip check and seven GLB validations (zero errors/warnings; informational unused UV notices). Real isolated HTTP release smoke passed in 11.57 seconds with both verifiers and recorded original checkpoint UTC; no hosted inference occurred.
+
+The unchanged Windows maximum-history browser case passed separately in 2.7 minutes. The full combined 98-browser suite is still being verified; its final result belongs in PR #79's evidence comment. Shared-prefix proof reuse is bounded to one bundle and requires identical independently checked records/scenario/ancestry. No claimed final state is trusted. Verifier source fingerprints change by contract; only build fingerprint fields in examples changed, with canonical events/state hashes and results preserved.
+
+Release classification remains DEMO READY, SUBMISSION BLOCKED. Rights/release approval (#23), functioning public judge access, actual public video under two minutes and submission confirmation (#25) remain external gates. Hosted Foundry execution is not verified or authorized. The remaining broad profiler, long-session and forensic trace gaps remain explicit; this is not a claim of exhaustive product certification.
