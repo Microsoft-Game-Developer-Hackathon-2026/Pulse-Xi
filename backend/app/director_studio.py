@@ -42,7 +42,10 @@ def _ensure_tables(db: sqlite3.Connection) -> None:
         approved_at TEXT NOT NULL, PRIMARY KEY(match_id, revision))""")
     db.execute("""CREATE TABLE IF NOT EXISTS director_studio_audit (
         id INTEGER PRIMARY KEY AUTOINCREMENT, match_id TEXT NOT NULL, revision INTEGER NOT NULL,
-        action TEXT NOT NULL, at_utc TEXT NOT NULL)""")
+        action TEXT NOT NULL, at_utc TEXT NOT NULL, actor TEXT NOT NULL DEFAULT 'local_admin')""")
+    audit_columns = {row[1] for row in db.execute("PRAGMA table_info(director_studio_audit)")}
+    if "actor" not in audit_columns:
+        db.execute("ALTER TABLE director_studio_audit ADD COLUMN actor TEXT NOT NULL DEFAULT 'local_admin'")
 
 
 def _sources(match: Match, events: list[MatchEvent]) -> dict[str, OverlayCue]:
@@ -89,16 +92,16 @@ def read_studio(match: Match, events: list[MatchEvent]) -> dict:
         _ensure_tables(db)
         row = db.execute("SELECT revision,cues_json FROM director_studio_state WHERE match_id=?", (match.match_id,)).fetchone()
         approved = db.execute("SELECT MAX(revision) FROM director_studio_approvals WHERE match_id=?", (match.match_id,)).fetchone()[0]
-        audit = db.execute("SELECT revision,action,at_utc FROM director_studio_audit WHERE match_id=? ORDER BY id DESC LIMIT 50", (match.match_id,)).fetchall()
+        audit = db.execute("SELECT revision,action,at_utc,actor FROM director_studio_audit WHERE match_id=? ORDER BY id DESC LIMIT 50", (match.match_id,)).fetchall()
     revision = row[0] if row else 0
     edits = [CueEdit.model_validate(item) for item in json.loads(row[1])] if row else _default_edits(sources)
     return {"schema_version": "director-studio/1", "match_id": match.match_id, "revision": revision,
             "approved_revision": approved, "status": "draft" if approved != revision else "approved",
             "cues": _materialize(match, sources, edits),
-            "audit_history": [{"revision": item[0], "action": item[1], "at_utc": item[2]} for item in audit]}
+            "audit_history": [{"revision": item[0], "action": item[1], "at_utc": item[2], "actor": item[3]} for item in audit]}
 
 
-def save_studio(match: Match, events: list[MatchEvent], update: DraftUpdate) -> dict:
+def save_studio(match: Match, events: list[MatchEvent], update: DraftUpdate, *, actor: str = "local_admin") -> dict:
     sources = _sources(match, events)
     _materialize(match, sources, update.cues)
     serialized = json.dumps([item.model_dump(mode="json") for item in update.cues], sort_keys=True, separators=(",", ":"))
@@ -112,12 +115,12 @@ def save_studio(match: Match, events: list[MatchEvent], update: DraftUpdate) -> 
         new_revision = revision + 1
         db.execute("INSERT INTO director_studio_state VALUES (?,?,?) ON CONFLICT(match_id) DO UPDATE SET revision=excluded.revision,cues_json=excluded.cues_json",
                    (match.match_id, new_revision, serialized))
-        db.execute("INSERT INTO director_studio_audit(match_id,revision,action,at_utc) VALUES (?,?,?,?)",
-                   (match.match_id, new_revision, "draft_saved", datetime.now(timezone.utc).isoformat()))
+        db.execute("INSERT INTO director_studio_audit(match_id,revision,action,at_utc,actor) VALUES (?,?,?,?,?)",
+                   (match.match_id, new_revision, "draft_saved", datetime.now(timezone.utc).isoformat(), actor))
     return read_studio(match, events)
 
 
-def approve_studio(match: Match, events: list[MatchEvent], request: ApprovalRequest) -> dict:
+def approve_studio(match: Match, events: list[MatchEvent], request: ApprovalRequest, *, actor: str = "local_admin") -> dict:
     with connect() as db:
         _ensure_tables(db)
         db.execute("BEGIN IMMEDIATE")
@@ -135,8 +138,8 @@ def approve_studio(match: Match, events: list[MatchEvent], request: ApprovalRequ
         else:
             db.execute("INSERT INTO director_studio_approvals VALUES (?,?,?,?)",
                        (match.match_id, row[0], serialized, now))
-            db.execute("INSERT INTO director_studio_audit(match_id,revision,action,at_utc) VALUES (?,?,?,?)",
-                       (match.match_id, row[0], "approved", now))
+            db.execute("INSERT INTO director_studio_audit(match_id,revision,action,at_utc,actor) VALUES (?,?,?,?,?)",
+                       (match.match_id, row[0], "approved", now, actor))
     return {"match_id": match.match_id, "revision": request.expected_revision,
             "status": "approved", "approved_at": now}
 

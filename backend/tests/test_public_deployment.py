@@ -17,7 +17,8 @@ def public_env(monkeypatch, tmp_path):
     monkeypatch.setenv("PULSE_DB_PATH", str(tmp_path / "imported.sqlite"))
     monkeypatch.setenv("PULSE_RUNTIME_DB_PATH", str(tmp_path / "runtime.sqlite"))
     for name in ("PULSE_RUNTIME_TOKEN", "PULSE_RUNTIME_TOKENS", "PULSE_IMPORT_TOKEN",
-                 "PULSE_FOUNDRY_ADMIN_TOKEN", "FOUNDRY_PROJECT_ENDPOINT", "FOUNDRY_MODEL",
+                 "PULSE_FOUNDRY_ADMIN_TOKEN", "PULSE_STUDIO_PRODUCER_TOKEN",
+                 "FOUNDRY_PROJECT_ENDPOINT", "FOUNDRY_MODEL",
                  "PULSE_ENABLE_LOCAL_DATA_ADMIN"):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv("PULSE_ENABLE_FOUNDRY", "false")
@@ -32,6 +33,7 @@ def test_local_mode_remains_default(monkeypatch):
 @pytest.mark.parametrize("name,value", [
     ("PULSE_RUNTIME_TOKEN", "x" * 40), ("PULSE_RUNTIME_TOKENS", '{"operator":"' + "x" * 40 + '"}'),
     ("PULSE_IMPORT_TOKEN", "x" * 40), ("PULSE_FOUNDRY_ADMIN_TOKEN", "x" * 40),
+    ("PULSE_STUDIO_PRODUCER_TOKEN", "x" * 40),
     ("FOUNDRY_PROJECT_ENDPOINT", "https://example.invalid"), ("FOUNDRY_MODEL", "model"),
 ])
 def test_public_mode_rejects_privileged_or_provider_configuration(public_env, monkeypatch, name, value):

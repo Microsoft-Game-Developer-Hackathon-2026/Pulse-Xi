@@ -72,7 +72,7 @@ test('authorized Director Studio edits, previews, approves, and exports a stable
   await page.goto('/')
   await page.getByRole('link', { name: 'Director studio' }).click()
   await expect(page.getByRole('heading', { name: 'Director studio / Draft and approval' })).toBeVisible()
-  await page.getByLabel('Producer access token').fill('test-import-token-at-least-32-characters')
+  await page.getByLabel('Producer access token').fill('test-studio-producer-token-at-least-32-characters')
   await page.getByRole('button', { name: 'Connect producer' }).click()
   await expect(page.getByText(/LOCAL PRODUCER ACCESS/)).toHaveCount(0)
   await expect(page.getByText(/REVISION 0 · DRAFT/)).toBeVisible()

@@ -1,6 +1,6 @@
 # Broadcast studio contract proposal
 
-**Status:** design proposal only. This document does not add a studio route, mutable API, or producer authorization. Issue #17 depends on #16 (ProofTrail evidence for sandbox interventions) and #14 (validated Foundry/provider contract). Both are open. The existing read-only overlay endpoints remain the production contract until those prerequisites and a separate implementation review are complete.
+> **Superseded:** the draft, approval and export workflow now exists. See [Director Studio draft contract](DIRECTOR_STUDIO.md) for the active API, producer authorization and audit behavior. Issue #17 remains open while its Foundry dependency (#14) awaits an explicitly approved live validation. The original proposal below is retained as design history and is not an accurate description of the current implementation.
 
 ## Existing behavior
 

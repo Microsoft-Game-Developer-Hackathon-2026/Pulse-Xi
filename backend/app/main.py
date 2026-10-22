@@ -26,7 +26,7 @@ from .security import LocalStaticFiles, RequestBoundary
 from .data_hub import MatchPackage, package_bytes, package_conflict, quality, require_import_token
 from .storage import ingest_package, imported_snapshot
 from .library_lifecycle import (LifecycleAction, change_lifecycle, deletion_record, library_entries,
-                                local_admin_enabled, require_local_admin)
+                                local_admin_enabled, require_local_admin, require_studio_producer)
 from .exports import AnalysisExport, analysis_export
 from .director_studio import ApprovalRequest, DraftUpdate, approve_studio, export_studio, read_studio, save_studio
 from .sandbox.api import router as sandbox_router
@@ -441,36 +441,37 @@ def match_overlay(match_id: str, cue_id: str):
     return cue
 
 
-@app.get("/api/matches/{match_id}/studio", dependencies=[Depends(require_local_admin)])
-def director_studio_read(match_id: str):
+@app.get("/api/matches/{match_id}/studio")
+def director_studio_read(match_id: str, actor: str = Depends(require_studio_producer)):
     match, events = get_match(match_id)
     return read_studio(match, events)
 
 
-@app.put("/api/matches/{match_id}/studio", dependencies=[Depends(require_local_admin)])
-def director_studio_save(match_id: str, update: DraftUpdate):
+@app.put("/api/matches/{match_id}/studio")
+def director_studio_save(match_id: str, update: DraftUpdate, actor: str = Depends(require_studio_producer)):
     match, events = get_match(match_id)
     try:
-        return save_studio(match, events, update)
+        return save_studio(match, events, update, actor=actor)
     except ValueError as error:
         raise HTTPException(422, str(error)) from error
     except RuntimeError as error:
         raise HTTPException(409, str(error)) from error
 
 
-@app.post("/api/matches/{match_id}/studio/approve", dependencies=[Depends(require_local_admin)])
-def director_studio_approve(match_id: str, approval: ApprovalRequest):
+@app.post("/api/matches/{match_id}/studio/approve")
+def director_studio_approve(match_id: str, approval: ApprovalRequest, actor: str = Depends(require_studio_producer)):
     match, events = get_match(match_id)
     try:
-        return approve_studio(match, events, approval)
+        return approve_studio(match, events, approval, actor=actor)
     except ValueError as error:
         raise HTTPException(422, str(error)) from error
     except RuntimeError as error:
         raise HTTPException(409, str(error)) from error
 
 
-@app.get("/api/matches/{match_id}/studio/export", dependencies=[Depends(require_local_admin)])
-def director_studio_export(match_id: str, revision: int | None = Query(None, ge=1)):
+@app.get("/api/matches/{match_id}/studio/export")
+def director_studio_export(match_id: str, revision: int | None = Query(None, ge=1),
+                            actor: str = Depends(require_studio_producer)):
     get_match(match_id)
     try:
         return export_studio(match_id, revision)
