@@ -39,6 +39,7 @@ def main():
             player.passing = player.finishing = player.defending = 100
     construction = {}
     for name, config in [('default', ScenarioConfig()), ('maximal_names_attributes', maximal)]:
+        build_scenario(config)  # warm validation/model construction outside measured samples
         times = []
         for _ in range(1000):
             start = time.perf_counter()
@@ -48,6 +49,7 @@ def main():
                               'p95_ms': sorted(times)[949]}
     rows = []
     for name, template in presets().items():
+        finish(template.model_copy(update={'seed': 2_147_483_647}, deep=True))  # warm this preset; discard output
         for seed in range(args.samples):
             config = template.model_copy(update={'seed': seed}, deep=True)
             start = time.perf_counter()
@@ -63,6 +65,8 @@ def main():
     print(json.dumps({'python': platform.python_version(), 'platform': platform.system(),
         'engine_version': ENGINE_VERSION, 'schema_version': SCHEMA_VERSION, 'rng_algorithm': RNG_ALGORITHM,
         'construction': construction, 'fulltime_runs': rows,
+        'warmup_runs_per_preset': 1,
+        'warmup_runs_per_construction_case': 1,
         'profiled_decisions': {'calls': decision[1], 'cumulative_seconds': decision[3],
                               'mean_microseconds': decision[3] / decision[1] * 1_000_000},
         'limitations': 'Local wall times include validation/copying; profiler adds overhead. No deployment SLA or real-football accuracy claim.'}, sort_keys=True, indent=2))
