@@ -1,9 +1,27 @@
 """Independent replay from resolved inputs, never from the claimed final state."""
-from .engine import EngineError, apply_command, build_scenario, digest, initial_state, implementation_hash
-from .models import ExperimentManifest, Verification
+from dataclasses import dataclass
+
+from .engine import EngineError, apply_command, build_scenario, canonical, digest, initial_state, implementation_hash
+from .models import EngineState, ExperimentManifest, Verification
 
 
-def verify_manifest(manifest: ExperimentManifest) -> Verification:
+@dataclass
+class _VerifiedPrefix:
+    """One bounded prefix, computed locally; never accepted from a wire payload.
+
+    Only verify_bundle creates this per-request object. apply_command is
+    copy-on-write, so suffix replay cannot mutate the verified parent state.
+    """
+    revision: int
+    state: EngineState | None = None
+    scenario: str = ''
+    operations: tuple[str, ...] = ()
+    ancestry: tuple[str, ...] = ()
+    seen: frozenset[str] = frozenset()
+    last_ancestor_revision: int = 0
+
+
+def verify_manifest(manifest: ExperimentManifest, *, _prefix: _VerifiedPrefix | None = None) -> Verification:
     def mismatch(component, expected, actual, index=None):
         return Verification(verified=False, component=component, operation_index=index,
                             expected=str(expected), actual=str(actual))
@@ -17,7 +35,20 @@ def verify_manifest(manifest: ExperimentManifest) -> Verification:
     seen = set()
     ancestry_index = 0
     last_ancestor_revision = 0
-    for index, record in enumerate(manifest.operations):
+    start = 0
+    if (_prefix is not None and _prefix.state is not None
+            and canonical(scenario) == _prefix.scenario
+            and tuple(canonical(r) for r in manifest.operations[:_prefix.revision]) == _prefix.operations
+            and tuple(canonical(a) for a in manifest.ancestry[:len(_prefix.ancestry)]) == _prefix.ancestry):
+        # Every skipped record and ancestor equals an already independently
+        # verified input/hash record. Any difference takes the full replay path.
+        state = _prefix.state
+        seen = set(_prefix.seen)
+        ancestry_index = len(_prefix.ancestry)
+        last_ancestor_revision = _prefix.last_ancestor_revision
+        start = _prefix.revision
+    for index in range(start, len(manifest.operations)):
+        record = manifest.operations[index]
         if record.command.operation_id in seen:
             return mismatch('operation_id', 'unique', record.command.operation_id, index)
         seen.add(record.command.operation_id)
@@ -41,6 +72,13 @@ def verify_manifest(manifest: ExperimentManifest) -> Verification:
                 return mismatch('ancestry.checkpoint_id', ancestor.checkpoint_id, expected_id, index)
             ancestry_index += 1
             last_ancestor_revision = ancestor.revision
+        if _prefix is not None and _prefix.state is None and state.revision == _prefix.revision:
+            _prefix.state = state
+            _prefix.scenario = canonical(scenario)
+            _prefix.operations = tuple(canonical(r) for r in manifest.operations[:index + 1])
+            _prefix.ancestry = tuple(canonical(a) for a in manifest.ancestry[:ancestry_index])
+            _prefix.seen = frozenset(seen)
+            _prefix.last_ancestor_revision = last_ancestor_revision
     if ancestry_index != len(manifest.ancestry):
         return mismatch('ancestry.revision', 'visited checkpoint revisions', 'unresolved ancestry')
     if state.interventions != manifest.interventions:
