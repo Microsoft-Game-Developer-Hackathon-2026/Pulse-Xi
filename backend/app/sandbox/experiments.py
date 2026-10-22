@@ -6,7 +6,7 @@ from typing import Literal
 from . import storage
 from .control import Experiment, ExperimentRequest, read, trial_commands
 from .engine import EngineError, apply_command, digest, restore_state, implementation_hash
-from .manifest import verify_manifest
+from .manifest import _VerifiedPrefix, verify_manifest
 from .models import ExperimentManifest, Model, Snapshot, Verification, Digest
 
 METRICS = ('possessions', 'pressures', 'recoveries', 'turnovers', 'final_third_entries', 'shots', 'goals', 'activity', 'involvements')
@@ -155,8 +155,9 @@ def verify_bundle(bundle: ExperimentBundle) -> Verification:
             or experiment.start_tick != parent.tick or experiment.request.expected_revision != parent.revision):
         return Verification(verified=False, component='experiment.boundary')
     states = []
+    prefix = _VerifiedPrefix(parent.revision)
     for index, manifest in enumerate(bundle.branches):
-        result = verify_manifest(manifest)
+        result = verify_manifest(manifest, _prefix=prefix)
         if not result.verified:
             result.component = f'branches[{index}].{result.component}'
             return result
@@ -185,12 +186,23 @@ def verify_bundle(bundle: ExperimentBundle) -> Verification:
     return Verification(verified=True)
 
 
+def _trial_manifest(owner: str, session_id: str, revision: int) -> ExperimentManifest:
+    # manifest() captures state and receipts in one read transaction. Completed
+    # trials normally remain at exactly this boundary, so historical replay is
+    # unnecessary. A subsequently advanced branch still uses the historical path.
+    # Both paths undergo full independent verification before any result returns.
+    current = storage.manifest(owner, session_id)
+    if len(current.operations) == revision:
+        return current
+    return storage.manifest_at(owner, session_id, revision)
+
+
 def _verified_comparison(owner, identity) -> tuple[ExperimentBundle, Comparison]:
     experiment = read('experiments', owner, identity)[1]
     if experiment.status != 'completed':
         raise EngineError('experiment_not_completed')
     checkpoint = storage.get_checkpoint(owner, experiment.request.checkpoint_id)
-    manifests = [storage.manifest_at(owner, sid, experiment.request.expected_revision + len(trial_commands(experiment, index)))
+    manifests = [_trial_manifest(owner, sid, experiment.request.expected_revision + len(trial_commands(experiment, index)))
                  for index, sid in enumerate(experiment.branches)]
     states = []
     for manifest in manifests:

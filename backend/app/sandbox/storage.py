@@ -230,6 +230,26 @@ def get_runtime(owner: str, session_id: str) -> RuntimeView:
         return RuntimeView(**{k: v for k, v in ack(state, session_id).model_dump().items() if k != 'lifecycle'}, state=state)
 
 
+def runtime_revision(owner: str, session_id: str) -> int:
+    """Read the committed boundary without parsing an unchanged event snapshot.
+
+    Restored branches start at their creation receipt's inherited revision; local
+    command revisions advance atomically with the state. Keep ownership in this
+    query even when an observer has already authenticated.
+    """
+    with connect() as db:
+        row = db.execute('''SELECT
+            (SELECT MAX(c.revision) FROM commands c WHERE c.session_id=s.id), e.payload
+            FROM sessions s JOIN runtime_events e ON e.session_id=s.id AND e.cursor=0
+            WHERE s.id=? AND s.owner=?''', (session_id, owner)).fetchone()
+        if row is None:
+            raise EngineError('not_found', 404)
+        revision = row[0] if row[0] is not None else json.loads(row[1])['revision']
+        if type(revision) is not int or revision < 0:
+            raise EngineError('runtime_revision_invalid', 500)
+        return revision
+
+
 def read_events(owner: str, session_id: str, cursor: int, limit: int) -> EventPage:
     with connect() as db:
         db.execute('BEGIN')
