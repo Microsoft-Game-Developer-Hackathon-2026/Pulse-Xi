@@ -6,7 +6,7 @@ from typing import Literal
 from . import storage
 from .control import Experiment, ExperimentRequest, read, trial_commands
 from .engine import EngineError, apply_command, digest, restore_state, implementation_hash
-from .manifest import verify_manifest
+from .manifest import _VerifiedPrefix, verify_manifest
 from .models import ExperimentManifest, Model, Snapshot, Verification, Digest
 
 METRICS = ('possessions', 'pressures', 'recoveries', 'turnovers', 'final_third_entries', 'shots', 'goals', 'activity', 'involvements')
@@ -155,8 +155,9 @@ def verify_bundle(bundle: ExperimentBundle) -> Verification:
             or experiment.start_tick != parent.tick or experiment.request.expected_revision != parent.revision):
         return Verification(verified=False, component='experiment.boundary')
     states = []
+    prefix = _VerifiedPrefix(parent.revision)
     for index, manifest in enumerate(bundle.branches):
-        result = verify_manifest(manifest)
+        result = verify_manifest(manifest, _prefix=prefix)
         if not result.verified:
             result.component = f'branches[{index}].{result.component}'
             return result

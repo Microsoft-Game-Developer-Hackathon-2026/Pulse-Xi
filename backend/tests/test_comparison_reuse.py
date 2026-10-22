@@ -1,7 +1,7 @@
 """A successful independent audit must not trigger another full history replay."""
 import pytest
 
-from app.sandbox import control, experiments, storage
+from app.sandbox import control, experiments, manifest, storage
 from app.sandbox.engine import EngineError, digest
 from app.sandbox.models import Command, ExperimentManifest
 from test_runtime_integration import database, checkpoint, experiment_request, finish_experiment
@@ -86,3 +86,40 @@ def test_current_manifest_fast_path_does_not_bypass_corrupt_prefix_rejection(dat
     monkeypatch.setattr(storage, 'manifest', corrupted)
     with pytest.raises(EngineError, match='experiment_diverged'):
         experiments.comparison('alice', job.experiment_id)
+
+
+def test_prefix_proof_is_replayed_once_per_bundle_and_never_reused_between_requests(database, monkeypatch):
+    root = checkpoint()
+    job = finish_experiment(control.create_experiment('alice', experiment_request(root)))
+    value = experiments.bundle('alice', job.experiment_id)
+    apply = manifest.apply_command
+    prefix_reads = []
+
+    def counted(state, command):
+        if command.expected_revision < root.revision:
+            prefix_reads.append(command.operation_id)
+        return apply(state, command)
+
+    monkeypatch.setattr(manifest, 'apply_command', counted)
+    assert experiments.verify_bundle(value).verified
+    assert len(prefix_reads) == root.revision
+    assert experiments.verify_bundle(value).verified
+    assert len(prefix_reads) == 2 * root.revision
+
+
+@pytest.mark.parametrize('field', ['state_hash', 'event_hash', 'command', 'ancestry', 'scenario'])
+def test_shared_prefix_never_accepts_a_different_later_branch_claim(database, field):
+    job = finish_experiment(control.create_experiment('alice', experiment_request(checkpoint())))
+    value = experiments.bundle('alice', job.experiment_id).model_dump(mode='json')
+    branch = value['branches'][1]
+    if field in ('state_hash', 'event_hash'):
+        branch['operations'][0][field] = '0' * 64
+    elif field == 'command':
+        branch['operations'][0]['command']['ticks'] += 1
+    elif field == 'ancestry':
+        branch['ancestry'][0]['session_id'] = 'runtime-' + '0' * 64
+    else:
+        branch['scenario']['config']['seed'] += 1
+    result = experiments.verify_bundle(experiments.ExperimentBundle.model_validate(value))
+    assert not result.verified
+    assert result.component.startswith('branches[1].')
