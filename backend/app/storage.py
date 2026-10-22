@@ -70,7 +70,7 @@ def connect():
                 connection.execute("PRAGMA user_version=2")
                 version = 2
             connection.commit()
-        if version != 2:
+        if version not in (2, 3):
             raise RuntimeError(f"unsupported PULSE XI database version {version}")
         with connection:
             yield connection
