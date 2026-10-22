@@ -359,16 +359,18 @@ async def observe(websocket: WebSocket, session_id: str, cursor: int = Query(def
             # Revalidate rotated/revoked credentials before every observation.
             if require_operator('Bearer ' + frame['token']) != owner:
                 raise EngineError('unauthorized', 403)
-            view = await run_in_threadpool(storage.get_runtime, owner, session_id)
-            if cursor > view.event_cursor:
-                raise EngineError('cursor_ahead')
-            if last_revision == -1:
-                await websocket.send_json({'kind': 'snapshot', 'view': view.model_dump(mode='json')})
-            elif view.revision != last_revision:
-                value = view.model_dump(mode='json')
-                events = value['state'].pop('events')
-                await websocket.send_json({'kind': 'delta', 'view': value, 'from_cursor': cursor, 'events': events[cursor:]})
-            cursor, last_revision = view.event_cursor, view.revision
+            revision = await run_in_threadpool(storage.runtime_revision, owner, session_id)
+            if last_revision == -1 or revision != last_revision:
+                view = await run_in_threadpool(storage.get_runtime, owner, session_id)
+                if cursor > view.event_cursor:
+                    raise EngineError('cursor_ahead')
+                if last_revision == -1:
+                    await websocket.send_json({'kind': 'snapshot', 'view': view.model_dump(mode='json')})
+                elif view.revision != last_revision:
+                    value = view.model_dump(mode='json')
+                    events = value['state'].pop('events')
+                    await websocket.send_json({'kind': 'delta', 'view': value, 'from_cursor': cursor, 'events': events[cursor:]})
+                cursor, last_revision = view.event_cursor, view.revision
             # Receive disconnects promptly, without requiring a simulation change.
             try:
                 message = await asyncio.wait_for(websocket.receive(), timeout=0.25)
