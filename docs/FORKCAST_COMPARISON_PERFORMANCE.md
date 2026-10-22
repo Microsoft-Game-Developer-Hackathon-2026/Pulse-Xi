@@ -22,8 +22,15 @@ verification, tamper rejection, ancestry, input/parent boundary and comparison-h
 checks remain. Engine/RNG/models/manifest-verifier files and analytical formulas
 are unchanged.
 
+Calculation now reconstructs only trial suffixes from the immutable checkpoint.
+The independent manifest verifier still replays the entire history from kickoff
+for every branch. Its verified last ancestor must match parent session/checkpoint,
+revision and state hash before that parent is reused in verification calculations.
+A forged early prefix operation remains rejected. apply_command is copy-on-write,
+so each trial leaves the shared source checkpoint unchanged.
+
 The new regression first failed against original main with the explicit
-post-audit fourth-replay assertion. It passes on the candidate, as do58 focused
+post-audit fourth-replay assertion. It passes on the candidate, as do59 focused
 runtime/reproduction tests. Both independent committed example verifiers pass.
 
 ## Versioned source fingerprint
@@ -49,18 +56,20 @@ seed7, duration1800, checkpoint1200,2 paired trials,300-second horizon,
 concurrency1, three sequential in-process samples per revision. Temporary SQLite
 stores; no HTTP/provider calls or personal data. Background load was uncontrolled.
 
-| Measurement | Original main | Candidate ca72516 |
+| Measurement | Original main | Candidate f06654f |
 |---|---:|---:|
-| Total replayed command transitions per comparison | 120 | 90 |
+| Total replayed command transitions per comparison | 120 | 50 |
 | Independent verifier transitions | 30 | 30 |
-| Measured median ms (3 samples only) | 5950.82 | 5263.84 |
+| Measured median ms (3 samples only) | 5950.82 | 2056.30 |
 | Comparison hash | c071ffb03edad0d6dedc86dcff76f1f0cebd3fce5ace4c5054b4fce5236e075d | identical |
 
 [Raw baseline](benchmarks/forkcast-reuse/before.json) and
 [raw candidate](benchmarks/forkcast-reuse/after.json) preserve every observation.
-The repeatable result is25% fewer replay transitions with independent-verifier
-work unchanged. The observed11.5% median reduction is a small, high-variance local
-sample, not a P95/production improvement guarantee. No memory/FPS claim is made.
+The repeatable result is58.3% fewer replay transitions with independent-verifier
+work unchanged (30 transitions per branch set). The observed65.4% median reduction
+is a small, high-variance local sample, not a P95/production improvement guarantee.
+The intermediate calculation-only reuse did not meet the local maximum-history
+budget; its raw profile is retained in intermediate.json rather than concealed. No memory/FPS claim is made.
 
 ## Acceptance boundary
 
