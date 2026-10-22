@@ -100,6 +100,7 @@ Set variables in the server shell before startup. Do not commit credentials or p
 | `PULSE_DB_PATH` | Imported-match SQLite database; default `backend/data/pulse_xi.sqlite` |
 | `PULSE_IMPORT_TOKEN` | Shared dataset write capability, at least 32 characters; not private multi-user ownership |
 | `PULSE_ENABLE_LOCAL_DATA_ADMIN` | Exact value `1` enables additional direct-loopback administration checks; keep unset publicly |
+| `PULSE_STUDIO_PRODUCER_TOKEN` | Optional server-only bearer capability for Director Studio in `local` deployment mode; at least 32 characters; never accepted in `public-readonly` mode |
 | `PULSE_FOUNDRY_ADMIN_TOKEN` | Administrative capability for privileged agent operations; see security qualification below |
 | `PULSE_ENABLE_FOUNDRY`, `FOUNDRY_PROJECT_ENDPOINT`, `FOUNDRY_MODEL` | Optional provider path; enabled only by exact `true` plus endpoint/model; leave disabled for offline work |
 | `PULSE_BUILD_REVISION` | Optional truthful build revision in analysis exports; otherwise unavailable |

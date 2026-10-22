@@ -205,6 +205,25 @@ html[data-px-material="glass"] {
   & :is(.studio-lower small,.broadcast-cue small) { color:var(--px-accent); letter-spacing:1px; }
   & .broadcast-cue { min-width:0; max-width:85%; }
   & .studio-queue { padding:4px; }
+  & .studio-editor { margin-top:18px; }
+  & .studio-route { padding:24px; }
+  & .studio-route-link { display:inline-flex; margin:16px 0; color:var(--px-accent); font-weight:600; }
+  & .studio-auth,.studio-editor-actions,.studio-edit-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:12px 0; }
+  & .studio-auth input { min-width:240px; }
+  & .studio-edit-preview { display:grid; grid-template-columns:minmax(260px, 1fr) minmax(320px, 1.4fr); gap:16px; align-items:start; }
+  & .studio-cue-editor { display:grid; gap:10px; max-height:680px; overflow:auto; }
+  & .studio-cue-editor fieldset { border:1px solid #ffffff24; border-radius:12px; padding:12px; min-width:0; }
+  & .studio-cue-editor legend { max-width:100%; font-weight:700; }
+  & .studio-edit-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  & .studio-edit-grid label { display:grid; gap:4px; }
+  & .studio-edit-grid :is(input,select) { width:100%; min-width:0; }
+  & .studio-lower.top_left { inset:auto auto auto 5%; top:12%; text-align:left; }
+  & .studio-lower.top_right { inset:auto 5% auto auto; top:12%; text-align:right; }
+  & .studio-lower[data-transition=slide] { animation:studio-slide .25s ease-out; }
+  & .studio-lower[data-transition=wipe] { animation:studio-wipe .25s ease-out; }
+  @keyframes studio-slide { from { transform:translateX(-12px); opacity:.5 } to { transform:translateX(0); opacity:1 } }
+  @keyframes studio-wipe { from { clip-path:inset(0 100% 0 0) } to { clip-path:inset(0) } }
+  @media (max-width:720px) { & .studio-edit-preview { grid-template-columns:1fr; } & .studio-cue-editor { max-height:none; } }
   & .studio-queue-head { font:500 10px/1.5 var(--px-font); letter-spacing:.2px; color:var(--px-text-secondary); flex-wrap:wrap; gap:12px; }
   & .cue-entry { padding:9px 0; margin:0; border-bottom:1px solid #ffffff0e; gap:8px; }
   & .cue-row { border:0; padding:10px 4px; background:none; box-shadow:none; border-radius:0; }

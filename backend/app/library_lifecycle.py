@@ -1,11 +1,12 @@
 """Administrative dataset lifecycle; not simulation checkpoints."""
 import ipaddress
 import os
+import secrets
 from datetime import datetime, timezone
 from typing import Literal
 from uuid import uuid4
 
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, Header, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
 from .data_hub import require_import_token
@@ -34,6 +35,27 @@ def require_local_admin(request: Request, _: None = Depends(require_import_token
         raise HTTPException(403, 'Dataset lifecycle is disabled. It requires explicit local administrator mode and a direct loopback connection; public/proxied administration is unsupported.')
 
 
+def require_studio_producer(request: Request, authorization: str | None = Header(default=None)) -> str:
+    """Authorize a configured shared-demo producer or an explicitly local admin."""
+    from .deployment import deployment_mode
+
+    if deployment_mode() == 'public-readonly':
+        raise HTTPException(403, 'The public read-only deployment does not allow studio changes.')
+    expected = os.getenv('PULSE_STUDIO_PRODUCER_TOKEN', '')
+    if expected:
+        if len(expected) < 32:
+            raise HTTPException(503, 'Studio producer access is misconfigured; the token must contain at least 32 characters.')
+        supplied = (authorization or '').removeprefix('Bearer ')
+        if not (authorization or '').startswith('Bearer ') or not secrets.compare_digest(
+                supplied.encode('utf-8'), expected.encode('utf-8')):
+            raise HTTPException(403, 'Producer authorization required.')
+        return 'producer_token'
+    require_import_token(authorization)
+    if not local_admin_enabled(request):
+        raise HTTPException(403, 'Studio editing requires configured producer access or explicit local administrator mode.')
+    return 'local_admin'
+
+
 class LifecycleAction(BaseModel):
     model_config = ConfigDict(extra='forbid', strict=True)
     action: Literal['archive', 'restore', 'delete']
@@ -57,8 +79,16 @@ def change_lifecycle(match_id: str, action: LifecycleAction) -> dict:
                 raise StorageConflict('deletion safety ledger is full; trusted offline maintenance is required')
             deletion_id = uuid4().hex
             db.execute('INSERT INTO deleted_matches VALUES (?,?,?)', (match_id, deletion_id, datetime.now(timezone.utc).isoformat()))
-            for table in ('package_metadata', 'events', 'match_lifecycle', 'matches'):
-                db.execute(f'DELETE FROM {table} WHERE match_id=?', (match_id,))
+            # Studio records are tied to the imported match identity. Remove
+            # them in the same transaction so recovery cannot inherit stale
+            # cues or approvals from the deleted source.
+            existing = {row[0] for row in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            tables = ('director_studio_approvals', 'director_studio_audit',
+                      'director_studio_state', 'package_metadata', 'events',
+                      'match_lifecycle', 'matches')
+            for table in tables:
+                if table in existing:
+                    db.execute(f'DELETE FROM {table} WHERE match_id=?', (match_id,))
             return {'match_id':match_id, 'status':'deleted', 'deletion_id':deletion_id}
         archived = int(action.action == 'archive')
         if row[2] != archived:
