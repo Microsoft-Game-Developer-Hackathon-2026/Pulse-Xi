@@ -69,7 +69,7 @@ Whole-database restore rotates dataset generation IDs and deletion nonces in the
 
 The integrated runtime exposes `runtime-analysis/1` and authenticated pass/evidence/export adapters under `/api/sandbox/sessions/{id}`. They reuse existing calculations over a committed engine-owned v1 projection, reject future cutoffs and conceal other owners. Private runtime datasets are not resolved through public `/api/matches` routes. Current compatibility is 5400-second scenarios only. See [LIVE_SANDBOX](LIVE_SANDBOX.md#existing-analysis-integration) for every route, local bookmark namespace, export limits and runtime-boundary hash scope. Neither dataset lifecycle nor engine state serialization is replaced.
 
-## Saved scenarios (runtime schema 3)
+## Saved scenarios (introduced in runtime schema 3; retained in schema 4)
 
 The scenario library remains separate from imported-match storage (library schema 2).
 Authenticated GET `/api/sandbox/scenarios` returns at most 100 owned summaries,
@@ -79,3 +79,15 @@ scenario-archive/1; GET `/api/sandbox/scenarios/{id}/archive` exports the persis
 record. New private responses use Cache-Control: no-store. See
 [LIVE_SANDBOX](LIVE_SANDBOX.md#saved-scenario-library-and-archives) for schema,
 identity verification, idempotence, errors, migration and rollback details.
+
+
+## Checkpoint/reproduction additive boundary (runtime schema 4)
+
+Checkpoint reads/summaries add original created_at_utc or null; summaries expose
+saved lifecycle. Command responses add checkpoint_created_at_utc. Timestamp data
+is stored separately and excluded from every deterministic snapshot/hash.
+GET sessions/{id}/reproduction and experiments/{id}/reproduction under
+/api/sandbox wrap the original manifests with versioned unsigned export-build
+provenance. Raw manifest routes remain unchanged; existing verify routes/CLIs
+accept either supported raw payloads or the corresponding wrapper. See the
+[wire/migration and trust contract](LIVE_SANDBOX.md#checkpoint-metadata-and-reproduction-contracts).

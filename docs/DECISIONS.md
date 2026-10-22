@@ -26,7 +26,7 @@ The blueprint/master prompt express intentions rather than current contracts.
    defaults/nulls defines engine hashes; audit UTC is excluded. Identical supported
    build/inputs reproduce. Different command batching can alter state revisions/
    hashes while preserving gameplay. Cross-platform parity needs actual evidence.
-5. **Separate persistence domains.** Library schema 2 and runtime schema 3 are different files,
+5. **Separate persistence domains.** Library schema 2 and runtime schema 4 are different files,
    transactions, migrations, backup allowlists and rollback paths. Atomic commands
    include state/events/receipt/audit/checkpoint. Job progress commits separately
    and recovers with stable command IDs/CAS. Future versions reject; rollback uses
@@ -44,7 +44,7 @@ The blueprint/master prompt express intentions rather than current contracts.
    accounts/viewer roles/gateway rate limits are release work. Deterministic facts
    precede optional Foundry opinion; provider configuration never proves inference.
    Trace GET's fail-open default was corrected on main by #45. Command credential
-   hardening is present on main through #53, even though #52 remains open.
+   hardening is present on main through #53, #52 is now closed as superseded.
 
 9. **Provenance outside simulation state.** ScenarioConfig/Scenario/core hashes
    remain unchanged. Runtime schema 3 adds owner-scoped scenario_metadata only;
@@ -52,3 +52,17 @@ The blueprint/master prompt express intentions rather than current contracts.
    Scenario plus explicit RNG provenance and creation UTC. Import rebuilds identity;
    the first stored record wins on identical imports. Timestamps are unsigned
    provenance, never an input to transitions or a proof of authorship.
+
+10. **Checkpoint calendar metadata is observational.** Schema 4 adds a nullable
+    checkpoint_metadata sidecar, backfills NULL and writes new UTC exactly once
+    inside the checkpoint transaction. Read/retry envelopes enrich the original
+    receipt; core CheckpointView/Snapshot/EngineState and golden artifacts stay
+    unchanged. Backup supports all prior versions; rollback uses matching backups.
+11. **Recovery never rewrites history.** Reset creates a fresh runtime. Restore
+    forks a checkpoint; in-place undo/redo and substitutions remain unsupported.
+    Audit acceptance and current engine applied state are distinct observations.
+12. **Reproduction is not attestation.** Optional runtime-reproduction/1 and
+    forkcast-reproduction/1 wrappers preserve raw manifest compatibility. They
+    include only bounded unsigned export-build provenance; original execution
+    environment is explicitly unrecorded. Git absent means null. Independent
+    replay validates deterministic inputs/outputs, not metadata authenticity.
