@@ -1,0 +1,64 @@
+{
+  "mode": "Headed physical GPU, five-second active orbit; requestAnimationFrame pacing, not GPU timer queries",
+  "commit": "c03435772fa03f988b075ee3d382777544c8be23",
+  "browser": "156.0.8078.4",
+  "viewport": {
+    "width": 1366,
+    "height": 768
+  },
+  "dpr": 1.0000000149011612,
+  "assetReadiness": "Procedural scene; no GLB activation",
+  "gpu": {
+    "renderer": "ANGLE (Intel, Intel(R) Iris(R) Xe Graphics (0x0000A7A1) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "vendor": "WebKit"
+  },
+  "profiles": [
+    {
+      "quality": "low",
+      "metrics": "19 draw calls · 656 triangles · 19 geometries · 2 textures · first ready 551.8 ms · frames in 500 ms sample: 28",
+      "heapBytes": 15676762,
+      "activeCamera": {
+        "durationMs": 5001.399999988079,
+        "frames": 301,
+        "fps": 60.18314871850231,
+        "medianFrameMs": 16.699999999999818,
+        "p95FrameMs": 17
+      }
+    },
+    {
+      "quality": "standard",
+      "metrics": "39 draw calls · 10100 triangles · 39 geometries · 2 textures · first ready 551.8 ms · frames in 500 ms sample: 1",
+      "heapBytes": 12460960,
+      "activeCamera": {
+        "durationMs": 5004.199999988079,
+        "frames": 301,
+        "fps": 60.149474441612455,
+        "medianFrameMs": 16.69999999999891,
+        "p95FrameMs": 17
+      }
+    },
+    {
+      "quality": "high",
+      "metrics": "69 draw calls · 16764 triangles · 55 geometries · 4 textures · first ready 551.8 ms · frames in 500 ms sample: 1",
+      "heapBytes": 16073256,
+      "activeCamera": {
+        "durationMs": 5008.699999952318,
+        "frames": 301,
+        "fps": 60.095433945507914,
+        "medianFrameMs": 16.69999999999709,
+        "p95FrameMs": 16.899999999999636
+      }
+    }
+  ],
+  "requests": {
+    "http://127.0.0.1:8768/assets/SceneCanvas-BQHPUAEm.js": 1
+  },
+  "interactionHeap": {
+    "before": 12970464,
+    "after": 21673764,
+    "afterThirtySecondIdle": 13556690,
+    "note": "No forced GC; bounded samples do not establish a leak or its absence."
+  },
+  "finalMetrics": "38 draw calls · 10076 triangles · 38 geometries · 4 textures · first ready 151.8 ms · frames in 500 ms sample: 20",
+  "errors": []
+}
