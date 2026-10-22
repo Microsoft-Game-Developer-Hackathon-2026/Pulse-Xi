@@ -1,6 +1,51 @@
 """Deterministic evidence packets and rule-based verification."""
-from .analytics import event_metric, events_at, state_at, window_events
-from .models import EventType, FactualClaim, Insight, Match, MatchEvent, OverlayCue
+from .analytics import control_chaos_at, event_metric, events_at, state_at, window_events
+from .models import ControlTurningPoint, EventType, FactualClaim, Insight, Match, MatchEvent, OverlayCue
+
+
+def verify_control_turning_point(
+    claim: ControlTurningPoint, match: Match, events: list[MatchEvent],
+    at_second: int, window_seconds: int,
+) -> bool:
+    """Recompute the approved activity-index rule and validate every source reference."""
+    if claim.verification_status != "verified_rule_based" or claim.team_id not in (
+        match.home.team_id, match.away.team_id,
+    ):
+        return False
+    try:
+        packet = control_chaos_at(match, events, at_second, window_seconds)
+    except ValueError:
+        return False
+    expected = next(
+        (item for item in packet.interpretation.turning_points
+         if item.evidence_id == claim.evidence_id),
+        None,
+    )
+    if expected is None or expected.model_copy(update={
+        "verification_status": claim.verification_status,
+    }) != claim:
+        return False
+    indexed = {event.event_id: event for event in events}
+    if packet.previous_window is None:
+        return False
+    previous_start = packet.previous_window.start_second
+    previous_end = packet.previous_window.end_second
+    current_start = packet.window.start_second
+    current_end = packet.window.end_second
+    source_pairs = (
+        (claim.previous_event_ids, previous_start, previous_end),
+        (claim.current_event_ids, current_start, current_end),
+    )
+    for index, (source_ids, start, end) in enumerate(source_pairs):
+        if (index == 1 and not source_ids) or len(source_ids) != len(set(source_ids)):
+            return False
+        for event_id in source_ids:
+            event = indexed.get(event_id)
+            if event is None or event.team_id != claim.team_id:
+                return False
+            if not start < event.match_second <= end or event.match_second > at_second:
+                return False
+    return True
 
 
 def verify(insight: Insight, match: Match, events: list[MatchEvent]) -> bool:

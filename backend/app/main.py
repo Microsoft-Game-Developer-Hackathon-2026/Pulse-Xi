@@ -12,10 +12,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
-from .analytics import metrics_at, state_at, tactics_at
+from .analytics import control_chaos_at, metrics_at, state_at, tactics_at
 from .agents import TRACES, configured, run_specialists
-from .evidence import insights_for, overlays_for, recap_for
-from .models import EventType, Match, MatchEvent
+from .evidence import insights_for, overlays_for, recap_for, verify_control_turning_point
+from .models import ControlChaosResponse, EventType, Match, MatchEvent
 from .pass_difficulty import (
     PassDifficulty, PassDifficultyEvidence, PassDifficultyPage, PlayerDifficultyResponse,
     player_summary, score_pass, verify_pass_difficulty,
@@ -247,6 +247,94 @@ def match_metrics(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
 def match_tactics(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
     match, events = get_match(match_id)
     return tactics_at(match, events, at_second)
+
+
+@app.get(
+    "/api/matches/{match_id}/control-chaos",
+    response_model=ControlChaosResponse,
+    summary="Compare event-derived match rhythm in equal-duration windows",
+    description=(
+        "Read-only Control vs Chaos v1 for generated and imported matches. Events use (window_start, window_end] "
+        "and are cut off at the selected replay clock. Possession IDs are counts, not time share."
+    ),
+    responses={
+        200: {
+            "description": "Versioned event-derived comparison and verified turning-point claims.",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "windowed-comparison": {
+                            "summary": "Window and evidence shape (illustrative only)",
+                            "value": {
+                                "schema_version": "control-chaos/1",
+                                "match_id": "example-match",
+                                "at_second": 1200,
+                                "window": {"start_second": 900, "end_second": 1200},
+                                "previous_window": {"start_second": 600, "end_second": 900},
+                                "formula_version": "control-chaos-formulas/1",
+                                "units": {
+                                    "progression": "normalized 0-100 pitch x units; not metres",
+                                    "possession_sequences": "distinct observed possession IDs; not time share",
+                                    "pass_completion_ratio": "percent",
+                                    "activity_index": "2 x final-third entries + 3 x shots + recoveries",
+                                    "rate": "per 300 match seconds",
+                                },
+                                "teams": {
+                                    "example-home": {
+                                        "team_id": "example-home",
+                                        "retention": {
+                                            "observed_possession_sequences": {
+                                                "value": 4, "numerator": 4, "denominator": None,
+                                                "unit": "observed possession IDs", "eligible_event_count": 8,
+                                                "located_event_count": None, "missing_coordinate_count": None,
+                                                "missing_identifier_count": 0,
+                                                "unknown_chain_count": None, "supporting_event_ids": ["evt-01"],
+                                                "unavailable_reason": None,
+                                            }
+                                        },
+                                        "progression": {},
+                                        "disruption": {},
+                                        "attacking_activity": {},
+                                    }
+                                },
+                                "deltas": {},
+                                "interpretation": {
+                                    "status": "verified_rule_based",
+                                    "language_limit": "Event association only; no causal or superiority claim.",
+                                    "turning_points": [],
+                                },
+                                "unavailable_reasons": [],
+                            },
+                        }
+                    }
+                }
+            },
+        }
+    },
+)
+def match_control_chaos(
+    match_id: str,
+    at_second: int | None = Query(None, ge=0, le=5400),
+    window_seconds: int = Query(300, ge=1, le=900),
+):
+    match, events = get_match(match_id)
+    cutoff = match.duration_seconds if at_second is None else at_second
+    if cutoff > match.duration_seconds:
+        raise HTTPException(422, "replay cutoff exceeds match duration")
+    if window_seconds not in (300, 600, 900):
+        raise HTTPException(422, "window_seconds must be 300, 600, or 900")
+    try:
+        packet = control_chaos_at(match, events, cutoff, window_seconds)
+    except ValueError as error:
+        if "event stream" in str(error):
+            raise HTTPException(413, str(error)) from error
+        raise HTTPException(422, str(error)) from error
+    if any(
+        not verify_control_turning_point(claim, match, events, cutoff, window_seconds)
+        for claim in packet.interpretation.turning_points
+    ):
+        raise HTTPException(500, "generated Control vs Chaos evidence failed verification")
+    return packet
 
 
 @app.get("/api/matches/{match_id}/passes/{event_id}/difficulty", response_model=PassDifficulty)
