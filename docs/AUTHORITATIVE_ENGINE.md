@@ -1,6 +1,34 @@
 # Football Sandbox Lab architecture and authoritative engine
 
-## Integrated baseline and current contracts (2026-10-21)
+## Checkpoint-to-experiment acceptance update (2026-10-21)
+
+This update starts from main `c2f8c622d21d3db804e57c9a02e4c09b264f9c4b`
+(PR #61), whose exact-head CI passed. It incorporates #59's existing consumer work
+with its authorship preserved and adds checkpoint UTC metadata, explicit reset/audit
+states, and portable reproduction envelopes. The contracts below describe this
+source tree; PR/merge and exact-head CI records determine integration status.
+
+- `checkpoint_metadata.StoredCheckpoint` adds nullable original `created_at_utc`
+  outside Snapshot/EngineState. Runtime schema 4 adds checkpoint_metadata; old rows
+  stay null. Checkpoint, receipt, events, audit, state and metadata commit atomically.
+  HTTP checkpoint command retries enrich the original receipt from that immutable
+  metadata record. They never sample the current clock again.
+- Checkpoint summaries also expose saved lifecycle. Only paused sources with future
+  time are eligible for ForkCast. Completed/cancelled sources remain inspectable;
+  restoring a terminal source does not invent more play.
+- Reset creates a new session from the saved scenario. Restore forks immutable
+  checkpoint history; in-place undo/redo and substitutions are not implemented.
+  Audit acceptance stays append-only; applied status comes from the current
+  engine intervention record, not the acceptance acknowledgment.
+- `reproduction.py` wraps unchanged manifests with versioned, unsigned export-build
+  context. Git revision/dirty state are nullable when unavailable; original execution
+  host/revision were not recorded and are not inferred. Existing manifest endpoints,
+  core serializers, RNG, version constants, implementation hashes and sample
+  artifacts remain unchanged. API/CLI verification accepts old files and wrappers.
+
+See [the complete wire/migration/verification contracts](LIVE_SANDBOX.md#checkpoint-metadata-and-reproduction-contracts).
+
+## Historical integrated baseline (#64/#65)
 
 Main `100106ade274bbb7da137c73b22009f929a72e8c` integrated #64's saved-scenario
 library/archive contracts and runtime schema 3 metadata, following #53's runtime,
@@ -186,7 +214,7 @@ and independent replay. Structural validity alone does not prove authenticity.
 | Actor/tactical state | `ActorState`, `Tactics`, `PendingAction` within EngineState | GK/DF/MF/FW roles follow formation; stamina 0..10000, last action <= tick; no continuous actor positions, substitutions or physics |
 | ClockState | EngineState tick/period/lifecycle + config duration; no separate class | Integer seconds, separate from UTC and browser elapsed time; period 2 starts at duration/2 after halftime event |
 | Intervention | `Intervention` produced by `Command(kind="intervene")` | Current revision/tick, owned valid team/tactic, effective tick+1; old/new value, accepted -> applied. Runtime identity is in audit/envelope, not Intervention fields |
-| Checkpoint | `Snapshot` + `CheckpointView`, sandbox/1 | Full EngineState and digest, stored replay records/ancestry; revision after checkpoint command; API restores owned stored IDs only |
+| Checkpoint | `Snapshot` + boundary `StoredCheckpoint` (extends CheckpointView), sandbox/1 | Full EngineState and digest, stored replay records/ancestry; revision after checkpoint command; nullable sidecar creation UTC; API restores owned stored IDs only |
 | Branch | sessions row + manifest `Ancestor[]`; no Branch class | New runtime ID, copied state/events/operation prefix, independent future writes, preserved owner, ancestry depth 32; inherited operation IDs reserved |
 | ExperimentManifest | `ExperimentManifest`, sandbox/1 | Resolved scenario, RNG/engine/schema versions, implementation hash, replay commands and expected hashes, ancestry/interventions/events; unsigned reproducibility evidence |
 | Paired experiment | `control.ExperimentRequest/Experiment`; `ExperimentBundle` forkcast-manifest/1; `Comparison` forkcast/1 | 1..5 pairs, 1..600-second horizon, <=6 distinct tactical changes/arm, immutable parent and exact child end revisions |
@@ -318,7 +346,7 @@ clients from this actual schema and preserve the documented error-family caveat.
 | Store | Responsibility | Recovery |
 |---|---|---|
 | Library PULSE_DB_PATH, schema 2 | matches/events/package_metadata/match_lifecycle/deleted_matches; public reads, shared import capability | Separate atomic 0->1 and 1->2 migrations; scripts/database-admin.py; restored admin generations rotate |
-| Runtime PULSE_RUNTIME_DB_PATH, schema 3 | scenarios/scenario_metadata/sessions/commands/runtime_events/checkpoints/audit/runs/experiments; owner scope | Atomic 0->1->2->3 steps; metadata migration preserves deterministic payloads; app.sandbox.backup supports versions 1/2/3 |
+| Runtime PULSE_RUNTIME_DB_PATH, schema 4 | scenarios/scenario_metadata/sessions/commands/runtime_events/checkpoints/checkpoint_metadata/audit/runs/experiments; owner scope | Atomic 0->1->2->3->4 steps; metadata migrations preserve deterministic payloads; app.sandbox.backup supports versions 1/2/3/4 |
 | Browser storage | Replay workspace/notes and runtime ID only | Origin/profile-local; not credentials, engine state or server backup |
 | Process memory | Regenerable fixture cache, optional bounded TRACES, worker task | Traces/cache lost on restart; accepted runtimes/jobs reload from SQLite |
 

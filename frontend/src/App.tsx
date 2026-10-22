@@ -1,3 +1,4 @@
+import { useStableViewport } from './useStableViewport'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Activity, ArrowRight, ChevronLeft, ChevronRight, CirclePause, CirclePlay, Radio, RotateCcw, Wifi } from 'lucide-react'
 import type { Cue, Event, Insight, Match, Metrics, Recap, Tactics } from './types'
@@ -48,6 +49,7 @@ function Pitch({ event, match, cue }: { event?: Event; match: Match; cue?: Cue }
 }
 
 export default function App() {
+  useStableViewport()
   const [fanPreferences] = useState(readFanPreferences)
   const [initialWorkspace] = useState(() => { const saved = readWorkspace(); try { return { ...saved, value: deepWorkspace() ?? saved.value } } catch (e) { return { ...saved, notice: String(e) } } })
   const pendingRestore = useRef<Workspace | null>(initialWorkspace.value)
