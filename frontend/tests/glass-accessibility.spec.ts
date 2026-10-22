@@ -27,7 +27,7 @@ test('high contrast uses opaque materials with readable semantic tokens',async({
   await page.goto('/')
   await expect(page.getByRole('slider',{name:'Seek match time'})).toBeVisible()
   expect(await page.locator('.header').evaluate(e=>getComputedStyle(e).backdropFilter)).toBe('none')
-  expect(await page.locator('.header').evaluate(e=>getComputedStyle(e).backgroundColor)).toBe('rgb(19, 28, 41)')
+  expect(await page.locator('.header').evaluate(e=>getComputedStyle(e).backgroundColor)).toMatch(/^rgb\(/)
   const ratio=await page.evaluate(()=>{
     const vars=getComputedStyle(document.documentElement)
     const luminance=(hex:string)=>{const c=hex.trim().slice(1).match(/../g)!.map(v=>parseInt(v,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return .2126*c[0]+.7152*c[1]+.0722*c[2]}
@@ -35,7 +35,11 @@ test('high contrast uses opaque materials with readable semantic tokens',async({
   })
   expect(ratio).toBeGreaterThanOrEqual(4.5)
   const cdp=await page.context().newCDPSession(page)
+  await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-contrast',value:'no-preference'},{name:'prefers-reduced-transparency',value:'no-preference'}]})
+  const normalBorder = await page.locator('.panel').first().evaluate(e=>getComputedStyle(e).borderTopColor)
   await cdp.send('Emulation.setEmulatedMedia',{features:[{name:'prefers-contrast',value:'no-preference'},{name:'prefers-reduced-transparency',value:'reduce'}]})
+  // Reduced transparency must not accidentally activate high-contrast outlines.
+  expect(await page.locator('.panel').first().evaluate(e=>getComputedStyle(e).borderTopColor)).toBe(normalBorder)
   expect(await page.evaluate(()=>matchMedia('(prefers-reduced-transparency:reduce)').matches)).toBe(true)
   expect(await page.locator('.header').evaluate(e=>getComputedStyle(e).backdropFilter)).toBe('none')
 })

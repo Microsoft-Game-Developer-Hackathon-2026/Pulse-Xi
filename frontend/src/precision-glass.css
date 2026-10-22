@@ -1,27 +1,27 @@
 /* PULSE XI / Precision Glass. Presentation only; original layout owns geometry. */
 html[data-px-material="glass"] {
   color-scheme: dark;
-  --px-bg-base: #090d14;
-  --px-bg-elevated: #151b26;
-  --px-surface: #121923;
-  --px-glass-regular: rgba(25, 33, 47, .88);
-  --px-glass-strong: rgba(21, 28, 41, .96);
-  --px-glass-border: rgba(218, 234, 255, .15);
+  --px-bg-base: #101012;
+  --px-bg-elevated: #242427;
+  --px-surface: #1a1a1d;
+  --px-glass-regular: rgba(38, 38, 42, .76);
+  --px-glass-strong: rgba(29, 29, 32, .96);
+  --px-glass-border: rgba(255, 255, 255, .085);
   --px-glass-highlight: rgba(255, 255, 255, .12);
-  --px-control-border: #59677d;
-  --px-text-primary: #edf2fa;
-  --px-text-secondary: #b3bed0;
-  --px-text-muted: #96a5bd;
-  --px-accent: #8be3df;
+  --px-control-border: rgba(255, 255, 255, .16);
+  --px-text-primary: #f5f5f7;
+  --px-text-secondary: #b3b3bb;
+  --px-text-muted: #a0a0aa;
+  --px-accent: #9bddd6;
   --px-accent-ink: #09272b;
   --px-success: #a1e5c6;
   --px-warning: #edd5a8;
   --px-error: #ffc6bc;
   --px-radius-sm: 8px;
   --px-radius-md: 12px;
-  --px-radius-lg: 20px;
+  --px-radius-lg: 18px;
   --px-radius-pill: 999px;
-  --px-shadow-soft: 0 12px 32px -18px rgba(0, 0, 0, .7);
+  --px-shadow-soft: 0 8px 24px -16px rgba(0, 0, 0, .65);
   --px-shadow-floating: 0 24px 70px rgba(0, 0, 0, .45);
   --px-motion-fast: 150ms;
   --px-motion-normal: 240ms;
@@ -33,15 +33,15 @@ html[data-px-material="glass"] {
 html[data-px-material="glass"] body {
   color: var(--px-text-primary);
   background:
-    radial-gradient(ellipse 900px 600px at 75% 0, rgba(65, 98, 147, .14), transparent 80%),
-    radial-gradient(ellipse 650px 750px at 5% 12%, rgba(34, 112, 112, .08), transparent 80%),
+    radial-gradient(ellipse 900px 600px at 75% 0, rgba(154, 166, 186, .065), transparent 80%),
+    radial-gradient(ellipse 650px 750px at 5% 12%, rgba(104, 138, 141, .035), transparent 80%),
     var(--px-bg-base);
   -webkit-font-smoothing: antialiased;
 }
 
 /* Chrome: reflective, softly lit materials; rail/header dimensions stay upstream. */
 html[data-px-material="glass"] .rail {
-  background: linear-gradient(110deg, rgba(255,255,255,.055), transparent 60%), #101620;
+  background: linear-gradient(110deg, rgba(255,255,255,.055), transparent 60%), #171719;
   border-color: var(--px-glass-border);
   box-shadow: inset -1px 0 rgba(255,255,255,.025), 12px 0 28px -25px #000;
 }
@@ -55,7 +55,7 @@ html[data-px-material="glass"] .rail-item.active {
   box-shadow: inset 0 1px #ffffff06;
 }
 html[data-px-material="glass"] .header {
-  background: linear-gradient(115deg, #ffffff05, transparent), rgba(14, 20, 31, .78);
+  background: linear-gradient(115deg, #ffffff05, transparent), rgba(25, 25, 28, .72);
   border-color: var(--px-glass-border);
   -webkit-backdrop-filter: blur(12px) saturate(120%);
   backdrop-filter: blur(12px) saturate(120%);
@@ -68,7 +68,7 @@ html[data-px-material="glass"] .workspace-nav a[aria-current=page] {
   color: var(--px-accent); border-color: var(--px-accent);
   background: linear-gradient(0deg, #8be3df0c, transparent 70%);
 }
-html[data-px-material="glass"] .workspace-recovery { background: linear-gradient(120deg, #ffffff05, transparent), #182330; color: var(--px-text-secondary); border-radius: var(--px-radius-md); box-shadow: inset 0 1px #ffffff0d; }
+html[data-px-material="glass"] .workspace-recovery { background: linear-gradient(120deg, #ffffff05, transparent), #202023; color: var(--px-text-secondary); border-radius: var(--px-radius-md); box-shadow: inset 0 1px #ffffff0d; }
 html[data-px-material="glass"] .synthetic-tag {
   color: var(--px-warning); border-color: #b49c6e66;
   background: #c9a7660b; border-radius: var(--px-radius-pill);
@@ -100,7 +100,7 @@ html[data-px-material="glass"] .scoreboard {
   background:
     radial-gradient(ellipse at 18% 0, #a8dfe714, transparent 55%),
     radial-gradient(ellipse at 85% 100%, #9eacc315, transparent 55%),
-    linear-gradient(125deg, #1d2938, #111923 55%, #202735);
+    linear-gradient(125deg, #292b2e, #1d1e21 55%, #27282c);
   box-shadow: inset 0 1px #ffffff1a, inset 0 -1px #0005, 0 20px 45px -28px #000;
 }
 html[data-px-material="glass"] .scoreboard::before {
@@ -113,30 +113,30 @@ html[data-px-material="glass"] :is(.score b,.match-clock span,.match-phase) { co
 html[data-px-material="glass"] .team-mark { filter: none; box-shadow: 0 5px 18px #0004; }
 html[data-px-material="glass"] .runtime-score {
   border-radius: var(--px-radius-lg);
-  background: radial-gradient(ellipse at 50% 0, #8be3df09, transparent 70%), #111924;
+  background: radial-gradient(ellipse at 50% 0, #8be3df09, transparent 70%), #1d1e21;
   box-shadow: inset 0 1px #ffffff0d;
 }
 html[data-px-material="glass"] :is(.pitch-wrap,.studio-screen) {
   border-color: var(--px-glass-border); border-radius: var(--px-radius-lg);
   background-color: #0c151d; box-shadow: var(--px-shadow-soft);
 }
-html[data-px-material="glass"] :is(.observer-controls,.observer-bar) { background: #141e29; border-color: var(--px-glass-border); }
-html[data-px-material="glass"] .observer { background: #0d151f; }
+html[data-px-material="glass"] :is(.observer-controls,.observer-bar) { background: #202023; border-color: var(--px-glass-border); }
+html[data-px-material="glass"] .observer { background: #151618; }
 /* No filter, transform, opacity or sizing rule touches svg/canvas/3D geometry. */
 
 /* One control language; leave native dimensions, padding, font and labels intact. */
 html[data-px-material="glass"] :is(button,select,input:not([type=range]):not([type=checkbox]):not([type=radio]),textarea) {
   color: var(--px-text-primary); border-color: var(--px-control-border);
   border-radius: var(--px-radius-sm);
-  background-color: #172331;
+  background-color: #29292d;
   background-image: linear-gradient(175deg, #ffffff0a, transparent 70%);
   box-shadow: inset 0 1px #ffffff0a, 0 2px 4px #0002;
 }
 html[data-px-material="glass"] :is(input:not([type=range]):not([type=checkbox]):not([type=radio]),textarea,select) {
-  background-color: #0c1420; background-image: none;
+  background-color: #151517; background-image: none;
   box-shadow: inset 0 1px 4px #0004;
 }
-html[data-px-material="glass"] option { color: #edf2fa; background: #151d29; }
+html[data-px-material="glass"] option { color: #edf2fa; background: #202023; }
 html[data-px-material="glass"] :is(button,a,input,select,textarea,summary) {
   transition: color var(--px-motion-fast) ease, background-color var(--px-motion-fast) ease,
     border-color var(--px-motion-fast) ease, box-shadow var(--px-motion-normal) var(--px-ease-premium);
@@ -160,7 +160,7 @@ html[data-px-material="glass"] :is(input[type=range],input[type=checkbox],input[
 html[data-px-material="glass"] .pass-source { background: transparent; border-color: transparent; box-shadow: none; color: var(--px-accent); }
 @media (hover:hover) and (pointer:fine) {
   html[data-px-material="glass"] button:not(:disabled):hover {
-    border-color: #9cbed0; background-color: #263748;
+    border-color: #9cbed0; background-color: #343439;
     box-shadow: inset 0 1px #ffffff16, 0 4px 16px #0003;
   }
   html[data-px-material="glass"] :is(button[aria-pressed=true],button.selected,button.play,.sandbox-seed-row button,.sandbox-more):not(:disabled):hover {
@@ -177,10 +177,10 @@ html[data-px-material="glass"] :is(td,th,.metric-row,.pass-factor,.feed-time,.cu
 html[data-px-material="glass"] :is(.insight-card,.feed-item,.moment,.cue-row,.sandbox-event-list button) { background-color: #ffffff02; }
 html[data-px-material="glass"] :is(.metric-row label,.pass-factor,.proof-row,.recap-body,.cue-row,.insight-card p) { color: var(--px-text-secondary); }
 html[data-px-material="glass"] :is(.insight-card strong,.proof-event b,.feed-item strong,.cue-row strong) { color: var(--px-text-primary); }
-html[data-px-material="glass"] :is(.pass-badge,.proof-verified,.runtime-notice,.sandbox-success) { color: var(--px-success); background-color: #17352e; border-color: #83c4ac66; border-radius: var(--px-radius-sm); }
+html[data-px-material="glass"] :is(.pass-badge,.proof-verified,.runtime-notice,.sandbox-success) { color: var(--px-success); background-color: #21332e; border-color: #83c4ac66; border-radius: var(--px-radius-sm); }
 html[data-px-material="glass"] :is(.runtime-error,.sandbox-error,.data-hub [role=alert]) { color: var(--px-error); border-color: #b7897e; background-color: #352526; border-radius: var(--px-radius-md); }
 html[data-px-material="glass"] :is(.runtime-notice,.runtime-error) p { color: inherit; }
-html[data-px-material="glass"] :is(.studio-lower,.broadcast-cue) { background: rgba(17,27,37,.96); color: var(--px-text-primary); border-color: #d8f2ee4d; border-radius: var(--px-radius-md); box-shadow: var(--px-shadow-floating),inset 0 1px #ffffff20; }
+html[data-px-material="glass"] :is(.studio-lower,.broadcast-cue) { background: rgba(25,27,29,.96); color: var(--px-text-primary); border-color: #d8f2ee4d; border-radius: var(--px-radius-md); box-shadow: var(--px-shadow-floating),inset 0 1px #ffffff20; }
 html[data-px-material="glass"] :is(.studio-lower strong,.broadcast-cue strong) { color: #f1f8fb; }
 html[data-px-material="glass"] :is(.studio-lower small,.broadcast-cue small) { color: var(--px-accent); }
 
@@ -200,16 +200,93 @@ html[data-px-material="glass"] :is(.proof-drawer h3,.proof-event code) { color: 
 @keyframes px-glass-reveal { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
 html[data-px-material="glass"] :is(.runtime-events,.sandbox-event-list,.recap-body,.player-table,.studio-queue) { scrollbar-color: #66798d #101822; }
 
+/* Content is a quiet reading plane; glass belongs to functional chrome.
+   No sizing, order, grid, pitch coordinates or canvas rules are introduced. */
+html[data-px-material="glass"] {
+  --px-font-display: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+html[data-px-material="glass"] :is(.panel,.sandbox-setup,.pass-inspection,.pass-empty,.hub-card,.hub-preview) {
+  background: linear-gradient(180deg, #ffffff02, transparent 120px), var(--px-surface);
+  box-shadow: inset 0 1px #ffffff03, var(--px-shadow-soft);
+}
+html[data-px-material="glass"] :is(.panel-title,.transport-heading,.observer-bar) {
+  letter-spacing: 1.1px; font-weight: 600; color: #d8d8df;
+}
+html[data-px-material="glass"] :is(.panel-title small,.transport-heading span:last-child,.eyebrow) {
+  letter-spacing: 1.25px; font-weight: 500;
+}
+html[data-px-material="glass"] .brand h1 {
+  font-family: var(--px-font-display); font-weight: 600; letter-spacing: -1.4px;
+}
+html[data-px-material="glass"] .brand h1 small { letter-spacing: 1.7px; color: #a8a8b2; }
+html[data-px-material="glass"] .topbar h2 { font-weight: 600; letter-spacing: -.7px; }
+html[data-px-material="glass"] .rail-item.active {
+  color: #ebf7f5; background: linear-gradient(140deg, #ffffff16, #ffffff04);
+  border-color: transparent; box-shadow: inset 0 1px #ffffff09;
+}
+html[data-px-material="glass"] .workspace-nav a[aria-current=page] {
+  color: #edf7f5; background: linear-gradient(0deg, #ffffff08, transparent);
+  border-color: #a7d9d260;
+}
+/* Paint the selection inside the original target; hit areas and bounds stay put. */
+html[data-px-material="glass"] :is(.rail-item,.workspace-nav a) { position: relative; isolation: isolate; }
+html[data-px-material="glass"] :is(.rail-item.active,.workspace-nav a[aria-current=page]) { background: none; border-color: transparent; box-shadow: none; }
+html[data-px-material="glass"] :is(.rail-item.active,.workspace-nav a[aria-current=page])::before {
+  content: ""; position: absolute; pointer-events: none; z-index: -1;
+  inset: 7px 9px; border-radius: 14px;
+  background: linear-gradient(145deg, #ffffff16, #ffffff06);
+  box-shadow: inset 0 1px #ffffff18, inset 0 -1px #0002, 0 2px 8px #0002;
+}
+html[data-px-material="glass"] .workspace-nav a[aria-current=page]::before { inset: 8px -9px; border-radius: 10px; }
+html[data-px-material="glass"] .panel-title { font-size: 11px; letter-spacing: .8px; }
+html[data-px-material="glass"] .pitch-wrap { background-color: #17201f; border-color: #ffffff0f; }
+html[data-px-material="glass"] .scoreboard { border-color: #ffffff0f; }
+html[data-px-material="glass"] .scoreboard::before {
+  background: radial-gradient(ellipse at 50% -60%, #ffffff18, transparent 68%);
+}
+html[data-px-material="glass"] .score {
+  font-family: var(--px-font-display); font-weight: 500; letter-spacing: -4px;
+}
+html[data-px-material="glass"] .team strong { font-weight: 600; font-style: normal; letter-spacing: -.4px; }
+html[data-px-material="glass"] .team-mark {
+  clip-path: none; border-radius: 22%; font-family: var(--px-font-display); font-weight: 600;
+  box-shadow: inset 0 1px #ffffff50, 0 5px 16px #0002;
+}
+html[data-px-material="glass"] :is(.feed-item,.cue-row,.moment,.recap-body button,.sandbox-event-list button,.runtime-events button,.proof-event,.pass-source) {
+  border-radius: 0; background: transparent; background-image: none; box-shadow: none;
+}
+html[data-px-material="glass"] .feed-item strong { font-weight: 600; letter-spacing: .35px; }
+html[data-px-material="glass"] :is(.feed-time,.cue-row>span) { color: #a1b8b6; }
+html[data-px-material="glass"] :is(.studio-lower strong,.broadcast-cue strong,.proof-drawer h2,.studio-idle) {
+  font-family: var(--px-font-display); font-weight: 600; letter-spacing: -.6px;
+}
+html[data-px-material="glass"] .insight-minute { font: 29px Impact, sans-serif; letter-spacing: normal; }
+html[data-px-material="glass"] :is(.studio-lower,.broadcast-cue) {
+  border-left-color: #91c7bd80; box-shadow: 0 12px 36px #0004, inset 0 1px #ffffff12;
+}
+html[data-px-material="glass"] .speed button { border-radius: var(--px-radius-pill); }
+@media (hover:hover) and (pointer:fine) {
+  html[data-px-material="glass"] :is(.feed-item,.cue-row,.moment,.recap-body button,.sandbox-event-list button,.runtime-events button,.proof-event):not(:disabled):hover {
+    background: #ffffff06; border-color: var(--px-glass-border); box-shadow: none;
+  }
+}
+
 /* Accessible / low-cost materials. Never require backdrop-filter support. */
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
-  html[data-px-material="glass"] :is(.header,.proof-drawer,.hub-dialog) { background-color: #171f2c; }
+  html[data-px-material="glass"] :is(.header,.proof-drawer,.hub-dialog) { background-color: #202023; }
 }
 @media (max-width:800px), (pointer:coarse) {
-  html[data-px-material="glass"] :is(.header,.proof-drawer,.hub-dialog) { -webkit-backdrop-filter:none; backdrop-filter:none; background-color:#151d29; }
+  html[data-px-material="glass"] :is(.header,.proof-drawer,.hub-dialog) { -webkit-backdrop-filter:none; backdrop-filter:none; background-color:#202023; }
 }
-@media (prefers-reduced-transparency:reduce), (prefers-contrast:more) {
-  html[data-px-material="glass"] { --px-glass-border:#8491a5; --px-text-secondary:#d6deeb; --px-text-muted:#c1cede; }
-  html[data-px-material="glass"] :is(.header,.rail,.proof-drawer,.hub-dialog,.panel,.observer,.scoreboard) { background:#131c29; -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:none; }
+/* Transparency and contrast are independent preferences, including on Windows. */
+@media (prefers-reduced-transparency:reduce) {
+  html[data-px-material="glass"] :is(.header,.rail,.proof-drawer,.hub-dialog) {
+    background: linear-gradient(135deg, #28282b, #202023); -webkit-backdrop-filter:none; backdrop-filter:none;
+  }
+}
+@media (prefers-contrast:more) {
+  html[data-px-material="glass"] { --px-glass-border:#8e8e93; --px-text-secondary:#e2e2e7; --px-text-muted:#d2d2d8; }
+  html[data-px-material="glass"] :is(.header,.rail,.proof-drawer,.hub-dialog,.panel,.observer,.scoreboard) { background:#151517; -webkit-backdrop-filter:none; backdrop-filter:none; box-shadow:none; }
 }
 @media (prefers-reduced-motion:reduce) {
   html[data-px-material="glass"] *,html[data-px-material="glass"] *::before,html[data-px-material="glass"] *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
@@ -217,4 +294,10 @@ html[data-px-material="glass"] :is(.runtime-events,.sandbox-event-list,.recap-bo
 @media (forced-colors:active) {
   html[data-px-material="glass"] :is(.panel,.scoreboard,.rail,.header,.observer,button,input,select,textarea) { background:Canvas; color:CanvasText; border-color:CanvasText; box-shadow:none; -webkit-backdrop-filter:none; backdrop-filter:none; }
   html[data-px-material="glass"] :is(button,a,input,select,textarea,summary):focus-visible { outline-color:Highlight; }
+}
+
+/* Preserve narrow-screen text metrics and the existing stacked brand height. */
+@media (max-width:800px) {
+  html[data-px-material="glass"] .brand h1 { font-family: Arial, sans-serif; letter-spacing: -1px; }
+  html[data-px-material="glass"] .brand h1 small { letter-spacing: 3px; }
 }

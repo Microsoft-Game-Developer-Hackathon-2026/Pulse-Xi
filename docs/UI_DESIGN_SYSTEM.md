@@ -14,20 +14,20 @@ The geometry suite covers replay, Sandbox, Data Hub and authenticated runtime, i
 
 | Token | Value / purpose |
 |---|---|
-| `--px-bg-base` | `#090d14`, graphite canvas |
-| `--px-surface` | `#121923`, opaque reading layer |
+| `--px-bg-base` | `#101012`, graphite canvas |
+| `--px-surface` | `#1a1a1d`, opaque reading layer |
 | `--px-glass-regular` | charcoal translucent chrome |
 | `--px-glass-strong` | nearly opaque overlay material |
-| `--px-text-primary` | `#edf2fa` |
-| `--px-text-secondary` | `#b3bed0` |
-| `--px-text-muted` | `#96a5bd` |
-| `--px-accent` | `#8be3df`, restrained teal |
+| `--px-text-primary` | `#f5f5f7` |
+| `--px-text-secondary` | `#b3b3bb` |
+| `--px-text-muted` | `#a0a0aa` |
+| `--px-accent` | `#9bddd6`, restrained teal |
 | success / warning / error | mint / sand / warm coral; labels remain present |
-| radius sm / md / lg / pill |8px /12px /20px /999px |
+| radius sm / md / lg / pill |8px /12px /18px /999px |
 | motion fast / normal |150ms /240ms |
 | easing | `cubic-bezier(.22,1,.36,1)` |
 
-Team-owned colors, event categories, chart scales and SVG coordinates remain unchanged. Platform/Arial font stacks are reused; branding and scoreboard use the available Arial face. Numeric reading regions use tabular figures without interpolating scores. No web fonts are downloaded.
+Team-owned colors, event categories, chart scales and SVG coordinates remain unchanged. Platform/Arial font stacks are reused; branding and scoreboard use the platform system display stack with Arial fallback. Numeric reading regions use tabular figures without interpolating scores. No web fonts are downloaded.
 
 ## Material hierarchy
 
@@ -42,7 +42,7 @@ Team-owned colors, event categories, chart scales and SVG coordinates remain unc
 
 Only color, background-color, border-color and shadow transitions are used for controls. Existing overlays may reveal with opacity and5px translation on genuine mount. There is no layout animation, new requestAnimationFrame loop, scroll listener, parallax, continuously animated backdrop or value interpolation. Existing viewport preservation is not replaced.
 
-`prefers-reduced-motion` removes decorative animation and transitions. Reduced transparency and increased contrast use opaque surfaces and stronger text/borders. Forced colors use system colors and a visible Highlight focus ring. On narrow/coarse-pointer devices, backdrop filters are disabled. Unsupported backdrop-filter has an opaque fallback. Keyboard, native controls and all actual error/disabled states remain usable. Tests check focus, real evidence opening/closing under reduced motion, and a minimum4.5:1 secondary-token contrast against the reading surface in increased-contrast mode; this is not a blanket WCAG certification.
+`prefers-reduced-motion` removes decorative animation and transitions. Reduced transparency makes chrome opaque without changing border contrast. Increased contrast independently strengthens text and borders. A browser regression checks that reduced transparency alone does not activate the high-contrast palette. Forced colors use system colors and a visible Highlight focus ring. On narrow/coarse-pointer devices, backdrop filters are disabled. Unsupported backdrop-filter has an opaque fallback. Keyboard, native controls and all actual error/disabled states remain usable. Tests check focus, real evidence opening/closing under reduced motion, and a minimum4.5:1 secondary-token contrast against the reading surface in increased-contrast mode; this is not a blanket WCAG certification.
 
 ## Cost and browser verification
 
@@ -82,3 +82,15 @@ These projects were evaluated as references, not installed or certified against 
 | Sandbox,390px, cutoff3500 | [Before](images/precision-glass/sandbox-390-before.png) | [After](images/precision-glass/sandbox-390-after.png) |
 
 [Geometry summary](images/precision-glass/layout-report.json) records all28 route/viewport comparisons. These are real browser captures, not concept renders. Local full-resolution captures also include the checkpoint/ForkCast and pass-inspection surfaces. Screenshot PNGs are documentation only and are never loaded by the application.
+
+## Graphite refinement
+
+The refined theme follows Apple's distinction between glass navigation and quiet content surfaces. Neutral graphite replaces the blue cast; evidence and event lists use flat divided rows rather than nested beveled cards. System display typography and rounded team badges retain original team colors and geometry. Selection reflections are pointer-inert pseudo-elements painted inside existing hit targets; no component is reparented.
+
+A real Windows Chromium preview reported reduced transparency enabled while increased contrast was disabled. The earlier combined fallback incorrectly applied high-contrast borders in that state. These preferences now have independent CSS rules and an executable regression. No external material library is installed: the rdev reference's browser displacement limitations do not justify introducing an optical renderer into the existing observer.
+
+Refinement captures: [desktop](images/precision-glass/refined-desktop.png), [mobile](images/precision-glass/refined-mobile.png). These show a real recorded fixture at cutoff 3500, at 1440 by 1000 and 390 by 844 respectively, with the operating system's reduced-transparency preference enabled.
+
+Refinement verification: TypeScript/production build and all 16 focused browser tests passed, covering 28 route/viewport geometry comparisons with the existing 2px desktop and 4px mobile limits. Narrow-screen moment and runtime-heading typography retain their original metrics to prevent wrapping changes. Backend and component logic diffs are empty.
+
+All six desktop/mobile material smoke tests also passed across Chromium, Firefox and Playwright WebKit. These checks cover the real replay, Sandbox, Data Hub and authenticated runtime routes, reduced motion, overflow and browser console errors.
