@@ -1,5 +1,69 @@
 import { expect, test } from '@playwright/test'
 
+for (const [index, action] of ['clear', 'credential', 'branch', 'cutoff', 'navigate', 'delayed-error'].entries()) {
+test(`real verified comparison stays isolated after ${action} and can retry`, async ({page, request}) => {
+  const token = 'test-runtime-token-at-least-32-characters'
+  const headers = {Authorization: `Bearer ${token}`}
+  const post = async (path: string, data: Record<string, unknown>) => {
+    const body = data.operation_id ? {...data, operation_id:`${action}-${data.operation_id}`} : data
+    const response = await request.post(`/api/sandbox${path}`, {headers, data:body})
+    expect(response.ok(), await response.text()).toBe(true)
+    return response.json()
+  }
+  const config = (await (await request.get('/api/sandbox/presets', {headers})).json()).balanced
+  config.duration_seconds = 120
+  config.seed = 700 + index
+  const scenario = await post('/scenarios', config)
+  let baseline = await post('/sessions', {operation_id:'proof-clear-root', scenario_id:scenario.scenario_id})
+  baseline = await post(`/sessions/${baseline.session_id}/commands`, {operation_id:'proof-clear-step', expected_revision:baseline.revision, kind:'step', ticks:20})
+  baseline = await post(`/sessions/${baseline.session_id}/commands`, {operation_id:'proof-clear-checkpoint', expected_revision:baseline.revision, kind:'checkpoint'})
+  let branch = await post(`/checkpoints/${baseline.checkpoint_id}/restore`, {operation_id:'proof-clear-restore', expected_revision:baseline.revision})
+  branch = await post(`/sessions/${branch.session_id}/commands`, {operation_id:'press-change', expected_revision:branch.revision, kind:'intervene', team_id:config.home.team_id, field:'pressing', value:100, requested_tick:20})
+  await post(`/sessions/${baseline.session_id}/commands`, {operation_id:'proof-clear-baseline-future', expected_revision:baseline.revision, kind:'step', ticks:100})
+  await post(`/sessions/${branch.session_id}/commands`, {operation_id:'proof-clear-branch-future', expected_revision:branch.revision, kind:'step', ticks:100})
+  await page.goto('/#/sandbox')
+  await page.getByLabel('Operator bearer token').fill(token)
+  await page.getByLabel('Baseline session ID').fill(baseline.session_id)
+  await page.getByLabel('Branch session ID').fill(branch.session_id)
+  await page.getByLabel('Intervention operation ID').fill(`${action}-press-change`)
+  await page.getByLabel('Compare through tick').fill('120')
+  await page.getByRole('button',{name:'Verify and compare',exact:true}).click()
+  await expect(page.locator('.prooftrail-result')).toContainText('Verified manifest pair')
+  let release!: () => void
+  const blocked = new Promise<void>(resolve => { release = resolve })
+  let arrived!: () => void
+  const ready = new Promise<void>(resolve => { arrived = resolve })
+  let delivered!: () => void
+  const finished = new Promise<void>(resolve => { delivered = resolve })
+  await page.route('**/api/sandbox/sessions/*/prooftrail**', async route => {
+    const response = await route.fetch(action === 'delayed-error' ? {headers:{Authorization:'Bearer invalid'}} : {})
+    expect(response.status()).toBe(action === 'delayed-error' ? 403 : 200)
+    arrived(); await blocked
+    await route.fulfill({response})
+    delivered()
+  }, {times:1})
+  await page.getByRole('button',{name:'Verify and compare',exact:true}).click()
+  await ready
+  if (action === 'clear' || action === 'delayed-error') await page.getByRole('button',{name:'Clear',exact:true}).click()
+  if (action === 'credential') await page.getByLabel('Operator bearer token').fill('different-owner-token-at-least-32-characters')
+  if (action === 'branch') await page.getByLabel('Branch session ID').fill(baseline.session_id)
+  if (action === 'cutoff') await page.getByLabel('Compare through tick').fill('60')
+  if (action === 'navigate') await page.getByRole('link',{name:'MATCH DATA HUB',exact:true}).click()
+  release(); await finished
+  await expect(page.locator('.prooftrail-result')).toHaveCount(0)
+  await expect(page.locator('.prooftrail-error')).toHaveCount(0)
+  if (action === 'navigate') await page.goto('/#/sandbox')
+  await page.getByLabel('Operator bearer token').fill(token)
+  await page.getByLabel('Baseline session ID').fill(baseline.session_id)
+  await page.getByLabel('Branch session ID').fill(branch.session_id)
+  await page.getByLabel('Intervention operation ID').fill(`${action}-press-change`)
+  await page.getByLabel('Compare through tick').fill('120')
+  await page.getByRole('button',{name:'Verify and compare',exact:true}).click()
+  await expect(page.locator('.prooftrail-result')).toContainText('Verified manifest pair')
+  expect(await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}))).not.toContain(token)
+})
+}
+
 test('sandbox ProofTrail renders verified branch metrics and source citations', async ({ page }) => {
   await page.route('**/api/sandbox/sessions/*/prooftrail**', async route => {
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({

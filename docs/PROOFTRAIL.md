@@ -4,6 +4,12 @@ The authenticated authoritative sandbox runtime already records immutable checkp
 
 ## Endpoint
 
+The browser comparison form holds credentials only in memory. Clear, changes to
+any comparison field (including credentials), and unmount cancel pending requests.
+Existing results are invalidated on edits; late success or failure responses cannot
+replace the cleared or edited state. A new explicit comparison can be submitted
+after cancellation. This does not revoke server credentials or undo server work.
+
 `GET /api/sandbox/sessions/{branch_session_id}/prooftrail?baseline_session_id={session_id}&intervention_id={operation_id}&at_tick={tick}`
 
 The endpoint uses the existing sandbox bearer-token authentication. Both sessions and the referenced checkpoint must belong to the authenticated operator; cross-owner identities remain concealed as 404. A caller cannot submit metric values or evidence IDs.
@@ -42,3 +48,5 @@ The endpoint inherits existing runtime limits (20,000 events per session, 32 che
 `backend/tests/test_prooftrail.py` exercises a real checkpoint fork and intervention, verifies both manifests, checks source citations and uncertainty language, confirms the authenticated route, rejects missing authentication and rejects a baseline that is not an ancestor. The existing authoritative engine suite continues to cover deterministic replay, checkpoint restoration, intervention immutability, manifest tampering and owner isolation.
 
 The Sandbox Lab includes a read-only comparison form for operator-provided baseline session ID, branch session ID, intervention operation ID and cutoff tick. The bearer token is held only in component memory, sent to the same-origin authenticated endpoint, and never placed in a URL or localStorage. Session IDs must be obtained from the existing authenticated runtime workflow. The view shows before/after windows, metric deltas, manifest digest, verification status and event citations. It does not create sessions, branches, interventions, or approval state.
+
+Authenticated branch comparison responses use `Cache-Control: no-store` alongside owner-scoped access and browser request cancellation. Private comparison results must not be reused from HTTP caches after credential changes.
