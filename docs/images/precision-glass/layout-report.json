@@ -1,0 +1,314 @@
+{
+  "baseline": "c2f8c622d21d3db804e57c9a02e4c09b264f9c4b",
+  "method": "Same DOM and server view; original styling vs scoped material styling",
+  "comparisons": [
+    {
+      "viewportWidth": 1024,
+      "route": "replay",
+      "maxDeltaPx": 0,
+      "regions": 18,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1024,
+      "route": "sandbox",
+      "maxDeltaPx": 0,
+      "regions": 21,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1024,
+      "route": "data",
+      "maxDeltaPx": 0,
+      "regions": 7,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1024,
+      "route": "runtime",
+      "maxDeltaPx": 0,
+      "regions": 18,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1280,
+      "route": "replay",
+      "maxDeltaPx": 0,
+      "regions": 18,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1280,
+      "route": "sandbox",
+      "maxDeltaPx": 0,
+      "regions": 21,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1280,
+      "route": "data",
+      "maxDeltaPx": 0,
+      "regions": 7,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1280,
+      "route": "runtime",
+      "maxDeltaPx": 0,
+      "regions": 18,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1440,
+      "route": "replay",
+      "maxDeltaPx": 0,
+      "regions": 18,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1440,
+      "route": "sandbox",
+      "maxDeltaPx": 0,
+      "regions": 21,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1440,
+      "route": "data",
+      "maxDeltaPx": 0,
+      "regions": 7,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1440,
+      "route": "runtime",
+      "maxDeltaPx": 0,
+      "regions": 18,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1920,
+      "route": "replay",
+      "maxDeltaPx": 0,
+      "regions": 18,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1920,
+      "route": "sandbox",
+      "maxDeltaPx": 0,
+      "regions": 21,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1920,
+      "route": "data",
+      "maxDeltaPx": 0,
+      "regions": 7,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 1920,
+      "route": "runtime",
+      "maxDeltaPx": 0,
+      "regions": 18,
+      "overflow": false,
+      "materials": {
+        "blur": "blur(12px) saturate(1.2)",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 375,
+      "route": "replay",
+      "maxDeltaPx": 0,
+      "regions": 17,
+      "overflow": false,
+      "materials": {
+        "blur": "none",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 375,
+      "route": "sandbox",
+      "maxDeltaPx": 0,
+      "regions": 20,
+      "overflow": false,
+      "materials": {
+        "blur": "none",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 375,
+      "route": "data",
+      "maxDeltaPx": 0,
+      "regions": 6,
+      "overflow": false,
+      "materials": {
+        "blur": "none",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 375,
+      "route": "runtime",
+      "maxDeltaPx": 0,
+      "regions": 17,
+      "overflow": false,
+      "materials": {
+        "blur": "none",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 390,
+      "route": "replay",
+      "maxDeltaPx": 0,
+      "regions": 17,
+      "overflow": false,
+      "materials": {
+        "blur": "none",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 390,
+      "route": "sandbox",
+      "maxDeltaPx": 0,
+      "regions": 20,
+      "overflow": false,
+      "materials": {
+        "blur": "none",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 390,
+      "route": "data",
+      "maxDeltaPx": 0,
+      "regions": 6,
+      "overflow": false,
+      "materials": {
+        "blur": "none",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 390,
+      "route": "runtime",
+      "maxDeltaPx": 0,
+      "regions": 17,
+      "overflow": false,
+      "materials": {
+        "blur": "none",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 768,
+      "route": "replay",
+      "maxDeltaPx": 0,
+      "regions": 18,
+      "overflow": false,
+      "materials": {
+        "blur": "none",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 768,
+      "route": "sandbox",
+      "maxDeltaPx": 0,
+      "regions": 21,
+      "overflow": false,
+      "materials": {
+        "blur": "none",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 768,
+      "route": "data",
+      "maxDeltaPx": 0,
+      "regions": 7,
+      "overflow": false,
+      "materials": {
+        "blur": "none",
+        "reducedTransparency": false
+      }
+    },
+    {
+      "viewportWidth": 768,
+      "route": "runtime",
+      "maxDeltaPx": 0,
+      "regions": 18,
+      "overflow": false,
+      "materials": {
+        "blur": "none",
+        "reducedTransparency": false
+      }
+    }
+  ]
+}

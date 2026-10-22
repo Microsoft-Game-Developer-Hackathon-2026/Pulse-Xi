@@ -1,3 +1,5 @@
+> Technical acceptance update (2026-10-22): issue #12 is closed for the implemented and verified production pipeline. Issue #23 remains open for actual rights-holder/license/release authorization; manifest approval remains pending. See [current acceptance boundary](PROJECT_STATUS.md#four-issue-acceptance-reconciliation-2026-10-22).
+
 > Release review update (2026-10-18): see [asset/security review](ASSET_SECURITY_RELEASE_REVIEW.md). The archived v1 GLBs now use canonical triangle indices to fix repeat-export nondeterminism; their source geometry and size budgets are unchanged. Older hashes/unchanged-byte statements below describe the earlier revision. Human release approval remains pending.
 
 # Original asset pipeline (#12)
