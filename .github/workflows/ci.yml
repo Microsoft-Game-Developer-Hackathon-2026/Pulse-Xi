@@ -64,6 +64,8 @@ jobs:
         working-directory: frontend
       - run: npx playwright install --with-deps chromium
         working-directory: frontend
+      - run: node --test scripts/graphics-report.test.mjs
+        working-directory: frontend
       - run: npm run test:e2e
         working-directory: frontend
       - name: Fresh-process offline release journey

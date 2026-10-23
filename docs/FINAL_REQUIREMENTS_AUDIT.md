@@ -1,5 +1,11 @@
 # Final requirements audit - 2026-10-22
 
+Historical snapshot: the baseline and coverage counts below apply to the dated
+audit, not current main. See the [release evidence ledger](RELEASE_EVIDENCE_LEDGER.md)
+for integration changes, exact-head CI and remaining external acceptance gates.
+Issue #34's current Diyan target is the physical RTX 5070 Laptop GPU, alongside
+Satvik's physical Iris Xe; the old RTX5090 requirement below was unverified.
+
 ## Scope and method
 
 Baseline main: `d19a898492f8c4a303caa576a9370411b21093ff`.
