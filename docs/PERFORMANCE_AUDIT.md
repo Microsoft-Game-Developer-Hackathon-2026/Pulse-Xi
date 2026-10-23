@@ -124,3 +124,48 @@ verifiers or hash-bound source. No test timeout was increased or test skipped.
 ## Subsequent performance delivery
 
 The maximum-history failure above records the initial audit, not the final candidate. PR #79 follows the earlier PR #78 merge with atomic current-boundary capture, request-local independently proven prefix reuse and idle observer revision reads. At source 743916c the unchanged Windows bounded-forkcast test passed in 2.7 minutes, including offline verification. The same copied disposable dense store measured 102.57 seconds before the later increments and 30.06 seconds afterward; one observation per revision, not a latency percentile. See [detailed method and raw measurements](FORKCAST_COMPARISON_PERFORMANCE.md). No timeout or verification gate was weakened. Broad React Profiler, Web Vitals and long-session memory measurements remain outstanding.
+
+## Passive replay stability (2026-10-24, base `0729d3f`)
+
+Workload: built-in recorded match, 12 s wall-clock of uninterrupted playback after the
+analysis panels had settled, Chromium (software rendering), local backend, one run per
+configuration (`frontend/tests/replay-stability-metrics.spec.ts`, which now enforces the
+thresholds below). Requests are counted while playing. These are single-run local
+numbers, not percentiles.
+
+| Viewport / speed | Fan Lens requests (before → after) | Metrics / Tactics / Recap / Control-Chaos | Page CLS excl. Event Wire | Document scroll drift |
+|---|---|---|---|---|
+| 1280px / 1× | 61 → 13 | 11 / 11 / 11 / 11 | 0.00006 | 0 px |
+| 1280px / 4× | 61 → 13 | 12 / 11 / 11 / 11 | 0.0004 | 0 px |
+| 390px / 2× | 61 → 13 | 11 / 11 / 11 / 11 | 0.0005 | 0 px |
+
+Findings and fixes:
+
+- **Fan Lens fetched on every 200 ms replay tick** (61 requests / 12 s) while all other
+  analytics used the 1 Hz analysis cutoff. It now uses the same cutoff (paused seeks stay
+  exact); alert windows are evaluated against that cutoff, never a future second.
+- **Event Wire grew from 137 px to ~560 px** as the first seven events arrived. Its list
+  now reserves seven rows, so the panel's bounds are constant from the first frame.
+- **Row motion inside the Event Wire is content-driven**: inserting a new event moves the
+  existing rows down inside the fixed-size panel (CLS contribution 0.019 at 1×, 0.266 at
+  4×, reported separately as `eventWireRowShift`). It is not page movement; nothing outside
+  the panel shifts, and the test gates page-level shift below 0.01. The Event Wire is now a
+  fixed seven-row viewport (exact height, internal scroll) and existing rows glide 220 ms
+  into place via transform (`useFlipList`); the glide is skipped under
+  `prefers-reduced-motion`. The browser's layout-shift API still reports the underlying row
+  position change, so `eventWireRowShift` is unchanged; the glide is a presentation change,
+  not a reduction in that metric. A test asserts constant bounds, newest-first order, no
+  future events, and zero animations under reduced motion.
+
+Not measured here: INP, LCP, heap growth, long tasks, React Profiler render counts.
+Pass-difficulty requests (10–37 / 12 s) are keyed to the last visible pass, not the clock.
+
+## PR #100 CI timeout (investigated 2026-10-24)
+
+`tests/test_deployment_provisioning.py::test_provision_requires_digest_before_contacting_azure`
+failed once on main run 40017120238 with `subprocess.TimeoutExpired` (20 s limit while the
+test launches `powershell -NoProfile ...`); that run and two others were pushed within ~70 s
+of each other. The next main run (#102) passed, and the complete local backend suite on
+`0729d3f` passed: **541 passed, 0 failed, 0 skipped** (281 s). Not reproduced; classified as a
+probable runner-load stall on PowerShell cold start, not proven. No timeout, assertion or
+production code was changed. If it recurs, capture runner CPU/queue data before changing the test.
