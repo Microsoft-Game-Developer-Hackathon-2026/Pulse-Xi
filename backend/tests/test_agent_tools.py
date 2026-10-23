@@ -141,3 +141,36 @@ def test_metric_bounds_fail_closed(change, code):
     with pytest.raises(ToolFailure, match=code):
         execute_tool(ctx, "TacticalAnalyst", "get_match_metrics", request)
     assert ctx.trace["tool_calls"][-1]["status"] == "rejected"
+
+
+def test_parallel_tool_calls_cannot_overspend_the_execution_budget():
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+    import time
+
+    class YieldingContext(ToolContext):
+        def __getattribute__(self, name):
+            value = super().__getattribute__(name)
+            if name == "call_count":
+                time.sleep(0.005)  # force a legal scheduler switch between read/check/update
+            return value
+
+    match, events, insight, _ = context()
+    ctx = YieldingContext(match, events, insight, {"tool_calls": []}, max_calls=1)
+    gate = Barrier(2, timeout=3)
+
+    def invoke(_):
+        gate.wait()
+        try:
+            execute_tool(ctx, "TacticalAnalyst", "get_match_metrics", {
+                "match_id": match.match_id, "at_second": insight.match_second,
+                "window_start": 0, "window_seconds": 10})
+            return True
+        except ToolFailure as error:
+            assert error.code == "tool_call_limit"
+            return False
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        outcomes = list(pool.map(invoke, range(2)))
+    assert outcomes.count(True) == 1
+    assert ctx.call_count == 1
