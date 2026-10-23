@@ -56,3 +56,32 @@ for (const [width, speed] of [[1280, 1], [1280, 4], [390, 2]] as const) {
     for (const selector of ['.scoreboard', '.metrics', '.transport', '.moments']) expect(distinct[selector], selector).toHaveLength(1)
   })
 }
+
+for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+  test(`Event Wire keeps fixed bounds, newest-first order and ${reducedMotion === 'reduce' ? 'no' : 'a restrained'} insertion glide (${reducedMotion})`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion })
+    await page.goto('/')
+    await expect(page.locator('.recap-body')).not.toContainText('Loading')
+    const slider = page.getByRole('slider', { name: 'Seek match time' })
+    const sizes = new Set<string>(); let animated = 0; let previousTop = ''
+    for (let second = 600; second <= 3000; second += 300) {
+      await slider.evaluate((element, value) => {
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(element, String(value))
+        element.dispatchEvent(new Event('input', { bubbles: true })); element.dispatchEvent(new Event('change', { bubbles: true }))
+      }, second)
+      await expect(slider).toHaveValue(String(second))
+      const state = await page.evaluate(() => {
+        const list = document.querySelector('.feed-list')!; const rect = list.getBoundingClientRect()
+        const rows = Array.from(list.querySelectorAll<HTMLElement>('[data-flip-key]'))
+        return { size: `${Math.round(rect.width)}x${Math.round(rect.height)}`, count: rows.length, times: rows.map(row => row.querySelector('.feed-time')!.textContent ?? ''), animations: rows.reduce((total, row) => total + row.getAnimations().length, 0) }
+      })
+      sizes.add(state.size); animated += state.animations
+      const seconds = state.times.map(text => { const [m, s] = text.split(':').map(Number); return m * 60 + s })
+      expect(seconds, 'newest event first').toEqual([...seconds].sort((a, b) => b - a))
+      expect(seconds.every(value => value <= second)).toBe(true)
+      previousTop = state.times[0] ?? previousTop
+    }
+    expect([...sizes], 'Event Wire bounds').toHaveLength(1)
+    if (reducedMotion === 'reduce') expect(animated).toBe(0)
+  })
+}
