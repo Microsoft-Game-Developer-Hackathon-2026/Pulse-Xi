@@ -55,6 +55,11 @@ mobile controls. No screenshot was substituted from another run or edited.
 The reports and PNGs were copied byte-for-byte. `artifact-inventory.json` records
 their hashes/lengths and the build metadata; it does not recursively hash itself.
 The seven original GLBs and every previous failed/successful report remain intact.
+An evidence-specific `.gitattributes` rule keeps these new JSON files at LF on
+Windows and Linux. A checkout-inventory test reproduced the earlier Windows
+line-ending/hash mismatch and now verifies every published artifact's byte length
+and SHA-256. Newly generated metadata was serialized with explicit LF; the original
+Node report bytes and PNGs were not changed. Historical evidence is outside the rule.
 
 ## Limits and the unexplained closure
 
