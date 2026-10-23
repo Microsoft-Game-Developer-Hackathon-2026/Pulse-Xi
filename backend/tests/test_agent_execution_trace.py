@@ -1,6 +1,7 @@
 """Provider doubles only: these tests must never authenticate or make a request."""
 import asyncio
 import json
+import hashlib
 import sys
 from types import SimpleNamespace
 
@@ -164,3 +165,15 @@ def test_provider_timeout_and_rate_limit_remain_visible_without_raw_errors(provi
     if getattr(error, "status_code", None):
         assert trace["http_status"] == 429
     assert "SENTINEL_SECRET" not in json.dumps(trace)
+
+
+@pytest.mark.parametrize("failed", [False, True])
+def test_trace_output_hash_matches_the_actual_json_response(provider, failed):
+    from fastapi.encoders import jsonable_encoder
+    match, events, insight, state = provider
+    if failed:
+        state["error"] = RuntimeError("offline failure")
+    result = asyncio.run(agents.run_specialists(match, events, insight))
+    wire = json.dumps(jsonable_encoder(result), ensure_ascii=False, sort_keys=True,
+                      separators=(",", ":")).encode()
+    assert agents.TRACES[-1]["output_hash"] == hashlib.sha256(wire).hexdigest()

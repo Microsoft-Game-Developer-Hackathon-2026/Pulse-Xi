@@ -55,6 +55,10 @@ returned integer usage counters. A missing Git repository or usage value remains
 unavailable. It excludes raw arguments, prompts, provider objects and endpoint
 credentials. Accepted-model and fallback cue metadata both retain draft-only,
 non-publishing flags, and deterministic recap/cue calculations use the insight cutoff.
+Response digests identify `response-canonical-json/1`: UTF-8 JSON with sorted keys,
+compact separators and unescaped Unicode, over the returned packet. Verified facts
+are serialized records, not Python object representations. Stage digests separately
+identify the message-role/text scope; tool output digests cover their deterministic packets.
 
 The model output is rejected if it has an invalid shape, unsupported event
 references, duplicated IDs, or numeric prose. Failure returns deterministic
