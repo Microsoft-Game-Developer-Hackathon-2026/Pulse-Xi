@@ -1,25 +1,31 @@
 # Release evidence ledger - 2026-10-23
 
 This ledger separates evidence categories. Passing tests do not authorize cloud
-spend, attest asset rights, or prove submission. The verified baseline is main
-`07da294514f36820a7cf7d7c2dfacaab1adc735d`, with
-[six passing exact-main CI jobs](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39898162401):
-454 backend tests, 102 browser tests, seven documentation tests, independent
+spend, attest asset rights, or prove submission. Latest verified integration is
+PR #95 at main `1a2ff3727ebcd00a101f7b26d218588beaea620b`, with
+[six passing exact-main CI jobs](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39901455301):
+454 backend tests, 102 browser tests, four graphics-reporting tests, seven documentation tests, independent
 manifest/experiment verification, pip consistency, frontend build/assets,
 public read-only container smoke and offline Bicep compilation.
+
+Historical baseline `07da294514f36820a7cf7d7c2dfacaab1adc735d` retains its
+[own successful exact-main run](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39898162401).
+The physical measurement source is clean
+`e927785eb05f1dd09a9d4c20019c656f340a28d2`, not either merge SHA. Its probe and
+evidence were subsequently integrated by #95; these are distinct provenance facts.
 
 ## Evidence and remaining acceptance
 
 | Area | Established evidence | Remaining gate / disposition |
 |---|---|---|
-| Integrated source | #76 runtime analysis, #78/#79 replay/ForkCast fixes, #87 Fan Lens, #88/#92 Studio and backup, #89 trace envelope, #93 speech, #91/#94 deployment preparation are merged | This is integration evidence; it does not close their broader product acceptance |
-| Local regression | On the baseline: 454 backend and 102 browser tests, docs, seven assets, verifiers, pip check, disposable-DB release smoke; Python/npm audits found no known vulnerabilities | Candidate changes need their own checks and published CI |
-| Candidate graphics | Four failure-reporting regressions pass; physical production-GLB RTX probe passed on clean e927785, Chromium 156.0.8078.4 | [Raw JSON and inspected screenshots](audit-evidence/graphics-rtx5070-2026-10-23/README.md). Bounded RAF workload is not GPU timer FPS or the proposed 15-minute soak; physical Iris Xe remains pending |
+| Integrated source | #76 runtime analysis, #78/#79 replay/ForkCast fixes, #87 Fan Lens, #88/#92 Studio and backup, #89 trace envelope, #93 speech, #91/#94 deployment preparation and #95 graphics reporting/evidence are merged | This is integration evidence; it does not close their broader product acceptance |
+| Historical local regression | Recorded before #95 merged: 454 backend and 102 browser tests, docs, seven assets, verifiers, pip check, disposable-DB release smoke; Python/npm audits found no known vulnerabilities in that audited dependency closure | Later candidates need their own checks and published CI; these are not fresh dependency-audit results for every commit |
+| Integrated graphics evidence | Four failure-reporting regressions pass; physical production-GLB RTX probe passed on clean e927785, Chromium 156.0.8078.4, confirmed NVIDIA RTX 5070 D3D11 renderer; report and nine inspected screenshots merged through #95 | [Raw JSON and inspected screenshots](audit-evidence/graphics-rtx5070-2026-10-23/README.md). Three five-second samples/profile after warmup: about 165 RAF samples/s, 6.1 ms median / 6.2 ms p95. Browser pacing is not GPU execution FPS or the proposed 15-minute soak; physical Iris Xe remains pending |
 | Azure #21 | Digest pinning, offline template and container checks, isolated fixture-only public mode, runbook | OPEN/blocked: no authorized resources or verified public HTTPS URL; zero GitHub environments at audit. Explicit cost approval, protected environment, actual OIDC minimum roles, #23 clearance, live HTTPS/WSS/restart and cleanup evidence required |
 | Hosted AI #14/#15 | Provider integration and offline/scoped trace tests | Mahir: authorized real Microsoft model invocation and sanitized trace; mocks/configuration do not prove this. No billable call made by this audit |
 | Legal/security #23 | Versioned manifest and documented controls; assets still pending-team-review | Vishwam/rights holders: attributable licensing, redistribution and release decision; test results cannot supply human authority |
 | Submission #25 | Local app and smoke checks | Vishwam/authorized representative: real judge access, public video under 120 seconds, submission and confirmation |
-| Physical graphics #34 | Fresh inventory: RTX 5070 Laptop GPU, driver 617.42, 8151 MiB VRAM; Intel Graphics also present | Diyan's bounded run must identify the actual browser renderer. Satvik's production-GLB physical Iris Xe evidence remains separate and pending. No RTX 5090 tested |
+| Physical graphics #34 | Recorded 2026-10-23 inventory: RTX 5070 Laptop GPU, driver 617.42, 8151 MiB VRAM; Intel Graphics also present. The published run confirms the selected NVIDIA RTX 5070 D3D11 renderer | Satvik's production-GLB physical Iris Xe evidence, longer stability acceptance and human review remain pending. The earlier page-closure trigger is unproven; no RTX 5090 tested |
 | Software / historical graphics | Existing SwiftShader production-asset and older procedural Iris Xe artifacts retain original provenance | Neither is RTX 5070 evidence nor physical production-GLB Iris Xe acceptance. #13 Unreal NO-GO retained; optional work never blocks core submission |
 
 ## Closed engine issues: regression contract matrix
