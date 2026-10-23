@@ -7,6 +7,7 @@ import { cpus, totalmem, release, platform } from 'node:os'
 import { createHash } from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { recordProbe } from './graphics-report.mjs'
+import { stabilitySeconds, runStability } from './graphics-stability.mjs'
 
 const base = process.env.PULSE_GRAPHICS_URL ?? 'http://127.0.0.1:8000'
 const root = new URL('../../', import.meta.url)
@@ -17,12 +18,17 @@ console.log(`Graphics artifacts: ${output}`)
 const hardware = process.env.PULSE_GRAPHICS_HARDWARE === '1'
 let browser
 let interrupted = null
-const interrupt = signal => { interrupted = signal; void browser?.close() }
+let activeReport
+const interrupt = signal => {
+  interrupted = signal
+  if (activeReport) activeReport.interruption = { signal, at: new Date().toISOString() }
+  void browser?.close()
+}
 const onInterrupt = () => interrupt('SIGINT')
 const onTerminate = () => interrupt('SIGTERM')
 process.on('SIGINT', onInterrupt)
 process.on('SIGTERM', onTerminate)
-const deadline = setTimeout(() => interrupt('five-minute deadline'), 300_000)
+let deadline
 const command = (executable, args) => {
   try { return execFileSync(executable, args, { encoding: 'utf8', timeout: 10_000, windowsHide: true }).trim() }
   catch { return null }
@@ -40,6 +46,11 @@ try {
       activeOrbitMs: 5000, idleMs: 30000, note: 'Bounded probe; not the proposed 15-minute soak. RAF pacing, not GPU timer queries.' },
     unavailable: ['GPU utilization/allocated VRAM', 'GPU timer queries', 'forced-GC leak assessment'],
   }, async (report, checkpoint) => {
+    activeReport = report
+    const extendedSeconds = stabilitySeconds(process.env.PULSE_GRAPHICS_STABILITY_SECONDS)
+    report.workload.extendedStabilitySeconds = extendedSeconds
+    report.workload.note = extendedSeconds ? 'Extended switching/remount stability plus bounded RAF samples; not GPU timer queries.' : report.workload.note
+    deadline = setTimeout(() => interrupt('probe deadline'), 300_000 + extendedSeconds * 1000)
     const manifest = JSON.parse(await readFile(new URL('assets/manifest.json', root), 'utf8'))
     report.assetManifestSha256 = createHash('sha256').update(await readFile(new URL('assets/manifest.json', root))).digest('hex')
     report.assetManifest = manifest
@@ -51,6 +62,7 @@ try {
     }
     browser = await chromium.launch({ headless: !hardware,
       args: [...(hardware ? [] : ['--enable-unsafe-swiftshader']), '--enable-precise-memory-info'] })
+    browser.on('disconnected', () => { report.browserDisconnectedAt = new Date().toISOString() })
     const page = await browser.newPage({ viewport: { width: 1366, height: 768 } })
     page.setDefaultTimeout(15_000)
     report.browser = browser.version()
@@ -134,6 +146,36 @@ try {
         await page.getByRole('button', { name: '2D pitch', exact: true }).click()
         await page.getByRole('button', { name: '3D observer', exact: true }).click()
       }
+    }
+    if (extendedSeconds) {
+      await page.getByRole('slider', { name: 'Seek match time' }).fill('3500')
+      report.phase = 'extended-stability'
+      console.log(`Beginning ${extendedSeconds}-second extended stability observation.`)
+      await runStability({ durationMs: extendedSeconds * 1000, report, checkpoint,
+        step: async cycle => {
+          const quality = ['low', 'standard', 'high'][cycle % 3]
+          await page.getByLabel('3D QUALITY').selectOption(quality)
+          await page.getByRole('button', { name: ['Broadcast camera', 'Top-down camera', 'Isometric camera', 'Free camera', 'Focus event'][cycle % 5], exact: true }).click()
+          if (cycle % 6 === 0) {
+            await page.getByRole('button', { name: '2D pitch', exact: true }).click()
+            await page.getByRole('button', { name: '3D observer', exact: true }).click()
+          }
+          await expect(page.getByTestId('asset-status')).toHaveAttribute('data-status', 'ready')
+          await expect(page.getByTestId('observer-metrics')).toHaveAttribute('data-quality', quality)
+          await expect(page.getByTestId('observer-canvas').locator('canvas')).toBeVisible()
+          await page.waitForTimeout(5000)
+        },
+        sample: async () => {
+          if (errors.length) throw new Error('Runtime errors during extended stability')
+          const value = await page.getByTestId('observer-canvas').locator('canvas').evaluate(canvas => {
+            const gl = canvas.getContext('webgl2'), extension = gl?.getExtension('WEBGL_debug_renderer_info')
+            return { renderer: extension ? gl.getParameter(extension.UNMASKED_RENDERER_WEBGL) : 'unavailable',
+              heapBytes: performance.memory?.usedJSHeapSize ?? null, visibility: document.visibilityState }
+          })
+          if (value.renderer !== report.gpu.renderer) throw new Error(`Renderer changed during stability: ${value.renderer}`)
+          return { ...value, metrics: await page.getByTestId('observer-metrics').textContent() }
+        },
+      })
     }
     await page.getByLabel('3D QUALITY').selectOption('standard')
     await expect(page.getByTestId('observer-metrics')).toHaveAttribute('data-quality', 'standard')

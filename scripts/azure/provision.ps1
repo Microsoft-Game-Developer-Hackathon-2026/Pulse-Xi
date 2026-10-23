@@ -14,7 +14,13 @@ if ($Image -cnotmatch '\Aghcr\.io/[a-z0-9_.-]+/[a-z0-9_.-]+@sha256:[a-f0-9]{64}\
 if (-not (Get-Command az -ErrorAction SilentlyContinue)) { throw "Azure CLI is required. No resources were created." }
 $template = Join-Path $PSScriptRoot "../../infra/azure/main.bicep"
 $template = [System.IO.Path]::GetFullPath($template)
-if (-not (az group exists --name $ResourceGroup | ConvertFrom-Json)) {
+$groupExistsRaw = az group exists --name $ResourceGroup --output json
+if ($LASTEXITCODE -ne 0) { throw "Resource-group lookup failed; no what-if or deployment was attempted." }
+$groupExists = ($groupExistsRaw -join "`n").Trim()
+if ($groupExists -cnotmatch '\A(?:true|false)\z') {
+    throw "Resource-group lookup must return one JSON boolean; no what-if or deployment was attempted."
+}
+if ($groupExists -ceq 'false') {
     throw "Resource group '$ResourceGroup' does not exist. Provisioning never creates resource groups."
 }
 Write-Host "Target: existing resource group '$ResourceGroup', location '$Location', Container App '$AppName', environment '$EnvironmentName'."

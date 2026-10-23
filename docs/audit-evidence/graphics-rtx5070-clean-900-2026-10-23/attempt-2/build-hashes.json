@@ -1,0 +1,50 @@
+{
+  "files": [
+    {
+      "path": "index.html",
+      "sha256": "a4806c00d162b21ac753c4f2dce08b81e3e4825ecc793f48a85bea3046a37a15",
+      "bytes": 447
+    },
+    {
+      "path": "assets/ball-Co6hkrAX.glb",
+      "sha256": "260909418e1f655506c158540dbefd9f88cc6c7a64e97dfaf830bfaa1fe01996",
+      "bytes": 30736
+    },
+    {
+      "path": "assets/field-BUli6m92.glb",
+      "sha256": "fe8cccc093a6e605290cc661e6e1f29033f84826e83334a0213d1083259d8591",
+      "bytes": 224368
+    },
+    {
+      "path": "assets/index-DKw2n-KA.css",
+      "sha256": "9b4fbc3ce48f14006cc31c768cfd8ec272ae940abf8dc11a7dce118ee49175c0",
+      "bytes": 93867
+    },
+    {
+      "path": "assets/index-ODdcG0IC.js",
+      "sha256": "3f5fb20766eb235231c7b3465d2af531160c3506f9827596786dff9834e726ab",
+      "bytes": 410442
+    },
+    {
+      "path": "assets/player-marker-Be0iM_eU.glb",
+      "sha256": "697b42348e6373973b3e25c012d7f96e6b705aa197e463bc4f739898c6c24cf2",
+      "bytes": 19672
+    },
+    {
+      "path": "assets/SceneCanvas-IEPPeEnL.js",
+      "sha256": "274ea82a3f199fe1a82040f1daa0016aadd3cad0d55d42c2e58f24d12833e0e4",
+      "bytes": 983869
+    },
+    {
+      "path": "assets/stadium-C9KVc8zU.glb",
+      "sha256": "0c7891b7da5ebbcf839e1e3974ad71e32011936e8badb284bcefbec361807f31",
+      "bytes": 714308
+    },
+    {
+      "path": "assets/THIRD_PARTY_NOTICES.txt",
+      "sha256": "c5c814d0978f68dbb1ff0256706a6756dca39bca5eedd8e09447009623a6f663",
+      "bytes": 27965
+    }
+  ],
+  "source": "dc13f74e73c71927c7eddf17aaf010097ca6dd3d"
+}

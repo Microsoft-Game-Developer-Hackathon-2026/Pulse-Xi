@@ -1,0 +1,2 @@
+# Preserve the byte hashes of newly published raw audit JSON on every checkout.
+docs/audit-evidence/graphics-rtx5070-clean-900-2026-10-23/**/*.json text eol=lf

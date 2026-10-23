@@ -28,6 +28,8 @@ invalid windows, and unverified insights. Each invocation is bounded to eight
 tool calls per workflow. Per-role allowlists expose metrics and candidate search
 to Tactical Analyst, evidence retrieval to Story Editor, and draft preparation
 to Broadcast Director. A call not allowed for a role fails closed.
+Admission, deterministic execution and trace recording share a context-local lock;
+parallel tool calls cannot overspend that workflow's execution budget.
 
 ## Trace and fallback
 
@@ -39,12 +41,41 @@ and raw provider errors. Traces are capped at the latest 50 runs and are not
 durable storage. A stage is listed only once the workflow reaches it; the trace
 does not claim a hosted call when configuration or invocation fails.
 
+Agent Framework middleware now records each actual specialist invocation from
+running to completed, failed or cancelled, with duration and input/output hashes.
+The final response must be attributed to StoryEditor and both observed specialist
+stages must complete before the output gate. No stage is inferred from its prompt.
+Provider HTTP status is retained only when supplied as a numeric status; raw
+exception text remains excluded. Tool preflight denials are recorded and repeated
+denials are counted in one row per reason, keeping trace size bounded. An unexpected
+tool exception is failed, rather than completed. Rejected model copy still falls
+back; unverified source evidence is rejected before any provider invocation.
+
+The local smoke report includes actual run ID, UTC timestamp, Git revision/dirty
+state when available, evidence hash, observed handoff hashes, tool statuses and
+returned integer usage counters. A missing Git repository or usage value remains
+unavailable. It excludes raw arguments, prompts, provider objects and endpoint
+credentials. Accepted-model and fallback cue metadata both retain draft-only,
+non-publishing flags, and deterministic recap/cue calculations use the insight cutoff.
+Response digests identify `response-canonical-json/1`: UTF-8 JSON with sorted keys,
+compact separators and unescaped Unicode, over the returned packet. Verified facts
+are serialized records, not Python object representations. Stage digests separately
+identify the message-role/text scope; tool output digests cover their deterministic packets.
+
 The model output is rejected if it has an invalid shape, unsupported event
 references, duplicated IDs, or numeric prose. Failure returns deterministic
 verified content. The final evidence audit cannot be overridden by an agent.
-There are no automatic model retries (`max_model_attempts: 1`), and execution
-has a 30-second timeout. This avoids retry cost and duplicate inference while
-keeping the deterministic fallback available.
+There is one application workflow attempt (`max_workflow_attempts: 1`) and a
+30-second execution timeout. Legacy `max_model_attempts: 1` is retained for trace
+compatibility and refers to that workflow attempt, not a count of network calls.
+The two specialists and tool turns can make multiple model requests; provider SDK
+transport retries are not certified by this field. Owner cost approval must cover
+the workflow, and only returned usage counters are reported. Cancellation records
+its actual state and propagates rather than leaving a running trace.
+
+The output gate validates shape, IDs, numeric-prose exclusion and deterministic
+facts; it is not a semantic proof of arbitrary prose. Model copy remains labelled
+opinion, separate from verified facts, and needs release review before public use.
 
 ## Verification status and provider setup
 
@@ -60,3 +91,8 @@ The integration follows Microsoft's documented
 and [function tool](https://learn.microsoft.com/en-us/agent-framework/agents/tools/function-tools)
 patterns. Verify compatibility against the repository's pinned optional
 dependencies before enabling a deployment.
+
+`python scripts/foundry_smoke.py --check-only` also exercises the pinned SDK's
+real sequential/middleware/output contract with an in-memory chat transport.
+The Foundry client is constructed but never invoked. This is offline compatibility
+evidence with `authenticated: false`, not a hosted inference result.

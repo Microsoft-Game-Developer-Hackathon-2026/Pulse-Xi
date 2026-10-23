@@ -75,3 +75,56 @@ def test_workflow_revision_names_allow_numeric_shas_and_distinguish_retries():
         assert "--" not in name
         names.append(name)
     assert len(set(names)) == len(names), "Deployments/retries must not reuse an immutable revision name"
+
+
+@pytest.mark.skipif(not POWERSHELL, reason="PowerShell is required for provisioning guard tests")
+@pytest.mark.parametrize("response,exit_code,allowed", [
+    ("true", 0, True), ("false", 0, False),
+    ("true", 17, False), ('{"exists":true}', 0, False),
+    ('"true"', 0, False), ("[true]", 0, False),
+    ("null", 0, False), ("", 0, False), ("not-json", 0, False),
+    ("true\nfalse", 0, False),
+])
+def test_provision_requires_successful_boolean_group_lookup(response, exit_code, allowed):
+    command = r'''
+function az {
+    $global:LASTEXITCODE = 0
+    $operation = $args -join ' '
+    if ($operation -like 'group exists *') {
+        $global:LASTEXITCODE = [int]$env:PROVISION_TEST_EXIT_CODE
+        return $env:PROVISION_TEST_RESPONSE
+    }
+    if ($operation -like 'deployment group what-if *') {
+        [Console]::WriteLine('OFFLINE_WHAT_IF')
+        return
+    }
+    if ($operation -like 'deployment group create *') {
+        [Console]::WriteLine('OFFLINE_PROVISION')
+        return
+    }
+    throw 'Unexpected fake Azure operation'
+}
+function Read-Host {
+    param([string]$Prompt)
+    [Console]::WriteLine('OFFLINE_CONFIRMATION')
+    return 'CREATE PULSE XI AZURE RESOURCES'
+}
+try {
+    & $env:PROVISION_TEST_SCRIPT -ResourceGroup unused -Image $env:PROVISION_TEST_IMAGE -ConfirmProvisioning
+} catch {
+    [Console]::Error.WriteLine($_.Exception.Message)
+    exit 1
+}
+'''
+    environment = os.environ.copy()
+    environment.update(PROVISION_TEST_SCRIPT=str(PROVISION),
+                       PROVISION_TEST_IMAGE=f"ghcr.io/example/pulse-xi-demo@sha256:{DIGEST}",
+                       PROVISION_TEST_RESPONSE=response, PROVISION_TEST_EXIT_CODE=str(exit_code))
+    result = subprocess.run([POWERSHELL, "-NoLogo", "-NoProfile", "-NonInteractive",
+        "-EncodedCommand", base64.b64encode(command.encode("utf-16le")).decode("ascii")],
+        env=environment, capture_output=True, text=True, timeout=20)
+    output = result.stdout + result.stderr
+    assert "Unexpected fake Azure operation" not in output, output
+    assert (result.returncode == 0) is allowed, output
+    for marker in ("OFFLINE_WHAT_IF", "OFFLINE_CONFIRMATION", "OFFLINE_PROVISION"):
+        assert (marker in output) is allowed, output

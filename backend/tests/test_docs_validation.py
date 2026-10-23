@@ -60,3 +60,24 @@ def test_documented_health_openapi_and_fixture_read_smoke(monkeypatch, tmp_path)
         assert openapi.json()['openapi'].startswith('3.')
         match = client.get('/api/matches/comeback-1107')
         assert match.status_code == 200 and match.json()['synthetic'] is True
+
+
+def test_clean_graphics_artifact_inventories_match_checkout_bytes():
+    import hashlib
+    import json
+
+    root = Path(__file__).resolve().parents[2] / 'docs/audit-evidence/graphics-rtx5070-clean-900-2026-10-23'
+    inventories = list(root.glob('*/artifact-inventory.json'))
+    assert len(inventories) >= 2
+    for inventory in inventories:
+        rows = json.loads(inventory.read_text(encoding='utf-8'))
+        names = [row['file'] for row in rows]
+        assert len(names) == len(set(names))
+        assert {'report.json', 'build-hashes.json'} <= set(names)
+        assert set(names) == {p.name for p in inventory.parent.iterdir()
+                              if p.is_file() and p.name not in {'artifact-inventory.json', 'README.md'}}
+        for row in rows:
+            assert Path(row['file']).name == row['file']
+            content = (inventory.parent / row['file']).read_bytes()
+            assert len(content) == row['bytes']
+            assert hashlib.sha256(content).hexdigest() == row['sha256'], str(inventory.parent / row['file'])
