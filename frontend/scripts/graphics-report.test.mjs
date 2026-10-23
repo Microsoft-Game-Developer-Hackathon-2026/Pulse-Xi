@@ -9,6 +9,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { recordProbe } from './graphics-report.mjs'
 import { stabilitySeconds, runStability } from './graphics-stability.mjs'
+import { chromium } from '@playwright/test'
 
 test('CLI startup failure leaves an explicit failed report and exits nonzero', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'pulse-graphics-cli-'))
@@ -139,3 +140,43 @@ test('missing stability observations fail and preserve completed samples', async
     assert.equal(report.stability.samples.length, 1)
   }
 })
+
+// Deliberate real Playwright closures verify error propagation. They do not
+// reproduce or explain the earlier uncommanded physical-RTX page closure.
+for (const target of ['page', 'context', 'browser']) {
+  test(`real ${target} closure preserves failed status and completed observations`, { timeout: 45000 }, async () => {
+    const browser = await chromium.launch({ headless: true,
+      args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] })
+    const context = await browser.newContext()
+    const page = await context.newPage()
+    const directory = await mkdtemp(join(tmpdir(), 'pulse-graphics-lifecycle-'))
+    let time = 0
+    try {
+      await assert.rejects(recordProbe(directory, { mode: 'deliberate lifecycle failure; not GPU evidence' },
+        async (report, checkpoint) => {
+          report.profiles.push({ testOnly: true, completedBeforeInterruption: true })
+          await runStability({ durationMs: 500, report, checkpoint, now: () => time,
+            step: async cycle => {
+              if (cycle === 1) {
+                const pending = page.waitForTimeout(30000)
+                void pending.catch(() => {})
+                await ({ page, context, browser })[target].close()
+                await pending
+              }
+              await page.waitForTimeout(5)
+              time += 100
+            }, sample: async () => ({ testOnly: true }) })
+        }), /closed/)
+      const saved = JSON.parse(await readFile(join(directory, 'report.json')))
+      assert.equal(saved.status, 'failed')
+      assert.equal(saved.stability.status, 'failed')
+      assert.equal(saved.stability.observedWorkMs, 100)
+      assert.equal(saved.stability.cyclesCompleted, 1)
+      assert.equal(saved.stability.samples.length, 1)
+      assert.equal(saved.profiles.length, 1)
+      assert.ok(saved.endedAt)
+    } finally {
+      if (browser.isConnected()) await browser.close()
+    }
+  })
+}
