@@ -1,0 +1,57 @@
+[
+  {
+    "file": "build-hashes.json",
+    "bytes": 1580,
+    "sha256": "4c3d47105b1c4835422b99853f43fcf2193b184dc59d29b6c1aae0b46e68316b"
+  },
+  {
+    "file": "high.png",
+    "bytes": 258614,
+    "sha256": "96d63b998ccec16812f8154491063db9b80aeb6f1c1cd49c07b3fce3f956bf35"
+  },
+  {
+    "file": "low.png",
+    "bytes": 109641,
+    "sha256": "ad2c4cdcafb07c223f8fc9ca8b3549dcceae4d72ea05bd4feb1bcfb93a5509f5"
+  },
+  {
+    "file": "report.json",
+    "bytes": 80249,
+    "sha256": "3365c9f6b607a3dc7fe6e6459481e5cbc06081ab084c627dd671509844a4943e"
+  },
+  {
+    "file": "standard.png",
+    "bytes": 249633,
+    "sha256": "49112c4e1af19d62a85f75de3808ea18ac415a7a2906bf2c11f7ceb3d03dea40"
+  },
+  {
+    "file": "viewport-1024x768.png",
+    "bytes": 163212,
+    "sha256": "d66de297425c7bcb7f69c989db1173b3de73bffecd50f11594e805f0b5f39c7e"
+  },
+  {
+    "file": "viewport-1366x768.png",
+    "bytes": 238052,
+    "sha256": "802ee487796b748d250865588b6be40b067c46f0c00a12c7791f9e91a8f73e34"
+  },
+  {
+    "file": "viewport-1920x1080.png",
+    "bytes": 365239,
+    "sha256": "a65c6acc0678a76ca9519287d0b80ddf80ce5fd00ae1f7cca42ada5c00f93c71"
+  },
+  {
+    "file": "viewport-360x800.png",
+    "bytes": 58619,
+    "sha256": "bf2bd8cf70b0163b498cd475c468d0795a3542dc1d5d578b788347cfa28ef1a0"
+  },
+  {
+    "file": "viewport-390x844.png",
+    "bytes": 67452,
+    "sha256": "47e42641131d18cd88ca0904895da44756396061f0725b02f6db3e340df5b389"
+  },
+  {
+    "file": "viewport-768x1024.png",
+    "bytes": 242570,
+    "sha256": "cd6053171789ae04e763116b6bb27327261f99f663fc34cb24b7f9c18569fc38"
+  }
+]
