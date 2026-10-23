@@ -29,7 +29,11 @@ signals. It cycles all profiles/cameras at the same fixed scenario/event cutoff;
 total probe duration is longer than 15 minutes because setup, profile samples,
 the existing short idle phase and screenshots are additional. The option accepts
 only integers from 0 through 900; zero/unset preserves the short default. Record
-actual `stability.elapsedMs`, cycles and samples; a failed/interrupted section is
+actual `stability.elapsedMs`, `stability.observedWorkMs`, cycles and samples.
+Completion requires the requested duration spent awaiting browser steps and samples;
+JSON checkpoint time is excluded from `observedWorkMs`, but included in total
+`elapsedMs`. Missing observations fail without discarding completed samples;
+ a failed/interrupted section is
 not successful extended evidence. Use the same option on Iris Xe for comparison.
 
 The actual renderer must match the expected physical GPU; software/unknown

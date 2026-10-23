@@ -11,12 +11,18 @@ export async function runStability({ durationMs, report, checkpoint, step, sampl
   now = () => performance.now() }) {
   const started = now()
   const state = report.stability = { status: 'running', requestedDurationMs: durationMs,
-    elapsedMs: 0, cyclesCompleted: 0, samples: [] }
-  await checkpoint()
+    elapsedMs: 0, observedWorkMs: 0, cyclesCompleted: 0, samples: [] }
   try {
-    while (now() - started < durationMs) {
+    await checkpoint()
+    while (state.observedWorkMs < durationMs) {
+      const cycleStarted = now()
       await step(state.cyclesCompleted)
-      state.samples.push({ elapsedMs: now() - started, ...await sample() })
+      const observation = await sample()
+      if (!observation || typeof observation !== 'object' || Array.isArray(observation)) {
+        throw new Error('Missing stability observation')
+      }
+      state.observedWorkMs += now() - cycleStarted
+      state.samples.push({ ...observation, elapsedMs: now() - started })
       state.cyclesCompleted++
       state.elapsedMs = now() - started
       await checkpoint()

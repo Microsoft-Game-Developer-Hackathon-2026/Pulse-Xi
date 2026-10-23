@@ -1,4 +1,4 @@
-﻿# Physical RTX 5070 extended stability evidence — 23 October 2026
+# Physical RTX 5070 extended stability evidence — 23 October 2026
 
 This is a local physical-GPU observation, not release approval or Intel Iris Xe certification.
 The original bounded RTX report from PR #95 remains unchanged.
@@ -67,3 +67,15 @@ All nine new screenshots were opened and inspected: `low.png`, `standard.png`,
 on narrow screens. The three profile images precede the extended phase; six viewport
 captures follow it. These are viewport/observer captures, not full-page accessibility
 certification. Existing automated browser coverage remains separate.
+
+## Subsequent helper review
+
+The recorded probe predates the `observedWorkMs` completion guard. Its 906.109
+seconds are total extended-phase elapsed time, including checkpoint writes; the
+report does not separately measure checkpoint time. Its 145 actual observations
+remain bounded switching evidence. The revised helper excludes checkpoint I/O
+from its completion budget and rejects missing sample objects. Do not relabel this
+historical run as a measurement made by that revised source or infer an exact
+900 seconds of browser work from its elapsed time alone. A new hardware run is
+not supplied by these offline regressions. The earlier page-closure cause remains
+unproven.

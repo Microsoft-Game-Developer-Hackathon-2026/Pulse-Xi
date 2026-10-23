@@ -112,3 +112,30 @@ test('extended interruption retains partial observations and failed status', asy
   assert.equal(report.stability.elapsedMs, 200)
   assert.ok(report.stability.elapsedMs < report.stability.requestedDurationMs)
 })
+
+
+test('checkpoint delays cannot replace measured stability observations', async () => {
+  let time = 0
+  const report = {}
+  await runStability({ durationMs: 250, report, now: () => time,
+    step: async () => { time += 100 }, sample: async () => ({ heapBytes: null }),
+    checkpoint: async () => { time += 1000 } })
+  assert.equal(report.stability.cyclesCompleted, 3)
+  assert.equal(report.stability.observedWorkMs, 300)
+  assert.equal(report.stability.samples.length, 3)
+  assert.ok(report.stability.elapsedMs > report.stability.observedWorkMs)
+})
+
+test('missing stability observations fail and preserve completed samples', async () => {
+  for (const missing of [undefined, null, []]) {
+    let time = 0
+    const report = {}
+    await assert.rejects(runStability({ durationMs: 250, report, now: () => time,
+      step: async () => { time += 100 },
+      sample: async () => time === 100 ? { heapBytes: null } : missing,
+      checkpoint: async () => {} }), /Missing stability observation/)
+    assert.equal(report.stability.status, 'failed')
+    assert.equal(report.stability.cyclesCompleted, 1)
+    assert.equal(report.stability.samples.length, 1)
+  }
+})
