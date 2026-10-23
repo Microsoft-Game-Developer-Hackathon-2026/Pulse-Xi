@@ -34,6 +34,7 @@ test('closed browser preserves failed status and partial metrics, not success', 
   const directory = await mkdtemp(join(tmpdir(), 'pulse-graphics-failure-'))
   await assert.rejects(recordProbe(directory, { commit: 'test' }, async (report, checkpoint) => {
     report.profiles.push({ quality: 'low', unavailable: null })
+    report.interruption = { signal: 'SIGTERM', at: 'test observation, not a real OS signal' }
     await checkpoint()
     const running = JSON.parse(await readFile(join(directory, 'report.json')))
     assert.equal(running.status, 'running')
@@ -45,6 +46,7 @@ test('closed browser preserves failed status and partial metrics, not success', 
   assert.match(report.failure, /browser has been closed/)
   assert.equal(report.profiles.length, 1)
   assert.equal(report.profiles[0].unavailable, null)
+  assert.equal(report.interruption.signal, 'SIGTERM')
   assert.ok(report.endedAt)
 })
 

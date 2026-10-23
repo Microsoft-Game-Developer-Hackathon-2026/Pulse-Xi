@@ -41,7 +41,8 @@ Each invocation creates `test-results/graphics/run-*/report.json` plus screensho
 It writes `running` before launching Chromium, checkpoints profiles, and atomically
 renames JSON after each update. Completed runs are `passed` only after all steps
 and runtime-error checks. Exceptions produce `failed` with end time and the actual
-failure. SIGINT/SIGTERM close the browser; a five-minute deadline bounds hangs.
+failure. SIGINT/SIGTERM close the browser; a deadline bounds hangs. Signal and
+browser-disconnect timestamps are recorded when observable.
 The deadline remains five minutes for the default and adds the requested extended
 duration for the opt-in session. An OS force-kill/power failure may leave `running`, which is incomplete. Never
 promote partial metrics/screenshots or an old success file as this run's result.

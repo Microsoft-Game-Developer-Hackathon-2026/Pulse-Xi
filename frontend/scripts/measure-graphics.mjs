@@ -18,7 +18,12 @@ console.log(`Graphics artifacts: ${output}`)
 const hardware = process.env.PULSE_GRAPHICS_HARDWARE === '1'
 let browser
 let interrupted = null
-const interrupt = signal => { interrupted = signal; void browser?.close() }
+let activeReport
+const interrupt = signal => {
+  interrupted = signal
+  if (activeReport) activeReport.interruption = { signal, at: new Date().toISOString() }
+  void browser?.close()
+}
 const onInterrupt = () => interrupt('SIGINT')
 const onTerminate = () => interrupt('SIGTERM')
 process.on('SIGINT', onInterrupt)
@@ -41,6 +46,7 @@ try {
       activeOrbitMs: 5000, idleMs: 30000, note: 'Bounded probe; not the proposed 15-minute soak. RAF pacing, not GPU timer queries.' },
     unavailable: ['GPU utilization/allocated VRAM', 'GPU timer queries', 'forced-GC leak assessment'],
   }, async (report, checkpoint) => {
+    activeReport = report
     const extendedSeconds = stabilitySeconds(process.env.PULSE_GRAPHICS_STABILITY_SECONDS)
     report.workload.extendedStabilitySeconds = extendedSeconds
     report.workload.note = extendedSeconds ? 'Extended switching/remount stability plus bounded RAF samples; not GPU timer queries.' : report.workload.note
@@ -56,6 +62,7 @@ try {
     }
     browser = await chromium.launch({ headless: !hardware,
       args: [...(hardware ? [] : ['--enable-unsafe-swiftshader']), '--enable-precise-memory-info'] })
+    browser.on('disconnected', () => { report.browserDisconnectedAt = new Date().toISOString() })
     const page = await browser.newPage({ viewport: { width: 1366, height: 768 } })
     page.setDefaultTimeout(15_000)
     report.browser = browser.version()
