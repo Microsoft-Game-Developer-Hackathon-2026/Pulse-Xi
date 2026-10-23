@@ -1,0 +1,23 @@
+{
+    "probeCommit":  "1023a27762c18ff03a9bb4cb2a8cb920e6a7ab2f",
+    "applicationSourceCommit":  "0f45ca024bdcae294b74410023ff9533202416ed",
+    "diagnosticLogging":  "pw:browser,pw:protocol",
+    "files":  [
+                  {
+                      "path":  "index.html",
+                      "sha256":  "a4806c00d162b21ac753c4f2dce08b81e3e4825ecc793f48a85bea3046a37a15"
+                  },
+                  {
+                      "path":  "assets/index-DKw2n-KA.css",
+                      "sha256":  "9b4fbc3ce48f14006cc31c768cfd8ec272ae940abf8dc11a7dce118ee49175c0"
+                  },
+                  {
+                      "path":  "assets/index-ODdcG0IC.js",
+                      "sha256":  "3f5fb20766eb235231c7b3465d2af531160c3506f9827596786dff9834e726ab"
+                  },
+                  {
+                      "path":  "assets/SceneCanvas-IEPPeEnL.js",
+                      "sha256":  "274ea82a3f199fe1a82040f1daa0016aadd3cad0d55d42c2e58f24d12833e0e4"
+                  }
+              ]
+}
