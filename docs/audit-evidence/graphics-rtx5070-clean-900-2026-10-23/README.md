@@ -9,6 +9,12 @@ Both root reports and stability sections passed, and both probe processes exited
 | 1 | 902,543.8727 ms | 902,889.0666 ms | 177 | [JSON](attempt-1/report.json) |
 | 2 | 902,502.8011 ms | 902,742.0357 ms | 177 | [JSON](attempt-2/report.json) |
 
+A separate [integrated public-mode pass](integrated-public/README.md) includes
+the later recap-cooldown change at archived source `bbcce072`, with 902,233.1052 ms
+observed work, 902,493.3331 ms phase time and 177 samples. Its raw report, build
+hashes, nine inspected physical screenshots and separate headless public-mode UI
+check retain their own source/configuration. It does not relabel either trial above.
+
 Probe/application snapshot: clean at launch
 `dc13f74e73c71927c7eddf17aaf010097ca6dd3d`. Application/observer code, asset
 sources and dependency manifests are unchanged from main

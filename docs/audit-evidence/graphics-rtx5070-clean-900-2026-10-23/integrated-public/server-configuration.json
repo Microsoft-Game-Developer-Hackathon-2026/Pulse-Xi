@@ -1,0 +1,13 @@
+{
+  "source": "bbcce072ab6f1100eb89cc88c958648d7605d617",
+  "transport": "loopback HTTP/WS; not deployed HTTPS/WSS",
+  "deployment_mode": "public-readonly",
+  "runtime_driver": 0,
+  "foundry_enabled": false,
+  "privileged_runtime_import_admin_producer_provider_variables": "unset in child process",
+  "database_paths": "distinct disposable files under OS Temp; no real user database",
+  "host": "127.0.0.1",
+  "port": 8882,
+  "limit_concurrency": 32,
+  "access_log": false
+}
