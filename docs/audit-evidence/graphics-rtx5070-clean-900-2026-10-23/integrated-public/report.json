@@ -1,0 +1,1657 @@
+{
+  "schemaVersion": 1,
+  "commit": "bbcce072ab6f1100eb89cc88c958648d7605d617",
+  "dirty": false,
+  "mode": "headed physical GPU requested; inspect renderer",
+  "machine": {
+    "cpu": "Intel(R) Core(TM) Ultra 9 275HX",
+    "logicalCpus": 24,
+    "ramBytes": 33752997888,
+    "os": "win32 10.0.26300",
+    "nvidia": "name, driver_version, memory.total [MiB]\r\nNVIDIA GeForce RTX 5070 Laptop GPU, 617.42, 8151 MiB"
+  },
+  "workload": {
+    "match": "comeback-1107",
+    "cutoff": 3500,
+    "warmupMs": 5000,
+    "repeats": 3,
+    "activeOrbitMs": 5000,
+    "idleMs": 30000,
+    "note": "Extended switching/remount stability plus bounded RAF samples; not GPU timer queries.",
+    "extendedStabilitySeconds": 900
+  },
+  "unavailable": [
+    "GPU utilization/allocated VRAM",
+    "GPU timer queries",
+    "forced-GC leak assessment"
+  ],
+  "status": "passed",
+  "startedAt": "2026-10-23T19:02:52.028Z",
+  "endedAt": "2026-10-23T19:19:34.008Z",
+  "profiles": [
+    {
+      "quality": "low",
+      "metrics": "15 draw calls · 5556 triangles · 24 geometries · 1 textures · first ready 309.5 ms · frames in 500 ms sample: 1",
+      "heapBytes": 26566087,
+      "activeCamera": [
+        {
+          "durationMs": 5002.700000008941,
+          "frames": 826,
+          "fps": 165.11084014602588,
+          "medianFrameMs": 6.099999999999454,
+          "p95FrameMs": 6.199999999999818
+        },
+        {
+          "durationMs": 5004.700000008939,
+          "frames": 826,
+          "fps": 165.04485783334158,
+          "medianFrameMs": 6.099999999998545,
+          "p95FrameMs": 6.199999999998909
+        },
+        {
+          "durationMs": 5004.800000008941,
+          "frames": 826,
+          "fps": 165.04156010200694,
+          "medianFrameMs": 6.099999999998545,
+          "p95FrameMs": 6.200000000000728
+        }
+      ]
+    },
+    {
+      "quality": "standard",
+      "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 309.5 ms · frames in 500 ms sample: 1",
+      "heapBytes": 19690252,
+      "activeCamera": [
+        {
+          "durationMs": 5001.900000008944,
+          "frames": 826,
+          "fps": 165.13724784552332,
+          "medianFrameMs": 6.099999999998545,
+          "p95FrameMs": 6.200000000000728
+        },
+        {
+          "durationMs": 5004.800000005962,
+          "frames": 826,
+          "fps": 165.0415601021052,
+          "medianFrameMs": 6.099999999998545,
+          "p95FrameMs": 6.19999999999709
+        },
+        {
+          "durationMs": 5004.79999999702,
+          "frames": 826,
+          "fps": 165.04156010240007,
+          "medianFrameMs": 6.099999999998545,
+          "p95FrameMs": 6.19999999999709
+        }
+      ]
+    },
+    {
+      "quality": "high",
+      "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 309.5 ms · frames in 500 ms sample: 1",
+      "heapBytes": 19605967,
+      "activeCamera": [
+        {
+          "durationMs": 5002.099999997023,
+          "frames": 826,
+          "fps": 165.13064512914409,
+          "medianFrameMs": 6.099999999998545,
+          "p95FrameMs": 6.19999999999709
+        },
+        {
+          "durationMs": 5004.600000002982,
+          "frames": 826,
+          "fps": 165.04815569666064,
+          "medianFrameMs": 6.099999999998545,
+          "p95FrameMs": 6.19999999999709
+        },
+        {
+          "durationMs": 5005,
+          "frames": 826,
+          "fps": 165.03496503496504,
+          "medianFrameMs": 6.099999999998545,
+          "p95FrameMs": 6.19999999999709
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "assetManifestSha256": "5339ea3a2d76d159fbf6a9c66e1909fb347d6118252e6bc099c3973663075144",
+  "assetManifest": {
+    "schema_version": "1.0",
+    "generator": "scripts/build-blender-assets.py",
+    "blender_version": "5.2.2 LTS",
+    "release_approval": "pending-team-review",
+    "coordinate_system": "glTF Y-up; X length; Z width; origin pitch center; display units, not metres",
+    "external_assets": [],
+    "assets": [
+      {
+        "name": "field",
+        "version": "1.0",
+        "author": "Satvik Patel / PULSE XI procedural source",
+        "license": "CC0-1.0",
+        "source": "assets/blender/field.blend",
+        "output": "frontend/src/features/observer/assets/field.glb",
+        "source_sha256": "795a78a98b76e0f40d52d9a03776d5563f2dfb7bdce8b95a274f4a50513447ae",
+        "output_sha256": "9cf7c40308a3e9d98485a7676b6f042b3734fb5fd74456fbd26a9a29d6a24223",
+        "bytes": 68452,
+        "triangles": 920,
+        "source_polygons": 460,
+        "source_bytes": 104139,
+        "materials": [
+          "FieldWhite",
+          "Plinth",
+          "Turf",
+          "TurfBands"
+        ],
+        "draw_primitives": 4,
+        "textures": 0,
+        "texture_resolution": null,
+        "budget_bytes": 102400,
+        "budget_triangles": 5000,
+        "target": "Optional static event observer; procedural fallback and low-detail markers available"
+      },
+      {
+        "name": "ball",
+        "version": "1.0",
+        "author": "Satvik Patel / PULSE XI procedural source",
+        "license": "CC0-1.0",
+        "source": "assets/blender/ball.blend",
+        "output": "frontend/src/features/observer/assets/ball.glb",
+        "source_sha256": "ab6ff0791a65720fcee10f1342437315c7a4916344228dfd11e4cb4edb57d0a7",
+        "output_sha256": "a741caae81b4edce422332e7f9010b6f02e8922bdb57144ef4dead122243c024",
+        "bytes": 10556,
+        "triangles": 80,
+        "source_polygons": 80,
+        "source_bytes": 91869,
+        "materials": [
+          "BallIvory",
+          "BallPanels"
+        ],
+        "draw_primitives": 2,
+        "textures": 0,
+        "texture_resolution": null,
+        "budget_bytes": 30720,
+        "budget_triangles": 1500,
+        "target": "Optional static event observer; procedural fallback and low-detail markers available"
+      },
+      {
+        "name": "player-marker",
+        "version": "1.0",
+        "author": "Satvik Patel / PULSE XI procedural source",
+        "license": "CC0-1.0",
+        "source": "assets/blender/player-marker.blend",
+        "output": "frontend/src/features/observer/assets/player-marker.glb",
+        "source_sha256": "142b9aad82550b9315212637ec7577145ae63196fa655377e261487909827b30",
+        "output_sha256": "a09dc49fd79688993e3dd6781a9128d37d068b81aaeac98f6b5c644966a77fa5",
+        "bytes": 17108,
+        "triangles": 216,
+        "source_polygons": 102,
+        "source_bytes": 93829,
+        "materials": [
+          "MarkerNeutral",
+          "TeamAccent"
+        ],
+        "draw_primitives": 2,
+        "textures": 0,
+        "texture_resolution": null,
+        "budget_bytes": 30720,
+        "budget_triangles": 1500,
+        "target": "Optional static event observer; procedural fallback and low-detail markers available"
+      },
+      {
+        "name": "field-v2",
+        "version": "2.0",
+        "author": "Satvik Patel / PULSE XI procedural source",
+        "license": "CC0-1.0",
+        "source": "assets/blender/v2/field.blend",
+        "output": "frontend/src/features/observer/assets/v2/field.glb",
+        "source_sha256": "7d8e49053585af4a504ea2fb6c415da14517644d2ad276a2bf92c1d0d32d4a82",
+        "output_sha256": "fe8cccc093a6e605290cc661e6e1f29033f84826e83334a0213d1083259d8591",
+        "source_bytes": 139889,
+        "source_polygons": 1786,
+        "materials": [
+          "CuttingBands",
+          "FieldWhite",
+          "FlagTeal",
+          "GoalNet",
+          "Runoff",
+          "Turf"
+        ],
+        "bytes": 224368,
+        "triangles": 3772,
+        "draw_primitives": 6,
+        "textures": 0,
+        "texture_resolution": null,
+        "budget_bytes": 450000,
+        "budget_triangles": 14000,
+        "target": "Optional event snapshot scenery; positions remain event-derived"
+      },
+      {
+        "name": "stadium-v2",
+        "version": "2.0",
+        "author": "Satvik Patel / PULSE XI procedural source",
+        "license": "CC0-1.0",
+        "source": "assets/blender/v2/stadium.blend",
+        "output": "frontend/src/features/observer/assets/v2/stadium.glb",
+        "source_sha256": "721523f974577e18aa9bac6a889ad0431a68dd146b202937e21f1d0eff01a7aa",
+        "output_sha256": "0c7891b7da5ebbcf839e1e3974ad71e32011936e8badb284bcefbec361807f31",
+        "source_bytes": 214372,
+        "source_polygons": 6532,
+        "materials": [
+          "LampPanels",
+          "OriginalNeutralBoards",
+          "RoofMetal",
+          "SeatingSilver",
+          "SeatingTeal",
+          "StadiumConcrete"
+        ],
+        "bytes": 714308,
+        "triangles": 13168,
+        "draw_primitives": 6,
+        "textures": 0,
+        "texture_resolution": null,
+        "budget_bytes": 850000,
+        "budget_triangles": 24000,
+        "target": "Optional event snapshot scenery; positions remain event-derived"
+      },
+      {
+        "name": "ball-v2",
+        "version": "2.0",
+        "author": "Satvik Patel / PULSE XI procedural source",
+        "license": "CC0-1.0",
+        "source": "assets/blender/v2/ball.blend",
+        "output": "frontend/src/features/observer/assets/v2/ball.glb",
+        "source_sha256": "7d618094d8f2a17a64bb6617db7da0f55535b7bc51c53fe158a4e0256096be31",
+        "output_sha256": "260909418e1f655506c158540dbefd9f88cc6c7a64e97dfaf830bfaa1fe01996",
+        "source_bytes": 124399,
+        "source_polygons": 1280,
+        "materials": [
+          "BallIvory",
+          "BallPanels"
+        ],
+        "bytes": 30736,
+        "triangles": 1280,
+        "draw_primitives": 2,
+        "textures": 0,
+        "texture_resolution": null,
+        "budget_bytes": 80000,
+        "budget_triangles": 2000,
+        "target": "Optional event snapshot scenery; positions remain event-derived"
+      },
+      {
+        "name": "player-marker-v2",
+        "version": "2.0",
+        "author": "Satvik Patel / PULSE XI procedural source",
+        "license": "CC0-1.0",
+        "source": "assets/blender/v2/player-marker.blend",
+        "output": "frontend/src/features/observer/assets/v2/player-marker.glb",
+        "source_sha256": "7a22cec6461ce5c8ea28a5182a0456c0e7f76b6a0aed7679ce6dd6db4fc4fcdf",
+        "output_sha256": "697b42348e6373973b3e25c012d7f96e6b705aa197e463bc4f739898c6c24cf2",
+        "source_bytes": 99542,
+        "source_polygons": 220,
+        "materials": [
+          "Boots",
+          "MarkerNeutral",
+          "TeamAccent"
+        ],
+        "bytes": 19672,
+        "triangles": 496,
+        "draw_primitives": 3,
+        "textures": 0,
+        "texture_resolution": null,
+        "budget_bytes": 80000,
+        "budget_triangles": 2000,
+        "target": "Optional event snapshot scenery; positions remain event-derived"
+      }
+    ],
+    "professional_generator": "scripts/build-professional-assets.py",
+    "reference_pitch_metres": [
+      105,
+      68
+    ]
+  },
+  "assetHashes": [
+    {
+      "name": "field",
+      "sha256": "9cf7c40308a3e9d98485a7676b6f042b3734fb5fd74456fbd26a9a29d6a24223"
+    },
+    {
+      "name": "ball",
+      "sha256": "a741caae81b4edce422332e7f9010b6f02e8922bdb57144ef4dead122243c024"
+    },
+    {
+      "name": "player-marker",
+      "sha256": "a09dc49fd79688993e3dd6781a9128d37d068b81aaeac98f6b5c644966a77fa5"
+    },
+    {
+      "name": "field-v2",
+      "sha256": "fe8cccc093a6e605290cc661e6e1f29033f84826e83334a0213d1083259d8591"
+    },
+    {
+      "name": "stadium-v2",
+      "sha256": "0c7891b7da5ebbcf839e1e3974ad71e32011936e8badb284bcefbec361807f31"
+    },
+    {
+      "name": "ball-v2",
+      "sha256": "260909418e1f655506c158540dbefd9f88cc6c7a64e97dfaf830bfaa1fe01996"
+    },
+    {
+      "name": "player-marker-v2",
+      "sha256": "697b42348e6373973b3e25c012d7f96e6b705aa197e463bc4f739898c6c24cf2"
+    }
+  ],
+  "browser": "156.0.8078.4",
+  "requests": {
+    "http://127.0.0.1:8882/assets/SceneCanvas-CEASPtCg.js": 1,
+    "http://127.0.0.1:8882/assets/field-BUli6m92.glb": 1,
+    "http://127.0.0.1:8882/assets/ball-Co6hkrAX.glb": 1,
+    "http://127.0.0.1:8882/assets/player-marker-Be0iM_eU.glb": 1,
+    "http://127.0.0.1:8882/assets/stadium-C9KVc8zU.glb": 1
+  },
+  "gpu": {
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "vendor": "WebKit"
+  },
+  "assetReadiness": "Original Blender geometry loaded in 403.1 ms.",
+  "viewport": {
+    "width": 1366,
+    "height": 768
+  },
+  "dpr": 1.0000000298023224,
+  "phase": "final-metrics",
+  "stability": {
+    "status": "passed",
+    "requestedDurationMs": 900000,
+    "elapsedMs": 902493.3331,
+    "observedWorkMs": 902233.1052,
+    "cyclesCompleted": 177,
+    "samples": [
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 16962695,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 89.9 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 5271.4272000000055
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 22262727,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 89.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 10356.079400000002
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 18382670,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 89.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 15427.706900000005
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 16521454,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 89.9 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 20494.980200000005
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 17659036,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 89.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 25579.044200000004
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 19394904,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 89.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 30641.94129999999
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 17482005,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 90.9 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 35851.979900000006
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 17432556,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 90.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 40947.2426
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 23951907,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.9 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 46008.1973
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 23034251,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 90.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 51078.60279999999
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 18348756,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 90.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 56154.116500000004
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 23661387,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 61208.60799999999
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 18024709,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 90.7 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 66427.91200000001
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 18311816,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 90.7 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 71519.47270000001
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 18898530,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 76587.35380000001
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 17293777,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 90.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 81660.01259999999
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 18298144,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 90.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 86763.8647
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 19716463,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 91819.7372
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20786408,
+        "visibility": "visible",
+        "metrics": "7 draw calls · 3772 triangles · 7 geometries · 1 textures · first ready 125.7 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 97132.8522
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 18365057,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 125.7 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 102248.9962
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 25606672,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 125.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 107303.1807
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20470017,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 125.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 112373.6919
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 19540737,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 125.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 117455.8283
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24131183,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 125.7 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 122517.32070000001
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 18744581,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 90.7 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 127734.29929999998
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 17923987,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 90.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 132816.9079
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 19914389,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 137883.9138
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 18542323,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 90.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 142948.4079
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 23010978,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 90.7 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 148035.0802
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 19569268,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 153091.17859999998
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 18781074,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 89.5 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 158307.1031
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 23443269,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 89.5 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 163391.3081
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 19946922,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 89.5 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 168450.0694
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 18159431,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 89.5 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 173518.0749
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 19235605,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 89.5 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 178598.2196
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20659092,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 89.5 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 183664.1631
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 19325193,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 91.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 188876.4207
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 21920908,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 91.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 193959.3458
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 19639162,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 91.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 199032.01380000002
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 18615375,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 91.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 204107.1362
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 21914203,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 91.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 209180.2706
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20213109,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 91.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 214246.8271
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24415177,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 126.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 219515.94569999998
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 28065853,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 126.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 224608.05800000002
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20844831,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 126.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 229675.1937
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 18989035,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 126.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 234752.2108
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 22653422,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 126.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 239842.1679
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20636415,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 126.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 244900.12680000003
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 19958834,
+        "visibility": "visible",
+        "metrics": "7 draw calls · 3772 triangles · 7 geometries · 1 textures · first ready 81.8 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 250122.48979999998
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 26317792,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 81.8 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 255213.7122
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20525846,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 81.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 260283.88079999998
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 19313095,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 81.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 265358.1478
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 22761135,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 81.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 270436.5193
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20177442,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 81.8 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 275498.1986
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20367599,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 80.4 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 280723.972
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24662702,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 80.4 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 285798.9879
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20800108,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 80.4 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 290862.7012
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 19623357,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 80.4 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 295929.064
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 25300659,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 80.4 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 301007.0828
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 21237961,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 80.4 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 306061.373
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20671293,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 106.7 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 311337.6817
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 25360726,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 106.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 316421.0503
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20626616,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 106.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 321482.8875
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 19868608,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 106.7 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 326557.1078
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24444358,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 106.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 331640.2044
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 21616898,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 106.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 336691.0772
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20722755,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 91.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 341907.6922
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 25788074,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 91.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 346983.1197
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 25040971,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 91.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 352049.8109
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 21265222,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 91.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 357121.2405
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 21693301,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 91.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 362202.6887
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 26941419,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 91.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 367254.5122
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 21261381,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 118.9 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 372521.5416
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20298852,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 118.9 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 377593.3933
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 22362173,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 118.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 382660.9493
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 23858262,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 118.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 387729.5392
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 21376974,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 118.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 392818.4421
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 22313100,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 118.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 397873.4065
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 21176178,
+        "visibility": "visible",
+        "metrics": "7 draw calls · 3772 triangles · 7 geometries · 1 textures · first ready 84.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 403076.1834
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 27629560,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 84.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 408171.9668
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 27685742,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 84.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 413239.5439
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 26148455,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 84.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 418308.5352
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 22926320,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 84.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 423391.8261
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 27492720,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 84.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 428443.665
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 21736202,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 90.7 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 433646.377
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 20901256,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 90.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 438734.1442
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 22924402,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 443799.8516
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24687857,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 90.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 448865.1611
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 27059779,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 90.7 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 453957.1196
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 22846032,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.7 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 459014.64949999994
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 21879066,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 90.3 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 464227.89300000004
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 26773269,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 90.3 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 469303.3545
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 26743684,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.3 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 474355.69220000005
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 22494412,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 90.3 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 479430.12529999996
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24601284,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 90.3 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 484514.3931
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 29765999,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.3 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 489564.04669999995
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 22624044,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 80.9 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 494790.21180000005
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24976871,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 80.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 499864.0072
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 31401592,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 80.9 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 504933.1947
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 27621338,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 80.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 509991.8308
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 30847451,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 80.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 515077.7341
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 23943912,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 80.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 520141.6152
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 29224753,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 90.4 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 525360.3952
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 23405191,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 90.4 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 530447.7513
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 21858474,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.4 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 535500.642
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24741170,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 90.4 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 540575.4587
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 25885319,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 90.4 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 545632.8876
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 27829804,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.4 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 550695.7249
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 23270385,
+        "visibility": "visible",
+        "metrics": "7 draw calls · 3772 triangles · 7 geometries · 1 textures · first ready 84.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 555889.6013
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 25448459,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 84.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 560982.0416
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 29407365,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 84.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 566045.7047
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 27998642,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 84.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 571121.1129
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24289960,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 84.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 576203.7467
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 28800088,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 84.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 581262.6988
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 23093340,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 90.0 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 586477.1955
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 27782900,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 90.0 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 591553.6955
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 26257819,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.0 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 596625.6881
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 31565676,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 90.0 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 601696.9223
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 23872473,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 90.0 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 606780.0071
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 29290455,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.0 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 611846.2149
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 30439955,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 90.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 617054.7962
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24587052,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 90.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 622123.2182
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 22701080,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 627178.5909
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 25348354,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 90.1 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 632255.1786
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 28863267,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 90.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 637341.0719
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 27892944,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.1 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 642407.239
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 30950144,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 91.8 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 647632.6886999999
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 27495529,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 91.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 652721.1072
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24051307,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 91.8 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 657791.0167
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 29805167,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 91.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 662856.6948
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24684960,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 91.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 667941.657
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 29835846,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 91.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 672993.7645
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 36677854,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 88.4 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 678198.5273
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24589327,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 88.4 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 683267.8443
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 31669309,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 88.4 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 688334.3318
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 29307824,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 88.4 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 693401.1816
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 32920856,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 88.4 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 698484.8716
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 38073844,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 88.4 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 703530.6895
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24892000,
+        "visibility": "visible",
+        "metrics": "7 draw calls · 3772 triangles · 7 geometries · 1 textures · first ready 77.8 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 708790.9882
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 23304238,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 77.8 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 713872.3115
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 25299147,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 77.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 718934.0849
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 27040198,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 77.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 724007.444
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 29005834,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 77.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 729090.327
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24491889,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 77.8 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 734159.2269
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 30540292,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 89.8 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 739373.0023
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 25648764,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 89.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 744463.4864
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 25582198,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 89.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 749526.9984
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24289924,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 89.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 754593.7687
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 26448566,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 89.8 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 759679.7967
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 31648322,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 89.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 764743.7511
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 25268844,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 106.8 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 770031.4218
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 27660421,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 106.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 775113.9913
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 34753306,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 106.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 780176.2917
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 32552327,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 106.8 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 785243.7443
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 35912831,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 106.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 790328.8722
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 41082344,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 106.8 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 795380.7393
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 26272078,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 84.3 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 800582.4872
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 24289704,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 84.3 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 805666.6298
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 25403112,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 84.3 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 810734.5009
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 27662796,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 84.3 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 815807.8306
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 29215908,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 84.3 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 820894.0198
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 26069912,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 84.3 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 825949.173
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 33429993,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 90.6 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 831166.2223
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 29770802,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 90.6 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 836249.9896
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 26773166,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.6 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 841316.9096
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 32051778,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 90.6 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 846376.5476
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 26358276,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 90.6 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 851463.2129
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 31658386,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 90.6 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 856517.1413
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 36495804,
+        "visibility": "visible",
+        "metrics": "7 draw calls · 3772 triangles · 7 geometries · 1 textures · first ready 82.6 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 861721.2768
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 26028580,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 82.6 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 866814.7898
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 33218965,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 82.6 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 871876.7184
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 30666572,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 24 geometries · 3 textures · first ready 82.6 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 876952.089
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 34331868,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 82.6 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 882027.9908
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 38721578,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 82.6 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 887091.3542
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 26761379,
+        "visibility": "visible",
+        "metrics": "15 draw calls · 5556 triangles · 15 geometries · 1 textures · first ready 89.9 ms · frames in 500 ms sample: 0",
+        "elapsedMs": 892359.8597
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 28764134,
+        "visibility": "visible",
+        "metrics": "25 draw calls · 19380 triangles · 22 geometries · 2 textures · first ready 89.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 897437.9421
+      },
+      {
+        "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 5070 Laptop GPU (0x00002D58) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+        "heapBytes": 35760045,
+        "visibility": "visible",
+        "metrics": "34 draw calls · 33044 triangles · 22 geometries · 4 textures · first ready 89.9 ms · frames in 500 ms sample: 69",
+        "elapsedMs": 902492.024
+      }
+    ]
+  },
+  "interactionHeap": {
+    "before": 15481689,
+    "after": 47947537,
+    "afterThirtySecondIdle": 25166674,
+    "note": "No forced GC; bounded samples do not establish a leak or its absence."
+  },
+  "finalMetrics": "25 draw calls · 19380 triangles · 22 geometries · 4 textures · first ready 89.9 ms · frames in 500 ms sample: 0",
+  "resources": [
+    {
+      "name": "/assets/SceneCanvas-CEASPtCg.js",
+      "transferSize": 984169,
+      "encodedBodySize": 983869,
+      "durationMs": 5.899999991059303
+    },
+    {
+      "name": "/assets/field-BUli6m92.glb",
+      "transferSize": 224668,
+      "encodedBodySize": 224368,
+      "durationMs": 14.200000002980232
+    },
+    {
+      "name": "/assets/ball-Co6hkrAX.glb",
+      "transferSize": 31036,
+      "encodedBodySize": 30736,
+      "durationMs": 13
+    },
+    {
+      "name": "/assets/player-marker-Be0iM_eU.glb",
+      "transferSize": 19972,
+      "encodedBodySize": 19672,
+      "durationMs": 13.799999997019768
+    },
+    {
+      "name": "/assets/stadium-C9KVc8zU.glb",
+      "transferSize": 714608,
+      "encodedBodySize": 714308,
+      "durationMs": 35.70000000298023
+    }
+  ],
+  "screenshots": [
+    "viewport-1920x1080.png",
+    "viewport-1366x768.png",
+    "viewport-1024x768.png",
+    "viewport-768x1024.png",
+    "viewport-390x844.png",
+    "viewport-360x800.png"
+  ]
+}

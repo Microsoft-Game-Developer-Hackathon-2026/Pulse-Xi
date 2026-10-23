@@ -1,0 +1,77 @@
+[
+  {
+    "file": "build-hashes.json",
+    "bytes": 1569,
+    "sha256": "bd907a106dc3c53a9d91ada1d064c46f908854c4b15ad794d1c353192c4f06ad"
+  },
+  {
+    "file": "high.png",
+    "bytes": 257021,
+    "sha256": "1189d46a56830d2a2cc78b652baf49db7cdaa3f273b32523a0dce7e6ef185f7c"
+  },
+  {
+    "file": "low.png",
+    "bytes": 109927,
+    "sha256": "838a98a1bc10e9a697d223e7cf3b50ac49d24f369db4447aba0ca7a0a3a7b0fe"
+  },
+  {
+    "file": "public-ui-limited.png",
+    "bytes": 56815,
+    "sha256": "97fc0254584dab4273a008565dbcc2ef34d6e0d9eb259f0570bac577c744b713"
+  },
+  {
+    "file": "public-ui-recovered.png",
+    "bytes": 157220,
+    "sha256": "6a63aa5f16261a276771ea12efad68e8d3300243e38f7dcf0daf76b7104fa23b"
+  },
+  {
+    "file": "public-ui-report.json",
+    "bytes": 5841,
+    "sha256": "bada045a16d5e8f1a4f160d3658010780d2d9b8dbb582a70381447b90755a9b9"
+  },
+  {
+    "file": "report.json",
+    "bytes": 80062,
+    "sha256": "ffa9350867be8c331ec31e8751d2f28b0a40c69e5434acec122bfa14180669f1"
+  },
+  {
+    "file": "server-configuration.json",
+    "bytes": 475,
+    "sha256": "cb0645759076f26f4a71ee8f9a5813871a2ee6e2b6d0d1beb03034300e6ee817"
+  },
+  {
+    "file": "standard.png",
+    "bytes": 249599,
+    "sha256": "dc17421b9231d5321c17487aa0bdfebd9fd92ac1eb106bb18b0b69c33bee0cb3"
+  },
+  {
+    "file": "viewport-1024x768.png",
+    "bytes": 162838,
+    "sha256": "d3fdc2114c7b37756cef88efa66216ec9fad69eb74ed58e59c575f560938add2"
+  },
+  {
+    "file": "viewport-1366x768.png",
+    "bytes": 238052,
+    "sha256": "802ee487796b748d250865588b6be40b067c46f0c00a12c7791f9e91a8f73e34"
+  },
+  {
+    "file": "viewport-1920x1080.png",
+    "bytes": 365278,
+    "sha256": "5a28390fc049dafb7ec908b028aa83ead6f20a02a957c2597a6e3cc5e7b1d4c6"
+  },
+  {
+    "file": "viewport-360x800.png",
+    "bytes": 58336,
+    "sha256": "ffcea89f7a471ac6564b8c64b975d6d70e1e73d25ee22e001ac2752648b53a21"
+  },
+  {
+    "file": "viewport-390x844.png",
+    "bytes": 67660,
+    "sha256": "c9c38b4b575ecdba32e3b09af99ca4c5a8739332a1c2e86dde1f6bf3d634d7bf"
+  },
+  {
+    "file": "viewport-768x1024.png",
+    "bytes": 242477,
+    "sha256": "6c14180e90984f574d4e209399b7b36c6163e6329c31f41af4bd35322a5316df"
+  }
+]
