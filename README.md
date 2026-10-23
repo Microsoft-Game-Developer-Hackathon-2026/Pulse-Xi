@@ -302,6 +302,8 @@ Use focused branches/PRs with reproducible evidence. Do not push directly to mai
 
 ## Documentation
 
+Start with [requirements traceability](docs/REQUIREMENTS_TRACEABILITY.md), the [judging matrix](docs/JUDGING_READINESS_MATRIX.md), the [readiness report](docs/FINAL_HACKATHON_READINESS_REPORT.md) and [performance audit](docs/PERFORMANCE_AUDIT.md).
+
 - [Current status](docs/PROJECT_STATUS.md)
 - [Independent handoff and next integration sequence](docs/SATVIK_INDEPENDENT_HANDOFF.md)
 - [API/event contract](docs/CONTRACT.md)

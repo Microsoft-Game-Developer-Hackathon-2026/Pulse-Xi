@@ -215,3 +215,73 @@ Release classification remains DEMO READY, SUBMISSION BLOCKED. Rights/release ap
 ### Final combined browser result
 
 All 98 Playwright tests passed in 6.0 minutes on the combined validation tree, including the unchanged maximum-history comparison/download/offline-verification case. Backend/frontend application source is identical to the PR79 delivery; subsequent differences are documentation only. This verifies the candidate locally, not a merge or successful remote CI. The candidate ledger now records frontend5/5 and persistence5/5 verified matrix rows. These are scoped row counts, not a whole-project or official judging score.
+
+## M. Demo-readiness session, 2026-10-24
+
+Status: **DEMO READY, SUBMISSION BLOCKED** (unchanged). Nothing below is merged.
+
+**Refs.** `main` = `0729d3f`. PR [#104](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/104)
+`audit/replay-stability` head `298828a`: exact-head CI all green (documentation, backend,
+frontend, browser, container, deployment-template); review requested from two teammates,
+none submitted. PR [#105](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/105)
+`feat/one-moment-three-stories` (stacked on #104, base `audit/replay-stability`): review
+requested; its browser CI was still running when last checked. Documentation and the
+route-health test were added after #105's first push and are committed on the same branch.
+
+**Tests run locally.** Backend `pytest tests`: 541 passed, 0 failed, 0 skipped (281 s, base
+`0729d3f`). Playwright full suite on the #105 head before the route-health file: 112 passed
+(6.5 min); `route-health.spec.ts` adds 10 (passed on its own). `scripts/release-smoke.py`:
+passed. `scripts/validate_docs.py`: passed. `npm audit --omit=dev`: 0 vulnerabilities.
+Strict TypeScript (`tsc -b`) and production build: clean.
+
+**Defect ledger (judge-visible).**
+
+| Defect | Severity | Root cause | Fix | Regression test |
+|---|---|---|---|---|
+| Fan Lens fetched every 200 ms tick during replay (61 req / 12 s) | medium | effect keyed to the raw replay clock | use the shared 1 Hz analysis cutoff (13 req) | `replay-stability-metrics.spec.ts` (measures; request counts reported, not asserted) |
+| Event Wire panel grew 137 → ~560 px, pushing content (CLS 0.27 at 4x) | high | list height depended on item count | fixed seven-row viewport, internal scroll | same file: panel bounds constant, page CLS excl. wire < 0.01 |
+| Event Wire reserved height off by 4 px (490 vs 494) | low | min-height guess | exact height | same file |
+| "One Moment/Three Stories exists" claim in the audit was false | medium (honesty) | no UI/test existed | built it; corrected the audit | `three-stories.spec.ts` |
+| PR #100 CI timeout | n/a | not reproduced | none; evidence recorded | n/a |
+
+Routes (Match Intelligence, Sandbox Lab, Control Room, Data Hub, Director Studio) loaded
+cleanly at 1440/390 px on the real backend. No new defect was found there by this sweep;
+that is a smoke result, not an exhaustive interaction audit. Deeper per-control audits of
+Sandbox, Control Room and Data Hub were not repeated; their existing browser suites pass.
+
+**Integration evidence.** `scripts/release-smoke.py` drives real loopback HTTP with
+disposable SQLite stores: scenario create, run, checkpoint, restore, paired comparison,
+two independent CLI verifiers, 4 audit records. Backend suites cover migrations,
+rollback, corruption, ownership denial (403/401 paths), determinism and restore
+(`test_authoritative_engine.py`, `test_reproduction.py`, `test_scenario_library.py`,
+`test_security_boundary.py`, `test_release_security.py`). Remaining non-durable areas:
+bounded process-local agent traces and browser-local notes/preferences.
+
+**Not done / not verified.** UI colour-token pass and screenshot comparison (the new
+drawer uses a few literal colours); INP/LCP/heap/React Profiler; per-control audit of every
+route; accessibility re-run beyond the existing suite; hosted Foundry/Agent Framework run
+(no authorization); public judge access, video, rights sign-off, submission.
+
+### Demo scripts (verified features only; deterministic fixture `comeback-1107`)
+
+Run: `.\scripts\start.ps1` then open `http://127.0.0.1:8000`. Reset: reload (replay state
+is browser-local; the fixture regenerates identically). Fallback if 3D fails: stay on the
+2D pitch, which is the default view; the 3D observer is optional.
+
+**Video cut, under 120 s (the official limit; judges need not watch longer).**
+0:00 one sentence: football dashboards report outcomes but cannot show why or what-if.
+0:10 Match Intelligence: press play at 4×, scroll to analysis; panels stay still. 0:30 seek
+to 16:40, open the goal's evidence: One Moment · Three Stories, same 2 source events, cue
+labelled PROPOSED. 1:00 Control Room: 120 s seed-7 scenario, step, checkpoint, restore a
+branch. 1:25 ForkCast comparison and independent verification. 1:45 say plainly that
+explanations are rule-based and deterministic. Do not say "AI-powered".
+
+**Five-minute live walkthrough.** (1) Problem and what is different, 30 s. (2) Replay at
+1×/4×, Event Wire and stable panels, 60 s. (3) Fan Lens metric + alert while playing, 45 s.
+(4) Goal cue → ProofTrail → Three Stories → switch persona/locale, same facts, 75 s.
+(5) Control Room scenario → checkpoint → intervention branch → ForkCast, 75 s.
+(6) Verify bundle independently, then state limits (synthetic data, rule-based text, no
+hosted model), 15 s. Skip the maximum-history ForkCast case; it is a known slow path.
+
+Commands: backend `cd backend; python -m pytest -q tests`; frontend `cd frontend; npm ci;
+npm run build; npx playwright test`; smoke `python scripts/release-smoke.py` (after build).
