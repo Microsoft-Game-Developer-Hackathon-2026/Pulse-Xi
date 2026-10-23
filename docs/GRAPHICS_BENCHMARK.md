@@ -32,9 +32,8 @@ only integers from 0 through 900; zero/unset preserves the short default. Record
 actual `stability.elapsedMs`, `stability.observedWorkMs`, cycles and samples.
 Completion requires the requested duration spent awaiting browser steps and samples;
 JSON checkpoint time is excluded from `observedWorkMs`, but included in total
-`elapsedMs`. Missing observations fail without discarding completed samples;
- a failed/interrupted section is
-not successful extended evidence. Use the same option on Iris Xe for comparison.
+`elapsedMs`. Missing observations fail without discarding completed samples.
+A failed or interrupted section is not successful extended evidence. Use the same option on Iris Xe for comparison.
 
 The actual renderer must match the expected physical GPU; software/unknown
 renderers fail physical mode. Inventory alone does not establish GPU selection.
