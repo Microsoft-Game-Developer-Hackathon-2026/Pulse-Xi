@@ -113,29 +113,30 @@ export default function App() {
     writeFanPreferences({ version: 2, locale, persona, favoriteTeamId, favoritePlayerId, metricId: fanMetric, thresholdId: fanThreshold, alertsEnabled: fanAlertsEnabled })
   }, [locale, persona, favoriteTeamId, favoritePlayerId, fanMetric, fanThreshold, fanAlertsEnabled])
 
+  const analysisSecond = useReplayAnalysisCutoff(second, playing)
   useEffect(() => { setFanLens(null); setFanLensError(false) }, [matchId])
 
   useEffect(() => {
     if (!matchId || !['command', 'sandbox'].includes(workspace)) return
     const controller = new AbortController()
-    const params = new URLSearchParams({ at_second: String(Math.floor(second)), metric_id: fanMetric, threshold_id: fanThreshold })
+    const params = new URLSearchParams({ at_second: String(analysisSecond), metric_id: fanMetric, threshold_id: fanThreshold })
     if (favoriteTeamId) params.set('team_id', favoriteTeamId)
     if (favoritePlayerId) params.set('player_id', favoritePlayerId)
     api<FanLens>(`/api/matches/${matchId}/fan-lens?${params}`, controller.signal)
       .then(result => {
-        if (playing && second >= lastFanLensClock.current) {
-          const newAlert = result.alerts.find(alert => alert.window_end > lastFanLensClock.current && alert.window_end <= second && !announcedFanAlerts.current.has(alert.alert_id))
+        if (playing && analysisSecond >= lastFanLensClock.current) {
+          const newAlert = result.alerts.find(alert => alert.window_end > lastFanLensClock.current && alert.window_end <= analysisSecond && !announcedFanAlerts.current.has(alert.alert_id))
           if (newAlert) {
             announcedFanAlerts.current.add(newAlert.alert_id)
             setFanLensAnnouncement(tx('alert_count', { value: newAlert.observed_value, unit: newAlert.unit, start: clock(newAlert.window_start), end: clock(newAlert.window_end), threshold: newAlert.threshold }))
           }
         }
-        lastFanLensClock.current = second
+        lastFanLensClock.current = analysisSecond
         setFanLens(result); setFanLensError(false)
       })
       .catch(() => { if (!controller.signal.aborted) setFanLensError(true) })
     return () => controller.abort()
-  }, [matchId, second, fanMetric, fanThreshold, favoriteTeamId, favoritePlayerId, workspace, playing, locale])
+  }, [matchId, analysisSecond, fanMetric, fanThreshold, favoriteTeamId, favoritePlayerId, workspace, playing, locale])
 
   useEffect(() => { if (workspace === 'data' || workspace === 'runtime' || workspace === 'studio') { setPlaying(false); setProof(null); proofRequest.current?.abort() } }, [workspace])
 
@@ -220,7 +221,6 @@ export default function App() {
     api<Cue[]>(`/api/matches/${matchId}/overlays`, controller.signal).then(value => { if (!controller.signal.aborted) setCues(value) }).catch(failed)
     return () => controller.abort()
   }, [matchId, connectionAttempt])
-  const analysisSecond = useReplayAnalysisCutoff(second, playing)
   const audienceScope = JSON.stringify([locale, persona, favoriteTeamId, favoritePlayerId])
   useEffect(() => {
     if (!matchId) return
