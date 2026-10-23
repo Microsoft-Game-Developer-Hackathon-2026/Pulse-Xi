@@ -9,8 +9,12 @@ $ErrorActionPreference = "Stop"
 if (-not (Get-Command az -ErrorAction SilentlyContinue)) { throw "Azure CLI is required; no resources were changed." }
 if (-not $ConfirmTarget) { throw "Pass -ConfirmTarget only after reviewing the resource IDs and expected charges." }
 
-$app = az containerapp show --resource-group $ResourceGroup --name $AppName --output json | ConvertFrom-Json
-$env = az containerapp env show --resource-group $ResourceGroup --name $EnvironmentName --output json | ConvertFrom-Json
+$appJson = az containerapp show --resource-group $ResourceGroup --name $AppName --output json
+if ($LASTEXITCODE -ne 0) { throw "Container App lookup failed; no resources were changed." }
+$app = $appJson | ConvertFrom-Json
+$environmentJson = az containerapp env show --resource-group $ResourceGroup --name $EnvironmentName --output json
+if ($LASTEXITCODE -ne 0) { throw "Environment lookup failed; no resources were changed." }
+$env = $environmentJson | ConvertFrom-Json
 $containerEnvironmentId = $app.properties.managedEnvironmentId
 if (-not $containerEnvironmentId) { $containerEnvironmentId = $app.properties.environmentId }
 if ($app.tags.purpose -ne "public-demo" -or $app.tags.application -ne "pulse-xi" -or
@@ -30,7 +34,20 @@ if ($LASTEXITCODE -ne 0) { throw "Container App deletion failed; inspect Azure s
 
 if ($DeleteEnvironment) {
     $environmentId = $env.id.ToLowerInvariant()
-    $apps = az containerapp list --resource-group $ResourceGroup --output json | ConvertFrom-Json
+    $appsJson = (az containerapp list --resource-group $ResourceGroup --output json) -join "`n"
+    if ($LASTEXITCODE -ne 0) { throw "Remaining-app inventory failed; the environment was retained. The named app was already deleted." }
+    if (-not $appsJson -or -not $appsJson.TrimStart().StartsWith('[')) {
+        throw "Remaining-app inventory is not a JSON array; environment retained."
+    }
+    $apps = $appsJson | ConvertFrom-Json
+    if (($null -eq $apps -or @($apps).Count -eq 0) -and $appsJson.Trim() -notmatch '^\[\s*\]$') {
+        throw "Remaining-app inventory contains no usable records; environment retained."
+    }
+    foreach ($candidate in $apps) {
+        $candidateEnvironment = $candidate.properties.managedEnvironmentId
+        if (-not $candidateEnvironment) { $candidateEnvironment = $candidate.properties.environmentId }
+        if (-not $candidateEnvironment) { throw "Remaining-app inventory is incomplete; environment retained." }
+    }
     $remaining = @($apps | Where-Object {
         $id = $_.properties.managedEnvironmentId
         if (-not $id) { $id = $_.properties.environmentId }
