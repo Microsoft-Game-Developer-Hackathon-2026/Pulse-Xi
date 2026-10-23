@@ -6,13 +6,13 @@
 
 A Microsoft Game Developer Hackathon 2026 project turning fictional football events into deterministic statistics, inspectable tactical explanations, synchronized broadcast cues and personalized recaps. Recorded fixture replay and an authenticated authoritative Control Room support reproducible tactical experiments. All teams, players and events are synthetic. No Premier League feed, club logos, real-player tracking or broadcast footage is used.
 
-## Availability and review status (2026-10-22)
+## Availability and review status (2026-10-23)
 
-Audited main: `d19a898492f8c4a303caa576a9370411b21093ff` ([passing exact-main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39766286652)). It includes the authoritative runtime, saved scenarios and archives, schema-4 checkpoints, ForkCast, native-period analysis #57, recorded Control vs Chaos #42, FanDNA #48, branch ProofTrail #51/#54, Atelier UI #71 and broadcast evidence #75. Optional agent tools #55, offline/cost-gated provider validation #56 and the Broadcast Studio contract #50 are merged; merging a contract does not implement producer editing or approval.
+Verified baseline main: `07da294514f36820a7cf7d7c2dfacaab1adc735d` ([all six exact-main CI jobs passed](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39898162401): 454 backend and 102 browser tests). It includes the authoritative runtime, saved scenarios and archives, schema-4 checkpoints, ForkCast, native-period analysis #57, recorded and runtime Control vs Chaos (#42/#76), FanDNA #48, branch ProofTrail #51/#54, Atelier UI #71 and broadcast evidence #75. Director Studio (#88/#92), Fan Lens (#87), speech controls (#93), scoped trace correction (#89), and deployment preparation hardening (#91/#94) are merged. CI verifies this baseline, not every later documentation or benchmark candidate.
 
-Runtime Control vs Chaos remains in PR #76, which was conflicting and had no submitted reviews at this audit. Microsoft provider code and offline checks are available, but no authorized hosted inference is evidenced. Assets remain `pending-team-review`; #23 licensing/release and #25 actual submission are open.
+Microsoft provider code and offline checks are available, but no authorized hosted inference is evidenced. Assets remain `pending-team-review`; #23 licensing/release and #25 actual submission are open. #21 remains blocked without cost authorization and verified public HTTPS acceptance. Merged infrastructure does not establish a running public demo.
 
-The [requirements audit](docs/FINAL_REQUIREMENTS_AUDIT.md), [performance measurements](docs/PERFORMANCE_AUDIT.md) and [readiness report](docs/FINAL_HACKATHON_READINESS_REPORT.md) separate exercised functionality from missing release deliverables. The replay refresh correction in the audit PR is not shipped until that PR merges.
+The [release evidence ledger](docs/RELEASE_EVIDENCE_LEDGER.md) separates merged code, local tests, exact-main CI, candidate measurements and human/live-service gates. The dated [requirements audit](docs/FINAL_REQUIREMENTS_AUDIT.md), [performance measurements](docs/PERFORMANCE_AUDIT.md) and [readiness report](docs/FINAL_HACKATHON_READINESS_REPORT.md) retain their historical scope; replay refresh corrections #78/#79 are merged.
 
 ## Application functionality
 
@@ -284,7 +284,7 @@ $env:PULSE_GRAPHICS_URL='http://127.0.0.1:8000'
 npm run measure:graphics
 ```
 
-The headed browser rejects a detected software renderer, records renderer identity, active-orbit browser frame pacing and bounded interaction/heap observations in ignored `test-results/graphics/intel-hardware.json`. The filename is historical; inspect the renderer field to identify actual hardware. It does not certify GPU timer FPS or replace a longer physical-hardware test. Without hardware opt-in the probe uses headless Chromium. Keep the browser visible/unoccluded during measurement.
+The headed browser rejects software/unknown renderer identity and records atomic `running`/`failed`/`passed` reports in ignored `test-results/graphics/run-*/report.json`. Set `PULSE_GRAPHICS_EXPECT_GPU='RTX 5070'` on Diyan's machine, or the actual Iris renderer on Satvik's, to reject the wrong selected GPU. Reports include repeated active-orbit browser frame pacing and bounded interaction/heap observations; they do not certify GPU timer FPS or replace a longer physical test. Without hardware opt-in the probe uses headless Chromium. Keep the browser visible/unoccluded. See [isolated startup, workload and failure semantics](docs/GRAPHICS_BENCHMARK.md).
 
 ## Team and contributions
 
