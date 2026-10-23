@@ -124,15 +124,19 @@ def _visible_insight(ctx: ToolContext, insight_id: str, cutoff: int) -> Insight:
 
 
 def _execute(ctx: ToolContext, role: str, name: str, raw_args: dict) -> dict:
-    if name not in ROLE_ALLOWLIST.get(role, frozenset()):
-        raise ToolFailure("tool_not_allowed", 403)
-    if ctx.call_count >= ctx.max_calls:
-        raise ToolFailure("tool_call_limit", 429)
-    ctx.call_count += 1
     started = time.perf_counter()
     safe_args = {}
     status = "completed"
+    error_code = None
+    charged = False
+    result = None
     try:
+        if name not in ROLE_ALLOWLIST.get(role, frozenset()):
+            raise ToolFailure("tool_not_allowed", 403)
+        if ctx.call_count >= ctx.max_calls:
+            raise ToolFailure("tool_call_limit", 429)
+        ctx.call_count += 1
+        charged = True
         if name == "get_match_metrics":
             request = MetricsInput.model_validate(raw_args)
             safe_args = request.model_dump()
@@ -209,17 +213,37 @@ def _execute(ctx: ToolContext, role: str, name: str, raw_args: dict) -> dict:
         return result
     except (ValidationError, TypeError, ValueError) as error:
         status = "rejected"
+        error_code = "invalid_tool_arguments"
         raise ToolFailure("invalid_tool_arguments") from error
     except ToolFailure as error:
         status = "rejected"
+        error_code = error.code
         raise error
+    except Exception as error:
+        status = "failed"
+        error_code = type(error).__name__
+        raise
     finally:
-        ctx.trace.setdefault("tool_calls", []).append({
+        row = {
             "role": role, "tool_name": name, "arguments": safe_args,
             "duration_ms": round((time.perf_counter() - started) * 1000, 1),
-            "status": status,
-        })
-        ctx.called_tools.add(name)
+            "status": status, "error_code": error_code, "budget_charged": charged,
+            "input_hash": hashlib.sha256(_json(safe_args).encode()).hexdigest(),
+            "output_hash": result.get("output_hash") if result else None,
+        }
+        calls = ctx.trace.setdefault("tool_calls", [])
+        # Preserve all budgeted calls and one counted row per preflight denial
+        # reason; repeated forbidden requests cannot grow trace memory.
+        previous = next((c for c in calls if not c.get("budget_charged", True)
+                         and c.get("error_code") == error_code), None) if not charged else None
+        if previous:
+            previous["rejected_count"] += 1
+        else:
+            if not charged:
+                row["rejected_count"] = 1
+            calls.append(row)
+        if charged:
+            ctx.called_tools.add(name)
 
 
 def execute_tool(ctx: ToolContext, role: str, name: str, raw_args: dict) -> dict:

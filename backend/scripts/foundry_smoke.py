@@ -1,47 +1,57 @@
 """One-shot, admin-operated Foundry validation; --check-only never makes a request."""
 import argparse
 import asyncio
-import hashlib
 import json
 import os
 import sys
 import time
 from pathlib import Path
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from app.agents import TRACES, configured, run_specialists
+from app.agents import (TRACES, configured, run_specialists, evidence_packet_hash,
+                        _safe_usage_details, _stage_middleware)
 from app.evidence import insights_for, verify
 from app.simulator import FIXTURES, generate
 
 
 def _evidence_hash(match, events, insight) -> str:
-    packet = {
-        "match_id": match.match_id,
-        "insight": insight.model_dump(mode="json"),
-        "source_events": [event.model_dump(mode="json", by_alias=True)
-                          for event in events if event.event_id in insight.supporting_event_ids],
-    }
-    encoded = json.dumps(packet, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
-    return hashlib.sha256(encoded).hexdigest()
+    return evidence_packet_hash(match, events, insight)
+
+
+def _safe_handoffs(rows) -> list[dict]:
+    """Export observed metadata, never nested provider objects or arguments."""
+    fields = {"role", "kind", "status", "tool_name", "duration_ms", "input_hash",
+              "output_hash", "error_code", "http_status", "rejected_count", "hash_scope"}
+    return [{key: value for key, value in row.items() if key in fields
+             and (value is None or isinstance(value, (str, int, float, bool)))}
+            for row in rows if isinstance(row, dict)]
 
 
 def _safe_report(trace: dict, result: dict, evidence_hash: str) -> dict:
     """Whitelist metadata only; never print endpoint, credentials, prompts, or raw errors."""
     return {
-        "invocation_id": trace.get("invocation_id"),
+        "invocation_id": trace.get("run_id") or trace.get("invocation_id"),
         "trace_id": trace.get("trace_id"),
+        "source_revision": trace.get("source_revision"),
+        "source_dirty": trace.get("source_dirty"),
+        "started_at_utc": trace.get("started_at_utc"),
         "provider": trace.get("provider", "microsoft_foundry_agent_framework"),
         "provider_status": trace.get("provider_status", "unknown"),
+        "provider_response_received": trace.get("provider_response_received", False),
         "workflow_status": trace.get("status", "unknown"),
         "model": trace.get("model") or os.getenv("FOUNDRY_MODEL"),
         "evidence_packet_sha256": evidence_hash,
         "audit_verdict": trace.get("audit_verdict", "not_reported"),
         "elapsed_ms": trace.get("elapsed_ms"),
-        "token_usage": trace.get("usage_details"),
+        "token_usage": _safe_usage_details([SimpleNamespace(usage_details=trace.get("usage_details"))]),
+        "stages": _safe_handoffs(trace.get("stages", [])),
+        "tool_calls": _safe_handoffs(trace.get("tool_calls", [])),
         "output_status": result.get("status") if isinstance(result, dict) else None,
         "output_hash": trace.get("output_hash"),
         "error_code": trace.get("error_type") or trace.get("error_code"),
+        "http_status": trace.get("http_status"),
     }
 
 
@@ -56,12 +66,39 @@ def check_sdk_compatibility() -> dict:
         model="offline-validation-only",
         credential=AzureCliCredential(),
     )
-    analyst = client.as_agent(name="TacticalAnalyst", instructions="Offline compatibility check.")
-    editor = client.as_agent(name="StoryEditor", instructions="Offline compatibility check.")
+    trace = {"stages": [], "tool_calls": [], "usage_details": None}
+    analyst = client.as_agent(name="TacticalAnalyst", instructions="Offline compatibility check.",
+                              middleware=[_stage_middleware(trace, "TacticalAnalyst")])
+    editor = client.as_agent(name="StoryEditor", instructions="Offline compatibility check.",
+                             middleware=[_stage_middleware(trace, "StoryEditor")])
     workflow = SequentialBuilder(participants=[analyst, editor]).build()
     if workflow is None:
         raise RuntimeError("Agent Framework did not build the sequential workflow")
-    return {"status": "sdk_compatibility_ok", "network_call": False, "authenticated": False}
+    # Exercise the real SDK orchestration/middleware contract with an in-memory
+    # transport. The actual Foundry client above is constructed but never run.
+    from agent_framework import BaseChatClient, ChatResponse, Message
+
+    class OfflineClient(BaseChatClient):
+        async def _inner_get_response(self, *, messages, stream, options, **kwargs):
+            if stream:
+                raise RuntimeError("Offline compatibility expects non-streaming execution")
+            return ChatResponse(messages=[Message(role="assistant", contents=["Offline SDK validation."])])
+
+    offline = OfflineClient()
+    participants = [offline.as_agent(name=role, middleware=[_stage_middleware(trace, role)])
+                    for role in ("TacticalAnalyst", "StoryEditor")]
+
+    async def exercise():
+        result = await SequentialBuilder(participants=participants).build().run("Synthetic offline SDK input.")
+        outputs = result.get_outputs()
+        if (len(outputs) != 1 or outputs[0].messages[-1].author_name != "StoryEditor"
+                or [(s["role"], s["status"]) for s in trace["stages"]] != [
+                    ("TacticalAnalyst", "completed"), ("StoryEditor", "completed")]):
+            raise RuntimeError("SDK output or observed middleware order is incompatible")
+
+    asyncio.run(exercise())
+    return {"status": "sdk_compatibility_ok", "network_call": False, "authenticated": False,
+            "offline_stage_order_verified": True}
 
 
 async def run_one_workflow(fixture: str, timeout_seconds: int) -> dict:
@@ -89,6 +126,7 @@ async def run_one_workflow(fixture: str, timeout_seconds: int) -> dict:
             "elapsed_ms": round((time.perf_counter() - started) * 1000, 1),
         }
         trace.setdefault("elapsed_ms", round((time.perf_counter() - started) * 1000, 1))
+        trace["error_type"] = type(error).__name__
         if trace.get("status") == "running":
             trace["status"] = "failed"
             trace["provider_status"] = "error"

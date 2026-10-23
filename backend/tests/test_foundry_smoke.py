@@ -90,3 +90,23 @@ def test_timed_out_smoke_returns_redacted_failure(monkeypatch):
     assert report["provider_status"] == "error"
     assert report["workflow_status"] == "failed"
     assert report["error_code"] == "TimeoutError"
+
+
+def test_smoke_preserves_safe_handoffs_and_drops_nested_secrets():
+    trace = {"run_id": "actual-run", "source_revision": "c" * 40,
+             "started_at_utc": "2026-10-23T10:00:00+00:00",
+             "usage_details": {"total_token_count": 6, "api_key": "SENTINEL_SECRET"},
+             "stages": [{"role": "StoryEditor", "kind": "foundry_agent", "status": "completed",
+                         "input_hash": "a" * 64, "output_hash": "b" * 64,
+                         "duration_ms": 3.0, "prompt": "SENTINEL_SECRET"}],
+             "tool_calls": [{"role": "StoryEditor", "tool_name": "get_evidence_for_insight",
+                             "status": "completed", "output_hash": "d" * 64,
+                             "arguments": {"credential": "SENTINEL_SECRET"}}]}
+    report = foundry_smoke._safe_report(trace, {}, "e" * 64)
+    assert report["invocation_id"] == "actual-run"
+    assert report["source_revision"] == "c" * 40
+    assert report["started_at_utc"] == trace["started_at_utc"]
+    assert report["stages"][0]["output_hash"] == "b" * 64
+    assert report["tool_calls"][0]["tool_name"] == "get_evidence_for_insight"
+    assert report["token_usage"] == {"total_token_count": 6}
+    assert "SENTINEL_SECRET" not in str(report)

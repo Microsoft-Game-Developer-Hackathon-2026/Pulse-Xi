@@ -124,3 +124,21 @@ GET sessions/{id}/reproduction and experiments/{id}/reproduction under
 provenance. Raw manifest routes remain unchanged; existing verify routes/CLIs
 accept either supported raw payloads or the corresponding wrapper. See the
 [wire/migration and trust contract](LIVE_SANDBOX.md#checkpoint-metadata-and-reproduction-contracts).
+
+## Optional agent trace additions
+
+`pulse-xi-workflow-trace/1` retains its existing fields and adds actual specialist
+stage input/output hashes, elapsed duration, cancellation/error state, safe numeric
+HTTP status when returned, source Git revision/dirty state and evidence-packet hash.
+Provider response receipt is separate from accepted output. The final StoryEditor
+response is audited before any model opinion is returned. Invalid source facts are
+rejected before invocation; deterministic fallback remains scoped to the insight
+cutoff. Both accepted and fallback `broadcast_cue_draft` values identify
+`approval_state: draft_only` and `publishing: false`.
+
+Normalized tool calls retain rejection/failure states and output hashes; repeated
+preflight denials are aggregated by reason without consuming executed-call slots.
+The eight-call execution budget and role allowlists remain unchanged. Smoke reports
+export whitelisted handoff metadata and usage counters, never raw provider objects
+or tool arguments. See [agent orchestration](AGENT_ORCHESTRATION.md) for opinion,
+provider-cost, offline-validation and independent review limits.
