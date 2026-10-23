@@ -516,6 +516,9 @@ Reproduce after build/start: set `PULSE_GRAPHICS_HARDWARE=1` and
 `PULSE_GRAPHICS_URL=http://127.0.0.1:<local-port>`, then run
 `npm run measure:graphics` from `frontend`. The hardware path rejects software
 renderer identity. Use isolated databases for verification.
+The current probe writes per-run atomic `report.json` files with explicit status;
+older `intel-hardware.json` results retain their original hardware/scene identity.
+See [current workload and failure reporting](GRAPHICS_BENCHMARK.md).
 
 ### Disconnect and uncertain operations
 

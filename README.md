@@ -284,7 +284,7 @@ $env:PULSE_GRAPHICS_URL='http://127.0.0.1:8000'
 npm run measure:graphics
 ```
 
-The headed browser rejects a detected software renderer, records renderer identity, active-orbit browser frame pacing and bounded interaction/heap observations in ignored `test-results/graphics/intel-hardware.json`. The filename is historical; inspect the renderer field to identify actual hardware. It does not certify GPU timer FPS or replace a longer physical-hardware test. Without hardware opt-in the probe uses headless Chromium. Keep the browser visible/unoccluded during measurement.
+The headed browser rejects software/unknown renderer identity and records atomic `running`/`failed`/`passed` reports in ignored `test-results/graphics/run-*/report.json`. Set `PULSE_GRAPHICS_EXPECT_GPU='RTX 5070'` on Diyan's machine, or the actual Iris renderer on Satvik's, to reject the wrong selected GPU. Reports include repeated active-orbit browser frame pacing and bounded interaction/heap observations; they do not certify GPU timer FPS or replace a longer physical test. Without hardware opt-in the probe uses headless Chromium. Keep the browser visible/unoccluded. See [isolated startup, workload and failure semantics](docs/GRAPHICS_BENCHMARK.md).
 
 ## Team and contributions
 
