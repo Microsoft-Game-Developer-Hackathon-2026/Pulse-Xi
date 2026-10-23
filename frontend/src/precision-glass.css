@@ -90,8 +90,8 @@ html[data-px-material="glass"] {
   & .metric-row>div label { margin-bottom:10px; font:500 11px/1.4 var(--px-font); letter-spacing:.1px; text-transform:none; color:#c1c3c3; }
   & .metric-bars { height:3px; gap:5px; border-radius:999px; overflow:hidden; }
   & .metric-bars :is(i,b) { height:3px; }
-  /* Reserve the seven-row wire so arriving events never push the page below. */
-  & .feed-list { min-height:calc(7 * 70px); }
+  /* Fixed seven-row viewport: arriving events never resize the panel or push the page. */
+  & .feed-list { height:calc(7 * 71px); overflow-y:auto; overscroll-behavior:contain; }
   & .feed-item { padding:16px 22px; gap:16px; border-color:#ffffff0a; background:transparent; box-shadow:none; border-radius:0; min-height:68px; }
   & .feed-time { font:500 11px/1.5 var(--px-font); font-variant-numeric:tabular-nums; color:var(--px-text-muted); }
   & .feed-item strong { font:600 12px/1.5 var(--px-font); letter-spacing:.1px; }
