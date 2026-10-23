@@ -1,5 +1,10 @@
 # Performance audit - 2026-10-22
 
+Historical measurements retain their original build and renderer identity.
+They are not RTX 5070 or production-GLB Iris Xe certification. See the current
+[release evidence ledger](RELEASE_EVIDENCE_LEDGER.md) and
+[graphics probe instructions](GRAPHICS_BENCHMARK.md).
+
 ## Environment and measurement limits
 
 Baseline `d19a898492f8c4a303caa576a9370411b21093ff`; backend bytes unchanged
