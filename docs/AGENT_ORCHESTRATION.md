@@ -28,6 +28,8 @@ invalid windows, and unverified insights. Each invocation is bounded to eight
 tool calls per workflow. Per-role allowlists expose metrics and candidate search
 to Tactical Analyst, evidence retrieval to Story Editor, and draft preparation
 to Broadcast Director. A call not allowed for a role fails closed.
+Admission, deterministic execution and trace recording share a context-local lock;
+parallel tool calls cannot overspend that workflow's execution budget.
 
 ## Trace and fallback
 

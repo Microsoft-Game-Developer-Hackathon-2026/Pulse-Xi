@@ -6,6 +6,7 @@ import hashlib
 import json
 import time
 from dataclasses import dataclass, field
+from threading import Lock
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
@@ -79,6 +80,7 @@ class ToolContext:
     max_calls: int = 8
     call_count: int = 0
     called_tools: set[str] = field(default_factory=set)
+    _execution_lock: object = field(default_factory=Lock, repr=False, compare=False)
 
     @property
     def cutoff(self) -> int:
@@ -124,6 +126,13 @@ def _visible_insight(ctx: ToolContext, insight_id: str, cutoff: int) -> Insight:
 
 
 def _execute(ctx: ToolContext, role: str, name: str, raw_args: dict) -> dict:
+    # SDK tools may execute concurrently. Admission, execution, and trace updates
+    # share this workflow-local lock so retries cannot overspend its call budget.
+    with ctx._execution_lock:
+        return _execute_locked(ctx, role, name, raw_args)
+
+
+def _execute_locked(ctx: ToolContext, role: str, name: str, raw_args: dict) -> dict:
     started = time.perf_counter()
     safe_args = {}
     status = "completed"
