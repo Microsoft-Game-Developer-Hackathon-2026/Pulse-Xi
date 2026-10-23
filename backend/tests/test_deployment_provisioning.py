@@ -31,7 +31,14 @@ def test_provision_requires_digest_before_contacting_azure(image, valid):
     # Reaching it proves the valid digest passed validation without cloud access.
     command = """
 function az { throw 'OFFLINE_AZURE_SENTINEL' }
-& $env:PROVISION_TEST_SCRIPT -ResourceGroup unused -Image $env:PROVISION_TEST_IMAGE
+try {
+    & $env:PROVISION_TEST_SCRIPT -ResourceGroup unused -Image $env:PROVISION_TEST_IMAGE
+} catch {
+    # Windows PowerShell otherwise wraps error records in width-dependent CLIXML.
+    # Emit the actual exception message so assertions test the guard on both hosts.
+    [Console]::Error.WriteLine($_.Exception.Message)
+    exit 1
+}
 """
     encoded = base64.b64encode(command.encode("utf-16le")).decode("ascii")
     environment = os.environ.copy()
