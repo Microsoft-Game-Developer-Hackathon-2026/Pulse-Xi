@@ -39,8 +39,9 @@ evidence (C6/A3) and the final submission (D6).
   feature is new in PR #105.
 - F1 (passive replay stability) was marked verified, but Fan Lens was still fetching on
   every 200 ms tick (61 requests / 12 s) until PR #104.
-- U2 remains **partial**: INP, LCP, heap growth, long tasks and React Profiler counts are
-  still unmeasured (see [PERFORMANCE_AUDIT.md](PERFORMANCE_AUDIT.md)).
+- U2 remains **partial**: LCP, long tasks, heap and a synthetic interaction latency now have
+  one-machine measurements, but field INP and React Profiler counts are unmeasured (see
+  [PERFORMANCE_AUDIT.md](PERFORMANCE_AUDIT.md)).
 
 ## Not independently re-verified this session
 

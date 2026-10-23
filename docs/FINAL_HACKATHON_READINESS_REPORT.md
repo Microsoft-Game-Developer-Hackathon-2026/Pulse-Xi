@@ -225,8 +225,8 @@ Status: **DEMO READY, SUBMISSION BLOCKED** (unchanged). Nothing below is merged.
 frontend, browser, container, deployment-template); review requested from two teammates,
 none submitted. PR [#105](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/105)
 `feat/one-moment-three-stories` (stacked on #104, base `audit/replay-stability`): review
-requested; its browser CI was still running when last checked. Documentation and the
-route-health test were added after #105's first push and are committed on the same branch.
+requested; exact-head CI was all green on `3cc00fa`. A later commit on the same branch adds
+the browser-metrics probe, design-token cleanup and the performance write-up (see its CI).
 
 **Tests run locally.** Backend `pytest tests`: 541 passed, 0 failed, 0 skipped (281 s, base
 `0729d3f`). Playwright full suite on the #105 head before the route-health file: 112 passed
@@ -257,9 +257,14 @@ rollback, corruption, ownership denial (403/401 paths), determinism and restore
 `test_security_boundary.py`, `test_release_security.py`). Remaining non-durable areas:
 bounded process-local agent traces and browser-local notes/preferences.
 
-**Not done / not verified.** UI colour-token pass and screenshot comparison (the new
-drawer uses a few literal colours); INP/LCP/heap/React Profiler; per-control audit of every
-route; accessibility re-run beyond the existing suite; hosted Foundry/Agent Framework run
+**Added later in the session.** `browser-metrics.spec.ts` (LCP, long tasks, heap over a
+full-match replay, synthetic interaction latency; two runs with large variance, see
+[PERFORMANCE_AUDIT.md](PERFORMANCE_AUDIT.md)). The Three Stories CSS now uses design tokens
+(`--px-warning`, `--px-error`, `--px-glass-border`, `--px-radius-sm`).
+
+**Not done / not verified.** A screenshot-based colour consistency review of every route
+(only the proof drawer was captured and inspected); field INP and React Profiler counts;
+per-control audit of every route; accessibility re-run beyond the existing suite; hosted Foundry/Agent Framework run
 (no authorization); public judge access, video, rights sign-off, submission.
 
 ### Demo scripts (verified features only; deterministic fixture `comeback-1107`)
@@ -285,3 +290,5 @@ hosted model), 15 s. Skip the maximum-history ForkCast case; it is a known slow 
 
 Commands: backend `cd backend; python -m pytest -q tests`; frontend `cd frontend; npm ci;
 npm run build; npx playwright test`; smoke `python scripts/release-smoke.py` (after build).
+
+Final full Playwright run on this branch after the last code change: **123 passed** (8.0 min), including route-health (10) and browser-metrics (1).

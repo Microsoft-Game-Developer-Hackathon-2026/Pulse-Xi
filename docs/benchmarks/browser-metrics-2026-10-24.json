@@ -1,0 +1,36 @@
+{
+  "environment": "Chromium (Playwright), software rendering, local backend, built-in fixture comeback-1107, 1280x720",
+  "readyMs": 1201,
+  "navigation": {
+    "domContentLoaded": 471.80000001192093,
+    "load": 471.80000001192093
+  },
+  "lcpMs": 1048,
+  "initialApiRequests": 11,
+  "syntheticInteraction": {
+    "samples": 30,
+    "p50": 25.80000001192093,
+    "p95": 30.69999998807907,
+    "max": 42.20000001788139,
+    "note": "click -> two animation frames; not field INP"
+  },
+  "longTasks": {
+    "count": 2,
+    "totalMs": 208,
+    "maxMs": 154
+  },
+  "replay": {
+    "wallSeconds": 60,
+    "speed": 4,
+    "matchSecondsReached": 5400,
+    "apiRequests": 359
+  },
+  "heapUsedMbAfterGc": [
+    4.9,
+    5.8,
+    5.9,
+    6.2,
+    6.2
+  ],
+  "domNodesAtEnd": 1457
+}
