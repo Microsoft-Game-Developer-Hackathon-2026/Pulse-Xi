@@ -1,8 +1,13 @@
 # Release evidence ledger - 2026-10-23
 
 This ledger separates evidence categories. Passing tests do not authorize cloud
-spend, attest asset rights, or prove submission. Latest verified integration is
-PR #95 at main `1a2ff3727ebcd00a101f7b26d218588beaea620b`, with
+spend, attest asset rights, or prove submission. Current verified main is
+`0f45ca024bdcae294b74410023ff9533202416ed`, including merged #95, #96 and #97.
+Its [exact-main run](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39911492834)
+passed all six jobs; its backend log records 501 tests. No later candidate below
+is described as merged main.
+
+Historical PR #95 integrated main `1a2ff3727ebcd00a101f7b26d218588beaea620b`, with
 [six passing exact-main CI jobs](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39901455301):
 454 backend tests, 102 browser tests, four graphics-reporting tests, seven documentation tests, independent
 manifest/experiment verification, pip consistency, frontend build/assets,
@@ -15,6 +20,53 @@ The physical measurement source is clean
 evidence were subsequently integrated by #95; these are distinct provenance facts.
 
 ## Evidence and remaining acceptance
+
+Open candidates retain separate reviews and exact-source evidence:
+
+- [#98 graphics probe/evidence](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/98),
+  publication `324aab83b935b7ad431a17ac8eb067a35575ce8c`: 13 report tests,
+  eight documentation tests and a checkout-byte inventory contract. Two clean
+  probe-`dc13f74` trials completed 902.544 and 902.503 seconds observed work;
+  a separate integrated public-mode trial at `bbcce072` completed 902.233 seconds.
+  Each recorded 177 samples, all profiles/cameras, nine inspected physical PNGs
+  and no page errors/observed renderer changes. [Raw reports, source/build hashes and limits](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/blob/324aab83b935b7ad431a17ac8eb067a35575ce8c/docs/audit-evidence/graphics-rtx5070-clean-900-2026-10-23/README.md)
+  retain both earlier failures and the diagnostic run separately. These bounded
+  observations do not explain the prior closure, measure GPU execution FPS,
+  establish leak absence or prove current-build Iris Xe compatibility. Final
+  publication checks and independent review remain visible on the open PR.
+- [#100 public operation budget](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/100),
+  source `15f1ec2f752d9b017e194d4e7af4325b8f659437`: 506 backend and 104 browser tests locally;
+  [source](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/40007388343)
+  and [PR CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/40007398763)
+  passed all six jobs. This is a process-wide budget, not per-IP fairness,
+  distributed denial-of-service protection or a spend cap. Recap playback now
+  respects Retry-After, retains truthful cutoffs and reports service failures
+  separately; a single active judge can still exhaust the shared budget.
+- [#101 observed agent execution and evidence gates](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/101),
+  source `985520b4de4fbaf8dc641af197dc86ced3599f5c`: 525 backend tests locally;
+  [source](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39946167218)
+  and [PR CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39946173460)
+  passed all six jobs. Pinned SDK compatibility is offline, not genuine hosted inference.
+- [#102 provisioning preflight](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/102),
+  source `6999cd1580639083b648db271573c83a3d911308`: 511 backend tests locally,
+  including 68 provisioning/teardown cases. Failed or non-boolean group lookup
+  output cannot authorize what-if, confirmation or provisioning.
+  [Source](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/40002605831)
+  and [PR CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/40002614400)
+  passed all six jobs. Independent review and deployment acceptance remain pending.
+
+The non-main source archive `bbcce072ab6f1100eb89cc88c958648d7605d617`
+combines #98 through #102, including the recap-cooldown fix. Its
+[exact-source CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/40008018221)
+passed all six jobs: 541 backend, 104 browser and 13 graphics-report tests.
+A separate real loopback public-mode browser check observed Retry-After 31,
+zero requests during the cooldown, recovery/pause/generation, private write/trace
+denials and a fixture WebSocket snapshot. This is HTTP/WS local acceptance,
+not deployed HTTPS/WSS. No combined public PR was opened; the archive is not
+main, an independent approval or a route around the focused PR reviews.
+Earlier local integration `cc03d2ace465b7b1706a70bf7b797b0bcabbcce7` retains its
+540-backend scoped result. Measured source commits are never replaced by a later
+publication or documentation commit.
 
 | Area | Established evidence | Remaining gate / disposition |
 |---|---|---|
