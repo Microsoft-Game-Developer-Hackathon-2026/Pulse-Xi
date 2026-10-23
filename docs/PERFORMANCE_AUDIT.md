@@ -212,4 +212,32 @@ path documented above.
 - `npm audit --omit=dev`: 0 vulnerabilities. No credential-shaped strings in the built
   bundle; the only match for `PULSE_*TOKEN` is an environment variable *name* in the
   disabled-imports help text.
-- Still unmeasured: INP, LCP, heap growth, long tasks, React Profiler render counts.
+- Still unmeasured: field INP and React Profiler render counts.
+
+## Browser metrics, one run (2026-10-24)
+
+Command: `PULSE_WRITE_BENCHMARK=../docs/benchmarks/browser-metrics-2026-10-24.json npx playwright test tests/browser-metrics.spec.ts --project=regression`.
+Chromium via Playwright on software rendering, local backend, fixture `comeback-1107`,
+same machine as the API table. **Two runs, the second reported**: no percentiles across runs. Raw JSON:
+[browser-metrics-2026-10-24.json](benchmarks/browser-metrics-2026-10-24.json).
+
+| Measure | Result |
+|---|---|
+| Panels and recap populated (wall clock from `goto`) | 1201 ms |
+| DOMContentLoaded / load | 472 ms / 472 ms |
+| LCP | 1048 ms (software rendering, local server; not a field number) |
+| API requests during initial load | 11 |
+| Synthetic interaction (speed-button click → two animation frames), 30 samples | p50 25.8 ms, p95 30.7 ms, max 42.2 ms. **Not field INP** |
+| Long tasks (>50 ms) over the whole session | 2 tasks, 208 ms total, longest 154 ms |
+| Replay at 4×, 60 s wall | reached 5400 s (match end 5400 s); 359 API requests |
+| JS heap after forced GC, samples every 15 s | 4.9, 5.8, 5.9, 6.2, 6.2 MB |
+| DOM nodes at end | 1457 |
+
+Run-to-run variance is large: an earlier identical run measured ready 2258 ms, LCP 1732 ms,
+6 long tasks (longest 274 ms) and interaction p95 39.4 ms, on the same machine minutes
+apart. The table is the second run; treat all timings as roughly +/-2x until repeated.
+
+Limits: the replay reached the end of the match after roughly 45 s, so the last heap
+samples are end-state, not mid-playback; heap growth of 1.3 MB over one match is a short
+horizon, not a leak test. The 154 ms long task was not attributed to a component. The
+test asserts only sanity bounds (clock advanced, heap growth under 25 MB).
