@@ -9,8 +9,8 @@ $ErrorActionPreference = "Stop"
 if (-not (Get-Command az -ErrorAction SilentlyContinue)) { throw "Azure CLI is required; no resources were changed." }
 if (-not $ConfirmTarget) { throw "Pass -ConfirmTarget only after reviewing the resource IDs and expected charges." }
 
-function Get-ValidatedResourceSubscription {
-    param([object]$ResourceId, [string]$ResourceType, [string]$ResourceName, [string]$GroupName)
+function Get-ValidatedResourceIdentity {
+    param([object]$ResourceId, [string]$ResourceType)
     # Match the entire ARM path, not a suffix. Names are compared as complete
     # segments, so operator input is never interpolated into the regex.
     $pattern = '\A/subscriptions/(?<subscription>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/resourceGroups/(?<group>[^/]+)/providers/Microsoft\.App/(?<type>[^/]+)/(?<name>[^/]+)\z'
@@ -19,14 +19,38 @@ function Get-ValidatedResourceSubscription {
         $identity = [regex]::Match($ResourceId, $pattern,
             [System.Text.RegularExpressions.RegexOptions]::IgnoreCase -bor [System.Text.RegularExpressions.RegexOptions]::CultureInvariant)
     }
-    $comparison = [System.StringComparison]::OrdinalIgnoreCase
     if (-not $identity -or -not $identity.Success -or
-        -not [string]::Equals($identity.Groups['group'].Value, $GroupName, $comparison) -or
-        -not [string]::Equals($identity.Groups['type'].Value, $ResourceType, $comparison) -or
+        -not [string]::Equals($identity.Groups['type'].Value, $ResourceType, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Resource ID is not a complete Microsoft.App/$ResourceType ARM identity; deletion cannot continue."
+    }
+    return $identity
+}
+
+function Get-ValidatedResourceSubscription {
+    param([object]$ResourceId, [string]$ResourceType, [string]$ResourceName, [string]$GroupName)
+    $identity = Get-ValidatedResourceIdentity -ResourceId $ResourceId -ResourceType $ResourceType
+    $comparison = [System.StringComparison]::OrdinalIgnoreCase
+    if (-not [string]::Equals($identity.Groups['group'].Value, $GroupName, $comparison) -or
         -not [string]::Equals($identity.Groups['name'].Value, $ResourceName, $comparison)) {
         throw "Resource ID does not identify requested Microsoft.App/$ResourceType '$ResourceName' in resource group '$GroupName'; no resources were changed."
     }
     return $identity.Groups['subscription'].Value
+}
+
+function Get-ResourceEnvironmentId {
+    param([object]$Properties)
+    $legacy = $Properties.managedEnvironmentId
+    $current = $Properties.environmentId
+    if (($null -ne $legacy -and $legacy -isnot [string]) -or
+        ($null -ne $current -and $current -isnot [string])) {
+        throw "Environment relationship must be a string; deletion cannot continue."
+    }
+    if ($legacy -and $current -and
+        -not [string]::Equals($legacy, $current, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Conflicting environment relationship fields; deletion cannot continue."
+    }
+    if ($legacy) { return $legacy }
+    return $current
 }
 
 $appJson = az containerapp show --resource-group $ResourceGroup --name $AppName --output json
@@ -40,8 +64,7 @@ $environmentSubscription = Get-ValidatedResourceSubscription -ResourceId $env.id
 if (-not [string]::Equals($appSubscription, $environmentSubscription, [System.StringComparison]::OrdinalIgnoreCase)) {
     throw "App and environment resource IDs identify different subscriptions; no resources were changed."
 }
-$containerEnvironmentId = $app.properties.managedEnvironmentId
-if (-not $containerEnvironmentId) { $containerEnvironmentId = $app.properties.environmentId }
+$containerEnvironmentId = Get-ResourceEnvironmentId -Properties $app.properties
 if ($containerEnvironmentId -isnot [string] -or
     $app.tags.purpose -ne "public-demo" -or $app.tags.application -ne "pulse-xi" -or
     -not [string]::Equals($containerEnvironmentId, $env.id, [System.StringComparison]::OrdinalIgnoreCase)) {
@@ -57,6 +80,7 @@ $confirmation = Read-Host "Type DELETE APP $AppName to delete only this Containe
 if ($confirmation -cne "DELETE APP $AppName") { throw "Confirmation did not match; nothing was deleted." }
 az containerapp delete --resource-group $ResourceGroup --name $AppName --yes
 if ($LASTEXITCODE -ne 0) { throw "Container App deletion failed; inspect Azure state before retrying." }
+Write-Host "Named Container App '$AppName' deletion succeeded; environment deletion has not been requested."
 
 if ($DeleteEnvironment) {
     $environmentId = $env.id.ToLowerInvariant()
@@ -70,13 +94,11 @@ if ($DeleteEnvironment) {
         throw "Remaining-app inventory contains no usable records; environment retained."
     }
     foreach ($candidate in $apps) {
-        $candidateEnvironment = $candidate.properties.managedEnvironmentId
-        if (-not $candidateEnvironment) { $candidateEnvironment = $candidate.properties.environmentId }
-        if (-not $candidateEnvironment) { throw "Remaining-app inventory is incomplete; environment retained." }
+        $candidateEnvironment = Get-ResourceEnvironmentId -Properties $candidate.properties
+        [void](Get-ValidatedResourceIdentity -ResourceId $candidateEnvironment -ResourceType 'managedEnvironments')
     }
     $remaining = @($apps | Where-Object {
-        $id = $_.properties.managedEnvironmentId
-        if (-not $id) { $id = $_.properties.environmentId }
+        $id = Get-ResourceEnvironmentId -Properties $_.properties
         $id -and $id.ToLowerInvariant() -eq $environmentId
     })
     if ($remaining.Count -gt 0) { throw "Environment still contains other apps ($($remaining.name -join ', ')); it was retained." }

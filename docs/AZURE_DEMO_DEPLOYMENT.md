@@ -126,12 +126,18 @@ name, and Microsoft.App/containerApps or Microsoft.App/managedEnvironments type.
 Path segments and the app/environment relationship are compared case-insensitively;
 both resources must identify the same subscription. The existing CLI queries use
 the operator's selected Azure account context; no additional lookup is introduced.
+If both `managedEnvironmentId` and `environmentId` are returned, they must agree
+case-insensitively; a conflicting field is never ignored. This applies to the
+target and remaining-app inventory. Every inventory relationship must itself be
+a complete Microsoft.App/managedEnvironments ARM ID, including unrelated apps.
 Missing or mismatched target IDs/relationship cannot authorize deletion. Environment deletion requires a
 valid, complete JSON array of remaining apps; failed commands, blank output, null, malformed or
 incomplete response is not evidence that the environment is empty. If this lookup
 fails after the named app was deleted, the environment is retained. Inspect Azure
 state and retry only after resolving the inventory error; do not infer that both
-resources were removed. Offline tests replace every Azure command and confirmation
+resources were removed. The script reports successful named-app deletion before
+checking inventory; it does not report success when that delete command fails.
+Offline tests replace every Azure command and confirmation
 prompt, including failures with valid-looking JSON and unrelated-environment apps.
 
 ```powershell

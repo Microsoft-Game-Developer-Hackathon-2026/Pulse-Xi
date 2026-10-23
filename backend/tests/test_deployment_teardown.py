@@ -46,6 +46,12 @@ INVALID_IDENTITIES = {
     ('missing-target-ids', False),
     ('wrong-tags', False), ('wrong-environment', False), ('app-delete-error', False),
     ('mixed-case-identities', True),
+    ('contradictory-target-environments', False), ('matching-target-environments', True),
+    ('managed-environment-only', True), ('remaining-app-contradictory-environments', False),
+    ('list-mixed-null-entry', False), ('list-mixed-array-entry', False),
+    ('list-malformed-environment-id', False),
+    ('wrong-env-tags', False), ('wrong-app-confirmation', False),
+    ('wrong-env-confirmation', False), ('env-delete-error', False),
     *((scenario, False) for scenario in INVALID_IDENTITIES),
 ])
 def test_teardown_requires_successful_complete_inventory_before_environment_deletion(scenario, allowed):
@@ -60,15 +66,27 @@ function az {
         }
         $tag = if ($env:TEARDOWN_TEST_CASE -eq 'wrong-tags') { 'other' } else { 'pulse-xi' }
         $environment = if ($env:TEARDOWN_TEST_CASE -eq 'wrong-environment') { '/env/unrelated' } else { $env:TEARDOWN_TEST_RELATIONSHIP }
+        $properties = @{environmentId=$environment}
+        if ($env:TEARDOWN_TEST_CASE -eq 'contradictory-target-environments') {
+            $properties.managedEnvironmentId=$environment
+            $properties.environmentId=$environment + '-other'
+        }
+        if ($env:TEARDOWN_TEST_CASE -eq 'matching-target-environments') {
+            $properties.managedEnvironmentId=$environment.ToUpperInvariant()
+        }
+        if ($env:TEARDOWN_TEST_CASE -eq 'managed-environment-only') {
+            $properties=@{managedEnvironmentId=$environment}
+        }
         return (@{id=$env:TEARDOWN_TEST_APP_ID; tags=@{purpose='public-demo'; application=$tag};
-            properties=@{environmentId=$environment}} | ConvertTo-Json -Depth 4 -Compress)
+            properties=$properties} | ConvertTo-Json -Depth 4 -Compress)
     }
     if ($operation -like 'containerapp env show *') {
         if ($env:TEARDOWN_TEST_CASE -eq 'env-show-error') { $global:LASTEXITCODE = 17 }
         if ($env:TEARDOWN_TEST_CASE -eq 'missing-target-ids') {
             return '{"tags":{"purpose":"public-demo","application":"pulse-xi"}}'
         }
-        return (@{id=$env:TEARDOWN_TEST_ENVIRONMENT_ID; tags=@{purpose='public-demo'; application='pulse-xi'}} | ConvertTo-Json -Compress)
+        $tag = if ($env:TEARDOWN_TEST_CASE -eq 'wrong-env-tags') { 'other' } else { 'pulse-xi' }
+        return (@{id=$env:TEARDOWN_TEST_ENVIRONMENT_ID; tags=@{purpose='public-demo'; application=$tag}} | ConvertTo-Json -Compress)
     }
     if ($operation -like 'containerapp list *') {
         switch ($env:TEARDOWN_TEST_CASE) {
@@ -80,6 +98,14 @@ function az {
             'list-incomplete' { return '[{"name":"unknown"}]' }
             'list-null-entry' { return '[null]' }
             'list-array-entry' { return '[[]]' }
+            'list-malformed-environment-id' { return '[{"name":"unknown","properties":{"environmentId":"/env/invalid"}}]' }
+            'list-mixed-null-entry' { return ('[null,{"name":"unrelated","properties":{"environmentId":"' + $env:TEARDOWN_TEST_ENVIRONMENT_ID + '-other"}}]') }
+            'list-mixed-array-entry' { return ('[[],{"name":"unrelated","properties":{"environmentId":"' + $env:TEARDOWN_TEST_ENVIRONMENT_ID + '-other"}}]') }
+            'remaining-app-contradictory-environments' {
+                return (ConvertTo-Json -InputObject @(@{name='teammate'; properties=@{
+                    managedEnvironmentId=$env:TEARDOWN_TEST_ENVIRONMENT_ID + '-other';
+                    environmentId=$env:TEARDOWN_TEST_ENVIRONMENT_ID}}) -Depth 4 -Compress)
+            }
             'remaining-app' { return (ConvertTo-Json -InputObject @(@{name='teammate'; properties=@{managedEnvironmentId=$env:TEARDOWN_TEST_ENVIRONMENT_ID}}) -Depth 4 -Compress) }
             'other-environment' { return (ConvertTo-Json -InputObject @(@{name='unrelated'; properties=@{environmentId=$env:TEARDOWN_TEST_ENVIRONMENT_ID + '-other'}}) -Depth 4 -Compress) }
             default { return '[]' }
@@ -90,12 +116,18 @@ function az {
         if ($env:TEARDOWN_TEST_CASE -eq 'app-delete-error') { $global:LASTEXITCODE=17 }
         return
     }
-    if ($operation -like 'containerapp env delete *') { Write-Output 'OFFLINE_ENVIRONMENT_DELETE'; return }
+    if ($operation -like 'containerapp env delete *') {
+        Write-Output 'OFFLINE_ENVIRONMENT_DELETE'
+        if ($env:TEARDOWN_TEST_CASE -eq 'env-delete-error') { $global:LASTEXITCODE=17 }
+        return
+    }
     throw "Unexpected fake Azure operation: $operation"
 }
 function Read-Host {
     param([string]$Prompt)
     [Console]::WriteLine('OFFLINE_CONFIRMATION')
+    if ($Prompt -like 'Type DELETE APP *' -and $env:TEARDOWN_TEST_CASE -eq 'wrong-app-confirmation') { return 'NO' }
+    if ($Prompt -like 'Type DELETE ENVIRONMENT *' -and $env:TEARDOWN_TEST_CASE -eq 'wrong-env-confirmation') { return 'NO' }
     if ($Prompt -like 'Type DELETE APP *') { return 'DELETE APP demo' }
     if ($Prompt -like 'Type DELETE ENVIRONMENT *') { return 'DELETE ENVIRONMENT demo-env' }
     throw 'Unexpected confirmation prompt'
@@ -121,15 +153,28 @@ try {
         '-EncodedCommand', base64.b64encode(command.encode('utf-16le')).decode('ascii')],
         env=environment, capture_output=True, text=True, timeout=20)
     output = result.stdout + result.stderr
-    if allowed:
+    assert 'Unexpected fake Azure operation' not in output, output
+    assert 'Unexpected confirmation prompt' not in output, output
+    if scenario == 'env-delete-error':
+        assert result.returncode != 0, output
+        assert 'OFFLINE_ENVIRONMENT_DELETE' in output, output
+        assert 'Environment deletion failed' in output, output
+    elif allowed:
         assert result.returncode == 0, output
         assert 'OFFLINE_ENVIRONMENT_DELETE' in output, output
     else:
         assert result.returncode != 0, output
         assert 'OFFLINE_ENVIRONMENT_DELETE' not in output, output
-    if scenario in {'app-show-error', 'env-show-error', 'wrong-tags', 'wrong-environment', 'missing-target-ids'}:
+    if scenario in {'app-show-error', 'env-show-error', 'wrong-tags', 'wrong-environment', 'missing-target-ids',
+                    'wrong-env-tags', 'wrong-app-confirmation', 'contradictory-target-environments'}:
         assert 'OFFLINE_APP_DELETE' not in output, output
-    if scenario in INVALID_IDENTITIES:
+    if scenario in INVALID_IDENTITIES or scenario == 'contradictory-target-environments':
         assert 'OFFLINE_APP_DELETE' not in output, output
         assert 'OFFLINE_ENVIRONMENT_DELETE' not in output, output
         assert 'OFFLINE_CONFIRMATION' not in output, output
+    if scenario in {'wrong-env-confirmation', 'remaining-app-contradictory-environments',
+                    'list-mixed-null-entry', 'list-mixed-array-entry', 'list-malformed-environment-id'}:
+        assert 'OFFLINE_APP_DELETE' in output, output
+        assert "Named Container App 'demo' deletion succeeded" in output, output
+    if scenario == 'app-delete-error':
+        assert 'deletion succeeded' not in output, output
