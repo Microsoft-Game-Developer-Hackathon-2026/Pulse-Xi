@@ -119,8 +119,9 @@ Troubleshooting: a failed `/ready` means the bundled `frontend/dist/index.html` 
 
 Teardown deletes only the named PULSE XI Container App. The resource group remains. To also delete the environment, the script checks the demo tags and that no other Container Apps remain, then asks for a second exact confirmation:
 
-Every Azure inventory lookup must succeed. Environment deletion also requires a
-valid, complete JSON array of remaining apps; a failed, empty, null, malformed or
+Every Azure inventory lookup must succeed and identify the expected resources.
+Missing target IDs or relationship cannot authorize deletion. Environment deletion requires a
+valid, complete JSON array of remaining apps; failed commands, blank output, null, malformed or
 incomplete response is not evidence that the environment is empty. If this lookup
 fails after the named app was deleted, the environment is retained. Inspect Azure
 state and retry only after resolving the inventory error; do not infer that both

@@ -19,6 +19,7 @@ SCRIPT = Path(__file__).resolve().parents[2] / 'scripts' / 'azure' / 'teardown.p
     ('list-object', False), ('list-malformed', False), ('list-incomplete', False),
     ('list-null-entry', False), ('list-array-entry', False),
     ('remaining-app', False), ('app-show-error', False), ('env-show-error', False),
+    ('missing-target-ids', False),
     ('wrong-tags', False), ('wrong-environment', False), ('app-delete-error', False),
 ])
 def test_teardown_requires_successful_complete_inventory_before_environment_deletion(scenario, allowed):
@@ -28,6 +29,9 @@ function az {
     $operation = $args -join ' '
     if ($operation -like 'containerapp show *') {
         if ($env:TEARDOWN_TEST_CASE -eq 'app-show-error') { $global:LASTEXITCODE = 17 }
+        if ($env:TEARDOWN_TEST_CASE -eq 'missing-target-ids') {
+            return '{"tags":{"purpose":"public-demo","application":"pulse-xi"},"properties":{}}'
+        }
         $tag = if ($env:TEARDOWN_TEST_CASE -eq 'wrong-tags') { 'other' } else { 'pulse-xi' }
         $environment = if ($env:TEARDOWN_TEST_CASE -eq 'wrong-environment') { '/env/unrelated' } else { '/env/demo' }
         return (@{id='/app/demo'; tags=@{purpose='public-demo'; application=$tag};
@@ -35,6 +39,9 @@ function az {
     }
     if ($operation -like 'containerapp env show *') {
         if ($env:TEARDOWN_TEST_CASE -eq 'env-show-error') { $global:LASTEXITCODE = 17 }
+        if ($env:TEARDOWN_TEST_CASE -eq 'missing-target-ids') {
+            return '{"tags":{"purpose":"public-demo","application":"pulse-xi"}}'
+        }
         return '{"id":"/env/demo","tags":{"purpose":"public-demo","application":"pulse-xi"}}'
     }
     if ($operation -like 'containerapp list *') {
@@ -85,5 +92,5 @@ try {
     else:
         assert result.returncode != 0, output
         assert 'OFFLINE_ENVIRONMENT_DELETE' not in output, output
-    if scenario in {'app-show-error', 'env-show-error', 'wrong-tags', 'wrong-environment'}:
+    if scenario in {'app-show-error', 'env-show-error', 'wrong-tags', 'wrong-environment', 'missing-target-ids'}:
         assert 'OFFLINE_APP_DELETE' not in output, output

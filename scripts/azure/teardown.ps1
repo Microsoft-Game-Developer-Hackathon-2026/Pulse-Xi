@@ -17,9 +17,10 @@ if ($LASTEXITCODE -ne 0) { throw "Environment lookup failed; no resources were c
 $env = $environmentJson | ConvertFrom-Json
 $containerEnvironmentId = $app.properties.managedEnvironmentId
 if (-not $containerEnvironmentId) { $containerEnvironmentId = $app.properties.environmentId }
-if ($app.tags.purpose -ne "public-demo" -or $app.tags.application -ne "pulse-xi" -or
+if (-not $app.id -or -not $env.id -or -not $containerEnvironmentId -or
+    $app.tags.purpose -ne "public-demo" -or $app.tags.application -ne "pulse-xi" -or
     $containerEnvironmentId -ne $env.id) {
-    throw "App tags or environment relationship do not match this demo; no resources were changed."
+    throw "App identity, tags or environment relationship do not match this demo; no resources were changed."
 }
 if ($DeleteEnvironment -and ($env.tags.purpose -ne "public-demo" -or $env.tags.application -ne "pulse-xi")) {
     throw "Environment does not carry the expected PULSE XI demo tags; no resources were changed."
