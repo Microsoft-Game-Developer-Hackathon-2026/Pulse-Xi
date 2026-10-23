@@ -141,6 +141,7 @@ try {
       }
     }
     if (extendedSeconds) {
+      await page.getByRole('slider', { name: 'Seek match time' }).fill('3500')
       report.phase = 'extended-stability'
       console.log(`Beginning ${extendedSeconds}-second extended stability observation.`)
       await runStability({ durationMs: extendedSeconds * 1000, report, checkpoint,
