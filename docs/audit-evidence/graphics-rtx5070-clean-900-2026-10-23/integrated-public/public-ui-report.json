@@ -1,0 +1,335 @@
+{
+  "status": "passed",
+  "startedAt": "2026-10-23T19:09:44.188Z",
+  "source": "bbcce072ab6f1100eb89cc88c958648d7605d617",
+  "transport": "loopback HTTP/WS; no public HTTPS/container/Azure claim",
+  "deploymentMode": "public-readonly",
+  "recapRequests": [
+    {
+      "atMs": 633.0504,
+      "cutoff": "1200"
+    },
+    {
+      "atMs": 1025.6757,
+      "cutoff": "1200"
+    },
+    {
+      "atMs": 2026.3082000000002,
+      "cutoff": "1218"
+    },
+    {
+      "atMs": 3023.8882000000003,
+      "cutoff": "1248"
+    },
+    {
+      "atMs": 4010.4284000000002,
+      "cutoff": "1278"
+    },
+    {
+      "atMs": 5018.7085,
+      "cutoff": "1308"
+    },
+    {
+      "atMs": 6024.513199999999,
+      "cutoff": "1338"
+    },
+    {
+      "atMs": 7028.883699999999,
+      "cutoff": "1368"
+    },
+    {
+      "atMs": 8025.503000000001,
+      "cutoff": "1398"
+    },
+    {
+      "atMs": 9024.4485,
+      "cutoff": "1428"
+    },
+    {
+      "atMs": 10013.532799999999,
+      "cutoff": "1458"
+    },
+    {
+      "atMs": 11024.1772,
+      "cutoff": "1488"
+    },
+    {
+      "atMs": 12025.4355,
+      "cutoff": "1518"
+    },
+    {
+      "atMs": 13024.2968,
+      "cutoff": "1548"
+    },
+    {
+      "atMs": 14016.172999999999,
+      "cutoff": "1578"
+    },
+    {
+      "atMs": 15025.9098,
+      "cutoff": "1608"
+    },
+    {
+      "atMs": 16020.7199,
+      "cutoff": "1638"
+    },
+    {
+      "atMs": 17017.5297,
+      "cutoff": "1668"
+    },
+    {
+      "atMs": 18024.0443,
+      "cutoff": "1698"
+    },
+    {
+      "atMs": 19021.4745,
+      "cutoff": "1728"
+    },
+    {
+      "atMs": 20026.5451,
+      "cutoff": "1758"
+    },
+    {
+      "atMs": 21024.6289,
+      "cutoff": "1788"
+    },
+    {
+      "atMs": 22021.5906,
+      "cutoff": "1818"
+    },
+    {
+      "atMs": 23014.203,
+      "cutoff": "1848"
+    },
+    {
+      "atMs": 24024.2083,
+      "cutoff": "1878"
+    },
+    {
+      "atMs": 25017.8861,
+      "cutoff": "1908"
+    },
+    {
+      "atMs": 26025.3055,
+      "cutoff": "1938"
+    },
+    {
+      "atMs": 27024.513,
+      "cutoff": "1968"
+    },
+    {
+      "atMs": 28009.3272,
+      "cutoff": "1998"
+    },
+    {
+      "atMs": 29025.4106,
+      "cutoff": "2028"
+    },
+    {
+      "atMs": 30025.6117,
+      "cutoff": "2058"
+    },
+    {
+      "atMs": 61032.816,
+      "cutoff": "2988"
+    },
+    {
+      "atMs": 61301.6133,
+      "cutoff": "3000"
+    },
+    {
+      "atMs": 61682.2981,
+      "cutoff": "0"
+    }
+  ],
+  "recapResponses": [
+    {
+      "atMs": 635.509,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 1028.1335,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 2028.9556,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 3025.9864000000002,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 4012.3258,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 5021.1349,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 6026.4544,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 7030.8656,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 8027.8212,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 9026.4699,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 10015.5792,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 11026.907799999999,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 12028.4043,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 13026.903,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 14018.3521,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 15029.1868,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 16023.6472,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 17020.3849,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 18026.5996,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 19025.2982,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 20029.2863,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 21026.8401,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 22025.1858,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 23016.977,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 24026.738,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 25020.6015,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 26027.3394,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 27026.742,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 28013.0568,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 29027.5902,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 30026.597999999998,
+      "status": 429,
+      "retryAfter": "31"
+    },
+    {
+      "atMs": 61036.9825,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 61304.8274,
+      "status": 200,
+      "retryAfter": null
+    },
+    {
+      "atMs": 61684.255,
+      "status": 200,
+      "retryAfter": null
+    }
+  ],
+  "pageErrors": [],
+  "captureReadiness": "Waited for existing scroll-reveal opacity 1; not a renderer change.",
+  "cooldown": {
+    "observedRetryAfterSeconds": 31,
+    "limitedAtMs": 30026.8233,
+    "resumedAtMs": 61037.0894,
+    "earlyRequests": 0
+  },
+  "websocket": {
+    "kind": "snapshot",
+    "match": "comeback-1107"
+  },
+  "pausedCutoff": "3000",
+  "generatedSeed": 123,
+  "privateWrites": 403,
+  "privateTraces": 403,
+  "endedAt": "2026-10-23T19:10:46.204Z",
+  "elapsedMs": 62015.5082
+}

@@ -1,10 +1,13 @@
 """Deployment-mode validation and the deliberately narrow public-demo boundary."""
 from __future__ import annotations
 
+import math
 import os
 import re
 import tempfile
+import time
 from pathlib import Path
+from threading import Lock
 
 from starlette.responses import JSONResponse
 
@@ -14,6 +17,30 @@ PUBLIC_MATCH_PATH = re.compile(r"^/api/matches/[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}
 PUBLIC_MATCH_SOCKET = re.compile(r"^/ws/matches/[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$")
 PUBLIC_POST_PATHS = frozenset(("/api/matches/generate",))
 PUBLIC_RECAP_PATH = re.compile(r"^/api/matches/[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}/recap$")
+PUBLIC_OPERATION_LIMIT = 30
+
+
+class PublicOperationQuota:
+    """Constant-space, process-wide POST budget; no client/proxy identity keys."""
+
+    def __init__(self, limit=30, window_seconds=60, clock=time.monotonic):
+        self.limit = limit
+        self.window_seconds = window_seconds
+        self.clock = clock
+        self._started = None
+        self._used = 0
+        self._lock = Lock()
+
+    def retry_after(self) -> int:
+        with self._lock:
+            now = self.clock()
+            if self._started is None or now - self._started >= self.window_seconds:
+                self._started, self._used = now, 0
+            if self._used >= self.limit:
+                elapsed = max(0, now - self._started)
+                return max(1, math.ceil(self.window_seconds - elapsed))
+            self._used += 1
+            return 0
 
 
 def deployment_mode() -> str:
@@ -51,8 +78,9 @@ def validate_deployment_config() -> None:
 class PublicDemoBoundary:
     """Allow synthetic reads and bounded seed generation, deny every other write."""
 
-    def __init__(self, app):
+    def __init__(self, app, quota=None):
         self.app = app
+        self.quota = quota if quota is not None else PublicOperationQuota(limit=PUBLIC_OPERATION_LIMIT)
 
     async def __call__(self, scope, receive, send):
         if scope["type"] == "websocket":
@@ -69,6 +97,12 @@ class PublicDemoBoundary:
         if not (allowed_post or allowed_read):
             response = JSONResponse({"detail": "This public demo is read-only."}, status_code=403,
                                     headers={"Cache-Control": "no-store"})
+            await response(scope, receive, send)
+            return
+        if allowed_post and (retry := self.quota.retry_after()):
+            response = JSONResponse({"detail": "Public operation budget exhausted; retry later."},
+                                    status_code=429, headers={"Cache-Control": "no-store",
+                                                             "Retry-After": str(retry)})
             await response(scope, receive, send)
             return
         await self.app(scope, receive, send)
