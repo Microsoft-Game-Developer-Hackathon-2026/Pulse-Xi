@@ -84,12 +84,16 @@ hosted AI. The ledger cannot establish rights, business adoption, or judge acces
 
 ## Innovation decision
 
-Evidence-to-Broadcast Inspector and One Moment/Three Stories already have real
-implementations and browser evidence. A new analytics engine or artificial agent
-chain would duplicate work. The highest-value increment selected here is a calm,
-inspectable replay with truthful asynchronous cutoffs, preserving that existing
-hero journey. A new subsystem was deliberately not started while final video,
-judge access and rights decisions remain unresolved.
+Evidence-to-Broadcast Inspector already had a real implementation and browser evidence.
+The earlier version of this section also claimed One Moment/Three Stories existed; a
+2026-10-24 re-audit found no UI or test for it (the agent-run route is admin-only and
+unused by the frontend), so that claim was incorrect. A small version now ships in the
+ProofTrail drawer (`frontend/src/ThreeStories.tsx`, `frontend/tests/three-stories.spec.ts`):
+one `insight_id`, three lenses (analyst from the insight and its claims, fan from a casual
+recap fetched at the moment's own clock, director from the matching cue), a computed
+source-ID consistency line, and an explicit PROPOSED label because approval requires the
+producer token in Director Studio. All text is rule-based; no model is invoked. It adds no
+analytics engine and no new backend route.
 
 ## Persistence and ownership boundary
 
