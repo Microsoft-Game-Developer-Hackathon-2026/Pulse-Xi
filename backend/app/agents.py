@@ -272,10 +272,12 @@ async def run_specialists(match: Match, events: list[MatchEvent], insight: Insig
         trace["provider_status"] = "authenticated_success"
         result_packet = {"status": "approved_model_opinion", "provider": "microsoft_foundry_agent_framework",
                 "headline": packet["headline"], "commentary": packet["commentary"],
-                "supporting_event_ids": packet["event_ids"], "verified_facts": insight.factual_claims,
+                "supporting_event_ids": packet["event_ids"],
+                "verified_facts": [c.model_dump(mode="json", by_alias=True) for c in insight.factual_claims],
                 "broadcast_cue_draft": cue_draft, "recap_provider": recap["provider"], "trace_id": trace["trace_id"]}
         trace["audit_verdict"] = "approved"
-        trace["output_hash"] = hashlib.sha256(json.dumps(result_packet, default=str, sort_keys=True,
+        trace["output_hash_scope"] = "response-canonical-json/1"
+        trace["output_hash"] = hashlib.sha256(json.dumps(result_packet, ensure_ascii=False, sort_keys=True,
                                                           separators=(",", ":")).encode()).hexdigest()
         return result_packet
     except asyncio.CancelledError:
@@ -307,7 +309,7 @@ def _fallback_result(match: Match, events: list[MatchEvent], insight: Insight,
         "headline": insight.title,
         "commentary": insight.explanation,
         "supporting_event_ids": insight.supporting_event_ids,
-        "verified_facts": insight.factual_claims,
+        "verified_facts": [c.model_dump(mode="json", by_alias=True) for c in insight.factual_claims],
         "broadcast_cue_draft": None if cue is None else {
             "approval_state": "draft_only",
             "source_insight_id": insight.insight_id,
@@ -321,6 +323,7 @@ def _fallback_result(match: Match, events: list[MatchEvent], insight: Insight,
         "recap_provider": recap["provider"],
         "trace_id": trace["trace_id"],
     }
-    trace["output_hash"] = hashlib.sha256(json.dumps(result_packet, default=str, sort_keys=True,
+    trace["output_hash_scope"] = "response-canonical-json/1"
+    trace["output_hash"] = hashlib.sha256(json.dumps(result_packet, ensure_ascii=False, sort_keys=True,
                                                       separators=(",", ":")).encode()).hexdigest()
     return result_packet

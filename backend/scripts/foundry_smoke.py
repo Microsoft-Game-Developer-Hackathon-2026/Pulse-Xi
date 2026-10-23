@@ -50,6 +50,7 @@ def _safe_report(trace: dict, result: dict, evidence_hash: str) -> dict:
         "tool_calls": _safe_handoffs(trace.get("tool_calls", [])),
         "output_status": result.get("status") if isinstance(result, dict) else None,
         "output_hash": trace.get("output_hash"),
+        "output_hash_scope": trace.get("output_hash_scope"),
         "error_code": trace.get("error_type") or trace.get("error_code"),
         "http_status": trace.get("http_status"),
     }
