@@ -119,6 +119,7 @@ Runtime provisioned credentials remain memory-only in the browser. New saved sce
 2. Play, pause, change speed and seek forward/backward; statistics follow the replay clock.
 3. Filter recorded events and select a pass; inspect the path, difficulty factors and evidence.
 4. Open ProofTrail to inspect supporting events; close with Escape.
+   The drawer's **One Moment · Three Stories** section frames that moment as Tactical Analyst, Fan Lens (casual) and Broadcast Director from the same verified source events. The director cue is labelled PROPOSED; approval happens in Director Studio. All text is rule-based, with no model call.
 5. Open 3D; choose Broadcast, Tactical, Isometric, Event focus or Free camera. Try quality profiles and reset.
 6. Inspect source coordinates, return to 2D and continue replay.
 7. Bookmark the selected event, save a note, then refresh: match, cutoff, selection and preferences restore in paused mode.
