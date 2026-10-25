@@ -35,6 +35,8 @@ for (const [width,height] of sizes) {
       } else if(route!=='data') {
         await page.getByRole('slider',{name:'Seek match time'}).fill('3500')
         await expect(page.locator('.recap-body')).not.toContainText('Loading')
+        // Tactics load on their own debounce; snapshot controls only after the momentum buttons exist, or the two snapshots race the response.
+        await expect(page.locator('.momentum-bars button').first()).toBeVisible()
       } else { await expect(page.getByRole('heading',{name:/Match Data Hub/})).toBeVisible(); await page.getByLabel('Match origin').selectOption('built-in'); await page.getByLabel('Search matches',{exact:true}).fill('comeback-1107'); await expect(page.getByRole('button',{name:'Open for analysis',exact:true})).toHaveCount(1) }
       await page.waitForLoadState('networkidle')
       await page.emulateMedia({reducedMotion:'reduce'})

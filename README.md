@@ -6,17 +6,17 @@
 
 A Microsoft Game Developer Hackathon 2026 project turning fictional football events into deterministic statistics, inspectable tactical explanations, synchronized broadcast cues and personalized recaps. Recorded fixture replay and an authenticated authoritative Control Room support reproducible tactical experiments. All teams, players and events are synthetic. No Premier League feed, club logos, real-player tracking or broadcast footage is used.
 
-## Availability and review status (2026-10-23)
+## Current status (2026-10-25)
 
-Current verified main is `0f45ca024bdcae294b74410023ff9533202416ed` (merged #95/#96/#97; [all six exact-main jobs passed](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39911492834), 501 backend tests in its CI log). Open #98-#102 remain separate candidates with pending reviews. Historical PR #95 integrated main `1a2ff3727ebcd00a101f7b26d218588beaea620b` ([all six exact-main CI jobs passed](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39901455301): 454 backend, 102 browser, four graphics-reporting and seven documentation tests). Historical baseline `07da294514f36820a7cf7d7c2dfacaab1adc735d` also has [passing exact-main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39898162401). The integrated application includes the authoritative runtime, saved scenarios and archives, schema-4 checkpoints, ForkCast, native-period analysis #57, recorded and runtime Control vs Chaos (#42/#76), FanDNA #48, branch ProofTrail #51/#54, Atelier UI #71 and broadcast evidence #75. Director Studio (#88/#92), Fan Lens (#87), speech controls (#93), scoped trace correction (#89), and deployment preparation hardening (#91/#94) are merged. These checks verify their recorded commits, not later unmerged candidates.
+| Area | State |
+|---|---|
+| Code | `main` is green in CI (six jobs: backend, frontend, browser, container, documentation, deployment-template). Last full local run: backend 549 passed / 0 failed / 0 skipped, browser 142 passed, deployed-URL suite against the production configuration 4 passed. Exact SHAs and results: [readiness report](docs/FINAL_HACKATHON_READINESS_REPORT.md) |
+| Judge access | **No public deployment exists yet.** A zero-cost Render Blueprint ([`render.yaml`](render.yaml), [guide](docs/JUDGE_ACCESS_DEPLOYMENT.md)) is ready and tracked in [#108](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/108). Until it is applied, run the project locally (Quick start below) |
+| Microsoft AI | Microsoft Agent Framework / Foundry code is optional and **verified offline only**: no authenticated hosted model run has happened ([#14](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/14), [#15](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/15) open). Every explanation shown in the app is deterministic and rule-based |
+| Licence and rights | **No root licence is declared**; the original artwork carries a CC0 declaration awaiting its author's confirmation and an independent release review ([#23](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/23), [decision memo](docs/LICENSE_AND_RIGHTS_DECISIONS.md)). Azure resources: none provisioned |
+| Submission | Demo video not recorded ([#25](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/25)); final submission not made and its Representative is unconfirmed ([#109](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/109)). Deadline: October 27, 2026, 11:59 PM Pacific |
 
-PR #95 also integrates truthful graphics-probe reporting and [physical production-GLB RTX 5070 evidence](docs/audit-evidence/graphics-rtx5070-2026-10-23/README.md). The actual measurement source is clean `e927785eb05f1dd09a9d4c20019c656f340a28d2`, distinct from the merge SHA. Chromium selected NVIDIA RTX 5070 D3D11; the repeated five-second samples measure browser RAF pacing, not GPU execution FPS or a 15-minute stability test. A separate [historical physical Iris Xe GLB report](docs/ASSET_SECURITY_RELEASE_REVIEW.md#separate-physical-gpu-test-with-the-glb-kit-activated) records source `42feb9ea146b392590475ba27116c0a99533b331`, one five-second sample/profile and 30 seconds idle. Its active asset hashes still match, but observer code has changed. Matching-current-build, extended cross-hardware acceptance and reviews remain pending; the historical report is not a new Iris Xe run.
-
-Open PR #98 publishes [three separate clean RTX observed-work passes](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/blob/324aab83b935b7ad431a17ac8eb067a35575ce8c/docs/audit-evidence/graphics-rtx5070-clean-900-2026-10-23/README.md): two main-derived trials and one integrated public-mode candidate, each exceeding 900 observed seconds with 177 completed samples. Their measured source/build hashes remain distinct from publication commits. The prior page-closure cause is unproven; these are bounded stability/RAF observations, not GPU execution timing, leak certification or current-build Iris Xe acceptance. These changes remain unmerged and under review.
-
-Microsoft provider code and offline checks are available, but no authorized hosted inference is evidenced. Assets remain `pending-team-review`; #23 licensing/release and #25 actual submission are open. #21 remains blocked without cost authorization and verified public HTTPS acceptance. Merged infrastructure does not establish a running public demo.
-
-The [release evidence ledger](docs/RELEASE_EVIDENCE_LEDGER.md) separates merged code, local tests, exact-main CI, candidate measurements and human/live-service gates. The dated [requirements audit](docs/FINAL_REQUIREMENTS_AUDIT.md), [performance measurements](docs/PERFORMANCE_AUDIT.md) and [readiness report](docs/FINAL_HACKATHON_READINESS_REPORT.md) retain their historical scope; replay refresh corrections #78/#79 are merged.
+The [release evidence ledger](docs/RELEASE_EVIDENCE_LEDGER.md) separates merged code, local tests, exact-main CI, measurements and human or live-service gates. See also the [requirements traceability](docs/REQUIREMENTS_TRACEABILITY.md), [judging matrix](docs/JUDGING_READINESS_MATRIX.md), [performance audit](docs/PERFORMANCE_AUDIT.md) and the [submission packet](docs/HACKATHON_SUBMISSION_PACKAGE.md). Older dated sections of those documents are historical snapshots.
 
 ## Application functionality
 
@@ -40,7 +40,10 @@ Checkpoint source inspection/download, terminal checkpoint capture, isolated res
 | Pass Difficulty | Versioned 0–100 geometry heuristic with inspectable factors and player summaries; not a failure probability; pressure coverage unavailable |
 | Sandbox Lab | Fixture replay plus a separate authenticated live Control Room with server-driven runs, tactical interventions, exact checkpoints, isolated branches and verified paired ForkCast experiments |
 | 3D Observer | Lazy original Blender kit with procedural fallback, five cameras, Low/Medium/High profiles, recorded-event evidence and 2D/WebGL fallback |
-| Broadcast/FanDNA | Timed cue JSON/preview and five recap modes; limited English, Hindi and Spanish templates, not full interface translation |
+| Broadcast/FanDNA | Timed cue JSON/preview, a producer-approved Director Studio, five recap modes and **One Moment · Three Stories** (analyst, fan and director framing of one verified moment with a computed source-ID check). English, Spanish and Hindi cover the fan flow with honest English fallback; operator routes are English-only; opt-in on-device speech |
+| Highlights | Deterministic event-derived highlight manifest (`GET /api/matches/{id}/highlights`), a frame-addressable reel player (`#/highlight-reel`) and a WebM renderer; no footage or external asset; Remotion not used ([why](docs/HIGHLIGHTS.md)) |
+| Accessibility | axe-core WCAG 2.0/2.1 A+AA scan of every route at desktop and mobile widths, Spanish, Hindi and the proof drawer; no screen-reader pass yet (human task) |
+| Public demo mode | `PULSE_DEPLOYMENT_MODE=public-readonly`: no tokens, writes denied, disposable SQLite, shared 30/min quota on recap and seed generation; operator routes explain they are disabled |
 | Match Data Hub | Searchable source-labelled library, authorized canonical JSON import, no-write preview, factual data-quality inspection, archive/restore/delete controls and checksummed portable match packages |
 | Persistence | SQLite imported-event persistence and idempotent ingest; built-in/custom fixtures regenerate |
 | Microsoft AI | Guarded optional provider code; verified local path uses deterministic fallback, not authenticated model inference |
@@ -267,6 +270,18 @@ npm run build
 npm run test:e2e
 ```
 
+Further checks that gate CI or release:
+
+```powershell
+# frontend: accessibility scan, route health, replay stability, highlights, Three Stories
+npx playwright test tests/accessibility-axe.spec.ts tests/route-health.spec.ts tests/replay-stability-metrics.spec.ts tests/highlight-reel.spec.ts tests/three-stories.spec.ts
+# public-mode acceptance against any deployed origin (https), or loopback with an explicit opt-in
+$env:PULSE_DEMO_URL = "https://<service>.onrender.com"; npx playwright test -c playwright.deployed.config.ts
+# repository root: real HTTP journey on disposable databases, and the SDK check (no network call)
+python scripts/release-smoke.py
+python backend/scripts/foundry_smoke.py --check-only
+```
+
 `build` includes strict TypeScript. Playwright starts a real FastAPI server on port 8765; avoid an unrelated process using that port. CI uses software rendering for reproducibility, not physical GPU performance evidence. Final counts and measured limitations are in the handoff.
 
 Asset validation is available on main: run `python scripts/asset_contract.py` from the repository root and `npm run validate:assets` from `frontend`. Historical preparation PRs #32/#33 are closed as superseded by the authoritative checkpoint/ForkCast implementation; their proposal schemas are not current APIs.
@@ -306,6 +321,9 @@ Use focused branches/PRs with reproducible evidence. Do not push directly to mai
 
 Start with [requirements traceability](docs/REQUIREMENTS_TRACEABILITY.md), the [judging matrix](docs/JUDGING_READINESS_MATRIX.md), the [readiness report](docs/FINAL_HACKATHON_READINESS_REPORT.md) and [performance audit](docs/PERFORMANCE_AUDIT.md).
 
+- [Judge-access deployment](docs/JUDGE_ACCESS_DEPLOYMENT.md) (prepared; no URL yet)
+- [Licence, rights and release decisions](docs/LICENSE_AND_RIGHTS_DECISIONS.md)
+- [Submission packet and recording storyboard](docs/HACKATHON_SUBMISSION_PACKAGE.md)
 - [Current status](docs/PROJECT_STATUS.md)
 - [Independent handoff and next integration sequence](docs/SATVIK_INDEPENDENT_HANDOFF.md)
 - [API/event contract](docs/CONTRACT.md)
@@ -331,7 +349,7 @@ Start with [requirements traceability](docs/REQUIREMENTS_TRACEABILITY.md), the [
 
 ### Limitations
 
-Synthetic streams are simplified and not calibrated against real football outcomes. Full interface localization, advanced studio editing, authenticated Microsoft inference and public authenticated runtime intervention remain incomplete. Authoritative paired experiments and independent reproduction are implemented; they describe this synthetic simulation rather than calibrated real-football outcomes. Azure deployment files are prepared, but no public deployment or URL is claimed; see the [cost-gated runbook](docs/AZURE_DEMO_DEPLOYMENT.md). A seed alone is not a full experiment manifest. The handoff identifies owners and exact integration gates.
+Synthetic streams are simplified and not calibrated against real football outcomes. Full interface localization (the operator routes are English-only), authenticated Microsoft inference and public authenticated runtime intervention remain incomplete. Authoritative paired experiments and independent reproduction are implemented; they describe this synthetic simulation rather than calibrated real-football outcomes. Azure deployment files are prepared, but no public deployment or URL is claimed; see the [cost-gated runbook](docs/AZURE_DEMO_DEPLOYMENT.md). A seed alone is not a full experiment manifest. The handoff identifies owners and exact integration gates.
 
 Browser regression runs are bounded to two workers to avoid oversubscribing software-rendering contexts on developer laptops; explicit multi-tab and database race tests retain their own concurrency. Deep-link navigation hides stale controls until recorded-source restoration completes. No test retries or suppressed failures are used.
 
@@ -339,26 +357,18 @@ Local startup/test serving uses an explicit Uvicorn loop factory: Windows Select
 
 ### Authoritative recorded-event analysis
 
-On this native-analysis branch above merged runtime/schema-4 main 175b7ce, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to pass analysis, source evidence, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. Short scenarios use the versioned native projection: actual duration, halftime at `duration_seconds // 2`, unchanged event ticks/periods, event counts, pass geometry/evidence and exports. Goal/activity ProofTrail rules retain their event-derived definitions; legacy match-state phase and continuous tracking remain unavailable. Standard 5400-second analysis retains its legacy behavior. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#native-period-analysis) for contracts and limitations. Native analysis remains subject to #57 review; the base runtime and saved-scenario library are already on main.
+On `main`, `/#/runtime` connects the real server clock, checkpoints and ForkCast from PRs #40/#41 to pass analysis, source evidence, local bookmarks, verified JSON/CSV exports and optional 3D. Open **Recorded-event analysis, bookmarks and 3D** after connecting an operator. Short scenarios use the versioned native projection: actual duration, halftime at `duration_seconds // 2`, unchanged event ticks/periods, event counts, pass geometry/evidence and exports. Goal/activity ProofTrail rules retain their event-derived definitions; legacy match-state phase and continuous tracking remain unavailable. Standard 5400-second analysis retains its legacy behavior. Private runtime events are never published to the unauthenticated match library. See [LIVE_SANDBOX](docs/LIVE_SANDBOX.md#native-period-analysis) for contracts and limitations. Native analysis remains subject to #57 review; the base runtime and saved-scenario library are already on main.
 
 Frontend visual materials and layout invariants: [Atelier design system](docs/UI_DESIGN_SYSTEM.md).
 
 ## Release verification and submission
 
-See [release readiness](docs/RELEASE_READINESS.md) for the tested clean setup, risk-weighted matrix, generated endpoint/dependency inventory, measured benchmarks and unresolved rights/public-service gates. After building, `python scripts/release-smoke.py` exercises a real temporary HTTP server and independently verifies its runtime/ForkCast exports without using personal databases or hosted inference. The [submission runbook](docs/SUBMISSION_RUNBOOK.md) contains the 110-second capture plan; it is not a claim that a final video or public deployment exists.
+See [release readiness](docs/RELEASE_READINESS.md) for the tested clean setup, risk-weighted matrix, generated endpoint/dependency inventory, measured benchmarks and unresolved rights/public-service gates. After building, `python scripts/release-smoke.py` exercises a real temporary HTTP server and independently verifies its runtime/ForkCast exports without using personal databases or hosted inference. The [submission runbook](docs/SUBMISSION_RUNBOOK.md) and the [submission packet](docs/HACKATHON_SUBMISSION_PACKAGE.md) contain the capture plan (the official limit is under two minutes); neither is a claim that a final video or public deployment exists.
 
 ## Repository consolidation record
 
-See [the consolidation audit](docs/REPOSITORY_CONSOLIDATION.md) for exact reviewed
-PR/dependency status, safe branch removals and verification boundaries. Premium
-Glass #71, archive reuse #74 and direct broadcast-cue evidence #75 remain under
-review; their compatibility branch is not the shipped main application.
+See [the consolidation audit](docs/REPOSITORY_CONSOLIDATION.md) for exact reviewed PR/dependency status, safe branch removals and verification boundaries. That audit predates the final merges: Premium Glass #71, archive reuse #74, broadcast-cue evidence #75 and runtime Control vs Chaos #76 are all merged into `main`.
 
-## Pending runtime Control vs Chaos integration
+## Runtime Control vs Chaos
 
-This PR adds authenticated native Control vs Chaos over existing recorded formulas.
-The frontend explicitly sends `projection=native`; the backend rejects unsupported
-projections and validates owner/cutoff/source identity. Window choices300/600/900
-retain honest partial-history states. This adapter is not on main until PR76
-is reviewed and merged; the native analysis and recorded algorithms are already
-merged dependencies. No engine serialization, RNG or formula change is introduced.
+Authenticated native Control vs Chaos over the recorded formulas is merged (PR #76). The frontend sends `projection=native`; the backend rejects unsupported projections and validates owner, cutoff and source identity. Window choices 300/600/900 keep honest partial-history states. No engine serialization, RNG or formula changed.

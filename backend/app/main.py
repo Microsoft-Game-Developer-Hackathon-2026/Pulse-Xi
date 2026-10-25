@@ -108,6 +108,12 @@ def health():
             "narrative_provider": "configured_not_verified" if configured() else "not_configured"}
 
 
+@app.get("/api/deployment")
+def deployment_info():
+    """Non-sensitive mode flag so the UI can explain disabled operator tools on a public demo."""
+    return {"mode": deployment_mode()}
+
+
 @app.get("/ready", include_in_schema=False)
 def ready():
     """Static frontend readiness; SQLite is intentionally disposable in public mode."""

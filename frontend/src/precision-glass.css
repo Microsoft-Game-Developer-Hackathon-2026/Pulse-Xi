@@ -476,3 +476,7 @@ html[data-px-material="glass"] .tactical-chart>p { min-block-size:4lh; }
 .three-stories .story-check { margin:10px 0 0; font:500 12px/1.5 var(--px-font); }
 .three-stories .story-check.ok { color:var(--px-accent); }
 .three-stories .story-check.warn { color:var(--px-error); }
+
+/* Public demo notice on operator routes */
+.public-demo-notice { margin:12px 0 0; padding:12px 16px; border:1px solid var(--px-glass-border); border-left:3px solid var(--px-warning); border-radius:var(--px-radius-sm); background:#ffffff08; font:450 13px/1.5 var(--px-font); color:var(--px-text-secondary); }
+.public-demo-notice strong { color:var(--px-warning); font-weight:600; }

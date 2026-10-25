@@ -29,8 +29,10 @@ evidence (C6/A3) and the final submission (D6).
 |---|---|
 | Replay, Fan Lens, ProofTrail, Control Room, ForkCast, Data Hub, Studio, 3D observer | In `main`; automated tests pass (backend 547, browser 141 on the #106 head) |
 | Fan Lens 1 Hz sampling, fixed Event Wire viewport, replay-stability tests (#104); One Moment · Three Stories, route-health sweep (#105); axe WCAG scan, highlight manifest/player/renderer, submission packet (#106) | **Merged**: `main` = `92d05ed`, post-merge CI green |
-| Hosted Foundry / Agent Framework execution | Blocked: no credential or cost authorization; offline deterministic path only |
-| Public judge access, demo video, rights approval, submission | Not done; see audit rows D3/D4/S3/D6 |
+| Judge-access deployment | **Not deployed.** Blueprint, deployed-URL suite and notice are in the final-pass PR; tracked in #108 |
+| Hosted Foundry / Agent Framework execution | Blocked: no credential or cost authorization; offline deterministic path only (`foundry_smoke.py --check-only` ok, `authenticated: false`) |
+| Highlight reel, axe gate, public-mode notice, recap-budget fix | In the final-pass PR (see readiness report section O) |
+| Public judge access, demo video, rights approval, submission | Not done; owners: #108 (access), #25 (video), #23 (rights), #109 (submission); audit rows D3/D4/S3/D6 |
 
 ## Corrections to earlier claims
 
