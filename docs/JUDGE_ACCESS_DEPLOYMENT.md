@@ -1,6 +1,12 @@
 # Judge-access deployment
 
-**Status (2026-10-25): prepared and verified locally; NOT deployed. No public URL exists.**
+**Status (2026-10-25): DEPLOYED and verified. Public URL: <https://pulse-xi-demo.onrender.com>** (Render service `pulse-xi-demo`, Docker, **Free** plan, Blueprint-managed from `render.yaml`, deployed commit `c16ad54` = `main` at that time, build 58 s). Auto-deploy is off, so the judged build stays frozen until someone redeploys on purpose.
+
+**Verification from outside the development machine (2026-10-25):** `GET /ready` 200 (first request after idle took 35.8 s); `/health` = `{"status":"ok","simulation":"synthetic","narrative_provider":"not_configured"}`; `/api/deployment` = `public-readonly`; `/docs` and `/api/sandbox/sessions` = 403; `PULSE_DEMO_URL=https://pulse-xi-demo.onrender.com npx playwright test -c playwright.deployed.config.ts` = **4 passed** (seek/play/generate seed; 35 s of 4x playback with zero HTTP 429, goal cue, evidence, Three Stories, no console errors; highlight reel plus axe scan; nine protected paths denied and operator routes explain they are disabled). Docker on the Free plan was accepted. `HEAD /` returns 405 (the app serves GET only); browsers are unaffected.
+
+Still to do: re-check the service on Oct 28, Nov 1 and Nov 9; open it shortly before recording or judging to avoid the cold start. Not measured: capacity on Render's free CPU.
+
+(The sections below describe how it was prepared.)
 Rules section 4.8 requires a working project that judges can reach free of charge and without
 restriction until the judging period ends (**November 10, 2026, 11:59 PM Pacific**). A repository
 checkout does not meet that on its own. Creating the hosting account is a human step; everything
@@ -35,7 +41,9 @@ personas and languages, Control vs Chaos, Pass Difficulty, highlight manifest an
 replay generation. These are intentionally disabled: Control Room, Data Hub imports and Director
 Studio approval (the app now says so on those routes via `GET /api/deployment`).
 
-## Steps for the account holder (about 10 minutes)
+## Steps for the account holder (about 10 minutes; completed 2026-10-25)
+
+The repository is public and belongs to a GitHub organization that the Render GitHub app could not list, so the Blueprint was created from the **public repository URL** instead of a GitHub connection. The steps as written below assume the GitHub connection; paste the URL in the Public Git Repository box if the organization is not listed.
 
 1. Sign in at render.com with an account the team controls. Do **not** add a payment method; the Free plan should not need one, and adding one lets overages bill.
 2. New → **Blueprint** → connect the public repository `Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi`, branch `main` → apply `render.yaml`. Confirm the plan shows **Free** before approving.

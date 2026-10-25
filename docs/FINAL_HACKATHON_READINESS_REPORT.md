@@ -416,3 +416,7 @@ The best-supported by verified evidence today is **Best Multi-Agent System** (di
 observed-stage traces and tested failure paths), but its rule asks for a *demonstration* and the only hosted-model run is blocked on #14, so it is conditional.
 **Best Enterprise Solution** is the credible second (read-only public boundary, 549 + 142 tests, six CI jobs, threat model, deployment template).
 Foundry and Azure Cloud Native are not supportable until #14 or an Azure deployment exists. No selection was made.
+
+## P. Public demo deployed, 2026-10-25
+
+**Judge-access gate: PASS for reachability today, with conditions.** <https://pulse-xi-demo.onrender.com> is live on Render's free plan (Docker, Blueprint-managed, deployed commit `c16ad54`). From outside the development machine: `/ready` 200, `/health` ok, `/api/deployment` `public-readonly`, `/docs` and operator APIs 403, and the deployed-URL suite **4 passed** (1.3 min), including 35 s of 4x playback with zero HTTP 429. Conditions: the free instance sleeps after 15 idle minutes (35-60 s wake-up; one measured at 35.8 s); no uptime guarantee through Nov 10 (re-check Oct 28, Nov 1, Nov 9); capacity on Render's CPU is unmeasured; operator routes are intentionally disabled. This supersedes the "no URL exists" statements in sections M-O. Status of the other gates is unchanged: video (#25), Representative (#109), Foundry (#14), rights decisions (#113-#115), screen-reader pass (#111).

@@ -25,6 +25,6 @@ technologies actually used.
 | Public repository | Verified public |
 | Pitch naming Microsoft/Azure tech actually used | Package exists; must not claim hosted Foundry/Agent Framework runs |
 | Video < 2 min, public URL | Not recorded |
-| Judge access through Nov 10, free | **Not provisioned.** Render Blueprint and acceptance suite ready; owner #108 |
+| Judge access through Nov 10, free | **Live** at <https://pulse-xi-demo.onrender.com> (free plan, verified 2026-10-25); sleeps when idle; must be re-checked Oct 28, Nov 1, Nov 9 (#108) |
 | Rights/originality sign-off | Pending human decisions; memo prepared ([LICENSE_AND_RIGHTS_DECISIONS](LICENSE_AND_RIGHTS_DECISIONS.md)), #23 |
 | Submit by Oct 27 11:59 PM Pacific (Oct 28 12:29 PM IST) | Not submitted; Representative unconfirmed (#109) |
