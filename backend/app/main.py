@@ -16,6 +16,7 @@ from .analytics import control_chaos_at, metrics_at, state_at, tactics_at
 from .fan_lens import FanLensResponse, fan_lens_at
 from .agents import TRACES, configured, run_specialists
 from .evidence import insights_for, overlays_for, recap_for, verify_control_turning_point
+from .highlights import highlights_for
 from .models import ControlChaosResponse, EventType, Match, MatchEvent
 from .pass_difficulty import (
     PassDifficulty, PassDifficultyEvidence, PassDifficultyPage, PlayerDifficultyResponse,
@@ -443,6 +444,12 @@ def match_insight_evidence(match_id: str, insight_id: str, at_second: int = Quer
 def match_overlays(match_id: str, at_second: int = Query(5400, ge=0, le=5400)):
     match, events = get_match(match_id)
     return overlays_for(match, events, at_second)
+
+
+@app.get("/api/matches/{match_id}/highlights")
+def match_highlights(match_id: str, at_second: int = Query(5400, ge=0, le=5400), limit: int = Query(6, ge=1, le=12)):
+    match, events = get_match(match_id)
+    return highlights_for(match, events, at_second, limit)
 
 
 @app.get("/api/matches/{match_id}/overlays/{cue_id}")
