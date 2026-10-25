@@ -368,3 +368,51 @@ covered by the browser tests listed above, and the reel and a pinned frame were 
 inspected. The Control Room portion needs a locally generated operator token and about a minute
 of real time, so it must be prepared before recording. A full human rehearsal with a microphone
 was not performed.
+
+## O. Final completion pass, 2026-10-25 (late)
+
+**Classification: DEMO READY, SUBMISSION BLOCKED.** Unchanged, and now with every blocker named and
+owned. The video is **not** the only open item.
+
+**What changed in code (branch `release/judge-access`).**
+1. *Judge-experience defect:* the public recap quota (30/min, shared by all visitors) was exhausted by one
+   viewer in about 30 s because the client posted a recap per second. Recap POSTs fell from 11 to 1 per 12 s
+   of playback; the deployed-URL suite plays 35 s at 4x with zero HTTP 429.
+2. *Public-mode clarity:* `GET /api/deployment` (read-only, reveals only the mode) and a notice on the Control Room,
+   Data Hub and Director Studio routes explaining that operator tools are disabled on the public demo; absent in local mode (tested both ways).
+3. *Deployment readiness:* `render.yaml` (free plan, public read-only, auto-deploy off) and `docs/JUDGE_ACCESS_DEPLOYMENT.md`
+   with the provider decision from official documentation; the deployed-URL suite (`frontend/tests-deployed`) now covers the
+   judge journey, highlight reel, axe scan and the public security boundary (nine protected paths return 403).
+4. *Test determinism:* `glass-layout` raced the tactics response (17 momentum buttons appeared between two control snapshots) in a loaded run;
+   it now waits for them. No assertion was loosened.
+5. *Docs:* README status rewritten (it was dated 2026-10-23 and described merged PRs as pending), licence memo, third-party licence inventory, performance evidence.
+
+**Verification (final head of this branch).** Backend `pytest tests`: **549 passed, 0 failed, 0 skipped** (504 s). Playwright full suite:
+**142 passed** (9.2 min, clean run). Deployed-URL suite against the production configuration (public-readonly, container flags, loopback): **4 passed**.
+`tsc -b` clean; production build clean; `npm audit --omit=dev`: 0 vulnerabilities; `pip_audit` on `requirements.txt` and `requirements-runtime.txt`: none;
+docs validator passed; `foundry_smoke.py --check-only`: `sdk_compatibility_ok`, `authenticated: false`, `network_call: false`. Post-merge CI on `d7bb7a7`
+(the previous docs merge) was green; CI for this branch is recorded in the PR.
+
+**Not run / not verified:** any hosted deployment (none exists); Docker image build (daemon not running locally; the CI container job builds it);
+a screen-reader pass; a human rehearsal of the video; GitHub-side secret scanning (API returned 404 for this account).
+
+### Gates and owners (nothing here is complete)
+
+| Gate | State | Owner and next action |
+|---|---|---|
+| Judge-access URL | BLOCKED: no URL; Blueprint and tests ready | [#108](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/108), satvikp-coder (provisional): apply `render.yaml`, run the deployed suite, record the URL |
+| Demo video, public URL, < 2:00 | BLOCKED | [#25](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/25), diyan07-ctrl: record, publish, post URL |
+| Final submission | BLOCKED: Representative unconfirmed | [#109](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/109): confirm the Representative (rules 4.10), then submit |
+| Live Foundry validation | BLOCKED: no credentials, cost approval needed | [#14](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/14), satvikp-coder: supply endpoint and deployment, approve cost in writing, run `foundry_smoke.py --confirm-cost` |
+| Multi-agent live run | Offline verified; live item depends on #14 | [#15](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/15) |
+| Remotion decision | OPEN: CLI + WebM shipped, Remotion not adopted | [#18](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/18): accept the deviation or confirm licence eligibility |
+| CC0 declaration, root licence, independent review | OPEN | [#23](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/23): author confirms CC0; four contributors choose a licence; `vishwam17-ctrl` reviews ([memo](LICENSE_AND_RIGHTS_DECISIONS.md)) |
+| Screen-reader pass | NOT DONE | Human task: NVDA + Chrome (or VoiceOver + Safari) over Match Intelligence, the proof drawer and Three Stories |
+
+### Category recommendation (the selection itself belongs to the Representative)
+
+Rules section 4.2 lists Best Use of Microsoft Foundry, Best Enterprise Solution, Best Multi-Agent System and Best Azure Cloud Native Integration.
+The best-supported by verified evidence today is **Best Multi-Agent System** (distinct staged roles, tool allowlists, a deterministic Evidence Auditor,
+observed-stage traces and tested failure paths), but its rule asks for a *demonstration* and the only hosted-model run is blocked on #14, so it is conditional.
+**Best Enterprise Solution** is the credible second (read-only public boundary, 549 + 142 tests, six CI jobs, threat model, deployment template).
+Foundry and Azure Cloud Native are not supportable until #14 or an Azure deployment exists. No selection was made.

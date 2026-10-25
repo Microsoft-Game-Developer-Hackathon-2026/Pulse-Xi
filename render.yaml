@@ -1,0 +1,22 @@
+# Render Blueprint for the judge-access demo. See docs/JUDGE_ACCESS_DEPLOYMENT.md.
+# Free plan, public read-only mode, no credentials, no provider calls, disposable /tmp SQLite.
+# Nothing is deployed by committing this file; an account holder must apply the Blueprint.
+services:
+  - type: web
+    name: pulse-xi-demo
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /ready
+    autoDeployTrigger: "off"   # redeploy deliberately so the judged build is the frozen, tested commit
+    envVars:
+      - key: PORT
+        value: "8080"          # matches the Dockerfile and its healthcheck
+      - key: PULSE_DEPLOYMENT_MODE
+        value: public-readonly
+      - key: PULSE_RUNTIME_DRIVER
+        value: "0"
+      - key: PULSE_ENABLE_FOUNDRY
+        value: "false"

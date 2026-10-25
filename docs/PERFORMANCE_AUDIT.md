@@ -241,3 +241,41 @@ Limits: the replay reached the end of the match after roughly 45 s, so the last 
 samples are end-state, not mid-playback; heap growth of 1.3 MB over one match is a short
 horizon, not a leak test. The 154 ms long task was not attributed to a component. The
 test asserts only sanity bounds (clock advanced, heap growth under 25 MB).
+
+## Public-demo mode: request budget and capacity (2026-10-25)
+
+Environment: Windows 11, 12 logical CPUs, Python 3.13; `uvicorn` with the container's flags
+(`PULSE_DEPLOYMENT_MODE=public-readonly`, `--limit-concurrency 32`, `--no-access-log`) on loopback,
+built frontend, empty disposable SQLite. Not measured on Render or any hosted provider.
+
+**Recap request budget (a real judge-experience defect, fixed).** Public mode shares one
+30-per-minute quota across all visitors for `POST .../recap` and `POST /api/matches/generate`. Before
+this change the client posted a recap about once per second while playing (11 per 12 s, measured
+earlier in this document), so one viewer exhausted the whole budget in about 30 s and everyone then
+saw "recap limited". The client now refreshes the recap only when a new verified moment appears,
+every 10 s while playing, or immediately on a paused or backward seek (`useRecapCutoff`; never a
+future cutoff). Measured with the replay-stability test: **1 recap POST per 12 s** of playback at
+1x, 4x and mobile 2x (asserted <= 5). The deployed-URL suite plays 35 s at 4x against the production
+configuration and asserts zero HTTP 429; that is more POSTs than the budget under the old cadence.
+
+**Highlights endpoint under load** (`GET /api/matches/comeback-1107/highlights?limit=12`, one
+keep-alive connection per client, public mode):
+
+| Clients | Requests | Status | p50 | p95 | Throughput |
+|---:|---:|---|---:|---:|---:|
+| 1 | 100 | 200 x100 | 23.7 ms | 26.1 ms | 31/s |
+| 8 | 400 | 200 x400 | 160 ms | 199 ms | 40/s |
+| 32 | 800 | 200 x656, 503 x144 | 586 ms | 739 ms | 42/s |
+| 64 | 640 | 200 x243, 503 x397 | 556 ms | 951 ms | 33/s |
+
+Reading: the single process saturates near 40 requests/s on this machine (about 24 ms of CPU per
+call); above 32 concurrent connections the server sheds load with 503 by design. The GET is not
+covered by the public quota, which applies only to the two POSTs above. A first attempt that opened a
+new connection per request reported 777 ms p50; that was Windows loopback connection setup in the load
+script, not server time, and is discarded. Comparable single-client p50 across endpoints, public vs
+local mode: health 3.5/3.1 ms, matches 5.3/14.3, events 12.6/22.1, metrics 4.1/13.4, insights
+20.5/23.5, highlights 17.8/30.7 (15 sequential requests each, medians only).
+
+**Risk to state plainly:** Render's free instance has far less CPU than this machine. A few concurrent
+judges should be fine; a crowd would see slow or shed (503) requests. Free instances also sleep after
+15 idle minutes (about a minute to wake). See [JUDGE_ACCESS_DEPLOYMENT.md](JUDGE_ACCESS_DEPLOYMENT.md).
