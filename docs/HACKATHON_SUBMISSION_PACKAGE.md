@@ -1,109 +1,123 @@
-# Pulse-Xi — submission working package
+# Pulse-Xi — submission packet
+
+Paste-ready text for the hackathon project form, the reviewer guide and the recording
+storyboard. Everything below was checked against the merged code on 2026-10-25; items that
+are prepared but not done are labelled as such. Rules source:
+[OFFICIAL RULES.md](https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md)
+(read 2026-10-24/25; deadline **October 27, 2026, 11:59 PM Pacific** = October 28, 12:29 PM IST).
 
 **Tagline:** Synthetic football intelligence, with evidence behind every story.
 
-## Elevator pitch
+## Elevator pitch (form field)
 
-Pulse-Xi connects synthetic football events to contextual intelligence, inspectable
-evidence, personalized recaps and synchronized broadcast cues. Analysts can also
-restore a checkpoint and run paired tactical experiments, then independently
-replay their results. Its central promise is inspectability: audiences see the
-source events and the limits of each explanation.
+Pulse-Xi turns synthetic football events into explainable match intelligence. Every moment links
+to the source events behind it and is framed three ways from the same facts: tactical analyst, fan
+(English, Spanish, Hindi) and broadcast director. A deterministic engine lets analysts checkpoint a
+match, change a tactic, run paired ForkCast experiments and verify the result independently. All
+facts come from the engine; stories are rule-based, with an optional Microsoft Agent Framework /
+Foundry path that is verified offline only. Source: github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi
 
-## Problem, solution and innovation
+## Full description (form field)
 
-Fans need understandable moments; analysts need the underlying calculation;
-broadcasters need concise timed output. Pulse-Xi presents different depths from
-the same source facts. Its deterministic synthetic engine makes tactical
-experiments reproducible without pretending to predict professional football.
-Evidence validation remains separate from optional model-generated prose.
+**Problem.** Football dashboards report outcomes; fans want to know why a moment mattered,
+analysts want the calculation, broadcasters want concise timed output, and nobody can tell
+generated prose from evidence.
 
-## Actual architecture
+**What it does** (all in the merged app, local run):
 
-```mermaid
-flowchart TD
-  UI[React replay / Control Room / observer] --> API[FastAPI]
-  API --> R[Recorded matches / imported SQLite store]
-  API --> E[Authoritative engine / separate runtime SQLite store]
-  E --> F[Checkpoints / paired ForkCast / manifests]
-  R --> A[Read-only event analytics and evidence]
-  E --> A
-  A --> P[Persona templates / timed cue JSON]
-  A --> M[Optional Microsoft Agent Framework analyst and editor]
-  M --> V[Deterministic packet auditor]
-  P --> UI
-  F --> I[Independent replay verifiers]
+1. *Ingest and interpret.* A seeded synthetic generator and a validated import path produce
+   events (passes, shots, goals, recoveries, pressure). Statistics, tactical windows, Control vs
+   Chaos and a heuristic Pass Difficulty are computed from those events only.
+2. *Explain.* Verified rule-based insights cite exact event IDs; ProofTrail shows the calculation and
+   source events. **One Moment · Three Stories** shows the analyst, fan and director framing of one
+   insight side by side with a computed check that all three cite the same source events; the
+   director cue is labelled PROPOSED until a producer approves it in Director Studio.
+3. *Render.* Timed lower-third cues export as versioned JSON; a highlight manifest drives a reel
+   player and WebM renderer built only from event data (no footage).
+4. *Personalize.* Five audience modes and three languages change wording and depth, never facts;
+   optional on-device speech reads the recap.
+5. *Experiment.* An authoritative deterministic engine (seeded clock/RNG, halftime, terminal state)
+   supports checkpoints, restore as a new branch, future tactical interventions, paired ForkCast
+   trials and two independent verifier CLIs.
+
+**Honest limits.** Data is synthetic and uncalibrated; no tracking, speeds or ball trajectories are
+inferred; narratives are templates, not model output; no hosted inference was run.
+
+## Microsoft / Azure technology inventory (verified status)
+
+| Technology | Status | Evidence |
+|---|---|---|
+| Microsoft Agent Framework (`agent-framework-foundry` 1.13.0, `agent-framework-orchestrations` 1.3.1) | **Optional; offline-verified, not run against a hosted model.** Staged Analyst → Story Editor → Evidence Auditor → Director → Fan workflow, tool allowlists and observed-stage traces are tested with fakes | `backend/app/agents.py`, `agent_tools.py`, `test_agent_tools.py`, `test_agent_execution_trace.py`, issue #15 |
+| Microsoft Foundry | **Adapter and fail-closed config only; no authenticated call made.** Needs project endpoint, deployment and explicit cost approval | `docs/FOUNDRY.md`, issue #14 stays open |
+| Azure Container Apps (Bicep + GitHub Actions) | **Prepared, not provisioned.** Template compiles in CI; no resource or public URL exists | `infra/azure/main.bicep`, `docs/AZURE_DEMO_DEPLOYMENT.md` |
+| GitHub Actions / GitHub CLI | Used: six CI jobs (backend, frontend, browser, container, documentation, deployment-template) | `.github/workflows/ci.yml` |
+| Azure databases, Fabric, Azure MCP, Copilot Agent Mode | **Not used** | — |
+
+Do not describe Foundry or hosted agents as working until issue #14's authenticated run exists.
+
+## Reviewer guide
+
+Prerequisites: Windows, Python 3.13, Node 24 (tested baseline). No account, key or paid service.
+
+```powershell
+python -m venv .venv
+$env:Path = "$(Resolve-Path .venv\Scripts);$env:Path"
+.\scripts\start.ps1          # builds and serves http://127.0.0.1:8000
 ```
 
-Microsoft Agent Framework / Foundry integration is optional. Default recaps are
-verified rule-based templates. Draft #55/#56 add tool orchestration and cost-gated
-validation; they are not shipped merely because this document references them.
-No authenticated hosted inference was performed for this package.
+1. Open `http://127.0.0.1:8000`. Match "Harbour City comeback" is loaded; choose speed 4× and press Play. Panels stay put while the clock runs.
+2. In **Broadcast studio / Verified cues** click the first cue row, then its **Inspect evidence** button. The drawer shows the calculation, **One Moment · Three Stories**, and the source events (click one to jump to it).
+3. Change **VIEW** (casual / analyst / broadcaster) and **LANGUAGE** (English / Español / हिन्दी): the facts and cited events do not change.
+4. Open **Open event-derived highlight reel** (new tab) for the six-clip reel, or `docs/examples/highlights/comeback-1107.webm`.
+5. Control Room (`#/runtime`) needs a local operator token you generate; follow [SUBMISSION_RUNBOOK](SUBMISSION_RUNBOOK.md) steps 1–8 (scenario → step → checkpoint → tactic → paired ForkCast → independent verification). `python scripts/release-smoke.py` runs the same path headlessly.
+6. Tests: `cd backend; python -m pytest -q tests` and `cd frontend; npm ci; npm run build; npx playwright test`.
 
-## Reproducible 110-second capture plan
+Public judge access is **not established**: no deployment exists. The rules allow a test build; a
+repository checkout plus these instructions is the current fallback and must be confirmed with the
+team, because judges are not required to run local builds.
 
-Use a fresh browser profile, current merged build and the recorded fixture
-`comeback-1107`. Derive the first goal cue from
-`GET /api/matches/comeback-1107/overlays`; use its actual `start_match_second`
-instead of a hand-authored timestamp. This keeps cue selection reproducible.
+## Recording storyboard for issue #25 (target 100–108 s, hard limit < 120 s)
 
-| Seconds | Real action / narration intent |
-|---|---|
-| 0–12 | Introduce the problem and synthetic-data boundary on the replay screen |
-| 12–32 | Select that cue; show its timed lower third and actual score/activity |
-| 32–50 | Open its EVIDENCE control (this PR), inspect calculations and source IDs |
-| 50–67 | Close proof; change VIEW from Casual fan to Tactical analyst to Broadcast producer at the same clock. Facts and source identity stay fixed |
-| 67–85 | Show cue preview and its JSON export with timing, metrics and event references |
-| 85–101 | Show an actually completed paired ForkCast and independent verifier; use the runbook's one-pair/60-second rehearsal, not fabricated trial output |
-| 101–110 | State the Microsoft integration actually executed and show public source. Do not call offline templates hosted AI |
+Record the build at the frozen SHA on `main`, 1920x1080 landscape, fresh browser profile, no
+music, no third-party material, no tokens or terminals on screen. Prepare the Control Room
+session and checkpoint before recording (the real run takes longer than the video).
 
-Pre-connect locally before capture; keep credentials and private terminal output
-out of frame. Record real execution; cuts may remove waiting but cannot fabricate
-success. The existing [runtime rehearsal](SUBMISSION_RUNBOOK.md) provisions no
-public access and does not itself constitute a submitted video.
+| Time | On screen (real actions) | Narration intent |
+|---|---|---|
+| 0–8 | Match Intelligence, "Harbour City comeback" | Football data tells you what happened, not why. Pulse-Xi explains it with evidence, on synthetic data |
+| 8–22 | Press Play at 4×; Event Wire fills, panels do not move; pick a Fan Lens metric | The match is replayed from events; every number below is computed from them |
+| 22–42 | Click the first goal cue, **Inspect evidence**; scroll the three stories; click a source event | One moment, three stories, one set of verified events. The broadcast line is only a proposal |
+| 42–54 | Switch VIEW to analyst and broadcaster, LANGUAGE to Español | Different audience, same facts |
+| 54–62 | Show Control vs Chaos / tactical windows panel | Why the rhythm changed, with the windows shown |
+| 62–84 | Control Room: saved scenario, checkpoint, apply tactic, paired ForkCast result, **Verify experiment independently** | Deterministic engine: branch from a checkpoint, compare against baseline, verify by an independent process |
+| 84–96 | Highlight reel tab: a goal clip with its evidence line; show the manifest hash | Highlights are built only from event data, no footage |
+| 96–106 | Back to README or repository page | Open source. Agent Framework path verified offline; no hosted model claimed |
 
-## Reproduction and validation
-
-Follow [README](../README.md) for setup. From `frontend`, run `npm run build`
-and `npx playwright test broadcast-proof.spec.ts --project=regression` for this
-PR's real FastAPI desktop/mobile journey. From `backend`, run `python -m pytest
-tests -q`, `python -m app.sandbox.verify_manifest ../docs/examples/sandbox/experiment.json`
-and `python -m app.sandbox.verify_experiment ../docs/examples/sandbox/forkcast.json`.
-From repository root, `python scripts/release-smoke.py` exercises isolated HTTP
-runtime/experiment operations and external verifier processes after the build.
+After upload: confirm logged-out playback, length under two minutes, and record the public URL in
+issue #25 and in the form. Never claim a Foundry or hosted-AI run in narration.
 
 ## Submission inventory — prepared versus outstanding
 
-| Deliverable | Actual status / responsible owner |
+| Deliverable | State |
 |---|---|
-| Public source | [Pulse-Xi](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi), public at inspection |
-| Description / architecture / evidence map | This package and [judging matrix](HACKATHON_JUDGING_EVIDENCE.md); review against final merged SHA |
-| Screenshot capture | Browser tests capture real desktop/mobile proof views locally; approved final screenshots still require selection |
-| Video / public video URL | Not recorded or uploaded by this change; authorized representative must publish and verify logged-out playback |
-| Working judge access | Not established publicly; verify an allowed test build or approved deployment from a clean environment |
-| Rights / security | Vishwam and actual rights holders: #23 remains open; use approved 2D/procedural presentation until cleared |
-| Registration / final submission | Team representative must confirm registration, eligibility and actual submission receipt |
+| Public source | [Pulse-Xi](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi), public |
+| Pitch, description, technology list | This document (needs a final read-through by the representative) |
+| Demo video, public URL | **Not recorded**; owner Diyan, issue #25 |
+| Working judge access | **Not established**; see reviewer guide |
+| Rights and licence decisions | **Open**: issue #23. No root `LICENSE` file; asset CC0 declaration and release approval await the rights holders |
+| Registration and submission | Representative must submit and keep the confirmation; not done |
 
-## Scope and credits
+## Screenshots (real captures)
 
-Synthetic behavior is not calibrated prediction. Positions are sparse event
-samples, not continuous player tracking. Pass Difficulty is a heuristic. Hashes
-demonstrate reproducibility, not legal authorship or trusted timestamps. Locale
-coverage is limited; pending FanDNA #48 does not imply whole-app translation.
+[Desktop cue](images/broadcast-evidence/broadcast-cues-1440.png) ·
+[desktop proof](images/broadcast-evidence/broadcast-proof-1440.png) ·
+[mobile cue](images/broadcast-evidence/broadcast-cues-390.png) ·
+[mobile proof](images/broadcast-evidence/broadcast-proof-390.png) ·
+[Three Stories](images/three-stories.png)
 
-Satvik: frontend, replay, consumers, evidence navigation, Data Hub and observer.
-Diyan: authoritative engine, persistence, checkpoints and experiment execution.
-Mahir: analytics, AI/Foundry, ProofTrail and personalization work. Vishwam:
-security, licensing and release decisions. Preserve contributors' existing credits.
+## Credits
 
-## Real fixture screenshots
-
-Captured from this PR's actual FastAPI-backed Chromium journey, not mockups:
-
-- [Desktop cue preview](images/broadcast-evidence/broadcast-cues-1440.png)
-- [Desktop source proof](images/broadcast-evidence/broadcast-proof-1440.png)
-- [Mobile cue preview](images/broadcast-evidence/broadcast-cues-390.png)
-- [Mobile source proof](images/broadcast-evidence/broadcast-proof-390.png)
-
-These show the current main-based visual system. Premium Glass #71 remains a
-separate reviewed integration. No continuous tracking or hosted output is shown.
+Satvik: frontend, replay, consumers, evidence navigation, Data Hub and observer, final release
+integration. Diyan: authoritative engine, persistence, checkpoints and experiments, deployment
+template. Mahir: analytics, agents/Foundry adapter, ProofTrail and personalization. Vishwam:
+security, licensing and release review. Contributors' existing credits are preserved.
