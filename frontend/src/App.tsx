@@ -1,4 +1,6 @@
 import { useReplayAnalysisCutoff } from './useReplayAnalysisCutoff'
+import { useFlipList } from './useFlipList'
+import { ThreeStories } from './ThreeStories'
 import { useStableViewport } from './useStableViewport'
 import { useAtelierMotion } from './useAtelierMotion'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -113,29 +115,30 @@ export default function App() {
     writeFanPreferences({ version: 2, locale, persona, favoriteTeamId, favoritePlayerId, metricId: fanMetric, thresholdId: fanThreshold, alertsEnabled: fanAlertsEnabled })
   }, [locale, persona, favoriteTeamId, favoritePlayerId, fanMetric, fanThreshold, fanAlertsEnabled])
 
+  const analysisSecond = useReplayAnalysisCutoff(second, playing)
   useEffect(() => { setFanLens(null); setFanLensError(false) }, [matchId])
 
   useEffect(() => {
     if (!matchId || !['command', 'sandbox'].includes(workspace)) return
     const controller = new AbortController()
-    const params = new URLSearchParams({ at_second: String(Math.floor(second)), metric_id: fanMetric, threshold_id: fanThreshold })
+    const params = new URLSearchParams({ at_second: String(analysisSecond), metric_id: fanMetric, threshold_id: fanThreshold })
     if (favoriteTeamId) params.set('team_id', favoriteTeamId)
     if (favoritePlayerId) params.set('player_id', favoritePlayerId)
     api<FanLens>(`/api/matches/${matchId}/fan-lens?${params}`, controller.signal)
       .then(result => {
-        if (playing && second >= lastFanLensClock.current) {
-          const newAlert = result.alerts.find(alert => alert.window_end > lastFanLensClock.current && alert.window_end <= second && !announcedFanAlerts.current.has(alert.alert_id))
+        if (playing && analysisSecond >= lastFanLensClock.current) {
+          const newAlert = result.alerts.find(alert => alert.window_end > lastFanLensClock.current && alert.window_end <= analysisSecond && !announcedFanAlerts.current.has(alert.alert_id))
           if (newAlert) {
             announcedFanAlerts.current.add(newAlert.alert_id)
             setFanLensAnnouncement(tx('alert_count', { value: newAlert.observed_value, unit: newAlert.unit, start: clock(newAlert.window_start), end: clock(newAlert.window_end), threshold: newAlert.threshold }))
           }
         }
-        lastFanLensClock.current = second
+        lastFanLensClock.current = analysisSecond
         setFanLens(result); setFanLensError(false)
       })
       .catch(() => { if (!controller.signal.aborted) setFanLensError(true) })
     return () => controller.abort()
-  }, [matchId, second, fanMetric, fanThreshold, favoriteTeamId, favoritePlayerId, workspace, playing, locale])
+  }, [matchId, analysisSecond, fanMetric, fanThreshold, favoriteTeamId, favoritePlayerId, workspace, playing, locale])
 
   useEffect(() => { if (workspace === 'data' || workspace === 'runtime' || workspace === 'studio') { setPlaying(false); setProof(null); proofRequest.current?.abort() } }, [workspace])
 
@@ -220,7 +223,6 @@ export default function App() {
     api<Cue[]>(`/api/matches/${matchId}/overlays`, controller.signal).then(value => { if (!controller.signal.aborted) setCues(value) }).catch(failed)
     return () => controller.abort()
   }, [matchId, connectionAttempt])
-  const analysisSecond = useReplayAnalysisCutoff(second, playing)
   const audienceScope = JSON.stringify([locale, persona, favoriteTeamId, favoritePlayerId])
   useEffect(() => {
     if (!matchId) return
@@ -384,6 +386,8 @@ export default function App() {
   const selectRecorded = (event: Event) => { if (event.match_id !== matchId) return; setFilters({team:'all',kind:'all'}); proofRequest.current?.abort(); setSecond(event.match_second); setPlaying(false); setProof(null); setSelectedEventId(event.event_id) }
   const highlights = events.filter(e => e.match_id === matchId && e.type === 'goal' && (workspace !== 'sandbox' || e.match_second <= second))
   const feed = [...seen].reverse().filter(e => important.has(e.type)).slice(0, 7)
+  const feedList = useRef<HTMLDivElement>(null)
+  useFlipList(feedList, feed.map(e => e.event_id).join('|'))
   const activeCue = showOverlays ? cues.find(cue => second >= cue.start_match_second && second < cue.end_match_second) : undefined
   const visibleInsights = insights.filter(insight => insight.match_id === matchId && insight.match_second <= second).slice(-3).reverse()
   const homeGoals = seen.filter(e => e.type === 'goal' && e.team_id === match?.home.team_id).length
@@ -433,7 +437,7 @@ export default function App() {
           <section className="transport panel"><div className="transport-heading"><span>{tx("time_machine")}</span><span>{tx("sim_clock")}</span></div><input aria-label={tx("seek_match")} type="range" min="0" max={match.duration_seconds} step="1" value={second} onChange={e => seekReplay(Number(e.target.value))}/><div className="transport-bottom"><div className="buttons"><button aria-label={tx("restart")} onClick={() => seekReplay(0)}><RotateCcw size={18}/></button><button aria-label={tx("previous_event")} onClick={() => step(-1)}><ChevronLeft size={20}/></button><button className="play" aria-label={playing ? 'Pause' : 'Play'} onClick={() => { if (!playing) setSelectedEventId(''); setPlaying(!playing) }}>{playing ? <CirclePause size={27}/> : <CirclePlay size={27}/>}</button><button aria-label={tx("next_event")} onClick={() => step(1)}><ChevronRight size={20}/></button></div><div className="speed">{tx("speed")} {[.5, 1, 2, 4].map(value => <button key={value} className={speed === value ? 'selected' : ''} onClick={() => setSpeed(value)}>{value}×</button>)}</div></div></section>
           <section className="moments panel"><div className="panel-title"><span>{tx("critical_moments")}</span><small>{tx("select_to_seek")}</small></div><div className="moment-list">{!highlights.length && <p className="empty">{tx("no_goals")}</p>}{highlights.map((e, i) => <button className={second >= e.match_second && second < (highlights[i + 1]?.match_second ?? 5401) ? 'moment current' : 'moment'} key={e.event_id} onClick={() => { setSecond(e.match_second); setPlaying(false) }}><span className="moment-time">{Math.floor(e.match_second / 60)}′</span><span className="moment-dot" style={{background: e.team_id === match.home.team_id ? match.home.color : match.away.color}}/><span>GOAL · {e.team_id === match.home.team_id ? match.home.name : match.away.name}</span><ArrowRight size={16}/></button>)}</div></section>
         </div><div className="secondary-column"><section data-analysis-cutoff={metrics?.at_second} className="metrics panel" aria-labelledby="match-signals-heading"><div className="panel-title"><h3 id="match-signals-heading">{tx("match_signals")}</h3><small>{tx("computed_from", { count: metrics?.computed_from_event_count ?? 0 })}{metrics && metrics.at_second < Math.floor(second) ? ` / through ${clock(metrics.at_second)}` : ""}</small></div>{[['shots', metrics?.home.shots, metrics?.away.shots], ['completed_passes', metrics?.home.completed_passes, metrics?.away.completed_passes], ['pass_accuracy', metrics?.home.pass_completion_pct, metrics?.away.pass_completion_pct, '%'], ['final_third_entries', metrics?.home.final_third_entries, metrics?.away.final_third_entries], ['recoveries', metrics?.home.recoveries, metrics?.away.recoveries], ['pressure_events', metrics?.home.pressure_events, metrics?.away.pressure_events]].map(([label, a, b, suffix]) => <div className="metric-row" key={String(label)}><span>{a ?? '—'}{suffix ?? ''}</span><div><label>{tx(label as MessageKey)}</label><div className="metric-bars"><i style={{width: `${((Number(a) || 0) / Math.max(1, Number(a) + Number(b))) * 100}%`}}/><b style={{width: `${((Number(b) || 0) / Math.max(1, Number(a) + Number(b))) * 100}%`}}/></div></div><span>{b ?? '—'}{suffix ?? ''}</span></div>)}</section>
-          <section className="feed panel" aria-labelledby="event-wire-heading"><div className="panel-title"><h3 id="event-wire-heading">{tx("event_wire")}</h3><small><span className="live-dot"/> {tx("sequenced_feed")}</small></div><div className="feed-list">{feed.length ? feed.map(e => <button key={e.event_id} className="feed-item" onClick={() => { setSecond(e.match_second); setPlaying(false) }}><span className="feed-time">{clock(e.match_second)}</span><span className={`feed-symbol ${e.type}`}>{e.type === 'goal' ? '●' : '◇'}</span><span><strong>{e.type.toUpperCase()}</strong><small>{e.team_id === match.home.team_id ? match.home.name : e.team_id === match.away.team_id ? match.away.name : 'Match official'} · {e.outcome}</small></span></button>) : <div className="empty">{tx("empty_feed")}</div>}</div></section></div></div>
+          <section className="feed panel" aria-labelledby="event-wire-heading"><div className="panel-title"><h3 id="event-wire-heading">{tx("event_wire")}</h3><small><span className="live-dot"/> {tx("sequenced_feed")}</small></div><div className="feed-list" ref={feedList}>{feed.length ? feed.map(e => <button key={e.event_id} data-flip-key={e.event_id} className="feed-item" onClick={() => { setSecond(e.match_second); setPlaying(false) }}><span className="feed-time">{clock(e.match_second)}</span><span className={`feed-symbol ${e.type}`}>{e.type === 'goal' ? '●' : '◇'}</span><span><strong>{e.type.toUpperCase()}</strong><small>{e.team_id === match.home.team_id ? match.home.name : e.team_id === match.away.team_id ? match.away.name : 'Match official'} · {e.outcome}</small></span></button>) : <div className="empty">{tx("empty_feed")}</div>}</div></section></div></div>
         {workspace === 'sandbox' && <EventTimeline match={match} seen={seen} atSecond={second} selectedId={current?.event_id} filters={filters} setFilters={setFilters} select={selectRecorded}/>}
         <AnalysisTools match={match} events={events} selected={current} second={second} filters={filters} panel={analysisPanel} setPanel={setAnalysisPanel} select={selectRecorded}/>
         <TacticalLab match={match} tactics={tactics} seen={seen} selectedEvent={playing ? undefined : current} selectPass={(eventId, time) => { const source = events.find(e => e.event_id === eventId && e.match_second === time); if (source) selectRecorded(source) }} atSecond={second} seek={seekReplay}/>
@@ -447,7 +451,7 @@ export default function App() {
         </div>
         <section className="studio panel"><div className="panel-title"><span>Broadcast studio / Verified cues</span><label className="cue-toggle"><input type="checkbox" checked={showOverlays} onChange={e => setShowOverlays(e.target.checked)}/> SHOW OVERLAYS</label></div><div className="studio-layout"><div className="studio-screen"><span className="studio-label">PREVIEW · SYNTHETIC FIELD</span>{activeCue ? <div className="studio-lower"><small>{activeCue.overlay_type.toUpperCase()} / {clock(activeCue.start_match_second)}</small><strong>{activeCue.text}</strong><span>{activeCue.overlay_type === 'goal' ? `${activeCue.metrics.score_home} — ${activeCue.metrics.score_away}` : `${activeCue.metrics.momentum_previous} → ${activeCue.metrics.momentum_current} ACTIVITY POINTS`}</span></div> : <div className="studio-idle">CUE STANDBY</div>}<span className="safe-area">SAFE AREA</span></div><div className="studio-queue"><div className="studio-queue-head"><span>UPCOMING / ALL CUES</span><a href={`/api/matches/${matchId}/overlays`} download={`pulse-xi-${matchId}-cues.json`}>EXPORT ALL JSON ↗</a></div>{cues.map(cue => <div key={cue.cue_id} className="cue-entry"><button className={activeCue?.cue_id === cue.cue_id ? 'cue-row active' : 'cue-row'} onClick={() => seekReplay(cue.start_match_second)}><span>{clock(cue.start_match_second)}</span><strong>{cue.text}</strong><small>{cue.show_duration_seconds}s</small></button><button className="cue-proof" aria-label={`Inspect evidence for ${cue.text} at ${clock(cue.start_match_second)}`} disabled={cue.trigger_match_second > second} title={cue.trigger_match_second > second ? "Seek to this cue before inspecting its evidence" : "Inspect verified source events at the current replay cutoff"} onClick={() => { setPlaying(false); openProof(cue.insight_id) }}>EVIDENCE</button><a aria-label={`Export ${cue.text} cue JSON`} href={`/api/matches/${matchId}/overlays/${cue.cue_id}`} download={`${cue.cue_id}.json`}>JSON</a></div>)}<p>Rule-scheduled overlays cite source events. No model inference has run.</p></div></div></section>
         <a className="studio-route-link" href="#/studio">Open Director Studio editor →</a>
-        {proof && <div className="proof-scrim" onClick={() => setProof(null)}><aside ref={proofDrawer} className="proof-drawer" role="dialog" aria-modal="true" aria-label="Insight evidence" onClick={event => event.stopPropagation()}><button className="proof-close" onClick={() => setProof(null)} aria-label="Close proof">×</button><div className="section-index">PROOFTRAIL / AUDITED EVIDENCE</div><h2>{proof.insight.title}</h2><p>{proof.insight.explanation}</p><div className="proof-verified">✓ {proof.insight.verification_status.replaceAll('_', ' ').toUpperCase()}</div><h3>CALCULATIONS</h3>{proof.insight.factual_claims.map(claim => <div className="proof-row" key={`${claim.metric}-${claim.window_start}`}><span>{claim.metric.replaceAll('_', ' ')} · {clock(claim.window_start)}–{clock(claim.at_second)}</span><strong>{claim.value}</strong></div>)}{proof.insight.comparison_window && <p>Compared with {clock(proof.insight.comparison_window[0])}–{clock(proof.insight.comparison_window[1])}</p>}<h3>SOURCE EVENTS</h3>{proof.source_events.map(event => <button className="proof-event" key={event.event_id} onClick={() => { selectRecorded(event); setProof(null) }}><b>{clock(event.match_second)} · {event.type.toUpperCase()}</b><code>{event.event_id}</code><small>{event.outcome}</small></button>)}<p className="proof-note">{proof.insight.data_quality} {proof.insight.uncertainty}</p></aside></div>}
+        {proof && <div className="proof-scrim" onClick={() => setProof(null)}><aside ref={proofDrawer} className="proof-drawer" role="dialog" aria-modal="true" aria-label="Insight evidence" onClick={event => event.stopPropagation()}><button className="proof-close" onClick={() => setProof(null)} aria-label="Close proof">×</button><div className="section-index">PROOFTRAIL / AUDITED EVIDENCE</div><h2>{proof.insight.title}</h2><p>{proof.insight.explanation}</p><div className="proof-verified">✓ {proof.insight.verification_status.replaceAll('_', ' ').toUpperCase()}</div><ThreeStories insight={proof.insight} cues={cueResponse} locale={locale} clock={clock}/><h3>CALCULATIONS</h3>{proof.insight.factual_claims.map(claim => <div className="proof-row" key={`${claim.metric}-${claim.window_start}`}><span>{claim.metric.replaceAll('_', ' ')} · {clock(claim.window_start)}–{clock(claim.at_second)}</span><strong>{claim.value}</strong></div>)}{proof.insight.comparison_window && <p>Compared with {clock(proof.insight.comparison_window[0])}–{clock(proof.insight.comparison_window[1])}</p>}<h3>SOURCE EVENTS</h3>{proof.source_events.map(event => <button className="proof-event" key={event.event_id} onClick={() => { selectRecorded(event); setProof(null) }}><b>{clock(event.match_second)} · {event.type.toUpperCase()}</b><code>{event.event_id}</code><small>{event.outcome}</small></button>)}<p className="proof-note">{proof.insight.data_quality} {proof.insight.uncertainty}</p></aside></div>}
         <footer><span>POWERED BY DETERMINISTIC SYNTHETIC EVENTS</span><span>MODEL INFERENCE: NOT CONFIGURED · RULE-BASED ENGINE</span><span>SCHEMA v1.0</span></footer>
       </>}
       </div>
