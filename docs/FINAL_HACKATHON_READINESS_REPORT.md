@@ -218,7 +218,7 @@ All 98 Playwright tests passed in 6.0 minutes on the combined validation tree, i
 
 ## M. Demo-readiness session, 2026-10-24
 
-Status: **DEMO READY, SUBMISSION BLOCKED** (unchanged). Nothing below is merged.
+Status: **DEMO READY, SUBMISSION BLOCKED** (unchanged). Superseded for merge state and final results by section N: PRs #104, #105 and #106 are merged.
 
 **Refs.** `main` = `0729d3f`. PR [#104](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/104)
 `audit/replay-stability` head `298828a`: exact-head CI all green (documentation, backend,
@@ -292,3 +292,79 @@ Commands: backend `cd backend; python -m pytest -q tests`; frontend `cd frontend
 npm run build; npx playwright test`; smoke `python scripts/release-smoke.py` (after build).
 
 Final full Playwright run on this branch after the last code change: **123 passed** (8.0 min), including route-health (10) and browser-metrics (1).
+
+## N. Final release state, 2026-10-25
+
+**Classification: DEMO READY, SUBMISSION BLOCKED.** Engineering for the issues that can be
+finished in code is complete and merged; what remains is the video (Diyan), judge access, human
+licence/rights decisions, and an authorized hosted-model run, none of which code can supply.
+
+**Code state.** `main` = `92d05ed` (merge of [#106](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/106)),
+containing [#104](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/104)
+(replay stability) and [#105](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/105)
+(One Moment · Three Stories, merged by the repository owner). Post-merge CI run
+[40185354081](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/40185354081)
+on `92d05ed`: all six jobs green. No branch protection or ruleset exists, so no review was
+technically required; reviews on #104/#105 were requested from teammates and none was submitted.
+
+**Verification run on the #106 head (pre-merge, same content as `92d05ed`).** Backend `pytest tests`: 547 passed,
+0 failed, 0 skipped (311 s). Playwright full suite: 141 passed (6.4 min), including 13 axe-core
+WCAG A/AA scans, 10 route-health checks, 5 highlight-reel tests, 3 Three Stories tests and the
+replay-stability gates. `scripts/release-smoke.py` passed on the earlier branch head. `npm audit
+--omit=dev`: 0; `pip_audit` on both requirement files: none; docs validator passed.
+
+**Defects found and fixed this round.** Axe found three real accessibility defects (critical:
+table rows without cell/columnheader roles; serious: aria-label on a role-less div; serious:
+scrollable table not keyboard-focusable). The earlier round fixed Fan Lens 200 ms polling and the
+Event Wire growth. A security note in issue #23 was corrected after verification: the highlights
+GET is unmetered (the public quota covers only `POST /recap`).
+
+**Issue disposition (GitHub numbers; the task prompt used title IDs, so prompt #13 = GitHub #14, and so on).**
+
+| Issue | Title ID | State | Evidence or blocker |
+|---|---|---|---|
+| #17 Director AI studio | 16 | **Closed** | `test_director_studio.py`, `replay.spec.ts` Studio journey, axe-clean route |
+| #20 FanDNA localization/voice/accessibility | 19 | **Closed** | en/es/hi catalog + backend templates, five modes, 13 axe tests; operator routes English only (stated in the closing comment) |
+| #18 Remotion highlights | 17 | **Open** | Manifest, player, renderer and rendered example exist; Remotion not adopted (licence eligibility unresolved); no in-app render job, audio or MP4 |
+| #14 Foundry live validation | 13 | **Open, blocked** | No credentials in this environment; billable call needs written owner approval |
+| #15 Multi-agent orchestration | 14 | **Open** | Offline workflow verified; live-run acceptance depends on #14 |
+| #23 Security/legal/provenance | 22 | **Open** | Audits re-run clean; needs rights-holder CC0 declaration, a root `LICENSE` decision (none exists) and independent release approval |
+| #25 Demo video and submission | 24 | **Open, assigned to `diyan07-ctrl`** | Storyboard and checklist posted; video not recorded |
+| #1 Epic | - | **Open** | Stays open until #25 and submission |
+
+So the video is **not** the only remaining item: #14/#15 (credentials and cost approval), #23
+(human decisions) and #18 (licence call) are also open, and judge access is unresolved.
+
+### Official criteria (rules section 6.2, equal weight), internal self-assessment
+
+No numeric score is given; this is an evidence review, not a prediction.
+
+| Criterion | Strongest evidence | Weakness |
+|---|---|---|
+| Technological Implementation | Deterministic engine, checkpoint/restore/ForkCast with independent verifiers, SQLite schema 4, 547 backend + 141 browser tests, API p50 6.6-34.6 ms (40 samples) | No hosted Microsoft service is executed; Azure template is compiled in CI but not provisioned |
+| Agentic Design and Innovation | Role-scoped tools, deterministic Evidence Auditor, staged workflow with traces, tested failure paths | Never run against a hosted model; Three Stories and highlights are rule-based. Weakest criterion |
+| Real-World Impact | Evidence-linked explanations, audience framing with identical facts, reproducible experiments | Synthetic only; no public deployment; local-first |
+| User Experience and Presentation | Stable replay (page CLS < 0.001, zero scroll drift), axe-clean routes in three locales, one-click evidence drawer | No final video; Event Wire rows still move inside their panel (animated, reduced-motion aware); no screen-reader pass |
+| Adherence to Category | Five-stage pipeline works end to end on synthetic events | The AI-powered element is unproven until #14/#15 run |
+
+### Submission eligibility
+
+| Requirement | Status |
+|---|---|
+| Fits the challenge (ingest, interpret, explain, render, personalize) | PASS (rule-based; see AI row) |
+| Synthetic, football-realistic data; no real footage | PASS (seeded generator; reel uses no footage) |
+| Working product runs on its platform | PASS (local run; CI and smoke) |
+| Real Microsoft/Azure technology use | PARTIAL: Agent Framework optional and offline-verified; Foundry and Azure not executed (BLOCKED on #14) |
+| Public GitHub repository | PASS |
+| Judge access without charge through Nov 10 | BLOCKED: no deployment; repository checkout is the only route |
+| Licence and provenance | BLOCKED: #23 human decisions; no root LICENSE |
+| Pitch, description, technology list in English | PASS (docs/HACKATHON_SUBMISSION_PACKAGE.md; needs final read-through) |
+| Video under two minutes, public URL | BLOCKED: not recorded (#25) |
+| Submitted before Oct 27 11:59 PM Pacific | NOT DONE |
+
+**Judge-experience rehearsal.** The exact storyboard path (play at 4x, first goal cue, Inspect
+evidence, Three Stories, persona/language switch, highlight reel, Control Room via runbook) is
+covered by the browser tests listed above, and the reel and a pinned frame were rendered and
+inspected. The Control Room portion needs a locally generated operator token and about a minute
+of real time, so it must be prepared before recording. A full human rehearsal with a microphone
+was not performed.
