@@ -1,7 +1,9 @@
 import { defineConfig } from '@playwright/test'
 
 const baseURL = process.env.PULSE_DEMO_URL
-if (!baseURL || !baseURL.startsWith('https://')) {
+// Loopback HTTP is accepted only with an explicit opt-in, so a public check can never run against http.
+const loopback = process.env.PULSE_DEMO_ALLOW_LOOPBACK === '1' && /^http:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/.test(baseURL ?? '')
+if (!baseURL || !(baseURL.startsWith('https://') || loopback)) {
   throw new Error('PULSE_DEMO_URL must be the deployed HTTPS origin')
 }
 

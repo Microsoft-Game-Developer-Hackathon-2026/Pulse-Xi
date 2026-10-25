@@ -4,7 +4,7 @@ Paste-ready text for the hackathon project form, the reviewer guide and the reco
 storyboard. Everything below was checked against the merged code on 2026-10-25; items that
 are prepared but not done are labelled as such. Rules source:
 [OFFICIAL RULES.md](https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md)
-(read 2026-10-24/25; deadline **October 27, 2026, 11:59 PM Pacific** = October 28, 12:29 PM IST).
+(re-read 2026-10-25, unchanged since 2026-10-24; deadline **October 27, 2026, 11:59 PM Pacific** = October 28, 12:29 PM IST).
 
 **Tagline:** Synthetic football intelligence, with evidence behind every story.
 
@@ -50,6 +50,7 @@ inferred; narratives are templates, not model output; no hosted inference was ru
 | Microsoft Agent Framework (`agent-framework-foundry` 1.13.0, `agent-framework-orchestrations` 1.3.1) | **Optional; offline-verified, not run against a hosted model.** Staged Analyst → Story Editor → Evidence Auditor → Director → Fan workflow, tool allowlists and observed-stage traces are tested with fakes | `backend/app/agents.py`, `agent_tools.py`, `test_agent_tools.py`, `test_agent_execution_trace.py`, issue #15 |
 | Microsoft Foundry | **Adapter and fail-closed config only; no authenticated call made.** Needs project endpoint, deployment and explicit cost approval | `docs/FOUNDRY.md`, issue #14 stays open |
 | Azure Container Apps (Bicep + GitHub Actions) | **Prepared, not provisioned.** Template compiles in CI; no resource or public URL exists | `infra/azure/main.bicep`, `docs/AZURE_DEMO_DEPLOYMENT.md` |
+| Render free web service | **Hosting target only; not yet applied.** `render.yaml` runs the existing container in public read-only mode; no Microsoft service is involved | `render.yaml`, `docs/JUDGE_ACCESS_DEPLOYMENT.md`, issue #108 |
 | GitHub Actions / GitHub CLI | Used: six CI jobs (backend, frontend, browser, container, documentation, deployment-template) | `.github/workflows/ci.yml` |
 | Azure databases, Fabric, Azure MCP, Copilot Agent Mode | **Not used** | — |
 
@@ -72,13 +73,11 @@ $env:Path = "$(Resolve-Path .venv\Scripts);$env:Path"
 5. Control Room (`#/runtime`) needs a local operator token you generate; follow [SUBMISSION_RUNBOOK](SUBMISSION_RUNBOOK.md) steps 1–8 (scenario → step → checkpoint → tactic → paired ForkCast → independent verification). `python scripts/release-smoke.py` runs the same path headlessly.
 6. Tests: `cd backend; python -m pytest -q tests` and `cd frontend; npm ci; npm run build; npx playwright test`.
 
-Public judge access is **not established**: no deployment exists. The rules allow a test build; a
-repository checkout plus these instructions is the current fallback and must be confirmed with the
-team, because judges are not required to run local builds.
+**Public URL: none yet.** Tracked in [#108](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/108); the Render Blueprint and a 4-test acceptance suite are ready ([guide](JUDGE_ACCESS_DEPLOYMENT.md)). Once applied, record the URL here and replace steps 1-4 with it. On the public demo the Control Room, Data Hub imports and Director Studio approval are disabled by design (the app says so); only the local run shows them. The rules allow a test build, but judges are not required to run local builds, so a public URL is needed. Free-plan caveats (15-minute idle sleep, limited CPU) are in the guide.
 
 ## Recording storyboard for issue #25 (target 100–108 s, hard limit < 120 s)
 
-Record the build at the frozen SHA on `main`, 1920x1080 landscape, fresh browser profile, no
+Record the build at the frozen SHA on `main` (the Control Room segment must come from a local run; the public demo does not include it), 1920x1080 landscape, fresh browser profile, no
 music, no third-party material, no tokens or terminals on screen. Prepare the Control Room
 session and checkpoint before recording (the real run takes longer than the video).
 
@@ -103,9 +102,9 @@ issue #25 and in the form. Never claim a Foundry or hosted-AI run in narration.
 | Public source | [Pulse-Xi](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi), public |
 | Pitch, description, technology list | This document (needs a final read-through by the representative) |
 | Demo video, public URL | **Not recorded**; owner Diyan, issue #25 |
-| Working judge access | **Not established**; see reviewer guide |
-| Rights and licence decisions | **Open**: issue #23. No root `LICENSE` file; asset CC0 declaration and release approval await the rights holders |
-| Registration and submission | Representative must submit and keep the confirmation; not done |
+| Working judge access | **Not established**: Blueprint and tests ready, nobody has applied it; owner issue #108 |
+| Rights and licence decisions | **Open**: issue #23. No root `LICENSE` file (the README says so); the CC0 declaration awaits its author (satvikp-coder) and release approval awaits an independent reviewer; memo: [LICENSE_AND_RIGHTS_DECISIONS](LICENSE_AND_RIGHTS_DECISIONS.md) |
+| Registration and submission | **Representative not confirmed** (rules 4.10); nothing submitted; owner issue #109 |
 
 ## Screenshots (real captures)
 

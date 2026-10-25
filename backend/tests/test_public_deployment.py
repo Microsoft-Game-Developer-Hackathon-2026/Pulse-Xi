@@ -177,3 +177,33 @@ def test_public_boundary_does_not_block_local_mode_writes(monkeypatch):
 
     asyncio.run(deployment.PublicDemoBoundary(app)(scope, receive, send))
     assert called
+
+
+def test_public_demo_highlights_are_read_only_bounded_and_deterministic(public_env):
+    path = "/api/matches/comeback-1107/highlights"
+    with TestClient(main.app) as client:
+        first = client.get(path)
+        assert first.status_code == 200 and first.json()["provenance"]["external_assets"] == []
+        # Reads are unmetered like the other GET analytics, so the response must stay small and
+        # identical for identical input rather than depend on caller-controlled work.
+        assert len(first.content) < 20_000
+        assert {client.get(path).json()["manifest_sha256"] for _ in range(20)} == {first.json()["manifest_sha256"]}
+        # Caller-controlled work is bounded at the validation layer.
+        assert client.get(path + "?limit=0").status_code == 422
+        assert client.get(path + "?limit=13").status_code == 422
+        assert client.get(path + "?at_second=5401").status_code == 422
+        assert client.get(path + "?limit=12&at_second=5400").status_code == 200
+        assert client.get("/api/matches/not-a-match/highlights").status_code == 404
+        # No write method is reachable, even with privileged-looking headers.
+        for method in ("POST", "PUT", "PATCH", "DELETE"):
+            denied = client.request(method, path, json={}, headers={"Authorization": "Bearer " + "x" * 40})
+            assert denied.status_code == 403 and denied.headers["cache-control"] == "no-store"
+
+
+def test_deployment_mode_flag_is_public_readable_and_reveals_nothing_else(public_env, monkeypatch):
+    with TestClient(main.app) as client:
+        response = client.get("/api/deployment")
+        assert response.status_code == 200 and response.json() == {"mode": "public-readonly"}
+        assert client.post("/api/deployment", json={}).status_code == 403
+    monkeypatch.setenv("PULSE_DEPLOYMENT_MODE", "local")
+    assert TestClient(main.app).get("/api/deployment").json() == {"mode": "local"}
