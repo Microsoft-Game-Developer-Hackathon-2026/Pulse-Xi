@@ -101,10 +101,10 @@ issue #25 and in the form. Never claim a Foundry or hosted-AI run in narration.
 |---|---|
 | Public source | [Pulse-Xi](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi), public |
 | Pitch, description, technology list | This document (needs a final read-through by the representative) |
-| Demo video, public URL | **Not recorded**; owner Diyan, issue #25 |
+| Demo video, public URL | **Not recorded**; owner Diyan, issue #25 (single submission-tracking issue) |
 | Working judge access | **Live** at <https://pulse-xi-demo.onrender.com>; verified from outside the dev machine; availability through Nov 10 must be re-checked (#108) |
-| Rights and licence decisions | **Open**: issue #23. No root `LICENSE` file (the README says so); the CC0 declaration awaits its author (satvikp-coder) and release approval awaits an independent reviewer; memo: [LICENSE_AND_RIGHTS_DECISIONS](LICENSE_AND_RIGHTS_DECISIONS.md) |
-| Registration and submission | **Representative not confirmed** (rules 4.10); nothing submitted; owner issue #109 |
+| Rights and licence | **Decided by the owner, 2026-10-25**: no root licence declared; existing CC0 declaration on the original artwork retained; independent review waived and replaced by a documented checklist run ([memo](LICENSE_AND_RIGHTS_DECISIONS.md)). State this plainly if asked; do not say the assets were independently reviewed |
+| Registration and submission | Nothing submitted. The submitting person must be the team's authorized Representative (rules 4.10); tracked with the video in #25 |
 
 ## Screenshots (real captures)
 

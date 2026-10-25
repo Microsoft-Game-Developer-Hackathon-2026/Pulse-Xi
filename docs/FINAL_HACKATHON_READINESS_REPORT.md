@@ -420,3 +420,19 @@ Foundry and Azure Cloud Native are not supportable until #14 or an Azure deploym
 ## P. Public demo deployed, 2026-10-25
 
 **Judge-access gate: PASS for reachability today, with conditions.** <https://pulse-xi-demo.onrender.com> is live on Render's free plan (Docker, Blueprint-managed, deployed commit `c16ad54`). From outside the development machine: `/ready` 200, `/health` ok, `/api/deployment` `public-readonly`, `/docs` and operator APIs 403, and the deployed-URL suite **4 passed** (1.3 min), including 35 s of 4x playback with zero HTTP 429. Conditions: the free instance sleeps after 15 idle minutes (35-60 s wake-up; one measured at 35.8 s); no uptime guarantee through Nov 10 (re-check Oct 28, Nov 1, Nov 9); capacity on Render's CPU is unmeasured; operator routes are intentionally disabled. This supersedes the "no URL exists" statements in sections M-O. Status of the other gates is unchanged: video (#25), Representative (#109), Foundry (#14), rights decisions (#113-#115), screen-reader pass (#111).
+
+## Q. Close-out, 2026-10-25 (owner-directed)
+
+At the owner's instruction, teammate review gates were dropped and tracking was consolidated. **Open work is now: #25 (everything submission-related, owner Diyan), #14 and #15 (blocked on credentials and an unapproved billable call), and the epic #1.**
+
+| Item | Outcome | Honest qualifier |
+|---|---|---|
+| Public judge access (#108) | Live and verified (section P) | Free plan: idle sleep, no uptime guarantee; the Oct 28 / Nov 1 / Nov 9 re-checks moved into #25 |
+| Screen reader (#111) | Replaced by `frontend/tests/keyboard-a11y.spec.ts` (4 tests: accessible names, no positive tabindex, visible focus, drawer focus trap + Escape + focus return, live regions) plus the 13 axe tests | **No real screen reader ran.** Do not claim a screen-reader pass |
+| CC0 (#113), root licence (#114), release review (#115) | Decided by the owner as recorded in [LICENSE_AND_RIGHTS_DECISIONS](LICENSE_AND_RIGHTS_DECISIONS.md): CC0 declaration retained as is, no root licence, independent review waived and replaced by a checklist run | Other contributors were not consulted; not an independent review; manifest still `pending-team-review` |
+| Remotion (#18) | CLI + WebM renderer accepted as the scope ([HIGHLIGHTS](HIGHLIGHTS.md)) | Remotion not used; no audio/MP4/in-app render job |
+| Security/legal/provenance (#23) | Technical audit complete (section O and the memo) | Closed on the owner's decisions, not on external approvals |
+| Category and copy (#116) | Recommendation and paste-ready copy are in this report (section O) and the submission packet | The Representative still chooses; nothing was selected or submitted |
+| Foundry (#14), multi-agent live run (#15) | **Still blocked**: no endpoint, deployment or credential, and no approval to spend | The submission copy must keep saying "verified offline only" |
+
+Verification for this pass: new keyboard/a11y spec 4 passed; full backend and browser suites run in CI on the PR for this branch (see the PR); live URL re-checked serving `public-readonly`.
