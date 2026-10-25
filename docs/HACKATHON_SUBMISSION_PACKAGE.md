@@ -73,7 +73,7 @@ $env:Path = "$(Resolve-Path .venv\Scripts);$env:Path"
 5. Control Room (`#/runtime`) needs a local operator token you generate; follow [SUBMISSION_RUNBOOK](SUBMISSION_RUNBOOK.md) steps 1–8 (scenario → step → checkpoint → tactic → paired ForkCast → independent verification). `python scripts/release-smoke.py` runs the same path headlessly.
 6. Tests: `cd backend; python -m pytest -q tests` and `cd frontend; npm ci; npm run build; npx playwright test`.
 
-**Public URL: none yet.** Tracked in [#108](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/108); the Render Blueprint and a 4-test acceptance suite are ready ([guide](JUDGE_ACCESS_DEPLOYMENT.md)). Once applied, record the URL here and replace steps 1-4 with it. On the public demo the Control Room, Data Hub imports and Director Studio approval are disabled by design (the app says so); only the local run shows them. The rules allow a test build, but judges are not required to run local builds, so a public URL is needed. Free-plan caveats (15-minute idle sleep, limited CPU) are in the guide.
+**Public URL: <https://pulse-xi-demo.onrender.com>** (Render free plan, deployed from `main` @ `c16ad54`, 4/4 acceptance tests passed against it on 2026-10-25; [guide](JUDGE_ACCESS_DEPLOYMENT.md), tracker [#108](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/108)). Steps 1-4 work there without installing anything. The first request after 15 idle minutes can take 35-60 s. On the public demo the Control Room, Data Hub imports and Director Studio approval are disabled by design (the app says so); only the local run shows them. The rules allow a test build, but judges are not required to run local builds, so a public URL is needed. Free-plan caveats (15-minute idle sleep, limited CPU) are in the guide.
 
 ## Recording storyboard for issue #25 (target 100–108 s, hard limit < 120 s)
 
@@ -102,7 +102,7 @@ issue #25 and in the form. Never claim a Foundry or hosted-AI run in narration.
 | Public source | [Pulse-Xi](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi), public |
 | Pitch, description, technology list | This document (needs a final read-through by the representative) |
 | Demo video, public URL | **Not recorded**; owner Diyan, issue #25 |
-| Working judge access | **Not established**: Blueprint and tests ready, nobody has applied it; owner issue #108 |
+| Working judge access | **Live** at <https://pulse-xi-demo.onrender.com>; verified from outside the dev machine; availability through Nov 10 must be re-checked (#108) |
 | Rights and licence decisions | **Open**: issue #23. No root `LICENSE` file (the README says so); the CC0 declaration awaits its author (satvikp-coder) and release approval awaits an independent reviewer; memo: [LICENSE_AND_RIGHTS_DECISIONS](LICENSE_AND_RIGHTS_DECISIONS.md) |
 | Registration and submission | **Representative not confirmed** (rules 4.10); nothing submitted; owner issue #109 |
 
