@@ -1,4 +1,4 @@
-import { useReplayAnalysisCutoff } from './useReplayAnalysisCutoff'
+import { useRecapCutoff, useReplayAnalysisCutoff } from './useReplayAnalysisCutoff'
 import { useFlipList } from './useFlipList'
 import { ThreeStories } from './ThreeStories'
 import { useStableViewport } from './useStableViewport'
@@ -104,6 +104,12 @@ export default function App() {
   const [workspace, setWorkspace] = useState(window.location.hash.split('?')[0] === '#/runtime' ? 'runtime' : window.location.hash.split('?')[0] === '#/data' ? 'data' : window.location.hash.split('?')[0] === '#/sandbox' ? 'sandbox' : window.location.hash.split('?')[0] === '#/studio' ? 'studio' : 'command')
   const [selectedEventId, setSelectedEventId] = useState('')
   const [connectionAttempt, setConnectionAttempt] = useState(0)
+  const [publicDemo, setPublicDemo] = useState(false)
+  useEffect(() => {
+    const controller = new AbortController()
+    api<{ mode: string }>('/api/deployment', controller.signal).then(value => setPublicDemo(value.mode === 'public-readonly')).catch(() => { /* Older servers: show no notice. */ })
+    return () => controller.abort()
+  }, [])
   const priorMatch = useRef('')
   const proofDrawer = useRef<HTMLElement>(null)
   const proofRequest = useRef<AbortController | null>(null)
@@ -116,6 +122,8 @@ export default function App() {
   }, [locale, persona, favoriteTeamId, favoritePlayerId, fanMetric, fanThreshold, fanAlertsEnabled])
 
   const analysisSecond = useReplayAnalysisCutoff(second, playing)
+  const momentSignature = useMemo(() => insights.filter(item => item.match_id === matchId && item.match_second <= analysisSecond).map(item => item.insight_id).join('|'), [insights, matchId, analysisSecond])
+  const recapSecond = useRecapCutoff(analysisSecond, playing, momentSignature)
   useEffect(() => { setFanLens(null); setFanLensError(false) }, [matchId])
 
   useEffect(() => {
@@ -228,7 +236,7 @@ export default function App() {
     if (!matchId) return
     let active = true
     const controller = new AbortController()
-    const params = new URLSearchParams({ locale, persona, at_second: String(analysisSecond) })
+    const params = new URLSearchParams({ locale, persona, at_second: String(recapSecond) })
     if (favoriteTeamId) params.set('favorite_team_id', favoriteTeamId)
     if (favoritePlayerId) params.set('favorite_player_id', favoritePlayerId)
     const timer = window.setTimeout(() => {
@@ -252,7 +260,7 @@ export default function App() {
         } }).catch(e => { if (active) setError(e.message) })
     }, Math.max(220, recapRetryAfter.current - performance.now()))
     return () => { active = false; controller.abort(); window.clearTimeout(timer) }
-  }, [matchId, locale, persona, analysisSecond, favoriteTeamId, favoritePlayerId, audienceScope, connectionAttempt, recapRetry])
+  }, [matchId, locale, persona, recapSecond, favoriteTeamId, favoritePlayerId, audienceScope, connectionAttempt, recapRetry])
   useEffect(() => {
     if (!matchId) return
     const controller = new AbortController()
@@ -425,6 +433,7 @@ export default function App() {
 
         try { localStorage.removeItem(WORKSPACE_KEY); localStorage.removeItem('pulse-xi-match'); pendingRestore.current = null; window.history.replaceState(null, '', window.location.pathname + window.location.search + window.location.hash.split('?')[0]); setSecond(0); setSelectedEventId(''); setFilters({team:'all',kind:'all'}); setViewPreference('2d'); setQualityPreference(window.matchMedia('(max-width: 700px), (prefers-reduced-motion: reduce)').matches ? 'low' : 'standard'); setAnalysisPanel('bookmarks'); setSpeed(1); setPlaying(false); setStorageConflict(false); setResetWorkspacePending(false); setWorkspaceNotice('Local replay workspace reset. Bookmarks were retained.') } catch { setWorkspaceNotice('Browser storage reset failed.') }
       }}>Confirm reset workspace</button><button onClick={() => setResetWorkspacePending(false)}>Cancel workspace reset</button></span>}{storageConflict && <><button onClick={() => location.reload()}>Reload saved workspace</button><button onClick={() => { setStorageConflict(false); setWorkspaceNotice('This tab will save its current analysis workspace.') }}>Keep this tab</button></>}</div>}
+      {publicDemo && (workspace === 'data' || workspace === 'runtime' || workspace === 'studio') && <p className="public-demo-notice" role="status" data-testid="public-demo-notice"><strong>Public read-only demo.</strong> Operator actions here (engine control, imports, producer approval) are disabled on this deployment and no token will unlock them. Replay, evidence, Fan Lens, highlights and generated seeds are fully available; run the project locally (see the README) to use operator tools.</p>}
       {workspace === 'data' && <MatchDataHub open={value => { generated(value); window.location.hash = '/sandbox' }}/> }
       {workspace === 'runtime' && <RuntimeRoom/>}
       <div hidden={workspace === 'data' || workspace === 'runtime' || workspace === 'studio'}>

@@ -49,6 +49,8 @@ for (const [width, speed] of [[1280, 1], [1280, 4], [390, 2]] as const) {
     await info.attach('replay-stability.json', { body: JSON.stringify(report, null, 2), contentType: 'application/json' })
     console.log(JSON.stringify(report))
     expect(endClock).toBeGreaterThan(startClock)
+    // Recap is a metered public POST (30/min process-wide): playback must stay far below that budget.
+    expect(requests['POST /api/matches/:id/recap'] ?? 0, 'recap POSTs per 12 s of playback').toBeLessThanOrEqual(5)
     expect(scrollAfter).toBe(scrollBefore)
     // Rows inside the fixed-size Event Wire move when a new event is inserted (content-driven,
     // reported separately). Nothing outside that panel may shift.

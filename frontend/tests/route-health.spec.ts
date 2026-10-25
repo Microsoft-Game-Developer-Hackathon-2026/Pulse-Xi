@@ -23,3 +23,12 @@ for (const width of [1440, 390]) {
     })
   }
 }
+
+test('local mode never shows the public-demo notice on operator routes', async ({ page, request }) => {
+  expect((await (await request.get('/api/deployment')).json()).mode).toBe('local')
+  for (const hash of ['#/runtime', '#/data', '#/studio']) {
+    await page.goto(`/${hash}`)
+    await page.waitForLoadState('networkidle')
+    await expect(page.getByTestId('public-demo-notice')).toHaveCount(0)
+  }
+})

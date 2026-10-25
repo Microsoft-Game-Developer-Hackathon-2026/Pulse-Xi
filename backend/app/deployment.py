@@ -12,7 +12,7 @@ from threading import Lock
 from starlette.responses import JSONResponse
 
 
-PUBLIC_READ_PATHS = frozenset(("/", "/health", "/ready", "/api/matches", "/api/data-hub"))
+PUBLIC_READ_PATHS = frozenset(("/", "/health", "/ready", "/api/deployment", "/api/matches", "/api/data-hub"))
 PUBLIC_MATCH_PATH = re.compile(r"^/api/matches/[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}(?:/.*)?$")
 PUBLIC_MATCH_SOCKET = re.compile(r"^/ws/matches/[A-Za-z0-9][A-Za-z0-9_.:-]{0,159}$")
 PUBLIC_POST_PATHS = frozenset(("/api/matches/generate",))
