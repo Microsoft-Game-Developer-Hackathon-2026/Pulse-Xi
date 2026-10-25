@@ -27,9 +27,8 @@ evidence (C6/A3) and the final submission (D6).
 
 | Capability | State |
 |---|---|
-| Replay, Fan Lens, ProofTrail, Control Room, ForkCast, Data Hub, Studio, 3D observer | In `main` (`0729d3f`); automated tests pass (backend 541, browser 112 on the stacked head) |
-| Fan Lens 1 Hz sampling, fixed Event Wire viewport, replay-stability tests | **Unmerged**: PR #104 (`audit/replay-stability`), exact-head CI green, review requested |
-| One Moment · Three Stories, route-health sweep | **Unmerged**: PR #105 (stacked on #104), review requested |
+| Replay, Fan Lens, ProofTrail, Control Room, ForkCast, Data Hub, Studio, 3D observer | In `main`; automated tests pass (backend 547, browser 141 on the #106 head) |
+| Fan Lens 1 Hz sampling, fixed Event Wire viewport, replay-stability tests (#104); One Moment · Three Stories, route-health sweep (#105); axe WCAG scan, highlight manifest/player/renderer, submission packet (#106) | **Merged**: `main` = `92d05ed`, post-merge CI green |
 | Hosted Foundry / Agent Framework execution | Blocked: no credential or cost authorization; offline deterministic path only |
 | Public judge access, demo video, rights approval, submission | Not done; see audit rows D3/D4/S3/D6 |
 
