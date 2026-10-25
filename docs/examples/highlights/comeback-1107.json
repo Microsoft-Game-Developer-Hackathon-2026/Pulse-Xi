@@ -1,0 +1,62 @@
+{
+  "match_id": "comeback-1107",
+  "manifest_sha256": "a9b87246040ca48338a88ba94ee2d41583af8baa6c429b029be693decb862aaf",
+  "clips": 6,
+  "planned_seconds": 42,
+  "recorded_wall_seconds": 42.3,
+  "bytes": 3135258,
+  "resolution": "1280x720",
+  "container": "webm",
+  "source_events": [
+    {
+      "clip_id": "clip-1-comeback-1107-insight-67",
+      "insight_id": "comeback-1107-insight-67",
+      "event_ids": [
+        "comeback-1107-e0066",
+        "comeback-1107-e0067"
+      ]
+    },
+    {
+      "clip_id": "clip-2-comeback-1107-insight-239",
+      "insight_id": "comeback-1107-insight-239",
+      "event_ids": [
+        "comeback-1107-e0238",
+        "comeback-1107-e0239"
+      ]
+    },
+    {
+      "clip_id": "clip-3-comeback-1107-insight-273",
+      "insight_id": "comeback-1107-insight-273",
+      "event_ids": [
+        "comeback-1107-e0272",
+        "comeback-1107-e0273"
+      ]
+    },
+    {
+      "clip_id": "clip-4-comeback-1107-momentum-northbank-4200",
+      "insight_id": "comeback-1107-momentum-northbank-4200",
+      "event_ids": [
+        "comeback-1107-e0276",
+        "comeback-1107-e0279",
+        "comeback-1107-e0286",
+        "comeback-1107-e0293"
+      ]
+    },
+    {
+      "clip_id": "clip-5-comeback-1107-insight-327",
+      "insight_id": "comeback-1107-insight-327",
+      "event_ids": [
+        "comeback-1107-e0326",
+        "comeback-1107-e0327"
+      ]
+    },
+    {
+      "clip_id": "clip-6-comeback-1107-insight-364",
+      "insight_id": "comeback-1107-insight-364",
+      "event_ids": [
+        "comeback-1107-e0363",
+        "comeback-1107-e0364"
+      ]
+    }
+  ]
+}
