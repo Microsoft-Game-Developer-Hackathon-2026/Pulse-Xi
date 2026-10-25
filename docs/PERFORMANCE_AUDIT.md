@@ -124,3 +124,120 @@ verifiers or hash-bound source. No test timeout was increased or test skipped.
 ## Subsequent performance delivery
 
 The maximum-history failure above records the initial audit, not the final candidate. PR #79 follows the earlier PR #78 merge with atomic current-boundary capture, request-local independently proven prefix reuse and idle observer revision reads. At source 743916c the unchanged Windows bounded-forkcast test passed in 2.7 minutes, including offline verification. The same copied disposable dense store measured 102.57 seconds before the later increments and 30.06 seconds afterward; one observation per revision, not a latency percentile. See [detailed method and raw measurements](FORKCAST_COMPARISON_PERFORMANCE.md). No timeout or verification gate was weakened. Broad React Profiler, Web Vitals and long-session memory measurements remain outstanding.
+
+## Passive replay stability (2026-10-24, base `0729d3f`)
+
+Workload: built-in recorded match, 12 s wall-clock of uninterrupted playback after the
+analysis panels had settled, Chromium (software rendering), local backend, one run per
+configuration (`frontend/tests/replay-stability-metrics.spec.ts`, which now enforces the
+thresholds below). Requests are counted while playing. These are single-run local
+numbers, not percentiles.
+
+| Viewport / speed | Fan Lens requests (before → after) | Metrics / Tactics / Recap / Control-Chaos | Page CLS excl. Event Wire | Document scroll drift |
+|---|---|---|---|---|
+| 1280px / 1× | 61 → 13 | 11 / 11 / 11 / 11 | 0.00006 | 0 px |
+| 1280px / 4× | 61 → 13 | 12 / 11 / 11 / 11 | 0.0004 | 0 px |
+| 390px / 2× | 61 → 13 | 11 / 11 / 11 / 11 | 0.0005 | 0 px |
+
+Findings and fixes:
+
+- **Fan Lens fetched on every 200 ms replay tick** (61 requests / 12 s) while all other
+  analytics used the 1 Hz analysis cutoff. It now uses the same cutoff (paused seeks stay
+  exact); alert windows are evaluated against that cutoff, never a future second.
+- **Event Wire grew from 137 px to ~560 px** as the first seven events arrived. Its list
+  now reserves seven rows, so the panel's bounds are constant from the first frame.
+- **Row motion inside the Event Wire is content-driven**: inserting a new event moves the
+  existing rows down inside the fixed-size panel (CLS contribution 0.019 at 1×, 0.266 at
+  4×, reported separately as `eventWireRowShift`). It is not page movement; nothing outside
+  the panel shifts, and the test gates page-level shift below 0.01. The Event Wire is now a
+  fixed seven-row viewport (exact height, internal scroll) and existing rows glide 220 ms
+  into place via transform (`useFlipList`); the glide is skipped under
+  `prefers-reduced-motion`. The browser's layout-shift API still reports the underlying row
+  position change, so `eventWireRowShift` is unchanged; the glide is a presentation change,
+  not a reduction in that metric. A test asserts constant bounds, newest-first order, no
+  future events, and zero animations under reduced motion.
+
+Not measured here: INP, LCP, heap growth, long tasks, React Profiler render counts.
+Pass-difficulty requests (10–37 / 12 s) are keyed to the last visible pass, not the clock.
+
+## PR #100 CI timeout (investigated 2026-10-24)
+
+`tests/test_deployment_provisioning.py::test_provision_requires_digest_before_contacting_azure`
+failed once on main run 40017120238 with `subprocess.TimeoutExpired` (20 s limit while the
+test launches `powershell -NoProfile ...`); that run and two others were pushed within ~70 s
+of each other. The next main run (#102) passed, and the complete local backend suite on
+`0729d3f` passed: **541 passed, 0 failed, 0 skipped** (281 s). Not reproduced; classified as a
+probable runner-load stall on PowerShell cold start, not proven. No timeout, assertion or
+production code was changed. If it recurs, capture runner CPU/queue data before changing the test.
+
+## API latency, local loopback (2026-10-24)
+
+Command: `python scripts/benchmark-public-api.py --output docs/benchmarks/public-api-2026-10-24.json --samples 40`.
+Source `33ab1fb` (PR #105 head). Windows 11, Intel Family 6 Model 186 (12 logical CPUs),
+15.7 GB RAM, Python 3.13.14. Empty temporary SQLite stores, built-in fixture, concurrency 1,
+sequential requests, no provider calls. The first request is **not** a process-cold estimate.
+40 warm samples per endpoint: p50/p95 are reported, p99 is not (too few samples). Raw
+samples are in the JSON. All 13 endpoints returned successfully.
+
+| Endpoint | Samples | p50 ms | p95 ms | Max ms | Bytes |
+|---|---:|---:|---:|---:|---:|
+| health | 40 | 6.6 | 8.7 | 23.2 | 78 |
+| matches | 40 | 17.1 | 29.4 | 43.4 | 6296 |
+| match | 40 | 22.6 | 31.0 | 32.8 | 2097 |
+| events | 40 | 26.1 | 46.9 | 60.5 | 176206 |
+| state | 40 | 17.7 | 21.1 | 30.7 | 182 |
+| metrics | 40 | 17.5 | 27.4 | 28.0 | 448 |
+| tactics | 40 | 27.0 | 38.7 | 44.3 | 14575 |
+| insights | 40 | 28.3 | 47.1 | 54.1 | 5451 |
+| overlays | 40 | 34.6 | 41.3 | 45.4 | 3483 |
+| control-chaos | 40 | 20.4 | 28.2 | 75.5 | 21379 |
+| recap (POST) | 40 | 34.2 | 47.5 | 47.8 | 738 |
+| data-hub | 40 | 11.4 | 32.8 | 34.7 | 8373 |
+| export | 40 | 20.0 | 29.6 | 31.3 | 171523 |
+
+Not covered by this benchmark: runtime/Control Room mutations, checkpoint save/restore,
+ForkCast. `scripts/release-smoke.py` ran those once on disposable stores (cold scenario
+create 17.6 ms, 4 audit records, comparison available, both independent verifiers passed);
+that is a single run, not a distribution. Maximum-history ForkCast remains the known slow
+path documented above.
+
+## Other measurements (2026-10-24)
+
+- Route health (`frontend/tests/route-health.spec.ts`): 5 routes x 1440/390 px, real
+  backend; each route's own heading is visible, no console errors, no `pageerror`, no
+  HTTP 5xx from `/api/`, horizontal overflow <= 1 px. 10/10 passed. This is a smoke
+  check, not a Web Vitals measurement.
+- Production bundle: 2.5 MB of `dist/assets` in total (largest: `SceneCanvas` chunk, then
+  the stadium GLB, then the main `index` chunk; Vite warns a chunk exceeds 500 kB).
+- `npm audit --omit=dev`: 0 vulnerabilities. No credential-shaped strings in the built
+  bundle; the only match for `PULSE_*TOKEN` is an environment variable *name* in the
+  disabled-imports help text.
+- Still unmeasured: field INP and React Profiler render counts.
+
+## Browser metrics, one run (2026-10-24)
+
+Command: `PULSE_WRITE_BENCHMARK=../docs/benchmarks/browser-metrics-2026-10-24.json npx playwright test tests/browser-metrics.spec.ts --project=regression`.
+Chromium via Playwright on software rendering, local backend, fixture `comeback-1107`,
+same machine as the API table. **Two runs, the second reported**: no percentiles across runs. Raw JSON:
+[browser-metrics-2026-10-24.json](benchmarks/browser-metrics-2026-10-24.json).
+
+| Measure | Result |
+|---|---|
+| Panels and recap populated (wall clock from `goto`) | 1201 ms |
+| DOMContentLoaded / load | 472 ms / 472 ms |
+| LCP | 1048 ms (software rendering, local server; not a field number) |
+| API requests during initial load | 11 |
+| Synthetic interaction (speed-button click → two animation frames), 30 samples | p50 25.8 ms, p95 30.7 ms, max 42.2 ms. **Not field INP** |
+| Long tasks (>50 ms) over the whole session | 2 tasks, 208 ms total, longest 154 ms |
+| Replay at 4×, 60 s wall | reached 5400 s (match end 5400 s); 359 API requests |
+| JS heap after forced GC, samples every 15 s | 4.9, 5.8, 5.9, 6.2, 6.2 MB |
+| DOM nodes at end | 1457 |
+
+Run-to-run variance is large: an earlier identical run measured ready 2258 ms, LCP 1732 ms,
+6 long tasks (longest 274 ms) and interaction p95 39.4 ms, on the same machine minutes
+apart. The table is the second run; treat all timings as roughly +/-2x until repeated.
+
+Limits: the replay reached the end of the match after roughly 45 s, so the last heap
+samples are end-state, not mid-playback; heap growth of 1.3 MB over one match is a short
+horizon, not a leak test. The 154 ms long task was not attributed to a component. The
+test asserts only sanity bounds (clock advanced, heap growth under 25 MB).
