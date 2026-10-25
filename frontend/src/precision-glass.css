@@ -464,3 +464,15 @@ html[data-px-material="glass"] {
 }
 
 html[data-px-material="glass"] .tactical-chart>p { min-block-size:4lh; }
+
+/* One Moment, Three Stories (proof drawer) */
+.three-stories { margin:20px 0; }
+.three-stories .story-grid { display:grid; gap:10px; }
+.three-stories article { padding:14px 16px; border:1px solid var(--px-glass-border); border-radius:var(--px-radius-sm); background:#ffffff08; display:grid; gap:6px; }
+.three-stories article p { margin:0; font:450 14px/1.5 var(--px-font); color:var(--px-text-primary); }
+.three-stories article small { font:500 11px/1.5 var(--px-font); color:var(--px-text-secondary); }
+.three-stories article>small:first-child { letter-spacing:1px; color:var(--px-accent); }
+.three-stories [data-lens="director"] .cue-status { color:var(--px-warning); }
+.three-stories .story-check { margin:10px 0 0; font:500 12px/1.5 var(--px-font); }
+.three-stories .story-check.ok { color:var(--px-accent); }
+.three-stories .story-check.warn { color:var(--px-error); }

@@ -169,3 +169,75 @@ of each other. The next main run (#102) passed, and the complete local backend s
 `0729d3f` passed: **541 passed, 0 failed, 0 skipped** (281 s). Not reproduced; classified as a
 probable runner-load stall on PowerShell cold start, not proven. No timeout, assertion or
 production code was changed. If it recurs, capture runner CPU/queue data before changing the test.
+
+## API latency, local loopback (2026-10-24)
+
+Command: `python scripts/benchmark-public-api.py --output docs/benchmarks/public-api-2026-10-24.json --samples 40`.
+Source `33ab1fb` (PR #105 head). Windows 11, Intel Family 6 Model 186 (12 logical CPUs),
+15.7 GB RAM, Python 3.13.14. Empty temporary SQLite stores, built-in fixture, concurrency 1,
+sequential requests, no provider calls. The first request is **not** a process-cold estimate.
+40 warm samples per endpoint: p50/p95 are reported, p99 is not (too few samples). Raw
+samples are in the JSON. All 13 endpoints returned successfully.
+
+| Endpoint | Samples | p50 ms | p95 ms | Max ms | Bytes |
+|---|---:|---:|---:|---:|---:|
+| health | 40 | 6.6 | 8.7 | 23.2 | 78 |
+| matches | 40 | 17.1 | 29.4 | 43.4 | 6296 |
+| match | 40 | 22.6 | 31.0 | 32.8 | 2097 |
+| events | 40 | 26.1 | 46.9 | 60.5 | 176206 |
+| state | 40 | 17.7 | 21.1 | 30.7 | 182 |
+| metrics | 40 | 17.5 | 27.4 | 28.0 | 448 |
+| tactics | 40 | 27.0 | 38.7 | 44.3 | 14575 |
+| insights | 40 | 28.3 | 47.1 | 54.1 | 5451 |
+| overlays | 40 | 34.6 | 41.3 | 45.4 | 3483 |
+| control-chaos | 40 | 20.4 | 28.2 | 75.5 | 21379 |
+| recap (POST) | 40 | 34.2 | 47.5 | 47.8 | 738 |
+| data-hub | 40 | 11.4 | 32.8 | 34.7 | 8373 |
+| export | 40 | 20.0 | 29.6 | 31.3 | 171523 |
+
+Not covered by this benchmark: runtime/Control Room mutations, checkpoint save/restore,
+ForkCast. `scripts/release-smoke.py` ran those once on disposable stores (cold scenario
+create 17.6 ms, 4 audit records, comparison available, both independent verifiers passed);
+that is a single run, not a distribution. Maximum-history ForkCast remains the known slow
+path documented above.
+
+## Other measurements (2026-10-24)
+
+- Route health (`frontend/tests/route-health.spec.ts`): 5 routes x 1440/390 px, real
+  backend; each route's own heading is visible, no console errors, no `pageerror`, no
+  HTTP 5xx from `/api/`, horizontal overflow <= 1 px. 10/10 passed. This is a smoke
+  check, not a Web Vitals measurement.
+- Production bundle: 2.5 MB of `dist/assets` in total (largest: `SceneCanvas` chunk, then
+  the stadium GLB, then the main `index` chunk; Vite warns a chunk exceeds 500 kB).
+- `npm audit --omit=dev`: 0 vulnerabilities. No credential-shaped strings in the built
+  bundle; the only match for `PULSE_*TOKEN` is an environment variable *name* in the
+  disabled-imports help text.
+- Still unmeasured: field INP and React Profiler render counts.
+
+## Browser metrics, one run (2026-10-24)
+
+Command: `PULSE_WRITE_BENCHMARK=../docs/benchmarks/browser-metrics-2026-10-24.json npx playwright test tests/browser-metrics.spec.ts --project=regression`.
+Chromium via Playwright on software rendering, local backend, fixture `comeback-1107`,
+same machine as the API table. **Two runs, the second reported**: no percentiles across runs. Raw JSON:
+[browser-metrics-2026-10-24.json](benchmarks/browser-metrics-2026-10-24.json).
+
+| Measure | Result |
+|---|---|
+| Panels and recap populated (wall clock from `goto`) | 1201 ms |
+| DOMContentLoaded / load | 472 ms / 472 ms |
+| LCP | 1048 ms (software rendering, local server; not a field number) |
+| API requests during initial load | 11 |
+| Synthetic interaction (speed-button click → two animation frames), 30 samples | p50 25.8 ms, p95 30.7 ms, max 42.2 ms. **Not field INP** |
+| Long tasks (>50 ms) over the whole session | 2 tasks, 208 ms total, longest 154 ms |
+| Replay at 4×, 60 s wall | reached 5400 s (match end 5400 s); 359 API requests |
+| JS heap after forced GC, samples every 15 s | 4.9, 5.8, 5.9, 6.2, 6.2 MB |
+| DOM nodes at end | 1457 |
+
+Run-to-run variance is large: an earlier identical run measured ready 2258 ms, LCP 1732 ms,
+6 long tasks (longest 274 ms) and interaction p95 39.4 ms, on the same machine minutes
+apart. The table is the second run; treat all timings as roughly +/-2x until repeated.
+
+Limits: the replay reached the end of the match after roughly 45 s, so the last heap
+samples are end-state, not mid-playback; heap growth of 1.3 MB over one match is a short
+horizon, not a leak test. The 154 ms long task was not attributed to a component. The
+test asserts only sanity bounds (clock advanced, heap growth under 25 MB).
