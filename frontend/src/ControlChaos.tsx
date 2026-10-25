@@ -189,7 +189,7 @@ export function ControlChaosPanel({ match, atSecond, analysisSecond = atSecond, 
           const delta = activityDelta(team.team_id)
           return <div className="rhythm-row" key={team.team_id}>
             <span style={{ color: team.color }}>{team.name}</span>
-            <div className="rhythm-track" aria-label={`${team.name} activity index`} style={{ '--team-color': team.color } as CSSProperties}>
+            <div className="rhythm-track" role="img" aria-label={`${team.name} activity index: previous window ${delta?.previous ?? 'unavailable'}, current window ${delta?.current ?? visible.teams[team.team_id].attacking_activity.activity_index.value}`} style={{ '--team-color': team.color } as CSSProperties}>
               <i style={{ width: `${(delta?.previous ?? 0) / maxActivity * 100}%` }}/>
               <b style={{ width: `${(delta?.current ?? 0) / maxActivity * 100}%` }}/>
             </div>
