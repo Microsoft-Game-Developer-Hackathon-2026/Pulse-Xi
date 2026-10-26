@@ -1,0 +1,79 @@
+1
+00:00:00,600 --> 00:00:03,077
+Football is more than the scoreline.
+
+2
+00:00:03,117 --> 00:00:09,508
+PULSE XI turns synthetic match events into intelligence you can inspect, compare and replay.
+
+3
+00:00:10,400 --> 00:00:14,171
+A synthetic match replays from recorded events.
+
+4
+00:00:14,211 --> 00:00:19,603
+Every statistic is computed from them, and the screen stays steady.
+
+5
+00:00:21,800 --> 00:00:24,924
+Pick a goal and ask why it matters.
+
+6
+00:00:24,964 --> 00:00:29,895
+The drawer shows the calculation and its source events.
+
+7
+00:00:29,935 --> 00:00:34,776
+One moment, three stories, all citing the same events.
+
+8
+00:00:34,816 --> 00:00:40,651
+The director's cue stays a proposal until a producer approves it.
+
+9
+00:00:43,800 --> 00:00:48,084
+Change the audience or the language, and the wording changes.
+
+10
+00:00:53,300 --> 00:00:55,224
+The facts do not.
+
+11
+00:00:56,400 --> 00:00:59,939
+Control vs Chaos shows how the rhythm of play shifted.
+
+12
+00:00:59,979 --> 00:01:04,248
+The pass inspector rates each pass with an explainable heuristic.
+
+13
+00:01:07,400 --> 00:01:11,701
+Control Room: a deterministic engine runs the match.
+
+14
+00:01:11,741 --> 00:01:18,462
+Save a checkpoint, change a tactic, run a paired comparison against the baseline.
+
+15
+00:01:22,000 --> 00:01:24,779
+Then verify the result independently.
+
+16
+00:01:26,400 --> 00:01:29,275
+Highlights are built only from event data.
+
+17
+00:01:29,315 --> 00:01:34,203
+Each clip shows its score and its source events, with no match footage.
+
+18
+00:01:38,400 --> 00:01:40,801
+Synthetic and rule-based.
+
+19
+00:01:40,841 --> 00:01:45,489
+Microsoft Agent Framework path verified offline.
+
+20
+00:01:45,529 --> 00:01:47,638
+Code public on GitHub.
