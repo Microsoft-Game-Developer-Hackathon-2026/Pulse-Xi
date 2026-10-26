@@ -1,0 +1,70 @@
+{
+  "voice": "Microsoft Zira Desktop",
+  "rate": 0,
+  "segments": [
+    {
+      "id": "n0",
+      "scene": "title",
+      "spoken": "Football is more than the scoreline. Pulse X I turns synthetic match events into intelligence you can inspect, compare and replay.",
+      "caption": "Football is more than the scoreline. PULSE XI turns synthetic match events into intelligence you can inspect, compare and replay."
+    },
+    {
+      "id": "n1",
+      "scene": "replay",
+      "spoken": "Here a synthetic match replays from recorded events. Every statistic is computed from them, and the screen stays steady while it plays.",
+      "caption": "A synthetic match replays from recorded events. Every statistic is computed from them, and the screen stays steady."
+    },
+    {
+      "id": "n2",
+      "scene": "evidence",
+      "spoken": "Pick a goal and ask why it matters. The evidence drawer shows the calculation and its source events. One moment, three stories: analyst, fan and broadcast director, all citing the same events. The director's cue stays a proposal until a producer approves it.",
+      "caption": "Pick a goal and ask why it matters. The drawer shows the calculation and its source events. One moment, three stories, all citing the same events. The director's cue stays a proposal until a producer approves it."
+    },
+    {
+      "id": "n3a",
+      "scene": "audience",
+      "spoken": "Change the audience or the language, and the wording changes.",
+      "caption": "Change the audience or the language, and the wording changes."
+    },
+    {
+      "id": "n3b",
+      "scene": "audience",
+      "spoken": "The facts do not.",
+      "caption": "The facts do not."
+    },
+    {
+      "id": "n4",
+      "scene": "intelligence",
+      "spoken": "Control versus Chaos shows how the rhythm of play shifted, and the pass inspector rates each pass with an explainable heuristic.",
+      "caption": "Control vs Chaos shows how the rhythm of play shifted. The pass inspector rates each pass with an explainable heuristic."
+    },
+    {
+      "id": "n5a",
+      "scene": "control",
+      "spoken": "In the Control Room, a deterministic engine runs the match on the server. Save a checkpoint, change a tactic, and run a paired comparison against the baseline.",
+      "caption": "Control Room: a deterministic engine runs the match. Save a checkpoint, change a tactic, run a paired comparison against the baseline."
+    },
+    {
+      "id": "n5b",
+      "scene": "control",
+      "spoken": "Then verify the result independently.",
+      "caption": "Then verify the result independently."
+    },
+    {
+      "id": "n6",
+      "scene": "reel",
+      "spoken": "Highlights are built only from event data. Each clip shows its score and its source events, with no match footage.",
+      "caption": "Highlights are built only from event data. Each clip shows its score and its source events, with no match footage.",
+      "style": {
+        "marginV": 10,
+        "fontsize": 38
+      }
+    },
+    {
+      "id": "n7",
+      "scene": "close",
+      "spoken": "Everything is synthetic and rule based, and the Microsoft Agent Framework path is verified offline. The code is public on GitHub.",
+      "caption": "Synthetic and rule-based. Microsoft Agent Framework path verified offline. Code public on GitHub."
+    }
+  ]
+}
