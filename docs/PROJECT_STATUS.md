@@ -200,7 +200,7 @@ See [README](../README.md) and [CONTRACT](CONTRACT.md) for limits, permissions, 
 - Mahir owns downstream evidence/AI integration. Hosted inference is guarded and unverified; no billable calls are required.
 - Vishwam retains broader release/deployment responsibilities. Optional RTX/Unreal work #34 does not block the recorded-event product.
 
-[The independent handoff](SATVIK_INDEPENDENT_HANDOFF.md) records the earlier feature integration and hardware evidence; its dated test counts are historical, not current totals.
+The earlier internal integration handoff was retired; current state is in the [readiness report](FINAL_HACKATHON_READINESS_REPORT.md). Dated counts in this file are historical, not current totals.
 
 ## Satvik analysis integration branch
 
