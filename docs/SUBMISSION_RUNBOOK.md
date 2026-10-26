@@ -2,7 +2,7 @@
 
 ## Current audit addendum - 2026-10-22
 
-Main `d19a898` has merged native analysis, recorded Control vs Chaos, FanDNA,
+Main `7d7a467` has merged native analysis, recorded Control vs Chaos, FanDNA,
 branch ProofTrail/request isolation, Atelier UI, agent tools and the Foundry
 validation pathway. Earlier snapshots below retain their original provenance;
 statements that these PRs were pending describe those earlier revisions only.
@@ -28,7 +28,7 @@ they do not justify bypassing #21's separate public-demo security gate.
 ## Candidate identity and evidence
 
 - Source: [Pulse-Xi](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi).
-- Audited starting main: `c5a93f46a24fa857318f237f37f9184a4b4d90dc`;
+- Audited starting main: `25439eba38e18e398b36b8c2c77ce8f4ab313fea`;
   [baseline CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39664390354).
 - Final candidate: select the **merged release-verification PR commit and its exact
   successful main Actions run**, recorded in the PR/issue evidence. Freeze that SHA

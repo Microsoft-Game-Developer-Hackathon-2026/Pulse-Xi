@@ -20,8 +20,8 @@ sha256 prefix `aded2afb9e84d3bb`). Storyboard and timings: [VIDEO_NARRATION_AND_
 ## B. Production evidence
 
 - **Recorded environments.** Scenes marked "Live" were recorded from the deployed public demo
-  `https://pulse-xi-demo.onrender.com` (Render free plan, deployed commit `c16ad54`). The Control Room scene
-  was recorded from a local server running the same application code (`main` at `fc16dbe`, later commits to
+  `https://pulse-xi-demo.onrender.com` (Render free plan, deployed commit `4770a2d`). The Control Room scene
+  was recorded from a local server running the same application code (`main` at `11cf7f0`, later commits to
   `main` are docs and tests), with a disposable database and a throw-away operator token, because operator tools
   are disabled on the public demo by design. The chip in the video states which is which.
 - **Data.** Built-in seeded synthetic fixture `comeback-1107` and, for the Control Room, a fresh scenario (seed 98765).

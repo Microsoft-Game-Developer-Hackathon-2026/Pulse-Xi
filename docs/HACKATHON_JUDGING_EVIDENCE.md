@@ -2,7 +2,7 @@
 
 ## Current audit addendum - 2026-10-22
 
-Main `d19a898` has merged native analysis, recorded Control vs Chaos, FanDNA,
+Main `7d7a467` has merged native analysis, recorded Control vs Chaos, FanDNA,
 branch ProofTrail/request isolation, Atelier UI, agent tools and the Foundry
 validation pathway. Earlier snapshots below retain their original provenance;
 statements that these PRs were pending describe those earlier revisions only.
@@ -18,7 +18,7 @@ No deployment, paid inference, upload or submission was performed.
 
 Rules checked October 22, 2026 against the [official rules](https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md).
 This is an evidence map, not an official score or eligibility certification.
-Starting main: `175b7ceb29b2f29437ba6a0a9886934fe5aebc4d`;
+Starting main: `97b724f9de7a3499f9e1692a9197ce8a7d6974e0`;
 [exact-main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39671842382).
 The broadcast evidence action and its new browser tests belong to this PR until merged.
 
@@ -62,12 +62,12 @@ See [submission package](HACKATHON_SUBMISSION_PACKAGE.md),
 
 These are separate draft heads, not features merged into this PR or main:
 
-- #56 `940ff0599bf84e9556211828aae52288608e2e20`:
+- #56 `69bfad94a4bb77487e9a4d6436903d945479d1bf`:
   `python backend/scripts/foundry_smoke.py --check-only` returned
   `sdk_compatibility_ok`, `network_call: false`, `authenticated: false`.
   Nine focused smoke/auth tests passed. This verifies imports/construction and
   local safety cases, not provider behavior or Microsoft category eligibility.
-- #55 `1ec2effbf6eddd6ef03a297a1b4db90a802cfc19`:
+- #55 `6602e79b152438490b4acdd2f90212c487297e96`:
   five `test_agent_tools.py` cases passed. Tool comparisons remain explicitly
   unavailable until a reviewed private-source authorization contract exists.
 

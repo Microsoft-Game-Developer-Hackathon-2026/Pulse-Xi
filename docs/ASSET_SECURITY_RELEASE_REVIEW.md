@@ -1,6 +1,6 @@
 # PR #31 asset, security and licensing technical review
 
-Review date: 2026-10-18. Reviewer: Codex operating as Satvik's authorized engineering agent, **not Vishwam**. Initial main `8d6abbb`, asset head `ed53e5a`. No human review or review request was present; #22/#23/#13 had no comments and #24 had only Satvik's previous handoff. No teammate branch/PR was overwritten.
+Review date: 2026-10-18. Reviewer: Codex operating as Satvik's authorized engineering agent, **not Vishwam**. Initial main `1aa3352`, asset head `c6b9394`. No human review or review request was present; #22/#23/#13 had no comments and #24 had only Satvik's previous handoff. No teammate branch/PR was overwritten.
 
 ## Executive summary
 
@@ -117,7 +117,7 @@ Until those human decisions occur, PR #31 stays OPEN; #32/#33 remain intact and 
 
 ## Current integration result
 
-Security PR #36 merged normally as main `5f8d9c80ad7b50e7903624d4dfaca807497eee55`; its main workflow is successful: https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39100546734. Clean final main backend run: 32 passed (13.22s). Asset approval is separate and still pending; these main changes do not include the GLB kit.
+Security PR #36 merged normally as main `73e73dc2191b7eaf61358dbccf30b247983ab495`; its main workflow is successful: https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39100546734. Clean final main backend run: 32 passed (13.22s). Asset approval is separate and still pending; these main changes do not include the GLB kit.
 ## Compatibility follow-up — 2026-10-21
 
 This follow-up preserves the earlier review as historical evidence. All `.blend`,
@@ -148,7 +148,7 @@ software-rendering concurrency matches the current main policy.
 ### Separate physical GPU test with the GLB kit activated
 
 [Raw measurements and active hashes](benchmarks/iris-xe-glb-compatibility.json)
-identify source `42feb9ea146b392590475ba27116c0a99533b331`, Windows 11,
+identify source `2443845b0ca6c3a72d945b712d52702f8a0300ea`, Windows 11,
 Intel Iris Xe / driver 32.0.101.7088, headed Chromium 156.0.8078.4,
 1366×768 viewport and DPR approximately 1. The actual renderer is ANGLE Intel Iris
 Xe Direct3D11. All four v2 GLBs loaded once (989,084 bytes total), as did the lazy

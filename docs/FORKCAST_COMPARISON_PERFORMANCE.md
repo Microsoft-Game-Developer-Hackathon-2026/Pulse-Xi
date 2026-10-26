@@ -61,7 +61,7 @@ seed7, duration1800, checkpoint1200,2 paired trials,300-second horizon,
 concurrency1, three sequential in-process samples per revision. Temporary SQLite
 stores; no HTTP/provider calls or personal data. Background load was uncontrolled.
 
-| Measurement | Original main | Candidate 743916c |
+| Measurement | Original main | Candidate 974a6bc |
 |---|---:|---:|
 | Total replayed command transitions per comparison | 150 | 35 |
 | Independent verifier transitions | 30 | 15 |
@@ -136,4 +136,4 @@ is retained; the prefix-proof increment specifically addresses that remaining wo
 
 ## Final local acceptance
 
-At source 743916c, the unchanged bounded-forkcast Playwright project passed: 1 test in 2.7 minutes, including the 90-second comparison arrival and 30-second offline verifier budgets. The same copied dense disposable database completed comparison in 30.06 seconds versus 102.57 seconds before the later optimizations. These are single local observations, not percentile guarantees. Raw dense profiles are retained alongside the smaller benchmark.
+At source 974a6bc, the unchanged bounded-forkcast Playwright project passed: 1 test in 2.7 minutes, including the 90-second comparison arrival and 30-second offline verifier budgets. The same copied dense disposable database completed comparison in 30.06 seconds versus 102.57 seconds before the later optimizations. These are single local observations, not percentile guarantees. Raw dense profiles are retained alongside the smaller benchmark.

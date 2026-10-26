@@ -18,7 +18,7 @@ rendering time is therefore **not measured**. No video exists.
 
 ## Exact inspected candidate and machine
 
-- Repository main at inspection: `7a8cccf9b9a3b6a6217c5188468493725d01129c`.
+- Repository main at inspection: `22b7854017c4d56655f5bb793bebfe6e1c0fd4bb`.
   Its successful main CI is [run #437](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39790628382)
   (backend, frontend and browser jobs; 5m16s overall). This is code CI evidence,
   not render evidence.

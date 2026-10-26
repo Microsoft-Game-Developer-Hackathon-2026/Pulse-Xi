@@ -9,9 +9,9 @@ has been exhaustively audited. A maximum-history local performance failure and
 uncompleted profiling work remain. No overall invented completion percentage is
 assigned.
 
-Starting main: `d19a898492f8c4a303caa576a9370411b21093ff`.
+Starting main: `7d7a467307186f16396eb1c5b517721b03356c91`.
 [Exact-main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39766286652)
-is successful. Audit source commit: `adc4a57` on
+is successful. Audit source commit: `1355403` on
 `audit/hackathon-final-readiness`; this increment is not on main until reviewed
 and merged. Backend source diff is empty; engine, RNG, schema, hashes and API
 contracts have not been changed by this branch.
@@ -168,7 +168,7 @@ See [submission package](HACKATHON_SUBMISSION_PACKAGE.md) and
 ## J. Next action and resume point
 
 Worktree: `C:\Users\satvi\Desktop\Microsoft\pulse_xi_audit`.
-Branch: `audit/hackathon-final-readiness`. Source increment: `adc4a57`.
+Branch: `audit/hackathon-final-readiness`. Source increment: `1355403`.
 Review the replay correction and audit evidence, then merge only with actual
 required approval and exact-head checks. Separately profile the repeated
 ForkCast replay path with Diyan, resolve PR76's integration conflicts, and protect
@@ -184,7 +184,7 @@ inspection, not the final review path. Normal merge99f4eb5 retained current-main
 schema4/UI/features; mergea4f1622 combined the replay change with strict private
 runtime request/revision boundaries. No contributor history was rewritten.
 
-PR76 code at `a4f1622a525ac3b1210adc384911d93497921cb8` passed **354 backend tests**
+PR76 code at `6e040c7effcb8f84c4daccc7812cd14220bc8008` passed **354 backend tests**
 in268.79s and **97 ordinary browser tests** in3.8min, plus TypeScript/build.
 The native-only parameter, short/full durations, invalid projection, owner denial,
 captured source hashes, partial windows and delayed session switching are covered.
@@ -204,7 +204,7 @@ The remaining profiler/memory/rights/video/access/submission work still applies.
 
 ## L. Subsequent GitHub integration and performance verification
 
-GitHub now confirms PRs #76, #77 and #78 merged. Main at 7a8cccf9b9a3b6a6217c5188468493725d01129c has successful Actions run 39790628382. Earlier review-path and unresolved-conflict statements above are historical evidence. PR #78 merged at an intermediate optimization; the remaining verified correction is proposed separately in PR #79, preserving normal history and review.
+GitHub now confirms PRs #76, #77 and #78 merged. Main at 22b7854017c4d56655f5bb793bebfe6e1c0fd4bb has successful Actions run 39790628382. Earlier review-path and unresolved-conflict statements above are historical evidence. PR #78 merged at an intermediate optimization; the remaining verified correction is proposed separately in PR #79, preserving normal history and review.
 
 The combined local validation tree at 7c34dbc7dd0feeb7d3928e32663e709fa1a2ce2e includes the replay fix, native runtime adapter and final performance source. It passed 367 backend tests in 242.42 seconds, TypeScript/production build, both independent committed example verifiers, pip check and seven GLB validations (zero errors/warnings; informational unused UV notices). Real isolated HTTP release smoke passed in 11.57 seconds with both verifiers and recorded original checkpoint UTC; no hosted inference occurred.
 
@@ -220,16 +220,16 @@ All 98 Playwright tests passed in 6.0 minutes on the combined validation tree, i
 
 Status: **DEMO READY, SUBMISSION BLOCKED** (unchanged). Superseded for merge state and final results by section N: PRs #104, #105 and #106 are merged.
 
-**Refs.** `main` = `0729d3f`. PR [#104](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/104)
-`audit/replay-stability` head `298828a`: exact-head CI all green (documentation, backend,
+**Refs.** `main` = `3648587`. PR [#104](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/104)
+`audit/replay-stability` head `8fca26b`: exact-head CI all green (documentation, backend,
 frontend, browser, container, deployment-template); review requested from two teammates,
 none submitted. PR [#105](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/105)
 `feat/one-moment-three-stories` (stacked on #104, base `audit/replay-stability`): review
-requested; exact-head CI was all green on `3cc00fa`. A later commit on the same branch adds
+requested; exact-head CI was all green on `ca6145f`. A later commit on the same branch adds
 the browser-metrics probe, design-token cleanup and the performance write-up (see its CI).
 
 **Tests run locally.** Backend `pytest tests`: 541 passed, 0 failed, 0 skipped (281 s, base
-`0729d3f`). Playwright full suite on the #105 head before the route-health file: 112 passed
+`3648587`). Playwright full suite on the #105 head before the route-health file: 112 passed
 (6.5 min); `route-health.spec.ts` adds 10 (passed on its own). `scripts/release-smoke.py`:
 passed. `scripts/validate_docs.py`: passed. `npm audit --omit=dev`: 0 vulnerabilities.
 Strict TypeScript (`tsc -b`) and production build: clean.
@@ -299,15 +299,15 @@ Final full Playwright run on this branch after the last code change: **123 passe
 finished in code is complete and merged; what remains is the video (Diyan), judge access, human
 licence/rights decisions, and an authorized hosted-model run, none of which code can supply.
 
-**Code state.** `main` = `92d05ed` (merge of [#106](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/106)),
+**Code state.** `main` = `f14ea2a` (merge of [#106](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/106)),
 containing [#104](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/104)
 (replay stability) and [#105](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/105)
 (One Moment · Three Stories, merged by the repository owner). Post-merge CI run
 [40185354081](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/40185354081)
-on `92d05ed`: all six jobs green. No branch protection or ruleset exists, so no review was
+on `f14ea2a`: all six jobs green. No branch protection or ruleset exists, so no review was
 technically required; reviews on #104/#105 were requested from teammates and none was submitted.
 
-**Verification run on the #106 head (pre-merge, same content as `92d05ed`).** Backend `pytest tests`: 547 passed,
+**Verification run on the #106 head (pre-merge, same content as `f14ea2a`).** Backend `pytest tests`: 547 passed,
 0 failed, 0 skipped (311 s). Playwright full suite: 141 passed (6.4 min), including 13 axe-core
 WCAG A/AA scans, 10 route-health checks, 5 highlight-reel tests, 3 Three Stories tests and the
 replay-stability gates. `scripts/release-smoke.py` passed on the earlier branch head. `npm audit
@@ -390,7 +390,7 @@ owned. The video is **not** the only open item.
 **Verification (final head of this branch).** Backend `pytest tests`: **549 passed, 0 failed, 0 skipped** (504 s). Playwright full suite:
 **142 passed** (9.2 min, clean run). Deployed-URL suite against the production configuration (public-readonly, container flags, loopback): **4 passed**.
 `tsc -b` clean; production build clean; `npm audit --omit=dev`: 0 vulnerabilities; `pip_audit` on `requirements.txt` and `requirements-runtime.txt`: none;
-docs validator passed; `foundry_smoke.py --check-only`: `sdk_compatibility_ok`, `authenticated: false`, `network_call: false`. Post-merge CI on `d7bb7a7`
+docs validator passed; `foundry_smoke.py --check-only`: `sdk_compatibility_ok`, `authenticated: false`, `network_call: false`. Post-merge CI on `39a514c`
 (the previous docs merge) was green; CI for this branch is recorded in the PR.
 
 **Not run / not verified:** any hosted deployment (none exists); Docker image build (daemon not running locally; the CI container job builds it);
@@ -419,7 +419,7 @@ Foundry and Azure Cloud Native are not supportable until #14 or an Azure deploym
 
 ## P. Public demo deployed, 2026-10-25
 
-**Judge-access gate: PASS for reachability today, with conditions.** <https://pulse-xi-demo.onrender.com> is live on Render's free plan (Docker, Blueprint-managed, deployed commit `c16ad54`). From outside the development machine: `/ready` 200, `/health` ok, `/api/deployment` `public-readonly`, `/docs` and operator APIs 403, and the deployed-URL suite **4 passed** (1.3 min), including 35 s of 4x playback with zero HTTP 429. Conditions: the free instance sleeps after 15 idle minutes (35-60 s wake-up; one measured at 35.8 s); no uptime guarantee through Nov 10 (re-check Oct 28, Nov 1, Nov 9); capacity on Render's CPU is unmeasured; operator routes are intentionally disabled. This supersedes the "no URL exists" statements in sections M-O. Status of the other gates is unchanged: video (#25), Representative (#109), Foundry (#14), rights decisions (#113-#115), screen-reader pass (#111).
+**Judge-access gate: PASS for reachability today, with conditions.** <https://pulse-xi-demo.onrender.com> is live on Render's free plan (Docker, Blueprint-managed, deployed commit `4770a2d`). From outside the development machine: `/ready` 200, `/health` ok, `/api/deployment` `public-readonly`, `/docs` and operator APIs 403, and the deployed-URL suite **4 passed** (1.3 min), including 35 s of 4x playback with zero HTTP 429. Conditions: the free instance sleeps after 15 idle minutes (35-60 s wake-up; one measured at 35.8 s); no uptime guarantee through Nov 10 (re-check Oct 28, Nov 1, Nov 9); capacity on Render's CPU is unmeasured; operator routes are intentionally disabled. This supersedes the "no URL exists" statements in sections M-O. Status of the other gates is unchanged: video (#25), Representative (#109), Foundry (#14), rights decisions (#113-#115), screen-reader pass (#111).
 
 ## Q. Close-out, 2026-10-25 (owner-directed)
 
@@ -436,3 +436,15 @@ At the owner's instruction, teammate review gates were dropped and tracking was 
 | Foundry (#14), multi-agent live run (#15) | **Still blocked**: no endpoint, deployment or credential, and no approval to spend | The submission copy must keep saying "verified offline only" |
 
 Verification for this pass: new keyboard/a11y spec 4 passed; full backend and browser suites run in CI on the PR for this branch (see the PR); live URL re-checked serving `public-readonly`.
+
+## R. Final close-out, 2026-10-26
+
+**Classification: DEMO READY, SUBMISSION NOT YET MADE.** The product, the live demo and the demo video exist and are verified. What remains is outside the repository: upload the video as public, enter its URL, and have the team's authorized Representative submit before **October 27, 2026, 11:59 PM Pacific**.
+
+**Final repository state.** All GitHub issues are closed; each closing note states what was and was not done (hosted Foundry and the hosted multi-agent run were never performed and are not claimed; the video is produced but not uploaded). The README was rewritten as a short judge-facing page; operational detail is preserved in [REFERENCE_GUIDE](REFERENCE_GUIDE.md). Retired internal prompt files, internal handoff documents and two development probe scripts were removed. Verified counts: backend 549 tests, browser 146 tests; CI green on `main`; live demo acceptance suite 4 tests.
+
+**Demo video.** Produced and checked (110.6 s, 1920x1080, burned-in captions, -15.9 LUFS); see [VIDEO_PRODUCTION_REPORT](VIDEO_PRODUCTION_REPORT.md). It is a build output and is not in Git. It has not been uploaded and no public URL exists.
+
+**History rewrite (owner-authorized).** On 2026-10-26 `main` was rewritten once to remove `Co-Authored-By` trailers from nine commit messages, so no commit on any branch of this repository names the AI assistant. Only commit messages changed: the file tree is byte-identical before and after (tree `81a988d8…` at the rewrite). Every commit after the first affected one received a new SHA, so SHAs quoted in older documents were remapped to the new history in this commit; the deployed Render build, for example, was commit `c16ad54` before the rewrite and is `4770a2d` now, with the same tree. Limits: pull-request pages for already-merged PRs still show their original commits on GitHub's side, existing clones need to re-sync, and issue comments written before the rewrite still quote pre-rewrite SHAs. A local backup bundle of the old history was kept outside the repository.
+
+**Do not claim:** a hosted model or Foundry run, a screen-reader pass, an open-source licence, independent asset review, or uninterrupted uptime of the free-plan demo.

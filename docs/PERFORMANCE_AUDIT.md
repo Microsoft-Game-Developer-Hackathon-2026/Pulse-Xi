@@ -7,7 +7,7 @@ They are not RTX 5070 or production-GLB Iris Xe certification. See the current
 
 ## Environment and measurement limits
 
-Baseline `d19a898492f8c4a303caa576a9370411b21093ff`; backend bytes unchanged
+Baseline `7d7a467307186f16396eb1c5b517721b03356c91`; backend bytes unchanged
 in the candidate. Frontend numbers apply to the audit source increment, identified
 by its PR commits. Raw evidence is in [audit-evidence](audit-evidence/).
 This is a local laptop benchmark, not a hosted SLA or a physical GPU benchmark.
@@ -123,9 +123,9 @@ verifiers or hash-bound source. No test timeout was increased or test skipped.
 
 ## Subsequent performance delivery
 
-The maximum-history failure above records the initial audit, not the final candidate. PR #79 follows the earlier PR #78 merge with atomic current-boundary capture, request-local independently proven prefix reuse and idle observer revision reads. At source 743916c the unchanged Windows bounded-forkcast test passed in 2.7 minutes, including offline verification. The same copied disposable dense store measured 102.57 seconds before the later increments and 30.06 seconds afterward; one observation per revision, not a latency percentile. See [detailed method and raw measurements](FORKCAST_COMPARISON_PERFORMANCE.md). No timeout or verification gate was weakened. Broad React Profiler, Web Vitals and long-session memory measurements remain outstanding.
+The maximum-history failure above records the initial audit, not the final candidate. PR #79 follows the earlier PR #78 merge with atomic current-boundary capture, request-local independently proven prefix reuse and idle observer revision reads. At source 974a6bc the unchanged Windows bounded-forkcast test passed in 2.7 minutes, including offline verification. The same copied disposable dense store measured 102.57 seconds before the later increments and 30.06 seconds afterward; one observation per revision, not a latency percentile. See [detailed method and raw measurements](FORKCAST_COMPARISON_PERFORMANCE.md). No timeout or verification gate was weakened. Broad React Profiler, Web Vitals and long-session memory measurements remain outstanding.
 
-## Passive replay stability (2026-10-24, base `0729d3f`)
+## Passive replay stability (2026-10-24, base `3648587`)
 
 Workload: built-in recorded match, 12 s wall-clock of uninterrupted playback after the
 analysis panels had settled, Chromium (software rendering), local backend, one run per
@@ -166,14 +166,14 @@ Pass-difficulty requests (10–37 / 12 s) are keyed to the last visible pass, no
 failed once on main run 40017120238 with `subprocess.TimeoutExpired` (20 s limit while the
 test launches `powershell -NoProfile ...`); that run and two others were pushed within ~70 s
 of each other. The next main run (#102) passed, and the complete local backend suite on
-`0729d3f` passed: **541 passed, 0 failed, 0 skipped** (281 s). Not reproduced; classified as a
+`3648587` passed: **541 passed, 0 failed, 0 skipped** (281 s). Not reproduced; classified as a
 probable runner-load stall on PowerShell cold start, not proven. No timeout, assertion or
 production code was changed. If it recurs, capture runner CPU/queue data before changing the test.
 
 ## API latency, local loopback (2026-10-24)
 
 Command: `python scripts/benchmark-public-api.py --output docs/benchmarks/public-api-2026-10-24.json --samples 40`.
-Source `33ab1fb` (PR #105 head). Windows 11, Intel Family 6 Model 186 (12 logical CPUs),
+Source `388ea9a` (PR #105 head). Windows 11, Intel Family 6 Model 186 (12 logical CPUs),
 15.7 GB RAM, Python 3.13.14. Empty temporary SQLite stores, built-in fixture, concurrency 1,
 sequential requests, no provider calls. The first request is **not** a process-cold estimate.
 40 warm samples per endpoint: p50/p95 are reported, p99 is not (too few samples). Raw

@@ -96,7 +96,7 @@ The official Apple pages above informed hierarchy and interaction decisions. The
 
 ## Atelier visual evidence
 
-Application source: `5997c746f986b0bdba6b43816c432e6f6022b382`, based on main `050e9c1`. Before/after pairs use identical DOM, fixture cutoff and viewport; the before image disables the material stylesheet to expose the legacy presentation. This is a real-browser comparison, not a concept render. The previous rejected Precision Glass captures remain under `images/precision-glass` for historical comparison.
+Application source: `4498f571f48d33ce57d91799036aeb920f216d8a`, based on main `64ab498`. Before/after pairs use identical DOM, fixture cutoff and viewport; the before image disables the material stylesheet to expose the legacy presentation. This is a real-browser comparison, not a concept render. The previous rejected Precision Glass captures remain under `images/precision-glass` for historical comparison.
 
 | Route | 1440?900 | 390?844 |
 |---|---|---|
@@ -111,7 +111,7 @@ Visual review found a substantially larger title/score hierarchy, a distinct mat
 
 ## Measured cost and verification
 
-Baseline: clean main `050e9c1`, built in a separate worktree. Environment: Windows 10.0.26300, Intel Core i7-1355U, Playwright Chromium 156.0.8078.4, 1440?900, reduced transparency enabled, reduced motion disabled. Five fresh browser contexts per version used the same recorded fixture and cutoff 3500, with warm local services.
+Baseline: clean main `64ab498`, built in a separate worktree. Environment: Windows 10.0.26300, Intel Core i7-1355U, Playwright Chromium 156.0.8078.4, 1440?900, reduced transparency enabled, reduced motion disabled. Five fresh browser contexts per version used the same recorded fixture and cutoff 3500, with warm local services.
 
 | Metric | Main baseline | Atelier |
 |---|---:|---:|

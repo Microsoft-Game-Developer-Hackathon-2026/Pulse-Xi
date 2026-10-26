@@ -12,7 +12,7 @@ The repository owner and declared asset author (satvikp-coder) instructed on 202
 | Root licence | **Left undeclared** (option C). The README states that no root licence is declared | Not an agreement of all four contributors: the other three were not consulted. Choosing a licence later needs their consent; until then reuse is not granted |
 | Release review | The independent human review was **waived by the owner**. In its place the preparer ran the review checklist (below) | Not an independent review. The `release_approval` field stays `pending-team-review` because `scripts/asset_contract.py` enforces that exact value and it denotes team review that did not happen |
 
-Review checklist as run on 2026-10-25 12:41 UTC against `main` `c81f78f` plus this branch:
+Review checklist as run on 2026-10-25 12:41 UTC against `main` `724dbd2` plus this branch:
 
 | Check | Result |
 |---|---|

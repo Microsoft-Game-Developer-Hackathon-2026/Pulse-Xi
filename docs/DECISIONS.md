@@ -1,6 +1,6 @@
 # Architecture decisions
 
-Status: implementation-aligned. Main `d1d099e` integrated #53, including runtime,
+Status: implementation-aligned. Main `ccb1296` integrated #53, including runtime,
 architecture, analysis and command hardening. The Issues #2-#5 completion revision
 adds a scenario archive/metadata layer; its acceptance uses the expressly authorized
 self-review plus reproducible automated checks, without claiming teammate approval.

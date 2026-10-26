@@ -2,21 +2,21 @@
 
 This ledger separates evidence categories. Passing tests do not authorize cloud
 spend, attest asset rights, or prove submission. Current verified main is
-`0f45ca024bdcae294b74410023ff9533202416ed`, including merged #95, #96 and #97.
+`1ad74219606e8cb0995752b4942926402b295d55`, including merged #95, #96 and #97.
 Its [exact-main run](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39911492834)
 passed all six jobs; its backend log records 501 tests. No later candidate below
 is described as merged main.
 
-Historical PR #95 integrated main `1a2ff3727ebcd00a101f7b26d218588beaea620b`, with
+Historical PR #95 integrated main `6e309a8580e9bfccc58ac0d8c4dd4ca91bc85c50`, with
 [six passing exact-main CI jobs](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39901455301):
 454 backend tests, 102 browser tests, four graphics-reporting tests, seven documentation tests, independent
 manifest/experiment verification, pip consistency, frontend build/assets,
 public read-only container smoke and offline Bicep compilation.
 
-Historical baseline `07da294514f36820a7cf7d7c2dfacaab1adc735d` retains its
+Historical baseline `8969b692d38e1531e334b45f3b6ccaa2444e2855` retains its
 [own successful exact-main run](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39898162401).
 The physical measurement source is clean
-`e927785eb05f1dd09a9d4c20019c656f340a28d2`, not either merge SHA. Its probe and
+`35158cd6327b9becc2ff822577fc306bfd7471a9`, not either merge SHA. Its probe and
 evidence were subsequently integrated by #95; these are distinct provenance facts.
 
 ## Evidence and remaining acceptance
@@ -24,18 +24,18 @@ evidence were subsequently integrated by #95; these are distinct provenance fact
 Open candidates retain separate reviews and exact-source evidence:
 
 - [#98 graphics probe/evidence](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/98),
-  publication `324aab83b935b7ad431a17ac8eb067a35575ce8c`: 13 report tests,
+  publication `6fd0a5f99d702f0b8c252942bb7f51500e5f05d4`: 13 report tests,
   eight documentation tests and a checkout-byte inventory contract. Two clean
-  probe-`dc13f74` trials completed 902.544 and 902.503 seconds observed work;
+  probe-`e7246d8` trials completed 902.544 and 902.503 seconds observed work;
   a separate integrated public-mode trial at `bbcce072` completed 902.233 seconds.
   Each recorded 177 samples, all profiles/cameras, nine inspected physical PNGs
-  and no page errors/observed renderer changes. [Raw reports, source/build hashes and limits](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/blob/324aab83b935b7ad431a17ac8eb067a35575ce8c/docs/audit-evidence/graphics-rtx5070-clean-900-2026-10-23/README.md)
+  and no page errors/observed renderer changes. [Raw reports, source/build hashes and limits](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/blob/6fd0a5f99d702f0b8c252942bb7f51500e5f05d4/docs/audit-evidence/graphics-rtx5070-clean-900-2026-10-23/README.md)
   retain both earlier failures and the diagnostic run separately. These bounded
   observations do not explain the prior closure, measure GPU execution FPS,
   establish leak absence or prove current-build Iris Xe compatibility. Final
   publication checks and independent review remain visible on the open PR.
 - [#100 public operation budget](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/100),
-  source `15f1ec2f752d9b017e194d4e7af4325b8f659437`: 506 backend and 104 browser tests locally;
+  source `a425102647c262e6f9b07401741529eefd2ad12f`: 506 backend and 104 browser tests locally;
   [source](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/40007388343)
   and [PR CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/40007398763)
   passed all six jobs. This is a process-wide budget, not per-IP fairness,
@@ -43,19 +43,19 @@ Open candidates retain separate reviews and exact-source evidence:
   respects Retry-After, retains truthful cutoffs and reports service failures
   separately; a single active judge can still exhaust the shared budget.
 - [#101 observed agent execution and evidence gates](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/101),
-  source `985520b4de4fbaf8dc641af197dc86ced3599f5c`: 525 backend tests locally;
+  source `5a74ad3a91f13eccc0811ab962c0c7130dc39e39`: 525 backend tests locally;
   [source](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39946167218)
   and [PR CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39946173460)
   passed all six jobs. Pinned SDK compatibility is offline, not genuine hosted inference.
 - [#102 provisioning preflight](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/102),
-  source `6999cd1580639083b648db271573c83a3d911308`: 511 backend tests locally,
+  source `f04efe748b90e81e70f487182acf151dc72e7538`: 511 backend tests locally,
   including 68 provisioning/teardown cases. Failed or non-boolean group lookup
   output cannot authorize what-if, confirmation or provisioning.
   [Source](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/40002605831)
   and [PR CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/40002614400)
   passed all six jobs. Independent review and deployment acceptance remain pending.
 
-The non-main source archive `bbcce072ab6f1100eb89cc88c958648d7605d617`
+The non-main source archive `46ce5287381c38e5409fccf7983a612b654badaa`
 combines #98 through #102, including the recap-cooldown fix. Its
 [exact-source CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/40008018221)
 passed all six jobs: 541 backend, 104 browser and 13 graphics-report tests.
@@ -64,7 +64,7 @@ zero requests during the cooldown, recovery/pause/generation, private write/trac
 denials and a fixture WebSocket snapshot. This is HTTP/WS local acceptance,
 not deployed HTTPS/WSS. No combined public PR was opened; the archive is not
 main, an independent approval or a route around the focused PR reviews.
-Earlier local integration `cc03d2ace465b7b1706a70bf7b797b0bcabbcce7` retains its
+Earlier local integration `80f5402ef575e1b68943e44805079bfd1809498f` retains its
 540-backend scoped result. Measured source commits are never replaced by a later
 publication or documentation commit.
 
@@ -72,8 +72,8 @@ publication or documentation commit.
 |---|---|---|
 | Integrated source | #76 runtime analysis, #78/#79 replay/ForkCast fixes, #87 Fan Lens, #88/#92 Studio and backup, #89 trace envelope, #93 speech, #91/#94 deployment preparation and #95 graphics reporting/evidence are merged | This is integration evidence; it does not close their broader product acceptance |
 | Historical local regression | Recorded before #95 merged: 454 backend and 102 browser tests, docs, seven assets, verifiers, pip check, disposable-DB release smoke; Python/npm audits found no known vulnerabilities in that audited dependency closure | Later candidates need their own checks and published CI; these are not fresh dependency-audit results for every commit |
-| Integrated graphics evidence | Four failure-reporting regressions pass; physical production-GLB RTX probe passed on clean e927785, Chromium 156.0.8078.4, confirmed NVIDIA RTX 5070 D3D11 renderer; report and nine inspected screenshots merged through #95 | [Raw JSON and inspected screenshots](audit-evidence/graphics-rtx5070-2026-10-23/README.md). Three five-second samples/profile after warmup: about 165 RAF samples/s, 6.1 ms median / 6.2 ms p95. Browser pacing is not GPU execution FPS or the proposed 15-minute soak; matching-current-build Iris Xe acceptance remains pending |
-| Historical physical Iris Xe with GLBs | [Raw report](benchmarks/iris-xe-glb-compatibility.json) at source 42feb9ea146b392590475ba27116c0a99533b331 records ANGLE Intel Iris Xe D3D11, driver 32.0.101.7088, headed Chromium 156.0.8078.4, four active v2 GLBs and zero page errors. [Method/limitations](ASSET_SECURITY_RELEASE_REVIEW.md#separate-physical-gpu-test-with-the-glb-kit-activated) accompany it | One five-second active sample/profile, about 59.7-60.0 RAF callbacks/s, median 16.7 ms and p95 17.0-17.1 ms, then 30 seconds idle. The active GLB hashes and manifest content are unchanged; its recorded manifest byte hash matches this Windows CRLF checkout (LF checkout bytes differ). Observer implementation has changed. Retain as historical physical GLB evidence, not a current-build/15-minute result, direct GPU timing or reviewed final compatibility acceptance |
+| Integrated graphics evidence | Four failure-reporting regressions pass; physical production-GLB RTX probe passed on clean 35158cd, Chromium 156.0.8078.4, confirmed NVIDIA RTX 5070 D3D11 renderer; report and nine inspected screenshots merged through #95 | [Raw JSON and inspected screenshots](audit-evidence/graphics-rtx5070-2026-10-23/README.md). Three five-second samples/profile after warmup: about 165 RAF samples/s, 6.1 ms median / 6.2 ms p95. Browser pacing is not GPU execution FPS or the proposed 15-minute soak; matching-current-build Iris Xe acceptance remains pending |
+| Historical physical Iris Xe with GLBs | [Raw report](benchmarks/iris-xe-glb-compatibility.json) at source 2443845b0ca6c3a72d945b712d52702f8a0300ea records ANGLE Intel Iris Xe D3D11, driver 32.0.101.7088, headed Chromium 156.0.8078.4, four active v2 GLBs and zero page errors. [Method/limitations](ASSET_SECURITY_RELEASE_REVIEW.md#separate-physical-gpu-test-with-the-glb-kit-activated) accompany it | One five-second active sample/profile, about 59.7-60.0 RAF callbacks/s, median 16.7 ms and p95 17.0-17.1 ms, then 30 seconds idle. The active GLB hashes and manifest content are unchanged; its recorded manifest byte hash matches this Windows CRLF checkout (LF checkout bytes differ). Observer implementation has changed. Retain as historical physical GLB evidence, not a current-build/15-minute result, direct GPU timing or reviewed final compatibility acceptance |
 | Azure #21 | Digest pinning, offline template and container checks, isolated fixture-only public mode, runbook | OPEN/blocked: no authorized resources or verified public HTTPS URL; zero GitHub environments at audit. Explicit cost approval, protected environment, actual OIDC minimum roles, #23 clearance, live HTTPS/WSS/restart and cleanup evidence required |
 | Hosted AI #14/#15 | Provider integration and offline/scoped trace tests | Mahir: authorized real Microsoft model invocation and sanitized trace; mocks/configuration do not prove this. No billable call made by this audit |
 | Legal/security #23 | Versioned manifest and documented controls; assets still pending-team-review | Vishwam/rights holders: attributable licensing, redistribution and release decision; test results cannot supply human authority |

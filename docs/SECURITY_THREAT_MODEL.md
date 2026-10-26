@@ -1,6 +1,6 @@
 # Security, licensing and provenance audit
 
-Audit snapshot: 2026-10-22, current `main` base `c2f8c622d21d3db804e57c9a02e4c09b264f9c4b`. This is a code and evidence review, not a penetration test, legal opinion, public deployment certification or human release approval. It follows issue #23 and the existing [asset security review](ASSET_SECURITY_RELEASE_REVIEW.md), [local boundary correction](LOCAL_SECURITY_BOUNDARY.md), and committed evidence under `asset-review-evidence/`.
+Audit snapshot: 2026-10-22, current `main` base `5a2613cbbc7a6514f39eddca02b1bc1acb3cf043`. This is a code and evidence review, not a penetration test, legal opinion, public deployment certification or human release approval. It follows issue #23 and the existing [asset security review](ASSET_SECURITY_RELEASE_REVIEW.md), [local boundary correction](LOCAL_SECURITY_BOUNDARY.md), and committed evidence under `asset-review-evidence/`.
 
 ## Trust boundaries and route inventory
 

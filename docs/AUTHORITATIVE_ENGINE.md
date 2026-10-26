@@ -2,7 +2,7 @@
 
 ## Checkpoint-to-experiment acceptance update (2026-10-21)
 
-This update starts from main `c2f8c622d21d3db804e57c9a02e4c09b264f9c4b`
+This update starts from main `5a2613cbbc7a6514f39eddca02b1bc1acb3cf043`
 (PR #61), whose exact-head CI passed. It incorporates #59's existing consumer work
 with its authorship preserved and adds checkpoint UTC metadata, explicit reset/audit
 states, and portable reproduction envelopes. The contracts below describe this
@@ -30,7 +30,7 @@ See [the complete wire/migration/verification contracts](LIVE_SANDBOX.md#checkpo
 
 ## Historical integrated baseline (#64/#65)
 
-Main `100106ade274bbb7da137c73b22009f929a72e8c` integrated #64's saved-scenario
+Main `e88d6da40e8c02a407e57472574a44011f40b968` integrated #64's saved-scenario
 library/archive contracts and runtime schema 3 metadata, following #53's runtime,
 architecture, analysis and command hardening. Post-merge CI passed 248 backend and
 55 browser cases; the handoff adds a mobile/keyboard test without changing runtime code. Core engine/schema/RNG versions and golden hashes
@@ -53,10 +53,10 @@ The blueprint/master prompt express product intentions, not implemented schemas.
 
 | Boundary | Observed head | Availability |
 |---|---|---|
-| main | `50f72e2` | Legacy fixtures/replay, analytics, procedural observer and library schema-2 lifecycle |
-| PR #40 -> main | `224be7c` | Implemented on an open feature branch: pure engine, runtime schema 1, checkpoints/manifests |
-| PR #41 -> engine branch | `f2854ae` | Implemented on an open feature branch: runtime schema 2, Control Room, jobs, observer, ForkCast |
-| PR #43 -> live integration branch | `b715e6a` | Implemented on an open feature branch: private runtime analysis/export/3D adapters; included after normal merge of the architecture baseline; not on main |
+| main | `c79cf33` | Legacy fixtures/replay, analytics, procedural observer and library schema-2 lifecycle |
+| PR #40 -> main | `9f340fa` | Implemented on an open feature branch: pure engine, runtime schema 1, checkpoints/manifests |
+| PR #41 -> engine branch | `3e5cb79` | Implemented on an open feature branch: runtime schema 2, Control Room, jobs, observer, ForkCast |
+| PR #43 -> live integration branch | `bc38aae` | Implemented on an open feature branch: private runtime analysis/export/3D adapters; included after normal merge of the architecture baseline; not on main |
 
 Live browser inspection found #40/#41 open with six successful checks each;
 Issues #2-#10 remain open. PR descriptions report respectively 148/171 backend
@@ -65,7 +65,7 @@ but those results were not independently executed here. These historical counts
 do not verify this revision or establish teammate approval. #31/#32/#33 remain
 separate asset/preparation work; #42 is separate analytics work.
 
-This revision is isolated on `feat/issue-2-architecture-alignment` from `f2854ae`:
+This revision is isolated on `feat/issue-2-architecture-alignment` from `3e5cb79`:
 the schema-2 architecture requires both #40 and #41. Publication uses a dedicated
 architecture PR with base `feat/live-sandbox-integration`, keeping its six-file
 diff visible without changing #41 or teammate branches. Merge dependencies remain
@@ -444,7 +444,7 @@ Verification recovery (2026-10-21): the previous restricted execution profile
 denied access to Python and esbuild's ancestor-directory lookup. With the updated
 profile the existing Python 3.13.15 .venv works; no environment deletion, system
 installation, dependency change or PowerShell policy change was required. Use
-`npm.cmd` on Windows. On architecture checkpoint b6a420c, full backend pytest
+`npm.cmd` on Windows. On architecture checkpoint 94ba82b, full backend pytest
 passed 171 cases (exit 0); both independent verifiers returned verified=true
 (exit 0 each); npm.cmd run test:e2e passed strict TypeScript, production Vite build
 and all 39 Playwright cases (exit 0). No tests were skipped or assertions weakened.
