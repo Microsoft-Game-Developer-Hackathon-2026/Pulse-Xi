@@ -190,7 +190,7 @@ must rerun this matrix rather than inherit this candidate's green checks.
 
 ## Reproducible local setup and recovery
 
-Use [README quick start](../README.md#windows-quick-start) and [Live Sandbox](LIVE_SANDBOX.md)
+Use [README quick start](../README.md#quick-start) and [Live Sandbox](LIVE_SANDBOX.md)
 as canonical configuration/API guides. For policy-restricted Windows, activation
 is optional: invoke `.venv\Scripts\python.exe` directly and prepend its Scripts
 directory to process PATH when using the PowerShell helper or browser suite.
