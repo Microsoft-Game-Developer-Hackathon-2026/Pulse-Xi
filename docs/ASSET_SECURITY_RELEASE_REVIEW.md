@@ -98,7 +98,7 @@ Evidence: [pre-fix rebuild discrepancy](asset-review-evidence/rebuilds-before-fi
 
 ## Performance and presentation
 
-No scenery redesign or new GPU cost was added. The active v2 payload remains 989,084 bytes; Low skips stadium. Existing physical Iris Xe run and its explicit rAF-vs-GPU timing limitations are recorded in `SATVIK_INDEPENDENT_HANDOFF.md` and `PROFESSIONAL_3D_GRAPHICS_UPGRADE.md`. This review does not invent RTX or fresh physical FPS numbers. Native bounds/material inspection and actual browser screenshots are separate evidence. Rendering remains event snapshots, not player tracking.
+No scenery redesign or new GPU cost was added. The active v2 payload remains 989,084 bytes; Low skips stadium. Existing physical Iris Xe run and its explicit rAF-vs-GPU timing limitations are recorded in `PROFESSIONAL_3D_GRAPHICS_UPGRADE.md`. This review does not invent RTX or fresh physical FPS numbers. Native bounds/material inspection and actual browser screenshots are separate evidence. Rendering remains event snapshots, not player tracking.
 
 ## Reviewer decision and GitHub coordination
 

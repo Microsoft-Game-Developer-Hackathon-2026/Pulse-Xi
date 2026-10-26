@@ -52,7 +52,7 @@ they do not justify bypassing #21's separate public-demo security gate.
 
 ## Rehearse the real judge journey
 
-1. Follow [README startup](../README.md#windows-quick-start). Use Python 3.13 / Node
+1. Follow [README startup](../README.md#quick-start). Use Python 3.13 / Node
    24 for the tested baseline, fresh dependencies, and separate disposable DB paths
    for rehearsal. Leave Foundry disabled. Use only locally provisioned operator
    credentials; never record or export them. The helper does not load `.env`.

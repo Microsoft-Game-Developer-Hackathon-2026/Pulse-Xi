@@ -1,6 +1,6 @@
 > Current release evidence: [release readiness](RELEASE_READINESS.md). The dated results below remain historical; do not use them as current test counts.
 
-> Historical report: statuses and counts below describe the dated build. See [current handoff](SATVIK_INDEPENDENT_HANDOFF.md) and [project status](PROJECT_STATUS.md) for the integrated baseline.
+> Historical report: statuses and counts below describe the dated build. See the [readiness report](FINAL_HACKATHON_READINESS_REPORT.md) and [project status](PROJECT_STATUS.md) for the integrated baseline.
 
 ## Issue #22 follow-up verification - 2026-10-22
 
