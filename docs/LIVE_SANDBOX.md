@@ -490,12 +490,12 @@ Experiment timing includes `tracemalloc` overhead; these are not process RSS or
 HTTP timings. Backend/browser tests were also running on the laptop, so these
 load-sensitive samples are acceptance evidence, not a controlled benchmark or
 deployment guarantee. The canonical engine is unchanged from runtime base
-`fed64f3`; no performance optimization or budget increase was justified.
+`e8fef08`; no performance optimization or budget increase was justified.
 
 ### Physical Intel Iris Xe verification (historical #59 source)
 
 The existing headed graphics probe ran against the production build at
-`c03435772fa03f988b075ee3d382777544c8be23` on Windows 11, Intel Iris Xe driver
+`e0bc28921ecc886b5d2624cf4000fc88f94b3e03` on Windows 11, Intel Iris Xe driver
 32.0.101.7088, Chromium 156.0.8078.4, viewport 1366×768 and DPR approximately 1.
 The actual renderer was ANGLE Intel Iris Xe Direct3D11, not SwiftShader.
 [Raw measurements](benchmarks/iris-xe-runtime-acceptance.json) record five-second
@@ -723,7 +723,7 @@ Earlier CI failures at the original 30-second comparison wait remain recorded
 on the PR. The final local full run passed all 64 browser cases after this change.
 
 
-Final integration base is main 3603b4c89f0f0114ca77ab6be05cc50c7a98a75d
+Final integration base is main 585dd8354480471ffca6041b177a92dc174ff49c
 (viewport fix #69), incorporated by normal merge without conflicts. Combined
 local verification passed 293 backend and 66 browser cases. The resource-heavy
 maximum-history case runs after the 65-case normal two-worker regression project;

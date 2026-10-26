@@ -1,6 +1,6 @@
 # Judge-access deployment
 
-**Status (2026-10-25): DEPLOYED and verified. Public URL: <https://pulse-xi-demo.onrender.com>** (Render service `pulse-xi-demo`, Docker, **Free** plan, Blueprint-managed from `render.yaml`, deployed commit `c16ad54` = `main` at that time, build 58 s). Auto-deploy is off, so the judged build stays frozen until someone redeploys on purpose.
+**Status (2026-10-25): DEPLOYED and verified. Public URL: <https://pulse-xi-demo.onrender.com>** (Render service `pulse-xi-demo`, Docker, **Free** plan, Blueprint-managed from `render.yaml`, deployed commit `4770a2d` = `main` at that time, build 58 s). Auto-deploy is off, so the judged build stays frozen until someone redeploys on purpose.
 
 **Verification from outside the development machine (2026-10-25):** `GET /ready` 200 (first request after idle took 35.8 s); `/health` = `{"status":"ok","simulation":"synthetic","narrative_provider":"not_configured"}`; `/api/deployment` = `public-readonly`; `/docs` and `/api/sandbox/sessions` = 403; `PULSE_DEMO_URL=https://pulse-xi-demo.onrender.com npx playwright test -c playwright.deployed.config.ts` = **4 passed** (seek/play/generate seed; 35 s of 4x playback with zero HTTP 429, goal cue, evidence, Three Stories, no console errors; highlight reel plus axe scan; nine protected paths denied and operator routes explain they are disabled). Docker on the Free plan was accepted. `HEAD /` returns 405 (the app serves GET only); browsers are unaffected.
 

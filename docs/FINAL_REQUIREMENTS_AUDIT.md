@@ -8,7 +8,7 @@ Satvik's physical Iris Xe; the old RTX5090 requirement below was unverified.
 
 ## Scope and method
 
-Baseline main: `d19a898492f8c4a303caa576a9370411b21093ff`.
+Baseline main: `7d7a467307186f16396eb1c5b517721b03356c91`.
 Official source: [competition rules](https://github.com/microsoft/insidethegamehackathon/blob/main/OFFICIAL%20RULES.md), checked again in this session.
 Full issue bodies were downloaded; acceptance/DoD sections for the release,
 agent, analytics, persistence and submission work were reviewed against source.

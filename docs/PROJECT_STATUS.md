@@ -2,7 +2,7 @@
 
 ## Current audit addendum - 2026-10-22
 
-Main `d19a898` has merged native analysis, recorded Control vs Chaos, FanDNA,
+Main `7d7a467` has merged native analysis, recorded Control vs Chaos, FanDNA,
 branch ProofTrail/request isolation, Atelier UI, agent tools and the Foundry
 validation pathway. Earlier snapshots below retain their original provenance;
 statements that these PRs were pending describe those earlier revisions only.
@@ -18,14 +18,14 @@ No deployment, paid inference, upload or submission was performed.
 
 ## Four-issue acceptance reconciliation (2026-10-22)
 
-Verified main: `175b7ceb29b2f29437ba6a0a9886934fe5aebc4d`.
+Verified main: `97b724f9de7a3499f9e1692a9197ce8a7d6974e0`.
 [Exact-main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39671842382)
 passed 297 backend and 66 real browser tests, TypeScript/build, both independent
 example verifiers and asset validation. These counts describe that revision.
 
 | Issue | Main implementation | GitHub disposition |
 |---|---|---|
-| #6 Checkpoints | #70 / `c5a93f4`: atomic original UTC sidecar, legacy null, schema-4 migration, retry/restart/backup, immutable source/history and deterministic restoration | Closed; [acceptance](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/6#issuecomment-6325141434) |
+| #6 Checkpoints | #70 / `25439eb`: atomic original UTC sidecar, legacy null, schema-4 migration, retry/restart/backup, immutable source/history and deterministic restoration | Closed; [acceptance](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/6#issuecomment-6325141434) |
 | #8 ForkCast | #70 includes #59: real paired trials, source navigation, independent verification, cancellation and bounded offline verification for large archives | Closed; [acceptance](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/8#issuecomment-6325147077) |
 | #10 Control Room | #53/#64/#65/#69/#70: saved scenarios/archives, authoritative controls, checkpoint/history/branch/ForkCast, mobile/keyboard/viewport and recovery | Closed; main browser journeys execute actual authenticated operations |
 | #12 Asset pipeline | #62: seven editable sources/GLBs, manifest declarations/hashes/budgets, original generators, actual loading and procedural/2D failure recovery | Technically completed and closed; [acceptance and release restriction](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/issues/12#issuecomment-6332486377) |
@@ -43,11 +43,11 @@ The following sections retain their historical verification boundaries.
 
 ## Release verification (#22-#25)
 
-Starting main `c5a93f46a24fa857318f237f37f9184a4b4d90dc` has successful exact-main CI. The focused release work fixes detached checkpoint metadata acceptance during backup and adds no-store to privileged trace responses, route-wide/CORS regressions, offline browser isolation and a disposable real-HTTP/CLI smoke journey in CI. See [release evidence and remaining gates](RELEASE_READINESS.md) and [submission runbook](SUBMISSION_RUNBOOK.md). Rights/root-license approval, authenticated paid Foundry validation, public deployment, actual video and submission remain unfulfilled; these are not cleared by local green tests. Final PR/main CI evidence belongs to the release PR/issue records.
+Starting main `25439eba38e18e398b36b8c2c77ce8f4ab313fea` has successful exact-main CI. The focused release work fixes detached checkpoint metadata acceptance during backup and adds no-store to privileged trace responses, route-wide/CORS regressions, offline browser isolation and a disposable real-HTTP/CLI smoke journey in CI. See [release evidence and remaining gates](RELEASE_READINESS.md) and [submission runbook](SUBMISSION_RUNBOOK.md). Rights/root-license approval, authenticated paid Foundry validation, public deployment, actual video and submission remain unfulfilled; these are not cleared by local green tests. Final PR/main CI evidence belongs to the release PR/issue records.
 
 ## Historical Issues #6-#9 acceptance update
 
-Integration baseline: main `c2f8c622d21d3db804e57c9a02e4c09b264f9c4b`
+Integration baseline: main `5a2613cbbc7a6514f39eddca02b1bc1acb3cf043`
 (PR #61). Its [exact-main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39653135823)
 passed before this update. The source tree incorporates #59's checkpoint/history,
 ForkCast verification/source navigation and recovery consumers by normal merge,
@@ -61,7 +61,7 @@ record was retained. No other feature branch was absorbed.
 | #8 | Existing bounded paired-trial engine retained. #59 adds independent verification, source navigation and reload recovery. Completed/cancelled checkpoints are inspectable; fulltime/no-future and non-paused sources disable trials honestly. Real metrics/parent isolation/paired reruns/sparse/cancellation tests retained. |
 | #9 | Raw manifests remain compatible. Versioned reproduction wrappers add unsigned export-build Git/Python/OS context; unrecorded original execution environment is explicit. API/CLI accept wrappers and legacy files; bounded reads, schema/version/unknown/duplicate/oversize rejection and named first-divergence tests pass. CI now explicitly runs both committed example CLIs and pip check. |
 
-Combined-main local regression (3603b4c viewport fix included): **293 backend tests passed** (one existing TestClient
+Combined-main local regression (585dd83 viewport fix included): **293 backend tests passed** (one existing TestClient
 httpx deprecation warning), **66 Playwright cases passed** with strict TypeScript
 and production build, both committed CLI verifiers returned verified=true,
 pip check passed, seven assets validated with zero errors/warnings, npm audit
@@ -87,7 +87,7 @@ Issue closure/merge evidence belongs in the corresponding GitHub records.
 ## Historical implementation and acceptance evidence
 
 
-Verified implementation merge: **`100106ade274bbb7da137c73b22009f929a72e8c`**,
+Verified implementation merge: **`e88d6da40e8c02a407e57472574a44011f40b968`**,
 [PR #64](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/pull/64).
 [Post-merge main CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39625055824)
 passed 248 backend and 55 browser cases, production build and asset validation.
@@ -97,7 +97,7 @@ frontend run passed **56 cases**. The screenshot was visually inspected; resolve
 rosters/hash/provenance wrap within the 390px viewport. This handoff changes docs
 and tests only; the application implementation remains the verified #64 tree.
 
-Starting main for the Issues #2-#5 sprint was `d1d099ebb75cb912003b3bf99b24e4d67111110a`,
+Starting main for the Issues #2-#5 sprint was `ccb1296dec882449b1b39d9a788dbe843d49da76`,
 merged #53, with [passing post-merge CI](https://github.com/Microsoft-Game-Developer-Hackathon-2026/Pulse-Xi/actions/runs/39617299612).
 Runtime, architecture, private analysis, command security and original graphics
 are integrated there. #52 security code reached main through #53; its duplicate PR is now closed.
@@ -154,12 +154,12 @@ Follow-up local verification: **171 backend tests and 39 browser cases passed**,
 
 - Seeded synthetic fixtures, REST/WebSocket replay, event-derived analytics and SQLite persistence.
 - Pass Difficulty (#28), replay Sandbox subset (#29), optional procedural 3D event observer (#30), persistent browser-local analysis, bookmarks and verified exports (#37).
-- Match Data Hub (#38, merged at `9eeeb2d74feb61fa4783ebfeb994f2a2f8044126`): canonical JSON validation/preview, authorized atomic import, searchable library, quality inspection and portable packages.
+- Match Data Hub (#38, merged at `4b6509b5e16aed01075f11c55326306ed6441695`): canonical JSON validation/preview, authorized atomic import, searchable library, quality inspection and portable packages.
 
 ## Issue #2 architecture audit (historical inspection)
 
-Live browser inspection confirms main 50f72e2, open #40 (224be7c) -> main,
-open #41 (f2854ae) -> engine branch, open #43 (b715e6a) -> live integration.
+Live browser inspection confirms main c79cf33, open #40 (9f340fa) -> main,
+open #41 (3e5cb79) -> engine branch, open #43 (bc38aae) -> live integration.
 #40/#41 each displayed six successful checks; Issues #2-#10 remain open.
 The existing [architecture specification](AUTHORITATIVE_ENGINE.md) now includes
 component/lifecycle/sequence diagrams, model/API ownership/status, store/rollback
@@ -168,7 +168,7 @@ stale clock/storage statements. No new engine implementation was introduced.
 
 Verification recovered after the restricted execution profile changed: the
 existing Python 3.13.15 .venv and npm.cmd work without dependency or security-policy
-changes. Architecture checkpoint b6a420c passed **171 backend cases**, both
+changes. Architecture checkpoint 94ba82b passed **171 backend cases**, both
 independent file verifiers, strict TypeScript/production build and **39 Playwright
 cases**. All commands exited 0; no skipped tests. Actual OpenAPI 3.1.0 inspection
 covered 73 schemas and all 30 Sandbox HTTP operations/operator dependencies.
@@ -208,7 +208,7 @@ The earlier internal integration handoff was retired; current state is in the [r
 
 ## Satvik integration reconciliation
 
-Main aefc046 includes runtime, saved scenarios, scenario archives, runtime schema 3 and graphics. Native #57, acceptance #59 and runtime Control vs Chaos #58 remain pending; their latest compatibility branches preserve this main baseline. #52 security behavior is already present through runtime history; its duplicate PR is closed after verifying the three-way merge is a no-op. Separate rights/release approval is not implied by integrated asset files.
+Main 6ef58ee includes runtime, saved scenarios, scenario archives, runtime schema 3 and graphics. Native #57, acceptance #59 and runtime Control vs Chaos #58 remain pending; their latest compatibility branches preserve this main baseline. #52 security behavior is already present through runtime history; its duplicate PR is closed after verifying the three-way merge is a no-op. Separate rights/release approval is not implied by integrated asset files.
 
 
 ## Satvik assigned-scope implementation audit (2026-10-21)
@@ -225,12 +225,12 @@ This table records executable implementation, separately from main incorporation
 | #27 | Main has the versioned scorer, inspector, filters, player summaries, source verifier, exports and 5,400-second runtime adapter; #57 supplies short native periods. | Pressure is intentionally unavailable in formula v1, rather than inferred from incompatible sparse event frames. No replacement scorer is needed. |
 | #68 | #69 supplies document viewport stability with desktop/mobile tests, actual playback and preserved explicit navigation. | A passive root layout floor also prevents temporary async-panel collapse from invalidating the current viewport; upward scrolling releases reserved space. |
 
-Executable sources: `test_authoritative_engine.py`, `test_runtime_integration.py`, `test_native_analysis.py`, `test_runtime_control.py`, `test_pass_difficulty.py`, `test_asset_contract.py`, and browser checkpoint/runtime/scenario/observer/pass/viewport suites. The unchanged backend tree at combined candidate `636238e` passed 294 cases. Its 76 browser cases passed. The subsequent combined viewport check exposed and fixed transient-panel collapse in #69; the strengthened 78-case run is recorded on the current validation head. Test results belong to their recorded source, not automatically main.
+Executable sources: `test_authoritative_engine.py`, `test_runtime_integration.py`, `test_native_analysis.py`, `test_runtime_control.py`, `test_pass_difficulty.py`, `test_asset_contract.py`, and browser checkpoint/runtime/scenario/observer/pass/viewport suites. The unchanged backend tree at combined candidate `3a1b106` passed 294 cases. Its 76 browser cases passed. The subsequent combined viewport check exposed and fixed transient-panel collapse in #69; the strengthened 78-case run is recorded on the current validation head. Test results belong to their recorded source, not automatically main.
 
 
 ## Final acceptance branch verification
 
-The acceptance branch normally merges current main 3603b4c (#69), retaining its
+The acceptance branch normally merges current main 585dd83 (#69), retaining its
 viewport fix and tests. Local full suites:293 backend/66 browser. After the final
 completed-experiment lost-response repair, strict build and all 65 ordinary
 regression cases pass; the maximum-load case is a dependent resource project,
