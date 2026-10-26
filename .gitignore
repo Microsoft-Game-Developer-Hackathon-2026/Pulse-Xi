@@ -14,3 +14,7 @@ test-results/
 pytest-cache-files-*/
 
 .local-backups/
+
+# Demo video production: the MP4 and intermediate clips are build outputs (regenerate with scripts/demo_video/).
+artifacts/demo/work/
+artifacts/demo/*.mp4

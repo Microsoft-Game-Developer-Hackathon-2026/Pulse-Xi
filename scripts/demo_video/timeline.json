@@ -1,0 +1,119 @@
+{
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "fade": 0.25,
+  "scenes": [
+    {
+      "id": "replay",
+      "clip": "replay",
+      "from": 0,
+      "duration": 21.0,
+      "chip": "chip-live"
+    },
+    {
+      "id": "evidence",
+      "clip": "evidence",
+      "from": 0,
+      "duration": 22.0,
+      "chip": "chip-live"
+    },
+    {
+      "id": "audience",
+      "clip": "audience",
+      "from": 0,
+      "duration": 12.6,
+      "chip": "chip-live"
+    },
+    {
+      "id": "intelligence",
+      "clip": "intelligence",
+      "from": 0,
+      "duration": 11.0,
+      "chip": "chip-live"
+    },
+    {
+      "id": "control",
+      "clip": "control",
+      "from": 3.0,
+      "duration": 19.0,
+      "chip": "chip-local"
+    },
+    {
+      "id": "reel",
+      "clip": "reel",
+      "from": 8.0,
+      "duration": 12.0,
+      "chip": null
+    },
+    {
+      "id": "close",
+      "clip": "close",
+      "from": 0,
+      "duration": 13.0,
+      "chip": "chip-live"
+    }
+  ],
+  "narration": [
+    {
+      "id": "n0",
+      "scene": "replay",
+      "offset": 0.6
+    },
+    {
+      "id": "n1",
+      "scene": "replay",
+      "offset": 10.4
+    },
+    {
+      "id": "n2",
+      "scene": "evidence",
+      "offset": 0.8
+    },
+    {
+      "id": "n3a",
+      "scene": "audience",
+      "offset": 0.8
+    },
+    {
+      "id": "n3b",
+      "scene": "audience",
+      "offset": 10.3
+    },
+    {
+      "id": "n4",
+      "scene": "intelligence",
+      "offset": 0.8
+    },
+    {
+      "id": "n5a",
+      "scene": "control",
+      "offset": 0.8
+    },
+    {
+      "id": "n5b",
+      "scene": "control",
+      "offset": 15.4
+    },
+    {
+      "id": "n6",
+      "scene": "reel",
+      "offset": 0.8
+    },
+    {
+      "id": "n7",
+      "scene": "close",
+      "offset": 0.8
+    }
+  ],
+  "titleCard": {
+    "start": 0,
+    "end": 4.0,
+    "fadeOut": 0.6
+  },
+  "endCard": {
+    "sceneOffset": 7.2,
+    "fadeIn": 0.6
+  },
+  "hideChipDuringTitle": true
+}
