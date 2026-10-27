@@ -15,7 +15,7 @@ Built for the Microsoft Game Developer Hackathon 2026 (Inside the Game).
 | **Live demo** | <https://pulse-xi-demo.onrender.com>: public, read-only, no login. It runs on a free plan: after 15 idle minutes the first request takes up to about a minute to wake up, and each panel loads noticeably slower than on a local run |
 | **Source** | this repository (public) |
 | **Run locally** | [Quick start](#quick-start) below. Only the local run includes the Control Room, imports and Director Studio approval, which the public demo disables by design |
-| **Demo video** | under 2 minutes; the public link is entered in the hackathon submission. How it was produced and checked: [video production report](docs/VIDEO_PRODUCTION_REPORT.md) |
+| **Demo video** | under 2 minutes; the public link is entered in the hackathon submission. How it was produced and checked: [video production report]([docs/VIDEO_PRODUCTION_REPORT.md](https://drive.google.com/file/d/1Ouk2DloBjsDCS9ujcF0mYv8MjwbJ2nL7/view?usp=sharing)) |
 
 **A 60-second tour of the live demo:** choose speed 2× and press Play (the 16:40 goal arrives after about 17 seconds), watching the score change while the page stays still; in *Broadcast studio / Verified cues* click the first cue, then **Inspect evidence**; read the three framings of that one moment (analyst, fan, broadcast director) and the check that they cite the same source events; switch **VIEW** and **LANGUAGE** under *FanDNA / Recap* and watch the wording change while the facts stay fixed; open **Open event-derived highlight reel** at the bottom of the page.
 
